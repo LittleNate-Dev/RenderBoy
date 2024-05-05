@@ -35,14 +35,15 @@
 
 #include <spdlog/spdlog.h>
 
-#define APP_VERSION "ver 0.0.1"
+#define APP_VERSION "ver 0.4.0"
+#define GIT_REPO "https://github.com/LittleNate-Dev/RenderBoy"
 #define SCENE_FILEPATH "data/saves/"
 #define SETTING_FILEPATH "data/config/settings.config"
 #define LOGGER_FILEPATH "data/logger/RenderBoy_Logger.txt"
 #define SHADER_OPENGL "data/shaders/opengl/"
 #define FONT_SIZE 1.2f
 #define MAX_FOV 120.f
-#define MIN_FOV 60.0f
+#define MIN_FOV 40.0f
 
 #define ASSERT(x) if (!(x)) __debugbreak();
 #define GLCall(x) GLClearError();\

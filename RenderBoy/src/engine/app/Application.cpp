@@ -332,7 +332,7 @@ bool Application::ReadFilePath()
 bool Application::LoadFile()
 {
     // Defer the loading time so loading window can popup
-    // Yes, I know this method is kinda stupid :(
+    // Yes, I know this approach is kinda stupid :(
     static int deferLoading = 0;
     if (rbcore::FILEPATH_BUFFER != "" && deferLoading == 20)
     {
@@ -690,8 +690,8 @@ void Application::DrawSettingWindow()
             ImGui::PopItemWidth();
             ImGui::TreePop();
         }
-        // Graphics
-        if (ImGui::TreeNode("Graphics"))
+        // Visual effects
+        if (ImGui::TreeNode("Visual Effects"))
         {
             // Draw mode
             {
@@ -714,22 +714,47 @@ void Application::DrawSettingWindow()
             }
             // Show normal
             {
-               ImGui::CenterAlignWidget("Show Normal");
-               ImGui::Checkbox("Show Normal", &rbcore::SETTINGS.showNormal);
-               if (rbcore::SETTINGS.showNormal)
-               {
-                   ImGui::CenterAlignWidget("Normal Color", 200.0f);
-                   ImGui::LabelHighlighted("Normal Color");
-                   ImGui::PushItemWidth(200.0f);
-                   ImGui::ColorEdit3("##NormalColor", &rbcore::NORMAL_COLOR[0]);
-                   ImGui::PopItemWidth();
-                   ImGui::CenterAlignWidget("Magnitude", 60.0f);
-                   ImGui::LabelHighlighted("Magnitude");
-                   ImGui::PushItemWidth(60.0f);
-                   ImGui::InputFloat("##NormalMagnitude", &rbcore::NORMAL_MAGNITUDE);
-                   ImGui::PopItemWidth();
-               }
+                ImGui::CenterAlignWidget("Show Normal");
+                ImGui::Checkbox("Show Normal", &rbcore::SETTINGS.showNormal);
+                if (rbcore::SETTINGS.showNormal)
+                {
+                    ImGui::CenterAlignWidget("Normal Color", 200.0f);
+                    ImGui::LabelHighlighted("Normal Color");
+                    ImGui::PushItemWidth(200.0f);
+                    ImGui::ColorEdit3("##NormalColor", &rbcore::NORMAL_COLOR[0]);
+                    ImGui::PopItemWidth();
+                    ImGui::CenterAlignWidget("Magnitude", 60.0f);
+                    ImGui::LabelHighlighted("Magnitude");
+                    ImGui::PushItemWidth(60.0f);
+                    ImGui::InputFloat("##NormalMagnitude", &rbcore::NORMAL_MAGNITUDE);
+                    ImGui::PopItemWidth();
+                }
             }
+            // Post-Process
+            {
+                ImGui::CenterAlignWidget("Post-Processing", 120.0f);
+                ImGui::LabelHighlighted("Post-Processing");
+                ImGui::PushItemWidth(120.0f);
+                const char* ppOps[] = {
+                    "None",
+                    "Inverse",
+                    "Blur",
+                    "Gray Scale",
+                    "Edge"
+                };
+                static int currentPp = rbcore::SETTINGS.pp;
+                if (ImGui::Combo("##PostProcess", &currentPp, ppOps, IM_ARRAYSIZE(ppOps)))
+                {
+                    rbcore::SETTINGS.pp = (PostProcess)currentPp;
+                    m_Renderer.ChangePostProcess();
+                }
+                ImGui::PopItemWidth();
+            }
+            ImGui::TreePop();
+        }
+        // Graphics
+        if (ImGui::TreeNode("Graphics"))
+        {
             // Projection Type
             {
                 ImGui::CenterAlignWidget("Projection Type", 150.0f);
@@ -813,26 +838,7 @@ void Application::DrawSettingWindow()
                 }
                 ImGui::PopItemWidth();
             }
-            // Post-Process
-            {
-                ImGui::CenterAlignWidget("Post-Processing", 120.0f);
-                ImGui::LabelHighlighted("Post-Processing");
-                ImGui::PushItemWidth(120.0f);
-                const char* ppOps[] = {
-                    "None",
-                    "Inverse",
-                    "Blur",
-                    "Gray Scale",
-                    "Edge"
-                };
-                static int currentPp = rbcore::SETTINGS.pp;
-                if (ImGui::Combo("##PostProcess", &currentPp, ppOps, IM_ARRAYSIZE(ppOps)))
-                {
-                    rbcore::SETTINGS.pp = (PostProcess)currentPp;
-                    m_Renderer.ChangePostProcess();
-                }
-                ImGui::PopItemWidth();
-            }
+            
             ImGui::TreePop();
         }
         ImGui::End();
@@ -910,8 +916,8 @@ void Application::DrawAboutRenderBoyWindow()
         ImGui::CenterAlignWidget(APP_VERSION);
         ImGui::Text(APP_VERSION);
         ImGui::SetCursorPosY(((windowSize.y - windowSize.x / 4.0f) / 2.0f) + windowSize.x / 4.0f);
-        ImGui::CenterAlignWidget("https://github.com/LittleNate-Dev");
-        ImGui::TextWrapped("https://github.com/LittleNate-Dev");
+        ImGui::CenterAlignWidget(GIT_REPO);
+        ImGui::TextWrapped(GIT_REPO);
         ImGui::End();
     }
 }
