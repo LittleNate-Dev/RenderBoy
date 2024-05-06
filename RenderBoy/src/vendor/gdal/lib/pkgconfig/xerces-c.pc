@@ -1,0 +1,11 @@
+prefix=E:/buildsystem/src/xerces/vc17x64/install
+exec_prefix=E:/buildsystem/src/xerces/vc17x64/install
+libdir=E:/buildsystem/src/xerces/vc17x64/install/lib
+includedir=E:/buildsystem/src/xerces/vc17x64/install/include
+
+Name: Xerces-C++
+Description: Validating XML parser library for C++
+Version: 3.2.2
+Libs: -LE:/buildsystem/src/xerces/vc17x64/install/lib -lxerces-c
+Libs.private: 
+Cflags: -IE:/buildsystem/src/xerces/vc17x64/install/include

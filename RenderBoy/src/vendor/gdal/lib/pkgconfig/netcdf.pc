@@ -1,0 +1,13 @@
+prefix=E:/buildsystem/src/netcdf/vc17x64/install
+exec_prefix=E:/buildsystem/src/netcdf/vc17x64/install
+libdir=E:/buildsystem/src/netcdf/vc17x64/install/lib
+includedir=E:/buildsystem/src/netcdf/vc17x64/install/include
+ccompiler=C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.30.30705/bin/Hostx64/x64/cl.exe
+
+Name: netCDF
+Description: NetCDF Client Library for C
+URL: http://www.unidata.ucar.edu/netcdf
+Version: 4.8.1
+Libs: -L${libdir} -lnetcdf
+Libs.private: -lmfhdf -lhdf -lhdf5-shared -lhdf5_hl-shared -lszip -lcurl_imp
+Cflags: -I${includedir}

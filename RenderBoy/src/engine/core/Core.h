@@ -33,6 +33,9 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
+#include <gdal/gdal_priv.h>
+#include <gdal/cpl_conv.h> 
+
 #include <spdlog/spdlog.h>
 
 #define APP_VERSION "ver 0.4.0"

@@ -206,7 +206,7 @@ std::vector<std::string> Model::AssimpLoadTexturePath(aiMaterial* mat, aiTexture
 
 bool Model::LoadModelTif(std::string filepath)
 {
-    return true;
+    spdlog::warn(filepath);
     return false;
 }
 
