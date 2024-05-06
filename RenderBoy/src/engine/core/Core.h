@@ -33,16 +33,13 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
-#include <gdal/gdal_priv.h>
-#include <gdal/cpl_conv.h> 
-
 #include <spdlog/spdlog.h>
 
 #define APP_VERSION "ver 0.4.0"
 #define GIT_REPO "https://github.com/LittleNate-Dev/RenderBoy"
-#define SCENE_FILEPATH "data/saves/"
+#define SCENE_FILEPATH "res/saves/"
 #define SETTING_FILEPATH "data/config/settings.config"
-#define LOGGER_FILEPATH "data/logger/RenderBoy_Logger.txt"
+#define LOGGER_FILEPATH "res/logger/RenderBoy_Logger.txt"
 #define SHADER_OPENGL "data/shaders/opengl/"
 #define FONT_SIZE 1.2f
 #define MAX_FOV 120.f
@@ -205,7 +202,7 @@ namespace rbcore
 	// Get scene value from scene file
 	std::vector<std::string> GetSceneValue(std::string scene);
 	// Get file info
-	std::string GetFileType(std::string filepath);
+	std::string GetFileFormat(std::string filepath);
 	std::string GetFileName(std::string filepath);
 	std::string GetFileNameNoSuffix(std::string filepath);
 	// Set UI style

@@ -36,8 +36,6 @@ private:
 	void AssimpProcessNode(aiNode* node, const aiScene* scene);
 	Mesh AssimpProcessMesh(aiMesh* mesh, aiNode* node, const aiScene* scene);
 	std::vector<std::string> AssimpLoadTexturePath(aiMaterial* mat, aiTextureType type);
-	// If file type is .tif, use these functions
-	bool LoadModelTif(std::string filepath);
 	// After changing attributes, update matrix
 	void UpdateModelMat(unsigned int current = 0);
 

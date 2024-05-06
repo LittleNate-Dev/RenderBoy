@@ -25,7 +25,7 @@ namespace rbcore
 	bool IS_LIGHTS_OPENED = false;
 	std::string POPUP_MSG = "";
 	const std::vector<std::string> FILE_TYPE({
-		"gltf", "obj", "scene", "tif"
+		"gltf", "obj"
 		});
 	const std::vector<std::string> FILE_TYPE_ASSIMP({
 		"3mf", "blend", "3ds", "ase", "gltf", "fbx",
@@ -123,7 +123,7 @@ namespace rbcore
 		return values;
 	}
 
-	std::string GetFileType(std::string filepath)
+	std::string GetFileFormat(std::string filepath)
 	{
 		std::string fileType = filepath.substr(filepath.find_last_of('.') + 1);
 		return fileType;

@@ -36,21 +36,13 @@ void Model::UpdateStatics()
 bool Model::LoadModel(std::string name, std::string filepath)
 {
     m_Name = name;
-    if (rbcore::CheckFileFormatAssimp(rbcore::GetFileType(filepath)))
+    if (rbcore::CheckFileFormatAssimp(rbcore::GetFileFormat(filepath)))
     {
         if (LoadModelAssimp(filepath))
         {
             return true;
         }
         return false;
-    }
-    else if (rbcore::GetFileType(filepath) == "tif")
-    {
-        if (LoadModelTif(filepath))
-        {
-            return true;
-        }
-        return false;;
     }
     return false;
 }
@@ -202,12 +194,6 @@ std::vector<std::string> Model::AssimpLoadTexturePath(aiMaterial* mat, aiTexture
         texPath.push_back(filepath);
     }
     return texPath;
-}
-
-bool Model::LoadModelTif(std::string filepath)
-{
-    spdlog::warn(filepath);
-    return false;
 }
 
 void Model::SetName(std::string name)

@@ -40,7 +40,7 @@ void Scene::Reset()
 
 bool Scene::Reset(std::string filepath)
 {
-	std::string fileType = rbcore::GetFileType(filepath);
+	std::string fileType = rbcore::GetFileFormat(filepath);
 	if (fileType == "scene")
 	{
 		if (LoadScene(filepath))
@@ -48,7 +48,7 @@ bool Scene::Reset(std::string filepath)
 			return true;
 		}
 	}
-	else if (rbcore::CheckFileFormatAssimp(fileType))
+	else if (rbcore::CheckFileFormat(fileType))
 	{
 		Reset();
 		if (AddModel(filepath))

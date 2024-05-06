@@ -177,7 +177,7 @@ void Application::SaveSettings()
 
 bool Application::Init()
 {
-    // Load RenderToy Settings
+    // Load RenderBoy Settings
     LoadSettings();
 
     // Initialize GLEW
@@ -223,7 +223,7 @@ bool Application::InitOpenGL()
 
     // Set RenderBoy's Icon
     GLFWimage icons[1];
-    icons[0].pixels = stbi_load("data/icons/Icon_48.png", &icons[0].width, &icons[0].height, 0, 4);
+    icons[0].pixels = stbi_load("res/icons/Icon_48.png", &icons[0].width, &icons[0].height, 0, 4);
     glfwSetWindowIcon(m_Window, 1, icons);
     stbi_image_free(icons[0].pixels);
 
@@ -245,7 +245,7 @@ bool Application::InitOpenGL()
     // Generate a texture id to display icon
     unsigned char* iconBuffer;
     int iconWidth, iconHeight;
-    iconBuffer = stbi_load("data/icons/Icon.png", &iconWidth, &iconHeight, 0, 4);
+    iconBuffer = stbi_load("res/icons/Icon.png", &iconWidth, &iconHeight, 0, 4);
     if (!iconBuffer)
     {
         spdlog::error("RenderBoy icon missing!");
@@ -313,10 +313,10 @@ bool Application::ReadFilePath()
     if (m_FileBrowser.HasSelected())
     {
         std::string filePath = m_FileBrowser.GetSelected().string();
-        std::string fileType = rbcore::GetFileType(m_FileBrowser.GetSelected().string());
+        std::string fileType = rbcore::GetFileFormat(m_FileBrowser.GetSelected().string());
         m_FileBrowser.ClearSelected();
         // The selected file is supported format
-        if (rbcore::CheckFileFormat(fileType))
+        if (fileType == "scene" || rbcore::CheckFileFormat(fileType))
         {
             rbcore::FILEPATH_BUFFER = filePath;
             return true;
@@ -349,14 +349,14 @@ bool Application::LoadFile()
             }
             break;
         case ADD_MODEL:
-            if (rbcore::GetFileType(rbcore::FILEPATH_BUFFER) == "scene")
+            if (rbcore::GetFileFormat(rbcore::FILEPATH_BUFFER) == "scene")
             {
                 rbcore::FILEPATH_BUFFER = "";
                 rbcore::LOAD_TYPE = NO_FILE;
                 rbcore::ShowWarningMsg("You can't add a scene to an existing scene!");
                 return false;
             }
-            if (m_Scene.AddModel(rbcore::FILEPATH_BUFFER))
+            else if (m_Scene.AddModel(rbcore::FILEPATH_BUFFER))
             {
                 m_Launched = true;
                 rbcore::FILEPATH_BUFFER = "";
