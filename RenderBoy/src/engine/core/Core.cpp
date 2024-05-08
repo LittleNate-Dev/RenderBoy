@@ -7,6 +7,7 @@ namespace rbcore
 	Settings SETTINGS;
 	LoadType LOAD_TYPE = NO_FILE;
 	std::string FILEPATH_BUFFER = "";
+	float FONT_SIZE = 1.2f;
 	glm::vec3 NORMAL_COLOR = glm::vec3(1.0f);
 	float NORMAL_MAGNITUDE = 1.0f;
 	const char* currentModelInfo = nullptr;

@@ -41,7 +41,6 @@
 #define SETTING_FILEPATH "data/config/settings.config"
 #define LOGGER_FILEPATH "res/logger/RenderBoy_Logger.txt"
 #define SHADER_OPENGL "data/shaders/opengl/"
-#define FONT_SIZE 1.2f
 #define MAX_FOV 120.f
 #define MIN_FOV 40.0f
 
@@ -158,6 +157,7 @@ namespace rbcore
 	// buffer for loading file
 	extern LoadType LOAD_TYPE;
 	extern std::string FILEPATH_BUFFER;
+	extern float FONT_SIZE;
 	extern glm::vec3 NORMAL_COLOR;
 	extern float NORMAL_MAGNITUDE;
 	// used for combo widgets

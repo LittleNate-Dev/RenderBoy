@@ -414,7 +414,7 @@ void Application::DrawMenuBar()
 {
     if (ImGui::BeginMainMenuBar())
     {
-        ImGui::SetWindowFontScale(FONT_SIZE);
+        ImGui::SetWindowFontScale(rbcore::FONT_SIZE);
         ImGui::SetNextItemWidth(4.0f);
         if (ImGui::BeginMenu("File"))
         {
@@ -520,7 +520,7 @@ void Application::DrawInfoWindow()
         ImGuiWindowFlags windowFlags = 0;
         windowFlags |= ImGuiWindowFlags_NoSavedSettings;
         ImGui::Begin("Info", &rbcore::IS_INFO_OPENED, windowFlags);
-        ImGui::SetWindowFontScale(FONT_SIZE);
+        ImGui::SetWindowFontScale(rbcore::FONT_SIZE);
         // FPS
         ImGui::LabelHighlighted("FPS:");
         ImGui::Text("%.1f (%.3f ms/frame)", io.Framerate, 1000.0f / io.Framerate);
@@ -625,7 +625,7 @@ void Application::DrawSettingWindow()
         ImVec2 displaySize = io.DisplaySize;
         ImVec2 windowSize = ImGui::GetWindowSize();
         ImGui::SetWindowPos(ImVec2((displaySize.x - windowSize.x) / 2.0f, (displaySize.y - windowSize.y) / 2.0f));
-        ImGui::SetWindowFontScale(FONT_SIZE);
+        ImGui::SetWindowFontScale(rbcore::FONT_SIZE);
         // Application
         if (ImGui::TreeNode("Application"))
         {
@@ -857,7 +857,7 @@ void Application::DrawWarningWindow()
     windowFlags |= ImGuiWindowFlags_NoMove;
     if (ImGui::BeginPopupModal("Warning", &rbcore::IS_WARNING_OPENED, windowFlags)) 
     {
-        ImGui::SetWindowFontScale(FONT_SIZE);
+        ImGui::SetWindowFontScale(rbcore::FONT_SIZE);
         // Calculate display and window size to center align warning window
         ImGuiIO& io = ImGui::GetIO(); (void)io;
         ImVec2 displaySize = io.DisplaySize;
@@ -880,7 +880,7 @@ void Application::DrawLoadingWindow()
         windowFlags |= ImGuiWindowFlags_NoCollapse;
         windowFlags |= ImGuiWindowFlags_NoTitleBar;
         ImGui::Begin("##Loading", nullptr, windowFlags);
-        ImGui::SetWindowFontScale(FONT_SIZE);
+        ImGui::SetWindowFontScale(rbcore::FONT_SIZE);
         // Calculate display and window size to center align warning window
         ImGuiIO& io = ImGui::GetIO(); (void)io;
         ImVec2 displaySize = io.DisplaySize;

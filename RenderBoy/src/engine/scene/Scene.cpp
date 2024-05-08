@@ -935,7 +935,7 @@ void Scene::DrawModelsWindow()
 		ImGuiWindowFlags windowFlags = 0;
 		windowFlags |= ImGuiWindowFlags_AlwaysAutoResize;
 		ImGui::Begin("Models", &rbcore::IS_MODELS_OPENED, windowFlags);
-		ImGui::SetWindowFontScale(FONT_SIZE);
+		ImGui::SetWindowFontScale(rbcore::FONT_SIZE);
 		ImGui::LabelHighlighted("Model ");
 		if (ImGui::BeginCombo("##Model", rbcore::currentModelScene))
 		{
@@ -986,7 +986,7 @@ void Scene::DrawCameraWindow()
 		ImGuiWindowFlags windowFlags = 0;
 		windowFlags |= ImGuiWindowFlags_AlwaysAutoResize;
 		ImGui::Begin("Camera", &rbcore::IS_CAMERA_OPENED, windowFlags);
-		ImGui::SetWindowFontScale(FONT_SIZE);
+		ImGui::SetWindowFontScale(rbcore::FONT_SIZE);
 		m_Camera.DrawUI();
 		ImGui::End();
 	}
@@ -999,7 +999,7 @@ void Scene::DrawLightsWindow()
 		ImGuiWindowFlags windowFlags = 0;
 		windowFlags |= ImGuiWindowFlags_AlwaysAutoResize;
 		ImGui::Begin("Lights", &rbcore::IS_LIGHTS_OPENED, windowFlags);
-		ImGui::SetWindowFontScale(FONT_SIZE);
+		ImGui::SetWindowFontScale(rbcore::FONT_SIZE);
 		// Add light
 		if (ImGui::TreeNode("Add Light"))
 		{
