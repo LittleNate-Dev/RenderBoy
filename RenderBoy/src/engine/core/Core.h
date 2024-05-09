@@ -116,6 +116,8 @@ struct Settings
 	unsigned int height = 720;
 	Core core = OPENGL;
 	UIStyle uiStyle = DEFAULT_LIGHT;
+	std::string fontStyle = "Open Sans";
+	int fontSize = 16;
 	float gamma = 2.2f;
 	DrawMode drawMode = DEFAULT;
 	float resolution = 1.0f;
@@ -157,9 +159,10 @@ namespace rbcore
 	// buffer for loading file
 	extern LoadType LOAD_TYPE;
 	extern std::string FILEPATH_BUFFER;
-	extern float FONT_SIZE;
 	extern glm::vec3 NORMAL_COLOR;
 	extern float NORMAL_MAGNITUDE;
+	// Reload font flag
+	extern bool RELOAD_FONT;
 	// used for combo widgets
 	extern const char* currentModelInfo;
 	extern const char* currentModelScene;
@@ -180,6 +183,7 @@ namespace rbcore
 	// file types RenderBoy can read
 	extern const std::vector<std::string> FILE_TYPE;
 	extern const std::vector<std::string> FILE_TYPE_ASSIMP;
+	extern const std::vector<std::string> FONT_STYLE;
 }
 // Use these statics to set ui style
 namespace ImGui
@@ -207,6 +211,9 @@ namespace rbcore
 	std::string GetFileNameNoSuffix(std::string filepath);
 	// Set UI style
 	void SetUiStyle(UIStyle style);
+	// Get Font Style
+	std::string GetFontStylePath(std::string style);
+	int GetFontStyleIndex(std::string style);
 	// Get Rodrigue rotation matrix
 	glm::mat4 GetRodrigue(glm::vec4 axis, float angle);
 	// Get viewport matrix

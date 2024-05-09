@@ -53,6 +53,14 @@ bool Application::LoadSettings()
             {
                 rbcore::SETTINGS.core = (Core)std::atoi(rbcore::GetSettingValue(line).c_str());
             }
+            if (line.find("#FONT_STYLE") != std::string::npos)
+            {
+                rbcore::SETTINGS.fontStyle = rbcore::FONT_STYLE[(int)std::atoi(rbcore::GetSettingValue(line).c_str())];
+            }
+            if (line.find("#FONT_SIZE") != std::string::npos)
+            {
+                rbcore::SETTINGS.fontSize = (int)std::atoi(rbcore::GetSettingValue(line).c_str());
+            }
             if (line.find("#UI_STYLE") != std::string::npos)
             {
                 rbcore::SETTINGS.uiStyle = (UIStyle)std::atoi(rbcore::GetSettingValue(line).c_str());
@@ -145,6 +153,10 @@ void Application::SaveSettings()
     line = "#HEIGHT " + std::to_string(rbcore::SETTINGS.height) + "\n";
     stream << line;
     line = "#CORE " + std::to_string(rbcore::SETTINGS.core) + "\n";
+    stream << line;
+    line = "#FONT_STYLE " + std::to_string(rbcore::GetFontStyleIndex(rbcore::SETTINGS.fontStyle)) + "\n";
+    stream << line;
+    line = "#FONT_SIZE " + std::to_string(rbcore::SETTINGS.fontSize) + "\n";
     stream << line;
     line = "#UI_STYLE " + std::to_string(rbcore::SETTINGS.uiStyle) + "\n";
     stream << line;
@@ -242,6 +254,10 @@ bool Application::InitOpenGL()
     ImGui_ImplGlfw_InitForOpenGL(m_Window, true);
     ImGui_ImplOpenGL3_Init("#version 460");
     rbcore::SetUiStyle(rbcore::SETTINGS.uiStyle);
+    // Set font
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    io.Fonts->AddFontFromFileTTF(rbcore::GetFontStylePath(rbcore::SETTINGS.fontStyle).c_str(), rbcore::SETTINGS.fontSize);
+    io.Fonts->Build();
     // Generate a texture id to display icon
     unsigned char* iconBuffer;
     int iconWidth, iconHeight;
@@ -379,6 +395,22 @@ bool Application::LoadFile()
 
 void Application::DrawUI()
 {
+    // Change Font size or style
+    if (rbcore::RELOAD_FONT)
+    {
+        rbcore::RELOAD_FONT = false;
+        ImGuiIO& io = ImGui::GetIO(); (void)io;
+        io.Fonts->Clear();
+        io.Fonts->AddFontFromFileTTF(rbcore::GetFontStylePath(rbcore::SETTINGS.fontStyle).c_str(), rbcore::SETTINGS.fontSize);
+        io.Fonts->Build();
+        switch (rbcore::SETTINGS.core)
+        {
+        case OPENGL:
+            ImGui_ImplOpenGL3_DestroyDeviceObjects();
+            ImGui_ImplOpenGL3_CreateDeviceObjects();
+            break;
+        }
+    }
     // Draw UI
     ImGui_ImplGlfw_NewFrame();
     ImGui_ImplOpenGL3_NewFrame();
@@ -414,7 +446,6 @@ void Application::DrawMenuBar()
 {
     if (ImGui::BeginMainMenuBar())
     {
-        ImGui::SetWindowFontScale(rbcore::FONT_SIZE);
         ImGui::SetNextItemWidth(4.0f);
         if (ImGui::BeginMenu("File"))
         {
@@ -520,7 +551,7 @@ void Application::DrawInfoWindow()
         ImGuiWindowFlags windowFlags = 0;
         windowFlags |= ImGuiWindowFlags_NoSavedSettings;
         ImGui::Begin("Info", &rbcore::IS_INFO_OPENED, windowFlags);
-        ImGui::SetWindowFontScale(rbcore::FONT_SIZE);
+        //ImGui::SetWindowFontScale(rbcore::FONT_SIZE);
         // FPS
         ImGui::LabelHighlighted("FPS:");
         ImGui::Text("%.1f (%.3f ms/frame)", io.Framerate, 1000.0f / io.Framerate);
@@ -625,69 +656,113 @@ void Application::DrawSettingWindow()
         ImVec2 displaySize = io.DisplaySize;
         ImVec2 windowSize = ImGui::GetWindowSize();
         ImGui::SetWindowPos(ImVec2((displaySize.x - windowSize.x) / 2.0f, (displaySize.y - windowSize.y) / 2.0f));
-        ImGui::SetWindowFontScale(rbcore::FONT_SIZE);
         // Application
         if (ImGui::TreeNode("Application"))
         {
             // Core
-            ImGui::CenterAlignWidget("Core", 120.0f);
-            ImGui::LabelHighlighted("Core");
-            ImGui::PushItemWidth(120.0f);
-            const char* coreOps[] = {
-                "OpenGL",
-                "Vulkan",
-                "DirectX 12"
-            };
-            static int currentCore = rbcore::SETTINGS.core;
-            if (ImGui::Combo("##Core", &currentCore, coreOps, IM_ARRAYSIZE(coreOps)))
             {
-                switch (currentCore)
+                ImGui::CenterAlignWidget("Core", 120.0f);
+                ImGui::LabelHighlighted("Core");
+                ImGui::PushItemWidth(120.0f);
+                const char* coreOps[] = {
+                    "OpenGL",
+                    "Vulkan",
+                    "DirectX 12"
+                };
+                static int currentCore = rbcore::SETTINGS.core;
+                if (ImGui::Combo("##Core", &currentCore, coreOps, IM_ARRAYSIZE(coreOps)))
                 {
-                case Core::OPENGL:
-                    rbcore::SETTINGS.core = Core::OPENGL;
-                    break;
-                case Core::VULKAN:
-                    rbcore::SETTINGS.core = Core::OPENGL;
-                    break;
-                case Core::DIRECTX:
-                    rbcore::SETTINGS.core = Core::OPENGL;
-                    break;
-                default:
-                    rbcore::SETTINGS.core = Core::OPENGL;
-                    break;
+                    switch (currentCore)
+                    {
+                    case Core::OPENGL:
+                        rbcore::SETTINGS.core = Core::OPENGL;
+                        break;
+                    case Core::VULKAN:
+                        rbcore::SETTINGS.core = Core::OPENGL;
+                        break;
+                    case Core::DIRECTX:
+                        rbcore::SETTINGS.core = Core::OPENGL;
+                        break;
+                    default:
+                        rbcore::SETTINGS.core = Core::OPENGL;
+                        break;
+                    }
                 }
+                ImGui::PopItemWidth();
             }
-            ImGui::PopItemWidth();
             // UI style
-            ImGui::CenterAlignWidget("UI Style", 180.0f);
-            ImGui::LabelHighlighted("UI Style");
-            ImGui::PushItemWidth(180.0f);
-            const char* uiStyleOps[] = {
-                "Default Light",
-                "Default Dark",
-                "Spectrum"
-            };
-            static int currentUIStyle = rbcore::SETTINGS.uiStyle;
-            if (ImGui::Combo("##UI Style", &currentUIStyle, uiStyleOps, IM_ARRAYSIZE(uiStyleOps)))
             {
-                switch (currentUIStyle)
+                ImGui::CenterAlignWidget("UI Style", 180.0f);
+                ImGui::LabelHighlighted("UI Style");
+                ImGui::PushItemWidth(180.0f);
+                const char* uiStyleOps[] = {
+                    "Default Light",
+                    "Default Dark",
+                    "Spectrum"
+                };
+                static int currentUIStyle = rbcore::SETTINGS.uiStyle;
+                if (ImGui::Combo("##UI Style", &currentUIStyle, uiStyleOps, IM_ARRAYSIZE(uiStyleOps)))
                 {
-                case UIStyle::DEFAULT_DARK:
-                    rbcore::SETTINGS.uiStyle = UIStyle::DEFAULT_DARK;
-                    break;
-                case UIStyle::DEFAULT_LIGHT:
-                    rbcore::SETTINGS.uiStyle = UIStyle::DEFAULT_LIGHT;
-                    break;
-                case UIStyle::SPECTRUM:
-                    rbcore::SETTINGS.uiStyle = UIStyle::SPECTRUM;
-                    break;
-                default:
-                    rbcore::SETTINGS.uiStyle = UIStyle::DEFAULT_LIGHT;
-                    break;
+                    switch (currentUIStyle)
+                    {
+                    case UIStyle::DEFAULT_DARK:
+                        rbcore::SETTINGS.uiStyle = UIStyle::DEFAULT_DARK;
+                        break;
+                    case UIStyle::DEFAULT_LIGHT:
+                        rbcore::SETTINGS.uiStyle = UIStyle::DEFAULT_LIGHT;
+                        break;
+                    case UIStyle::SPECTRUM:
+                        rbcore::SETTINGS.uiStyle = UIStyle::SPECTRUM;
+                        break;
+                    default:
+                        rbcore::SETTINGS.uiStyle = UIStyle::DEFAULT_LIGHT;
+                        break;
+                    }
+                    rbcore::SetUiStyle(rbcore::SETTINGS.uiStyle);
                 }
-                rbcore::SetUiStyle(rbcore::SETTINGS.uiStyle);
+                ImGui::PopItemWidth();
             }
-            ImGui::PopItemWidth();
+            // Font Type
+            {
+                ImGui::CenterAlignWidget("Font Type", 150.0f);
+                ImGui::LabelHighlighted("Font Type");
+                ImGui::PushItemWidth(150.0f);
+                const char* fontStyle = rbcore::SETTINGS.fontStyle.c_str();
+                if (ImGui::BeginCombo("##FontType", fontStyle))
+                {
+                    for (int i = 0; i < rbcore::FONT_STYLE.size(); i++)
+                    {
+                        bool isSelected = (fontStyle == rbcore::FONT_STYLE[i].c_str());
+                        if (ImGui::Selectable(rbcore::FONT_STYLE[i].c_str(), isSelected))
+                        {
+                            fontStyle = rbcore::FONT_STYLE[i].c_str();
+                            rbcore::SETTINGS.fontStyle = fontStyle;
+                            rbcore::RELOAD_FONT = true;
+                        }
+                    }
+                    ImGui::EndCombo();
+                }
+            }
+            // Font size
+            {
+                ImGui::CenterAlignWidget("Font Size", 100.0f);
+                ImGui::LabelHighlighted("Font Size");
+                ImGui::PushItemWidth(100.0f);
+                static int fontSize = rbcore::SETTINGS.fontSize;
+                if (ImGui::InputInt("##FontSize", &fontSize))
+                {
+                    if (fontSize <= 0)
+                    {
+                        fontSize = rbcore::SETTINGS.fontSize;
+                    }
+                    else
+                    {
+                        rbcore::SETTINGS.fontSize = fontSize;
+                        rbcore::RELOAD_FONT = true;
+                    }
+                }
+                ImGui::PopItemWidth();
+            }
             ImGui::TreePop();
         }
         // Visual effects
@@ -857,7 +932,6 @@ void Application::DrawWarningWindow()
     windowFlags |= ImGuiWindowFlags_NoMove;
     if (ImGui::BeginPopupModal("Warning", &rbcore::IS_WARNING_OPENED, windowFlags)) 
     {
-        ImGui::SetWindowFontScale(rbcore::FONT_SIZE);
         // Calculate display and window size to center align warning window
         ImGuiIO& io = ImGui::GetIO(); (void)io;
         ImVec2 displaySize = io.DisplaySize;
@@ -880,7 +954,6 @@ void Application::DrawLoadingWindow()
         windowFlags |= ImGuiWindowFlags_NoCollapse;
         windowFlags |= ImGuiWindowFlags_NoTitleBar;
         ImGui::Begin("##Loading", nullptr, windowFlags);
-        ImGui::SetWindowFontScale(rbcore::FONT_SIZE);
         // Calculate display and window size to center align warning window
         ImGuiIO& io = ImGui::GetIO(); (void)io;
         ImVec2 displaySize = io.DisplaySize;

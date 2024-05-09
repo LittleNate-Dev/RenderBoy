@@ -7,9 +7,9 @@ namespace rbcore
 	Settings SETTINGS;
 	LoadType LOAD_TYPE = NO_FILE;
 	std::string FILEPATH_BUFFER = "";
-	float FONT_SIZE = 1.2f;
 	glm::vec3 NORMAL_COLOR = glm::vec3(1.0f);
 	float NORMAL_MAGNITUDE = 1.0f;
+	bool RELOAD_FONT = false;
 	const char* currentModelInfo = nullptr;
 	const char* currentModelScene = nullptr;
 	const char* currentPointLight = nullptr;
@@ -32,6 +32,13 @@ namespace rbcore
 		"3mf", "blend", "3ds", "ase", "gltf", "fbx",
 		"ply", "smd", "vta", "x", "raw", "dxf", "stl",
 		"obj"
+		});
+	const std::vector<std::string> FONT_STYLE({
+		"Open Sans",
+		"Roboto",
+		"Raleway",
+		"Courier",
+		"Rubik"
 		});
 }
 // Use these statics to set ui style
@@ -161,6 +168,20 @@ namespace rbcore
 			ImGui::StyleColorsSpectrum();
 			break;
 		}
+	}
+
+	std::string GetFontStylePath(std::string style)
+	{
+		if (std::find(FONT_STYLE.begin(), FONT_STYLE.end(), style) != FONT_STYLE.end())
+		{
+			return "data/fonts/" + style + ".ttf";
+		}
+		return "";
+	}
+
+	int GetFontStyleIndex(std::string style)
+	{
+		return std::find(FONT_STYLE.begin(), FONT_STYLE.end(), style) - FONT_STYLE.begin();
 	}
 
 	glm::mat4 GetRodrigue(glm::vec4 axis, float angle)
