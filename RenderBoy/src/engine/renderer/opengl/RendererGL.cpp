@@ -1,4 +1,7 @@
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+
 #include "RendererGL.h"
+#include <stb/stb_image_write.h>
 
 RendererGL::RendererGL()
 {
@@ -221,6 +224,36 @@ void RendererGL::DrawNormal(Scene& scene)
 		scene.GetData().GetDataGL().GetModelData()[model].ib.Unbind();
 	}
 	m_Shaders.normal.Unbind();
+}
+
+bool RendererGL::SaveScreenShot()
+{
+	int width = (int)(rbcore::SETTINGS.width * rbcore::SETTINGS.resolution);
+	int height = (int)(rbcore::SETTINGS.height * rbcore::SETTINGS.resolution);
+	std::unique_ptr<unsigned char[]> data = std::make_unique<unsigned char[]>(width * height * 3 * sizeof(unsigned int));
+	m_Frame.fb.BindTex();
+	GLCall(glPixelStorei(GL_PACK_ALIGNMENT, 1));
+	GLCall(glGetTexImage(GL_TEXTURE_2D, 0, GL_RGB, GL_UNSIGNED_BYTE, data.get()));
+	stbi_flip_vertically_on_write(true);
+	// Generate screenshot file name
+	SYSTEMTIME time;
+	GetLocalTime(&time);
+	std::string filepath = SCREENSHOT_FILEPATH 
+							+ std::to_string(time.wYear) 
+							+ std::to_string(time.wMonth)
+							+ std::to_string(time.wDay)
+					  + "_" + std::to_string(time.wHour)
+							+ std::to_string(time.wMinute)
+							+ std::to_string(time.wSecond)
+							+ ".jpg";
+	int ret = stbi_write_jpg(filepath.c_str(), width, height, 3, data.get(), 100);
+	if (ret == 0)
+	{
+		rbcore::ShowWarningMsg("Unknow Error! Can't save screenshot!");
+		return false;
+	}
+	rbcore::ShowWarningMsg("Screenshot saved at: " + filepath);
+	return true;
 }
 
 void RendererGL::ChangeResolution()

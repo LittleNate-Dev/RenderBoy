@@ -632,6 +632,7 @@
     <ClInclude Include="src\vendor\spdlog\tweakme.h" />
     <ClInclude Include="src\vendor\spdlog\version.h" />
     <ClInclude Include="src\vendor\stb\stb_image.h" />
+    <ClInclude Include="src\vendor\stb\stb_image_write.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="src\vendor\assimp\color4.inl" />

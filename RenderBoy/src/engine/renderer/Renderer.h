@@ -23,6 +23,7 @@ public:
 	void Draw(Scene& scene);
 	void Clear();
 
+	bool SaveScreenShot();
 	void ChangeResolution();
 	void ChangeMSAA();
 	void ChangePostProcess();

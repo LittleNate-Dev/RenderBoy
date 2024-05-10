@@ -49,6 +49,7 @@ public:
 	void Init();
 	void Draw(Scene& scene);
 	
+	bool SaveScreenShot();
 	void ChangeResolution();
 	void ChangeMSAA();
 	void ChangePostProcess();

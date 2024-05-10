@@ -45,6 +45,23 @@ void Renderer::Clear()
 	}
 }
 
+bool Renderer::SaveScreenShot()
+{
+	switch (rbcore::SETTINGS.core)
+	{
+	case OPENGL:
+		if (m_RendererGL.SaveScreenShot())
+		{
+			return true;
+		}
+		return false;
+		break;
+	default:
+		break;
+	}
+	return false;
+}
+
 void Renderer::ChangeResolution()
 {
 	switch (rbcore::SETTINGS.core)

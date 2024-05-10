@@ -1622,6 +1622,9 @@
     <ClInclude Include="src\engine\shader\opengl\ShaderGL.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\vendor\stb\stb_image_write.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="src\vendor\assimp\color4.inl">

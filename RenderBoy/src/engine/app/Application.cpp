@@ -235,9 +235,18 @@ bool Application::InitOpenGL()
 
     // Set RenderBoy's Icon
     GLFWimage icons[1];
-    icons[0].pixels = stbi_load("res/icons/Icon_48.png", &icons[0].width, &icons[0].height, 0, 4);
-    glfwSetWindowIcon(m_Window, 1, icons);
-    stbi_image_free(icons[0].pixels);
+    unsigned char* iconBuffer;
+    iconBuffer = stbi_load("res/icons/Icon_48.png", &icons[0].width, &icons[0].height, 0, 4);
+    if (!iconBuffer)
+    {
+        spdlog::error("RenderBoy icon missing!");
+    }
+    else
+    {
+        icons[0].pixels = iconBuffer;
+        glfwSetWindowIcon(m_Window, 1, icons);
+        stbi_image_free(icons[0].pixels);
+    }
 
     // Initialize GLEW library
     if (glewInit() != GLEW_OK)
@@ -259,9 +268,8 @@ bool Application::InitOpenGL()
     io.Fonts->AddFontFromFileTTF(rbcore::GetFontStylePath(rbcore::SETTINGS.fontStyle).c_str(), rbcore::SETTINGS.fontSize);
     io.Fonts->Build();
     // Generate a texture id to display icon
-    unsigned char* iconBuffer;
     int iconWidth, iconHeight;
-    iconBuffer = stbi_load("res/icons/Icon.png", &iconWidth, &iconHeight, 0, 4);
+    iconBuffer = stbi_load("res/icons/Icon_256.png", &iconWidth, &iconHeight, 0, 4);
     if (!iconBuffer)
     {
         spdlog::error("RenderBoy icon missing!");
@@ -474,7 +482,7 @@ void Application::DrawMenuBar()
             ImGui::EndMenu();
         }
         ImGui::SetNextItemWidth(4.0f);
-        if (ImGui::BeginMenu("Window"))
+        if (ImGui::BeginMenu("View"))
         {
             if (ImGui::MenuItem("Info"))
             {
@@ -523,16 +531,16 @@ void Application::DrawLaunchWindow()
     ImGui::SetCursorPosX((windowSize.x - windowSize.x / 3.0f) * 0.5f);
     if (m_IconTexID)
     {
-        ImGui::Image(m_IconTexID, ImVec2(windowSize.x / 3.0f, windowSize.x / 3.0f));
+        ImGui::CenterAlignWidget(windowSize.x / 2.0f);
+        ImGui::Image(m_IconTexID, ImVec2(windowSize.x / 2.0f, windowSize.x / 2.0f));
     }
-    ImGui::SetWindowFontScale(io.DisplaySize.x / 720.0f);
+    ImGui::SetCursorPosY(((windowSize.y - windowSize.x / 2.0f) / 4.0f) + windowSize.x / 2.0f);
     ImGui::CenterAlignWidget("RenderBoy");
     ImGui::Text("RenderBoy");
-    ImGui::SetWindowFontScale(io.DisplaySize.x / 960.0f);
-    ImGui::SetCursorPosY(((windowSize.y - windowSize.x / 3.0f) / 3.0f) + windowSize.x / 3.0f);
+    ImGui::SetCursorPosY(((windowSize.y - windowSize.x / 2.0f) / 4.0f) * 2.0f + windowSize.x / 2.0f);
     ImGui::CenterAlignWidget(APP_VERSION);
     ImGui::Text(APP_VERSION);
-    ImGui::SetCursorPosY(((windowSize.y - windowSize.x / 3.0f) / 3.0f) * 2.0f + windowSize.x / 3.0f);
+    ImGui::SetCursorPosY(((windowSize.y - windowSize.x / 2.0f) / 4.0f) * 3.0f + windowSize.x / 2.0f);
     ImGui::CenterAlignWidget("Open File");
     if (ImGui::Button("Open File"))
     {
@@ -722,13 +730,13 @@ void Application::DrawSettingWindow()
                 }
                 ImGui::PopItemWidth();
             }
-            // Font Type
+            // Font Style
             {
-                ImGui::CenterAlignWidget("Font Type", 150.0f);
-                ImGui::LabelHighlighted("Font Type");
+                ImGui::CenterAlignWidget("Font Style", 150.0f);
+                ImGui::LabelHighlighted("Font Style");
                 ImGui::PushItemWidth(150.0f);
                 const char* fontStyle = rbcore::SETTINGS.fontStyle.c_str();
-                if (ImGui::BeginCombo("##FontType", fontStyle))
+                if (ImGui::BeginCombo("##FontStyle", fontStyle))
                 {
                     for (int i = 0; i < rbcore::FONT_STYLE.size(); i++)
                     {
@@ -850,9 +858,9 @@ void Application::DrawSettingWindow()
             {
                 ImGui::CenterAlignWidget("FOV", 220.0f);
                 ImGui::LabelHighlighted("FOV");
-                static float fov = m_Scene.GetCamera().GetFOV();
+                static int fov = (float)m_Scene.GetCamera().GetFOV();
                 ImGui::PushItemWidth(220.0f);
-                if (ImGui::SliderFloat("##FOV", &fov, MIN_FOV, MAX_FOV))
+                if (ImGui::SliderInt("##FOV", &fov, MIN_FOV, MAX_FOV))
                 {
                     m_Scene.GetCamera().SetFOV(fov);
                 }
@@ -973,24 +981,24 @@ void Application::DrawAboutRenderBoyWindow()
     if (rbcore::IS_ABOUT_OPENED)
     {
         ImGuiIO& io = ImGui::GetIO(); (void)io;
-        ImGui::SetNextWindowSize(ImVec2(io.DisplaySize.x / 2.5f, io.DisplaySize.y / 2.5f));
         ImGuiWindowFlags windowFlags = 0;
         windowFlags |= ImGuiWindowFlags_NoResize;
         windowFlags |= ImGuiWindowFlags_NoScrollbar;
         windowFlags |= ImGuiWindowFlags_NoCollapse;
+        windowFlags |= ImGuiWindowFlags_NoMove;
+        windowFlags |= ImGuiWindowFlags_AlwaysAutoResize;
         ImGui::Begin("About RenderBoy", &rbcore::IS_ABOUT_OPENED, windowFlags);
         ImVec2 windowSize = ImGui::GetWindowSize();
-        ImGui::SetCursorPosX((windowSize.x - windowSize.x / 4.0f) * 0.5f);
+        ImGui::SetWindowPos(ImVec2((io.DisplaySize.x - windowSize.x) / 2.0f, (io.DisplaySize.y - windowSize.y) / 2.0f));
+        ImGui::SetCursorPosX((windowSize.x - windowSize.x / 4.0f) / 2.0f);
         if (m_IconTexID)
         {
             ImGui::Image(m_IconTexID, ImVec2(windowSize.x / 4.0f, windowSize.x / 4.0f));
         }
-        ImGui::SetWindowFontScale(io.DisplaySize.x / 960.0f);
         ImGui::CenterAlignWidget(APP_VERSION);
         ImGui::Text(APP_VERSION);
-        ImGui::SetCursorPosY(((windowSize.y - windowSize.x / 4.0f) / 2.0f) + windowSize.x / 4.0f);
         ImGui::CenterAlignWidget(GIT_REPO);
-        ImGui::TextWrapped(GIT_REPO);
+        ImGui::Text(GIT_REPO);
         ImGui::End();
     }
 }
@@ -1099,6 +1107,16 @@ void Application::KeyboardInput()
         m_Scene.GetCamera().SetEulerAngle(rotate);
     }
     // Camera Rotation
+
+    // Save Screenshot
+    if (glfwGetKey(m_Window, GLFW_KEY_F5) == GLFW_PRESS && m_Launched)
+    {
+        if (!rbcore::IS_WARNING_OPENED)
+        {
+            m_Renderer.SaveScreenShot();
+        }
+    }
+    // Save Screenshot
 }
 
 void Application::MouseInput()

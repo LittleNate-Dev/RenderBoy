@@ -73,6 +73,7 @@ namespace rbcore
 		glm::vec2 resolution = glm::vec2(width, height);
 		return resolution;
 	}
+
 	void ShowWarningMsg(std::string msg)
 	{
 		IS_WARNING_OPENED = true;
@@ -174,7 +175,7 @@ namespace rbcore
 	{
 		if (std::find(FONT_STYLE.begin(), FONT_STYLE.end(), style) != FONT_STYLE.end())
 		{
-			return "data/fonts/" + style + ".ttf";
+			return FONTS_FILEPATH + style + ".ttf";
 		}
 		return "";
 	}

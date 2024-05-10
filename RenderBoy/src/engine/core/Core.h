@@ -7,6 +7,7 @@
 
 #include <iostream>
 #include <stdlib.h>
+#include <stdio.h>
 #include <string>
 #include <fstream>
 #include <sstream>
@@ -35,14 +36,16 @@
 
 #include <spdlog/spdlog.h>
 
-#define APP_VERSION "ver 0.4.0"
+#define APP_VERSION "ver 0.4.2"
 #define GIT_REPO "https://github.com/LittleNate-Dev/RenderBoy"
-#define SCENE_FILEPATH "res/saves/"
+#define SCENE_FILEPATH "saves/scene/"
 #define SETTING_FILEPATH "data/config/settings.config"
 #define LOGGER_FILEPATH "res/logger/RenderBoy_Logger.txt"
+#define FONTS_FILEPATH "res/fonts/"
+#define SCREENSHOT_FILEPATH "saves/screenshot/"
 #define SHADER_OPENGL "data/shaders/opengl/"
-#define MAX_FOV 120.f
-#define MIN_FOV 40.0f
+#define MAX_FOV 120
+#define MIN_FOV 40
 
 #define ASSERT(x) if (!(x)) __debugbreak();
 #define GLCall(x) GLClearError();\
