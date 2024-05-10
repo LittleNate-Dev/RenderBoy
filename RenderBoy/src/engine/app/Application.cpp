@@ -554,28 +554,44 @@ void Application::DrawInfoWindow()
 {
     if (rbcore::IS_INFO_OPENED)
     {
-        ImGui::SetNextWindowSizeConstraints(ImVec2(270.0f, 90.0f), ImVec2(500.0f, 350.0f));
+        //ImGui::SetNextWindowSizeConstraints(ImVec2(270.0f, 90.0f), ImVec2(500.0f, 350.0f));
         ImGuiIO& io = ImGui::GetIO(); (void)io;
         ImGuiWindowFlags windowFlags = 0;
         windowFlags |= ImGuiWindowFlags_NoSavedSettings;
+        windowFlags |= ImGuiWindowFlags_AlwaysAutoResize;
         ImGui::Begin("Info", &rbcore::IS_INFO_OPENED, windowFlags);
         //ImGui::SetWindowFontScale(rbcore::FONT_SIZE);
         // FPS
-        ImGui::LabelHighlighted("FPS:");
-        ImGui::Text("%.1f (%.3f ms/frame)", io.Framerate, 1000.0f / io.Framerate);
-        // Window size
-        ImGui::LabelHighlighted("Window Size:");
-        ImGui::Text("%d * %d", m_Width, m_Height);
-        // Resolution
-        ImGui::LabelHighlighted("Resolution:");
-        ImGui::Text("%d * %d", (int)(rbcore::SETTINGS.width * rbcore::SETTINGS.resolution), (int)(rbcore::SETTINGS.height * rbcore::SETTINGS.resolution));
-        // Driver
-        ImGui::LabelHighlighted("Driver:");
-        switch (rbcore::SETTINGS.core)
         {
-        case OPENGL:
-            ImGui::Text((const char*)glGetString(GL_VERSION));
-            break;
+            ImGui::LabelHighlighted("FPS:");
+            ImGui::Text("%.1f (%.3f ms/frame)", io.Framerate, 1000.0f / io.Framerate);
+            static float values[200] = {};
+            for (unsigned int i = 0; i < 199; i++)
+            {
+                values[i] = values[i + 1];
+            }
+            values[199] = io.Framerate;
+            ImGui::PlotLines("##FrameLines", values, IM_ARRAYSIZE(values));
+        }
+        // Window size
+        {
+            ImGui::LabelHighlighted("Window Size:");
+            ImGui::Text("%d * %d", m_Width, m_Height);
+        }
+        // Resolution
+        {
+            ImGui::LabelHighlighted("Resolution:");
+            ImGui::Text("%d * %d", (int)(rbcore::SETTINGS.width * rbcore::SETTINGS.resolution), (int)(rbcore::SETTINGS.height * rbcore::SETTINGS.resolution));
+        }
+        // Driver
+        {
+            ImGui::LabelHighlighted("Driver:");
+            switch (rbcore::SETTINGS.core)
+            {
+            case OPENGL:
+                ImGui::Text((const char*)glGetString(GL_VERSION));
+                break;
+            }
         }
         // Scene
         if (ImGui::TreeNode("Scene"))

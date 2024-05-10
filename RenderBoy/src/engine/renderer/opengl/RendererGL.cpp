@@ -19,10 +19,10 @@ void RendererGL::Init()
 	GLCall(glLineWidth(0.4f));
 	GLCall(glPointSize(1.5f));
 	// Initialize shaders
-	m_Shaders.wireframe.Init((std::string)SHADER_OPENGL + "WIREFRAME.shader");
-	m_Shaders.pointcloud.Init((std::string)SHADER_OPENGL + "POINTCLOUD.shader");
-	m_Shaders.depth.Init((std::string)SHADER_OPENGL + "DEPTH.shader");
-	m_Shaders.normal.Init((std::string)SHADER_OPENGL + "NORMAL.shader");
+	m_Shaders.wireframe.Init((std::string)SHADER_OPENGL + "WIREFRAME.glsl");
+	m_Shaders.pointcloud.Init((std::string)SHADER_OPENGL + "POINTCLOUD.glsl");
+	m_Shaders.depth.Init((std::string)SHADER_OPENGL + "DEPTH.glsl");
+	m_Shaders.normal.Init((std::string)SHADER_OPENGL + "NORMAL.glsl");
 	ChangePostProcess();
 	// Initialize frame buffers
 	m_Frame.fbMsaa.Init(FBType::MSAA);
@@ -276,22 +276,22 @@ void RendererGL::ChangePostProcess()
 	switch (rbcore::SETTINGS.pp)
 	{
 	case NO_PP:
-		m_Shaders.screen.Init((std::string)SHADER_OPENGL + "post_process/DEFAULT.shader");
+		m_Shaders.screen.Init((std::string)SHADER_OPENGL + "post_process/DEFAULT.glsl");
 		break;
 	case INVERSE:
-		m_Shaders.screen.Init((std::string)SHADER_OPENGL + "post_process/INVERSE.shader");
+		m_Shaders.screen.Init((std::string)SHADER_OPENGL + "post_process/INVERSE.glsl");
 		break;
 	case BLUR:
-		m_Shaders.screen.Init((std::string)SHADER_OPENGL + "post_process/BLUR.shader");
+		m_Shaders.screen.Init((std::string)SHADER_OPENGL + "post_process/BLUR.glsl");
 		break;
 	case GRAY_SCALE:
-		m_Shaders.screen.Init((std::string)SHADER_OPENGL + "post_process/GRAYSCALE.shader");
+		m_Shaders.screen.Init((std::string)SHADER_OPENGL + "post_process/GRAYSCALE.glsl");
 		break;
 	case EDGE:
-		m_Shaders.screen.Init((std::string)SHADER_OPENGL + "post_process/EDGE.shader");
+		m_Shaders.screen.Init((std::string)SHADER_OPENGL + "post_process/EDGE.glsl");
 		break;
 	default:
-		m_Shaders.screen.Init((std::string)SHADER_OPENGL + "post_process/DEFAULT.shader");
+		m_Shaders.screen.Init((std::string)SHADER_OPENGL + "post_process/DEFAULT.glsl");
 		break;
 	}
 	m_Shaders.screen.Unbind();
