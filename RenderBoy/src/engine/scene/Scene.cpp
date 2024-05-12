@@ -23,6 +23,7 @@ void Scene::Reset()
 	m_Camera.SetEulerAngle(glm::vec3(0.0f));
 	Data newData;
 	m_Data = newData;
+	m_Data.Init();
 	std::vector<std::string>().swap(m_ModelList);
 	m_Models.clear();
 	std::vector<std::string>().swap(m_PointLightList);
@@ -216,6 +217,21 @@ bool Scene::LoadScene(std::string filepath)
 					glm::vec3 clq = glm::vec3((float)std::atof(values[0].c_str()), (float)std::atof(values[1].c_str()), (float)std::atof(values[2].c_str()));
 					m_PointLights[light].SetCLQ(clq);
 				}
+				if (line.find("#POINT_LIGHT_" + light + "_SWITCH") != std::string::npos)
+				{
+					values = rbcore::GetSceneValue(line);
+					m_PointLights[light].SetLightSwitch((bool)std::atoi(values[0].c_str()));
+				}
+				if (line.find("#POINT_LIGHT_" + light + "_SHADOW") != std::string::npos)
+				{
+					values = rbcore::GetSceneValue(line);
+					m_PointLights[light].SetCastShadow((bool)std::atoi(values[0].c_str()));
+				}
+				if (line.find("#POINT_LIGHT_" + light + "_SHADOW_RES") != std::string::npos)
+				{
+					values = rbcore::GetSceneValue(line);
+					m_PointLights[light].SetShadowRes((int)std::atoi(values[0].c_str()));
+				}
 			}
 			// Load spot light
 			{
@@ -274,6 +290,21 @@ bool Scene::LoadScene(std::string filepath)
 					values = rbcore::GetSceneValue(line);
 					glm::vec3 clq = glm::vec3((float)std::atof(values[0].c_str()), (float)std::atof(values[1].c_str()), (float)std::atof(values[2].c_str()));
 					m_SpotLights[light].SetCLQ(clq);
+				}
+				if (line.find("#SPOT_LIGHT_" + light + "_SWITCH") != std::string::npos)
+				{
+					values = rbcore::GetSceneValue(line);
+					m_SpotLights[light].SetLightSwitch((bool)std::atoi(values[0].c_str()));
+				}
+				if (line.find("#SPOT_LIGHT_" + light + "_SHADOW") != std::string::npos)
+				{
+					values = rbcore::GetSceneValue(line);
+					m_SpotLights[light].SetCastShadow((bool)std::atoi(values[0].c_str()));
+				}
+				if (line.find("#SPOT_LIGHT_" + light + "_SHADOW_RES") != std::string::npos)
+				{
+					values = rbcore::GetSceneValue(line);
+					m_SpotLights[light].SetShadowRes((int)std::atoi(values[0].c_str()));
 				}
 			}
 			// Load directional light
@@ -394,6 +425,12 @@ void Scene::SaveScene()
 		glm::vec3 clq = m_PointLights[light].GetCLQ();
 		line = "#POINT_LIGHT_" + light + "_CLQ " + std::to_string(clq.x) + " " + std::to_string(clq.y) + " " + std::to_string(clq.z) + "\n";
 		stream << line;
+		line = "#POINT_LIGHT_" + light + "_SWITCH " + std::to_string(m_PointLights[light].LightSwitch()) + "\n";
+		stream << line;
+		line = "#POINT_LIGHT_" + light + "_SHADOW " + std::to_string(m_PointLights[light].CastShadow()) + "\n";
+		stream << line;
+		line = "#POINT_LIGHT_" + light + "_SHADOW_RES " + std::to_string(m_PointLights[light].GetShadowRes()) + "\n";
+		stream << line;
 	}
 	// Save Spot Lights
 	for (unsigned int i = 0; i < m_SpotLightList.size(); i++)
@@ -423,6 +460,12 @@ void Scene::SaveScene()
 		stream << line;
 		glm::vec3 clq = m_SpotLights[light].GetCLQ();
 		line = "#SPOT_LIGHT_" + light + "_CLQ " + std::to_string(clq.x) + " " + std::to_string(clq.y) + " " + std::to_string(clq.z) + "\n";
+		stream << line;
+		line = "#SPOT_LIGHT_" + light + "_SWITCH " + std::to_string(m_SpotLights[light].LightSwitch()) + "\n";
+		stream << line;
+		line = "#SPOT_LIGHT_" + light + "_SHADOW " + std::to_string(m_SpotLights[light].CastShadow()) + "\n";
+		stream << line;
+		line = "#SPOT_LIGHT_" + light + "_SHADOW_RES " + std::to_string(m_SpotLights[light].GetShadowRes()) + "\n";
 		stream << line;
 	}
 	// Save Directional Lights

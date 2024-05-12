@@ -12,6 +12,8 @@ void main()
     gl_Position = u_ProjMat * u_ViewMat * a_ModelMat * a_Position;
 }
 
+
+
 #SHADER FRAGMENT
 #version 460 core
 

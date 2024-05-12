@@ -27,6 +27,7 @@ struct Shaders
 	ShaderGL pointcloud;
 	ShaderGL depth;
 	ShaderGL normal;
+	ShaderGL lightcube;
 	ShaderGL screen;
 };
 
@@ -41,6 +42,7 @@ private:
 	void DrawPointCloud(Scene& scene);
 	void DrawDepth(Scene& scene);
 	void DrawNormal(Scene& scene);
+	void DrawLightCube(Scene& scene);
 
 public:
 	RendererGL();

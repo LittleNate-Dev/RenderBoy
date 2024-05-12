@@ -24,7 +24,7 @@ void DataGL::Init()
 			0, 1, 2,
 			0, 2, 3,
 			0, 3, 4,
-			0, 4, 5,
+			0, 4, 1,
 			5, 1, 2,
 			5, 2, 3,
 			5, 3, 4,
@@ -41,20 +41,22 @@ void DataGL::Init()
 	{
 		float position[] = {
 			0.0f,  0.0f,  0.0f, // 0
-			1.0f,  1.0f,  1.414f, // 1
-			1.0f, -1.0f,  1.414f, // 2
-		   -1.0f, -1.0f,  1.414f, // 3
-	       -1.0f,  1.0f,  1.414f  // 4
+			1.0f,  1.0f,  1.0f, // 1
+			1.0f, -1.0f,  1.0f, // 2
+		   -1.0f, -1.0f,  1.0f, // 3
+	       -1.0f,  1.0f,  1.0f  // 4
 		};
 		unsigned int indices[] = {
 			0, 1, 2,
 			0, 2, 3,
 			0, 3, 4,
-			0, 4, 1
+			0, 4, 1,
+			4, 1, 2,
+			4, 2, 3
 		};
 		m_SpotLightCube.va.GenVertexArray();
 		m_SpotLightCube.vb.GenVertexBuffer(position, sizeof(position));
-		m_SpotLightCube.ib.GenIndexBuffer(indices, 24);
+		m_SpotLightCube.ib.GenIndexBuffer(indices, 18);
 		GLVertexBufferLayout layout;
 		layout.Push<float>(3);
 		m_SpotLightCube.va.AddBuffer(m_SpotLightCube.vb, layout);
