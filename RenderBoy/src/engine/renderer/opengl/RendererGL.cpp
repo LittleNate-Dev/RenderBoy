@@ -1,7 +1,4 @@
-#define STB_IMAGE_WRITE_IMPLEMENTATION
-
 #include "RendererGL.h"
-#include <stb/stb_image_write.h>
 
 RendererGL::RendererGL()
 {
@@ -24,6 +21,12 @@ void RendererGL::Init()
 	m_Shaders.depth.Init((std::string)SHADER_OPENGL + "DEPTH.glsl");
 	m_Shaders.normal.Init((std::string)SHADER_OPENGL + "NORMAL.glsl");
 	m_Shaders.lightcube.Init((std::string)SHADER_OPENGL + "LIGHTCUBE.glsl");
+	m_Shaders.uvset.Init((std::string)SHADER_OPENGL + "UVSET.glsl");
+	// Initialize uv checker map texture
+	m_CheckerMap.GenTexture(UV_MAP_FILEPATH);
+	m_Shaders.uvset.Bind();
+	m_Shaders.uvset.SetUniformHandleARB("u_CheckerMap", m_CheckerMap.GetHandle());
+	m_Shaders.uvset.Unbind();
 	ChangePostProcess();
 	// Initialize frame buffers
 	m_Frame.fbMsaa.Init(FBType::MSAA);
@@ -91,6 +94,9 @@ void RendererGL::Draw(Scene& scene)
 		break;
 	case DEPTH:
 		DrawDepth(scene);
+		break;
+	case UVSET:
+		DrawUVSet(scene);
 		break;
 	}
 	// Draw Light Cube
@@ -200,6 +206,29 @@ void RendererGL::DrawDepth(Scene& scene)
 	m_Shaders.pointcloud.Unbind();
 }
 
+void RendererGL::DrawUVSet(Scene& scene)
+{
+	std::string model;
+	m_Shaders.uvset.Bind();
+	m_Shaders.uvset.SetUniformMat4f("u_ProjMat", scene.GetCamera().GetProjMat());
+	m_Shaders.uvset.SetUniformMat4f("u_ViewMat", scene.GetCamera().GetViewMat());
+	for (unsigned int i = 0; i < scene.GetModelList().size(); i++)
+	{
+		model = scene.GetModelList()[i];
+		scene.GetData().GetDataGL().GetModelData()[model].instanceVb.UpdateVertexBuffer(
+			&scene.GetModels()[model].GetModelMats()[0],
+			(unsigned int)scene.GetModels()[model].GetModelMats().size() * sizeof(glm::mat4)
+		);
+		scene.GetData().GetDataGL().GetModelData()[model].va.Bind();
+		scene.GetData().GetDataGL().GetModelData()[model].ib.Bind();
+		// Draw Model
+		GLCall(glDrawElementsInstanced(GL_TRIANGLES, scene.GetData().GetDataGL().GetModelData()[model].ib.GetCount(), GL_UNSIGNED_INT, nullptr, scene.GetModels()[model].GetInstance()));
+		scene.GetData().GetDataGL().GetModelData()[model].va.Unbind();
+		scene.GetData().GetDataGL().GetModelData()[model].ib.Unbind();
+	}
+	m_Shaders.uvset.Unbind();
+}
+
 void RendererGL::DrawNormal(Scene& scene)
 {
 	std::string model;
@@ -283,12 +312,12 @@ void RendererGL::DrawLightCube(Scene& scene)
 
 bool RendererGL::SaveScreenShot()
 {
+	// Make the BYTE array, factor of 3 because it's RBG.
 	glm::vec2 renderRes = rbcore::GetRenderResolution();
-	std::unique_ptr<unsigned char[]> data = std::make_unique<unsigned char[]>(renderRes.x * renderRes.y * 3 * sizeof(unsigned int));
+	BYTE* pixels = new BYTE[3 * renderRes.x * renderRes.y];
 	m_Frame.fb.BindTex();
 	GLCall(glPixelStorei(GL_PACK_ALIGNMENT, 1));
-	GLCall(glGetTexImage(GL_TEXTURE_2D, 0, GL_RGB, GL_UNSIGNED_BYTE, data.get()));
-	stbi_flip_vertically_on_write(true);
+	GLCall(glGetTexImage(GL_TEXTURE_2D, 0, GL_RGB, GL_UNSIGNED_BYTE, pixels));
 	// Generate screenshot file name
 	SYSTEMTIME time;
 	GetLocalTime(&time);
@@ -299,14 +328,19 @@ bool RendererGL::SaveScreenShot()
 					  + "_" + std::to_string(time.wHour)
 							+ std::to_string(time.wMinute)
 							+ std::to_string(time.wSecond)
-							+ ".jpg";
-	int ret = stbi_write_jpg(filepath.c_str(), renderRes.x, renderRes.y, 3, data.get(), 100);
-	if (ret == 0)
+							+ ".png";
+	// Convert to FreeImage format & save to file
+	FIBITMAP* image = FreeImage_ConvertFromRawBits(pixels, (int)renderRes.x, (int)renderRes.y, 3 * (int)renderRes.x, 24, 0x0000FF, 0xFF0000, 0x00FF00, false);
+	//FreeImage_ToneMapping(image, FITMO_REINHARD05);
+	//FreeImage_AdjustGamma(image, rbcore::SETTINGS.gamma);
+	if (!FreeImage_Save(FIF_PNG, image, filepath.c_str(), 0))
 	{
-		rbcore::ShowWarningMsg("Unknow Error! Can't save screenshot!");
+		rbcore::ShowWarningMsg("Unknow error! Couldn't save screenshot!");
 		return false;
 	}
 	rbcore::ShowWarningMsg("Screenshot saved at: " + filepath);
+	FreeImage_Unload(image);
+	delete[] pixels;
 	return true;
 }
 

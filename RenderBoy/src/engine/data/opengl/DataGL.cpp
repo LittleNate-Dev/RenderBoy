@@ -96,6 +96,11 @@ void DataGL::Init()
 	}
 }
 
+void DataGL::Reset()
+{
+	m_ModelData.clear();
+}
+
 void DataGL::AddModel(std::string name, Model model)
 {
 	ModelDataGL modelData;

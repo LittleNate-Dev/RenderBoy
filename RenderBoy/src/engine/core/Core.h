@@ -36,6 +36,8 @@
 
 #include <spdlog/spdlog.h>
 
+#include <freeimage/FreeImage.h>
+
 #define APP_VERSION "ver 0.4.2"
 #define GIT_REPO "https://github.com/LittleNate-Dev/RenderBoy"
 #define SCENE_FILEPATH "saves/scene/"
@@ -43,6 +45,7 @@
 #define LOGGER_FILEPATH "res/logger/RenderBoy_Logger.txt"
 #define FONTS_FILEPATH "res/fonts/"
 #define SCREENSHOT_FILEPATH "saves/screenshot/"
+#define UV_MAP_FILEPATH "res/checkermap/2048_5.png"
 #define SHADER_OPENGL "data/shaders/opengl/"
 #define MAX_FOV 120
 #define MIN_FOV 40

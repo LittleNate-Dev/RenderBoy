@@ -11,6 +11,7 @@
 #include "scene/Scene.h"
 #include "gl/opengl/GLFrameBuffer.h"
 #include "shader/opengl/ShaderGL.h"
+#include "data/opengl/texture/GLTexture.h"
 
 struct Frame
 {
@@ -27,6 +28,7 @@ struct Shaders
 	ShaderGL pointcloud;
 	ShaderGL depth;
 	ShaderGL normal;
+	ShaderGL uvset;
 	ShaderGL lightcube;
 	ShaderGL screen;
 };
@@ -36,11 +38,13 @@ class RendererGL
 private:
 	Frame m_Frame;
 	Shaders m_Shaders;
+	GLTexture m_CheckerMap;
 
 	void Clear();
 	void DrawWireFrame(Scene& scene);
 	void DrawPointCloud(Scene& scene);
 	void DrawDepth(Scene& scene);
+	void DrawUVSet(Scene& scene);
 	void DrawNormal(Scene& scene);
 	void DrawLightCube(Scene& scene);
 

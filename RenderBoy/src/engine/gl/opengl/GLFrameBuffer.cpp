@@ -65,7 +65,8 @@ void GLFrameBuffer::Init(FBType type)
 		GLCall(glBindRenderbuffer(GL_RENDERBUFFER, 0));
 		// Color buffer
 		GLCall(glBindTexture(GL_TEXTURE_2D, m_TexID));
-		GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, width, height, 0, GL_RGBA, GL_FLOAT, NULL));
+		GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_FLOAT, NULL));
+		//GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, width, height, 0, GL_RGBA, GL_FLOAT, NULL));
 		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
 		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
 		GLCall(glBindTexture(GL_TEXTURE_2D, 0));

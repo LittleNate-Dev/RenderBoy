@@ -56,7 +56,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>GLEW_STATIC;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>GLEW_STATIC;_DEBUG;_CONSOLE;STB_IMAGE_STATIC;STB_IMAGE_IMPLEMENTATION;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
@@ -66,8 +66,8 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(ProjectDir)src\vendor\gdal\lib;$(ProjectDir)src\vendor\assimp;$(SolutionDir)Dependencies\glfw;$(SolutionDir)Dependencies\glew;$(SolutionDir)Dependencies\vulkan;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>vulkan-1.lib;glfw3.lib;glew32s.lib;opengl32.lib;assimp-vc143-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)src\vendor\gdal\lib;$(ProjectDir)data\bin;$(SolutionDir)Dependencies\glfw;$(SolutionDir)Dependencies\glew;$(SolutionDir)Dependencies\vulkan;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>vulkan-1.lib;glfw3.lib;glew32s.lib;opengl32.lib;assimp-vc143-mt.lib;FreeImage.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>MSVCRT.lib;LIBCMT.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
     </Link>
   </ItemDefinitionGroup>
@@ -95,6 +95,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\engine\data\opengl\texture\GLTexture.cpp" />
     <ClCompile Include="src\engine\shader\opengl\ShaderGL.cpp" />
     <ClCompile Include="src\engine\data\Data.cpp" />
     <ClCompile Include="src\engine\data\opengl\DataGL.cpp" />
@@ -127,6 +128,7 @@
     <ClCompile Include="src\vendor\imgui\imgui_widgets.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\engine\data\opengl\texture\GLTexture.h" />
     <ClInclude Include="src\engine\shader\opengl\ShaderGL.h" />
     <ClInclude Include="src\engine\data\Data.h" />
     <ClInclude Include="src\engine\data\opengl\DataGL.h" />
@@ -528,6 +530,7 @@
     <ClInclude Include="src\vendor\imgui\imstb_rectpack.h" />
     <ClInclude Include="src\vendor\imgui\imstb_textedit.h" />
     <ClInclude Include="src\vendor\imgui\imstb_truetype.h" />
+    <ClInclude Include="src\vendor\pngwritter\pngwriter.h" />
     <ClInclude Include="src\vendor\spdlog\async.h" />
     <ClInclude Include="src\vendor\spdlog\async_logger-inl.h" />
     <ClInclude Include="src\vendor\spdlog\async_logger.h" />

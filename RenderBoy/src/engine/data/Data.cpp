@@ -20,6 +20,18 @@ void Data::Init()
 	}
 }
 
+void Data::Reset()
+{
+	switch (rbcore::SETTINGS.core)
+	{
+	case OPENGL:
+		m_DataGL.Reset();
+		break;
+	default:
+		break;
+	}
+}
+
 void Data::AddModel(std::string name, Model model)
 {
 	switch (rbcore::SETTINGS.core)

@@ -19,6 +19,7 @@ public:
 	~Data();
 
 	void Init();
+	void Reset();
 	// Add, delete and rename model
 	void AddModel(std::string name, Model model);
 	void DeleteModel(std::string name);

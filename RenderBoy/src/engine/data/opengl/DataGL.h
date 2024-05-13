@@ -42,6 +42,7 @@ public:
 	~DataGL();
 
 	void Init();
+	void Reset();
 	// Add, delete and rename model data
 	void AddModel(std::string name, Model model);
 	bool DeleteModel(std::string name);

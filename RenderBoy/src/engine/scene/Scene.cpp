@@ -21,9 +21,7 @@ void Scene::Reset()
 	m_FilePath = "";
 	m_Camera.SetPosition(glm::vec3(0.0f));
 	m_Camera.SetEulerAngle(glm::vec3(0.0f));
-	Data newData;
-	m_Data = newData;
-	m_Data.Init();
+	m_Data.Reset();
 	std::vector<std::string>().swap(m_ModelList);
 	m_Models.clear();
 	std::vector<std::string>().swap(m_PointLightList);
