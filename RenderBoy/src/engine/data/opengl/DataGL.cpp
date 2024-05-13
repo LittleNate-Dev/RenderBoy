@@ -37,7 +37,7 @@ void DataGL::Init()
 		layout.Push<float>(3);
 		m_PointLightCube.va.AddBuffer(m_PointLightCube.vb, layout);
 	}
-	// Initialize spot and directional light's cube
+	// Initialize spot light's cube
 	{
 		float position[] = {
 			0.0f,  0.0f,  0.0f, // 0
@@ -60,6 +60,39 @@ void DataGL::Init()
 		GLVertexBufferLayout layout;
 		layout.Push<float>(3);
 		m_SpotLightCube.va.AddBuffer(m_SpotLightCube.vb, layout);
+	}
+	// Initialize directional light's cube
+	{
+		float position[] = {
+			0.1f,  0.1f,  0.0f, // 0
+			0.1f, -0.1f,  0.0f, // 1
+		   -0.1f, -0.1f,  0.0f, // 2
+		   -0.1f,  0.1f,  0.0f, // 3
+			0.1f,  0.1f,  8.0f, // 4
+			0.1f, -0.1f,  8.0f, // 5
+		   -0.1f, -0.1f,  8.0f, // 6
+		   -0.1f,  0.1f,  8.0f, // 7
+		};
+		unsigned int indices[] = {
+			0, 1, 2,
+			0, 2, 3,
+			4, 5, 6,
+			4, 6, 7,
+			7, 6, 2,
+			7, 2, 3,
+			6, 5, 1,
+			6, 1, 2,
+			5, 4, 0,
+			5, 0, 1,
+			4, 3, 0,
+			4, 7, 3
+		};
+		m_DirLightCube.va.GenVertexArray();
+		m_DirLightCube.vb.GenVertexBuffer(position, sizeof(position));
+		m_DirLightCube.ib.GenIndexBuffer(indices, 36);
+		GLVertexBufferLayout layout;
+		layout.Push<float>(3);
+		m_DirLightCube.va.AddBuffer(m_DirLightCube.vb, layout);
 	}
 }
 
@@ -137,7 +170,7 @@ LightCubeDataGL& DataGL::GetLightCube(LightType type)
 	case SPOT_LIGHT:
 		return m_SpotLightCube;
 	case DIRECTIONAL_LIGHT:
-		return m_SpotLightCube;
+		return m_DirLightCube;
 	}
 }
 

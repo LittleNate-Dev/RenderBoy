@@ -63,7 +63,7 @@ glm::mat4 SpotLight::GetRotateMat()
 
 glm::mat4 SpotLight::GetModelMat()
 {
-	glm::mat4 modelMat = glm::scale(glm::mat4(1.0f), glm::vec3(2.0f * sin(m_Angle / 2), 2.0f * sin(m_Angle / 2), 2.0f * cos(m_Angle / 2)));
+	glm::mat4 modelMat = glm::scale(glm::mat4(1.0f), glm::vec3(sqrt(2.0f) * sin(glm::radians(m_Angle / 2.0f)), sqrt(2.0f) * sin(glm::radians(m_Angle / 2.0f)), sqrt(2.0f) * cos(glm::radians(m_Angle / 2.0f))));
 	modelMat = GetTranslateMat() * GetRotateMat() * modelMat;
 	return modelMat;
 }

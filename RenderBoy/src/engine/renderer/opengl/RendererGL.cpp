@@ -260,7 +260,7 @@ void RendererGL::DrawLightCube(Scene& scene)
 	}
 	scene.GetData().GetDataGL().GetLightCube(SPOT_LIGHT).va.Unbind();
 	scene.GetData().GetDataGL().GetLightCube(SPOT_LIGHT).ib.Unbind();
-	// Draw Spot light's cube
+	// Draw Directional light's cube
 	scene.GetData().GetDataGL().GetLightCube(DIRECTIONAL_LIGHT).va.Bind();
 	scene.GetData().GetDataGL().GetLightCube(DIRECTIONAL_LIGHT).ib.Bind();
 	GLCall(glDisable(GL_DEPTH_TEST));
@@ -268,7 +268,9 @@ void RendererGL::DrawLightCube(Scene& scene)
 	{
 		if (scene.GetDirectionalLights()[scene.GetDirectionalLightList()[i]].ShowCube())
 		{
-			m_Shaders.lightcube.SetUniformMat4f("u_ModelMat", scene.GetDirectionalLights()[scene.GetDirectionalLightList()[i]].GetModelMat());
+			glm::mat4 modelMat = scene.GetDirectionalLights()[scene.GetDirectionalLightList()[i]].GetModelMat()
+								* glm::scale(glm::mat4(1.0f), glm::vec3(glm::length(scene.GetCamera().GetPosition()) / 20.0f));
+			m_Shaders.lightcube.SetUniformMat4f("u_ModelMat", modelMat);
 			m_Shaders.lightcube.SetUniformVec3f("u_Color", scene.GetDirectionalLights()[scene.GetDirectionalLightList()[i]].GetColor());
 			GLCall(glDrawElements(GL_TRIANGLES, scene.GetData().GetDataGL().GetLightCube(DIRECTIONAL_LIGHT).ib.GetCount(), GL_UNSIGNED_INT, nullptr));
 		}

@@ -34,6 +34,7 @@ class DataGL
 private:
 	LightCubeDataGL m_PointLightCube;
 	LightCubeDataGL m_SpotLightCube;
+	LightCubeDataGL m_DirLightCube;
 	std::map<std::string, ModelDataGL> m_ModelData;
 
 public:
