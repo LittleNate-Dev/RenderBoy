@@ -15,7 +15,7 @@ private:
     unsigned int m_RendererID;
     GLuint64 m_Handle;
     std::string m_FilePath;
-    unsigned char* m_LocalBuffer;
+    FIBITMAP* m_LocalBuffer;
     int m_Width, m_Height, m_BPP; // BPP stands for Bytes Per Pixel
 
 public:
