@@ -315,9 +315,7 @@ bool RendererGL::SaveScreenShot()
 	// Make the BYTE array, factor of 3 because it's RBG.
 	glm::vec2 renderRes = rbcore::GetRenderResolution();
 	BYTE* pixels = new BYTE[3 * renderRes.x * renderRes.y];
-	m_Frame.fb.BindTex();
-	GLCall(glPixelStorei(GL_PACK_ALIGNMENT, 1));
-	GLCall(glGetTexImage(GL_TEXTURE_2D, 0, GL_RGB, GL_UNSIGNED_BYTE, pixels));
+	glReadPixels(0, 0, (int)renderRes.x, (int)renderRes.y, GL_BGR, GL_UNSIGNED_BYTE, pixels);
 	// Generate screenshot file name
 	SYSTEMTIME time;
 	GetLocalTime(&time);
@@ -331,8 +329,6 @@ bool RendererGL::SaveScreenShot()
 							+ ".png";
 	// Convert to FreeImage format & save to file
 	FIBITMAP* image = FreeImage_ConvertFromRawBits(pixels, (int)renderRes.x, (int)renderRes.y, 3 * (int)renderRes.x, 24, 0x0000FF, 0xFF0000, 0x00FF00, false);
-	//FreeImage_ToneMapping(image, FITMO_REINHARD05);
-	//FreeImage_AdjustGamma(image, rbcore::SETTINGS.gamma);
 	if (!FreeImage_Save(FIF_PNG, image, filepath.c_str(), 0))
 	{
 		rbcore::ShowWarningMsg("Unknow error! Couldn't save screenshot!");

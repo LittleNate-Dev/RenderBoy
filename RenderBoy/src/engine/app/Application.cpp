@@ -318,15 +318,12 @@ void Application::Run()
 void Application::Update()
 {
     ReadFilePath();
-    // Keyboard and mouse input
-    if (!rbcore::IS_SETTINGS_OPENED)
-    {
-        MouseInput();
-        KeyboardInput();
-    }
     // Rendering
     m_Renderer.Clear();
     m_Renderer.Draw(m_Scene);
+    // Keyboard and mouse input
+    MouseInput();
+    KeyboardInput();
     // Draw UI
     DrawUI();
     LoadFile();
@@ -1038,89 +1035,95 @@ void Application::WindowResize(int width, int height)
 void Application::KeyboardInput()
 {    
     //Camera Movement
-    glm::vec3 move = glm::vec4(0.0f);
-    if (glfwGetKey(m_Window, GLFW_KEY_W) == GLFW_PRESS) // Forward
+    if (!rbcore::IS_SETTINGS_OPENED)
     {
-        glm::vec3 direction = m_Scene.GetCamera().GetDirection(glm::vec3(0.0f, 0.0f, -1.0f));
-        direction = glm::normalize(glm::vec3(direction.x, 0.0f, direction.z));
-        move =  direction * m_Scene.GetCamera().GetMoveSpeed();
-        move += m_Scene.GetCamera().GetPosition();
-        m_Scene.GetCamera().SetPosition(move);
-    }
-    if (glfwGetKey(m_Window, GLFW_KEY_S) == GLFW_PRESS) // Backward
-    {
-        glm::vec3 direction = m_Scene.GetCamera().GetDirection(glm::vec3(0.0f, 0.0f, 1.0f));
-        direction = glm::normalize(glm::vec3(direction.x, 0.0f, direction.z));
-        move = direction * m_Scene.GetCamera().GetMoveSpeed();
-        move += m_Scene.GetCamera().GetPosition();
-        m_Scene.GetCamera().SetPosition(move);
-    }
-    if (glfwGetKey(m_Window, GLFW_KEY_A) == GLFW_PRESS) // Left
-    {
-        glm::vec3 direction = m_Scene.GetCamera().GetDirection(glm::vec3(-1.0f, 0.0f, 0.0f));
-        direction = glm::normalize(glm::vec3(direction.x, 0.0f, direction.z));
-        move = direction * m_Scene.GetCamera().GetMoveSpeed();
-        move += m_Scene.GetCamera().GetPosition();
-        m_Scene.GetCamera().SetPosition(move);
-    }
-    if (glfwGetKey(m_Window, GLFW_KEY_D) == GLFW_PRESS) // Right
-    {
-        glm::vec3 direction = m_Scene.GetCamera().GetDirection(glm::vec3(1.0f, 0.0f, 0.0f));
-        direction = glm::normalize(glm::vec3(direction.x, 0.0f, direction.z));
-        move = direction * m_Scene.GetCamera().GetMoveSpeed();
-        move += m_Scene.GetCamera().GetPosition();
-        m_Scene.GetCamera().SetPosition(move);
-    }
-    if (glfwGetKey(m_Window, GLFW_KEY_SPACE) == GLFW_PRESS) // Up
-    {
-        move = glm::vec3(0.0f, 1.0f, 0.0f) * m_Scene.GetCamera().GetMoveSpeed();
-        move += m_Scene.GetCamera().GetPosition();
-        m_Scene.GetCamera().SetPosition(move);
-    }
-    if (glfwGetKey(m_Window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) // Down
-    {
-        move = glm::vec3(0.0f, -1.0f, 0.0f) * m_Scene.GetCamera().GetMoveSpeed();
-        move += m_Scene.GetCamera().GetPosition();
-        m_Scene.GetCamera().SetPosition(move);
+        glm::vec3 move = glm::vec4(0.0f);
+        if (glfwGetKey(m_Window, GLFW_KEY_W) == GLFW_PRESS) // Forward
+        {
+            glm::vec3 direction = m_Scene.GetCamera().GetDirection(glm::vec3(0.0f, 0.0f, -1.0f));
+            direction = glm::normalize(glm::vec3(direction.x, 0.0f, direction.z));
+            move = direction * m_Scene.GetCamera().GetMoveSpeed();
+            move += m_Scene.GetCamera().GetPosition();
+            m_Scene.GetCamera().SetPosition(move);
+        }
+        if (glfwGetKey(m_Window, GLFW_KEY_S) == GLFW_PRESS) // Backward
+        {
+            glm::vec3 direction = m_Scene.GetCamera().GetDirection(glm::vec3(0.0f, 0.0f, 1.0f));
+            direction = glm::normalize(glm::vec3(direction.x, 0.0f, direction.z));
+            move = direction * m_Scene.GetCamera().GetMoveSpeed();
+            move += m_Scene.GetCamera().GetPosition();
+            m_Scene.GetCamera().SetPosition(move);
+        }
+        if (glfwGetKey(m_Window, GLFW_KEY_A) == GLFW_PRESS) // Left
+        {
+            glm::vec3 direction = m_Scene.GetCamera().GetDirection(glm::vec3(-1.0f, 0.0f, 0.0f));
+            direction = glm::normalize(glm::vec3(direction.x, 0.0f, direction.z));
+            move = direction * m_Scene.GetCamera().GetMoveSpeed();
+            move += m_Scene.GetCamera().GetPosition();
+            m_Scene.GetCamera().SetPosition(move);
+        }
+        if (glfwGetKey(m_Window, GLFW_KEY_D) == GLFW_PRESS) // Right
+        {
+            glm::vec3 direction = m_Scene.GetCamera().GetDirection(glm::vec3(1.0f, 0.0f, 0.0f));
+            direction = glm::normalize(glm::vec3(direction.x, 0.0f, direction.z));
+            move = direction * m_Scene.GetCamera().GetMoveSpeed();
+            move += m_Scene.GetCamera().GetPosition();
+            m_Scene.GetCamera().SetPosition(move);
+        }
+        if (glfwGetKey(m_Window, GLFW_KEY_SPACE) == GLFW_PRESS) // Up
+        {
+            move = glm::vec3(0.0f, 1.0f, 0.0f) * m_Scene.GetCamera().GetMoveSpeed();
+            move += m_Scene.GetCamera().GetPosition();
+            m_Scene.GetCamera().SetPosition(move);
+        }
+        if (glfwGetKey(m_Window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) // Down
+        {
+            move = glm::vec3(0.0f, -1.0f, 0.0f) * m_Scene.GetCamera().GetMoveSpeed();
+            move += m_Scene.GetCamera().GetPosition();
+            m_Scene.GetCamera().SetPosition(move);
+        }
     }
     // Camera Movement
 
     // Camera Rotation
-    if (glfwGetKey(m_Window, GLFW_KEY_Q) == GLFW_PRESS) // Roll left
+    if (!rbcore::IS_SETTINGS_OPENED)
     {
-        glm::vec3 rotate = m_Scene.GetCamera().GetEulerAngle();
-        rotate.z -= 0.5f;
-        m_Scene.GetCamera().SetEulerAngle(rotate);
-    }
-    if (glfwGetKey(m_Window, GLFW_KEY_E) == GLFW_PRESS) // Roll right
-    {
-        glm::vec3 rotate = m_Scene.GetCamera().GetEulerAngle();
-        rotate.z += 0.5f;
-        m_Scene.GetCamera().SetEulerAngle(rotate);
-    }
-    if (glfwGetKey(m_Window, GLFW_KEY_UP) == GLFW_PRESS) // Tilt up
-    {
-        glm::vec3 rotate = m_Scene.GetCamera().GetEulerAngle();
-        rotate.x += m_Scene.GetCamera().GetRotateSpeed() * 4.0f;
-        m_Scene.GetCamera().SetEulerAngle(rotate);
-    }
-    if (glfwGetKey(m_Window, GLFW_KEY_DOWN) == GLFW_PRESS) // Tilt down
-    {
-        glm::vec3 rotate = m_Scene.GetCamera().GetEulerAngle();
-        rotate.x -= m_Scene.GetCamera().GetRotateSpeed() * 4.0f;
-        m_Scene.GetCamera().SetEulerAngle(rotate);
-    }
-    if (glfwGetKey(m_Window, GLFW_KEY_LEFT) == GLFW_PRESS) // Turn left
-    {
-        glm::vec3 rotate = m_Scene.GetCamera().GetEulerAngle();
-        rotate.y += m_Scene.GetCamera().GetRotateSpeed() * 4.0f;
-        m_Scene.GetCamera().SetEulerAngle(rotate);
-    }
-    if (glfwGetKey(m_Window, GLFW_KEY_RIGHT) == GLFW_PRESS) // Turn right
-    {
-        glm::vec3 rotate = m_Scene.GetCamera().GetEulerAngle();
-        rotate.y -= m_Scene.GetCamera().GetRotateSpeed() * 4.0f;
-        m_Scene.GetCamera().SetEulerAngle(rotate);
+        if (glfwGetKey(m_Window, GLFW_KEY_Q) == GLFW_PRESS) // Roll left
+        {
+            glm::vec3 rotate = m_Scene.GetCamera().GetEulerAngle();
+            rotate.z -= 0.5f;
+            m_Scene.GetCamera().SetEulerAngle(rotate);
+        }
+        if (glfwGetKey(m_Window, GLFW_KEY_E) == GLFW_PRESS) // Roll right
+        {
+            glm::vec3 rotate = m_Scene.GetCamera().GetEulerAngle();
+            rotate.z += 0.5f;
+            m_Scene.GetCamera().SetEulerAngle(rotate);
+        }
+        if (glfwGetKey(m_Window, GLFW_KEY_UP) == GLFW_PRESS) // Tilt up
+        {
+            glm::vec3 rotate = m_Scene.GetCamera().GetEulerAngle();
+            rotate.x += m_Scene.GetCamera().GetRotateSpeed() * 4.0f;
+            m_Scene.GetCamera().SetEulerAngle(rotate);
+        }
+        if (glfwGetKey(m_Window, GLFW_KEY_DOWN) == GLFW_PRESS) // Tilt down
+        {
+            glm::vec3 rotate = m_Scene.GetCamera().GetEulerAngle();
+            rotate.x -= m_Scene.GetCamera().GetRotateSpeed() * 4.0f;
+            m_Scene.GetCamera().SetEulerAngle(rotate);
+        }
+        if (glfwGetKey(m_Window, GLFW_KEY_LEFT) == GLFW_PRESS) // Turn left
+        {
+            glm::vec3 rotate = m_Scene.GetCamera().GetEulerAngle();
+            rotate.y += m_Scene.GetCamera().GetRotateSpeed() * 4.0f;
+            m_Scene.GetCamera().SetEulerAngle(rotate);
+        }
+        if (glfwGetKey(m_Window, GLFW_KEY_RIGHT) == GLFW_PRESS) // Turn right
+        {
+            glm::vec3 rotate = m_Scene.GetCamera().GetEulerAngle();
+            rotate.y -= m_Scene.GetCamera().GetRotateSpeed() * 4.0f;
+            m_Scene.GetCamera().SetEulerAngle(rotate);
+        }
     }
     // Camera Rotation
 
@@ -1138,26 +1141,32 @@ void Application::KeyboardInput()
 void Application::MouseInput()
 {
     // Camera Rotation
-    if (ImGui::GetIO().MouseDown[1] && (ImGui::GetIO().MousePos.x >= 0.0f && ImGui::GetIO().MousePos.y >= 0.0f))
+    if (!rbcore::IS_SETTINGS_OPENED)
     {
-        glm::vec3 rotate = m_Scene.GetCamera().GetEulerAngle();
-        rotate.y += m_Scene.GetCamera().GetRotateSpeed() * ImGui::GetIO().MouseDelta.x;
-        rotate.x += m_Scene.GetCamera().GetRotateSpeed() * ImGui::GetIO().MouseDelta.y;
-        rotate.x = rotate.x > 89.0f ? 89.0f : rotate.x;
-        rotate.x = rotate.x < -89.0f ? -89.0f : rotate.x;
-        m_Scene.GetCamera().SetEulerAngle(rotate);
+        if (ImGui::GetIO().MouseDown[1] && (ImGui::GetIO().MousePos.x >= 0.0f && ImGui::GetIO().MousePos.y >= 0.0f))
+        {
+            glm::vec3 rotate = m_Scene.GetCamera().GetEulerAngle();
+            rotate.y += m_Scene.GetCamera().GetRotateSpeed() * ImGui::GetIO().MouseDelta.x;
+            rotate.x += m_Scene.GetCamera().GetRotateSpeed() * ImGui::GetIO().MouseDelta.y;
+            rotate.x = rotate.x > 89.0f ? 89.0f : rotate.x;
+            rotate.x = rotate.x < -89.0f ? -89.0f : rotate.x;
+            m_Scene.GetCamera().SetEulerAngle(rotate);
+        }
     }
     // Camera Rotation
 
     // Model Rotation
-    if (ImGui::GetIO().MouseDown[2] && (ImGui::GetIO().MousePos.x >= 0.0f && ImGui::GetIO().MousePos.y >= 0.0f))
+    if (!rbcore::IS_SETTINGS_OPENED)
     {
-        if (rbcore::currentModelScene)
+        if (ImGui::GetIO().MouseDown[2] && (ImGui::GetIO().MousePos.x >= 0.0f && ImGui::GetIO().MousePos.y >= 0.0f))
         {
-            glm::vec3 rotate = m_Scene.GetModels()[rbcore::currentModelScene].GetEulerAngle(m_Scene.GetModels()[rbcore::currentModelScene].GetCurrent());
-            rotate.y += 0.5f * ImGui::GetIO().MouseDelta.x;
-            rotate.x -= 0.5f * ImGui::GetIO().MouseDelta.y;
-            m_Scene.GetModels()[rbcore::currentModelScene].SetEulerAngle(rotate, m_Scene.GetModels()[rbcore::currentModelScene].GetCurrent());
+            if (rbcore::currentModelScene)
+            {
+                glm::vec3 rotate = m_Scene.GetModels()[rbcore::currentModelScene].GetEulerAngle(m_Scene.GetModels()[rbcore::currentModelScene].GetCurrent());
+                rotate.y += 0.5f * ImGui::GetIO().MouseDelta.x;
+                rotate.x -= 0.5f * ImGui::GetIO().MouseDelta.y;
+                m_Scene.GetModels()[rbcore::currentModelScene].SetEulerAngle(rotate, m_Scene.GetModels()[rbcore::currentModelScene].GetCurrent());
+            }
         }
     }
     // Model Rotation

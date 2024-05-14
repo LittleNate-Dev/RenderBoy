@@ -65,7 +65,7 @@ void GLFrameBuffer::Init(FBType type)
 		GLCall(glBindRenderbuffer(GL_RENDERBUFFER, 0));
 		// Color buffer
 		GLCall(glBindTexture(GL_TEXTURE_2D, m_TexID));
-		GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_FLOAT, NULL));
+		GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, width, height, 0, GL_RGBA, GL_FLOAT, NULL));
 		//GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, width, height, 0, GL_RGBA, GL_FLOAT, NULL));
 		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
 		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
@@ -81,7 +81,7 @@ void GLFrameBuffer::Init(FBType type)
 		GLCall(glBindRenderbuffer(GL_RENDERBUFFER, 0));
 		// Color buffer
 		GLCall(glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, m_TexID));
-		GLCall(glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, msaa, GL_RGBA, width, height, GL_TRUE));
+		GLCall(glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, msaa, GL_RGBA16F, width, height, GL_TRUE));
 		GLCall(glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0));
 		GLCall(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, m_RenderBufferID));
 		GLCall(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, m_TexID, 0));

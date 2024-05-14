@@ -16,7 +16,7 @@ private:
     GLuint64 m_Handle;
     std::string m_FilePath;
     FIBITMAP* m_LocalBuffer;
-    int m_Width, m_Height, m_BPP; // BPP stands for Bytes Per Pixel
+    int m_Width, m_Height;
 
 public:
     GLTexture();
