@@ -60,17 +60,41 @@ public:
 	void SetEulerAngle(float pitch, float yaw, float roll, unsigned int current = 0);
 	void SetEulerAngle(glm::vec3 eulerAngle, unsigned int current = 0);
 	// Get Model's members
-	std::string GetFilePath();
-	std::string GetDirectory();
-	std::string GetName();
-	ModelStatics GetStatics();
-	std::vector<Mesh>& GetMeshes();
+	inline std::string GetFilePath() const
+	{
+		return m_FilePath;
+	};
+	inline std::string GetDirectory() const
+	{
+		return m_FilePath.substr(0, m_FilePath.find_last_of('/'));
+	};
+	inline std::string GetName() const
+	{
+		return m_Name;
+	};
+	inline ModelStatics GetStatics() const
+	{
+		return m_Statics;
+	};
+	inline std::vector<Mesh>& GetMeshes()
+	{
+		return m_Meshes;
+	};
 	glm::vec3 GetPosition(unsigned int current = 0);
 	glm::vec3 GetScale(unsigned int current = 0);
 	glm::vec3 GetEulerAngle(unsigned int current = 0);
-	unsigned int GetInstance();
-	unsigned int GetCurrent();
-	std::vector<glm::mat4> GetModelMats();
+	inline unsigned int GetInstance() const
+	{
+		return m_Instance;
+	};
+	inline unsigned int GetCurrent() const
+	{
+		return m_Current;
+	};
+	inline std::vector<glm::mat4>& GetModelMats()
+	{
+		return m_ModelMats;
+	};
 	glm::mat4 GetModelMat(unsigned int current = 0);
 	glm::mat4 GetTranslateMat(unsigned int current = 0);
 	glm::mat4 GetScaleMat(unsigned int current = 0);

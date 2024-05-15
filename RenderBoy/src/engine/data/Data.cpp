@@ -10,7 +10,7 @@ Data::~Data()
 
 void Data::Init()
 {
-	switch (rbcore::SETTINGS.core)
+	switch (rbcore::SETTINGS.GraphicsCore)
 	{
 	case OPENGL:
 		m_DataGL.Init();
@@ -22,7 +22,7 @@ void Data::Init()
 
 void Data::Reset()
 {
-	switch (rbcore::SETTINGS.core)
+	switch (rbcore::SETTINGS.GraphicsCore)
 	{
 	case OPENGL:
 		m_DataGL.Reset();
@@ -34,7 +34,7 @@ void Data::Reset()
 
 void Data::AddModel(std::string name, Model model)
 {
-	switch (rbcore::SETTINGS.core)
+	switch (rbcore::SETTINGS.GraphicsCore)
 	{
 	case OPENGL:
 		m_DataGL.AddModel(name, model);
@@ -46,7 +46,7 @@ void Data::AddModel(std::string name, Model model)
 
 void Data::DeleteModel(std::string name)
 {
-	switch (rbcore::SETTINGS.core)
+	switch (rbcore::SETTINGS.GraphicsCore)
 	{
 	case OPENGL:
 		m_DataGL.DeleteModel(name);
@@ -58,7 +58,7 @@ void Data::DeleteModel(std::string name)
 
 void Data::RenameModel(std::string oldName, std::string newName)
 {
-	switch (rbcore::SETTINGS.core)
+	switch (rbcore::SETTINGS.GraphicsCore)
 	{
 	case OPENGL:
 		m_DataGL.RenameModel(oldName, newName);

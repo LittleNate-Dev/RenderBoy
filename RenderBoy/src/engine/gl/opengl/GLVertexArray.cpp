@@ -63,8 +63,3 @@ void GLVertexArray::Unbind() const
 {
     GLCall(glBindVertexArray(0));
 }
-
-unsigned int GLVertexArray::GetID() const
-{
-    return m_RendererID;
-}

@@ -56,18 +56,54 @@ public:
 	void SetCastShadow(bool castShadow);
 	void SetShadowRes(unsigned int res);
 	// Get spot light's members
-	std::string GetName();
-	glm::vec3 GetEulerAngle();
-	glm::vec3 GetColor();
-	float GetAmbient();
-	float GetDiffuse();
-	float GetSpecular();
-	glm::vec3 GetADS();
-	float GetIntensity();
-	bool ShowCube();
-	bool LightSwitch();
-	bool CastShadow();
-	unsigned int GetShadowRes();
+	inline std::string GetName() const
+	{
+		return m_Name;
+	};
+	inline glm::vec3 GetEulerAngle() const
+	{
+		return m_EulerAngle;
+	};
+	inline glm::vec3 GetColor() const
+	{
+		return m_Color;
+	};
+	inline float GetAmbient() const
+	{
+		return m_ADS.x;
+	};
+	inline float GetDiffuse() const
+	{
+		return m_ADS.y;
+	};
+	inline float GetSpecular() const
+	{
+		return m_ADS.z;
+	};
+	inline glm::vec3 GetADS() const
+	{
+		return m_ADS;
+	};
+	inline float GetIntensity() const
+	{
+		return m_Intensity;
+	};
+	inline bool ShowCube() const
+	{
+		return m_ShowCube;
+	};
+	inline bool LightSwitch() const
+	{
+		return m_LightSwitch;
+	};
+	inline bool CastShadow() const
+	{
+		return m_CastShadow;
+	};
+	inline unsigned int GetShadowRes() const
+	{
+		return m_CastShadow;
+	};
 	// Draw UI
 	void DrawUI();
 };

@@ -52,35 +52,71 @@ public:
 	bool AddModel(std::string name, std::string filepath);
 	bool DeleteModel(std::string name);
 	// Add and delete light 
-	bool AddLight(std::string name, LightType type);
+	bool AddLight(std::string name, Light_Type type);
 	bool AddPointLight(std::string name);
 	bool AddSpotLight(std::string name);
 	bool AddDirectionalLight(std::string name);
-	bool DeleteLight(std::string name, LightType type);
+	bool DeleteLight(std::string name, Light_Type type);
 	bool DeletePointLight(std::string name);
 	bool DeleteSpotLight(std::string name);
 	bool DeleteDirectionalLight(std::string name);
 	// Rename models and lights
 	bool RenameModel(std::string oldName, std::string newName);
-	bool RenameLight(std::string oldName, std::string newName, LightType type);
+	bool RenameLight(std::string oldName, std::string newName, Light_Type type);
 	bool RenamePointLight(std::string oldName, std::string newName);
 	bool RenameSpotLight(std::string oldName, std::string newName);
 	bool RenameDirectionalLight(std::string oldName, std::string newName);
 	// Set scene's name
 	void SetName(std::string name);
 	// Get Scene's members
-	std::string GetFilePath();
-	std::string GetName();
-	Data& GetData();
-	Camera& GetCamera();
-	std::vector<std::string>& GetModelList();
-	std::map<std::string, Model>& GetModels();
-	std::vector<std::string>& GetPointLightList();
-	std::map<std::string, PointLight>& GetPointLights();
-	std::vector<std::string>& GetSpotLightList();
-	std::map<std::string, SpotLight>& GetSpotLights();
-	std::vector<std::string>& GetDirectionalLightList();
-	std::map<std::string, DirectionalLight>& GetDirectionalLights();
+	inline std::string GetFilePath() const
+	{
+		return m_FilePath;
+	};
+	inline std::string GetName() const
+	{
+		return m_Name;
+	};
+	inline Data& GetData()
+	{
+		return m_Data;
+	};
+	inline Camera& GetCamera()
+	{
+		return m_Camera;
+	};
+	inline std::vector<std::string>& GetModelList()
+	{
+		return m_ModelList;
+	};
+	inline std::map<std::string, Model>& GetModels()
+	{
+		return m_Models;
+	};
+	inline std::vector<std::string>& GetPointLightList()
+	{
+		return m_PointLightList;
+	};
+	inline std::map<std::string, PointLight>& GetPointLights()
+	{
+		return m_PointLights;
+	};
+	inline std::vector<std::string>& GetSpotLightList()
+	{
+		return m_SpotLightList;
+	};
+	inline std::map<std::string, SpotLight>& GetSpotLights()
+	{
+		return m_SpotLights;
+	};
+	inline std::vector<std::string>& GetDirectionalLightList()
+	{
+		return m_DirLightList;
+	};
+	inline std::map<std::string, DirectionalLight>& GetDirectionalLights()
+	{
+		return m_DirLights;
+	};
 	// Draw UI
 	void DrawUI();
 };

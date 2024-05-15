@@ -262,66 +262,6 @@ void DirectionalLight::SetShadowRes(unsigned int res)
 	}
 }
 
-std::string DirectionalLight::GetName()
-{
-	return m_Name;
-}
-
-glm::vec3 DirectionalLight::GetEulerAngle()
-{
-	return m_EulerAngle;
-}
-
-glm::vec3 DirectionalLight::GetColor()
-{
-	return m_Color;
-}
-
-float DirectionalLight::GetAmbient()
-{
-	return m_ADS.x;
-}
-
-float DirectionalLight::GetDiffuse()
-{
-	return m_ADS.y;
-}
-
-float DirectionalLight::GetSpecular()
-{
-	return m_ADS.z;
-}
-
-glm::vec3 DirectionalLight::GetADS()
-{
-	return m_ADS;
-}
-
-float DirectionalLight::GetIntensity()
-{
-	return m_Intensity;
-}
-
-bool DirectionalLight::ShowCube()
-{
-	return m_ShowCube;
-}
-
-bool DirectionalLight::LightSwitch()
-{
-	return m_LightSwitch;
-}
-
-bool DirectionalLight::CastShadow()
-{
-	return m_CastShadow;
-}
-
-unsigned int DirectionalLight::GetShadowRes()
-{
-	return m_ShadowRes;
-}
-
 void DirectionalLight::DrawUI()
 {
 	if (m_LightSwitch)

@@ -61,23 +61,74 @@ public:
 	void SetCastShadow(bool castShadow);
 	void SetShadowRes(unsigned int res);
 	// Get spot light's members
-	std::string GetName();
-	glm::vec3 GetPosition();
-	glm::vec3 GetColor();
-	float GetAmbient();
-	float GetDiffuse();
-	float GetSpecular();
-	glm::vec3 GetADS();
-	float GetRange();
-	float GetIntensity();
-	float GetConstant();
-	float GetLinear();
-	float GetQuadratic();
-	glm::vec3 GetCLQ();
-	bool ShowCube();
-	bool LightSwitch();
-	bool CastShadow();
-	unsigned int GetShadowRes();
+	inline std::string GetName() const
+	{
+		return m_Name;
+	};
+	inline glm::vec3 GetPosition() const
+	{
+		return m_Position;
+	};
+	inline glm::vec3 GetColor() const
+	{
+		return m_Color;
+	};
+	inline float GetAmbient() const
+	{
+		return m_ADS.x;
+	};
+	inline float GetDiffuse() const
+	{
+		return m_ADS.y;
+	};
+	inline float GetSpecular() const
+	{
+		return m_ADS.z;
+	};
+	inline glm::vec3 GetADS() const
+	{
+		return m_ADS;
+	};
+	inline float GetRange() const
+	{
+		return m_Range;
+	};
+	inline float GetIntensity() const
+	{
+		return m_Intensity;
+	};
+	inline float GetConstant() const
+	{
+		return m_CLQ.x;
+	};
+	inline float GetLinear() const
+	{
+		return m_CLQ.y;
+	};
+	inline float GetQuadratic() const
+	{
+		return m_CLQ.z;
+	};
+	inline glm::vec3 GetCLQ() const
+	{
+		return m_CLQ;
+	};
+	inline bool ShowCube() const
+	{
+		return m_ShowCube;
+	};
+	inline bool LightSwitch() const
+	{
+		return m_LightSwitch;
+	};
+	inline bool CastShadow() const
+	{
+		return m_CastShadow;
+	};
+	inline unsigned int GetShadowRes() const
+	{
+		return m_ShadowRes;
+	};
 	// Draw UI
 	void DrawUI();
 };

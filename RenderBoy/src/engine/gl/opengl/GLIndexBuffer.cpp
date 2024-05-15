@@ -30,13 +30,3 @@ void GLIndexBuffer::Unbind() const
 {
     GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
 }
-
-unsigned int GLIndexBuffer::GetID() const
-{
-    return m_RendererID;
-}
-
-unsigned int GLIndexBuffer::GetCount() const
-{
-    return m_Count;
-}

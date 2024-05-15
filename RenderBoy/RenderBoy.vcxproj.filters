@@ -1634,6 +1634,9 @@
     <ClInclude Include="src\engine\data\opengl\texture\GLTexture.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\vendor\freeimage\FreeImage.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="src\vendor\assimp\color4.inl">

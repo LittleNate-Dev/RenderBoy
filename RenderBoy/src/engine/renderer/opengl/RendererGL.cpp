@@ -72,7 +72,7 @@ void RendererGL::Clear()
 void RendererGL::Draw(Scene& scene)
 {
 	// MSAA
-	if ((int)rbcore::SETTINGS.aa >= 1 && (int)rbcore::SETTINGS.aa <= 4)
+	if ((int)rbcore::SETTINGS.AA >= 1 && (int)rbcore::SETTINGS.AA <= 4)
 	{
 		m_Frame.fbMsaa.Bind();
 	}
@@ -84,7 +84,7 @@ void RendererGL::Draw(Scene& scene)
 	Clear();
 	glm::vec2 renderRes = rbcore::GetRenderResolution();
 	GLCall(glViewport(0, 0, (GLsizei)renderRes.x, (GLsizei)renderRes.y));
-	switch (rbcore::SETTINGS.drawMode)
+	switch (rbcore::SETTINGS.DrawMode)
 	{
 	case WIREFRAME:
 		DrawWireFrame(scene);
@@ -102,28 +102,28 @@ void RendererGL::Draw(Scene& scene)
 	// Draw Light Cube
 	DrawLightCube(scene);
 	// Draw normals
-	if (rbcore::SETTINGS.showNormal)
+	if (rbcore::SETTINGS.ShowNormal)
 	{
 		DrawNormal(scene);
 	}
 	// Draw your content inside this scope
-	if ((int)rbcore::SETTINGS.aa >= 1 && (int)rbcore::SETTINGS.aa <= 4)
+	if ((int)rbcore::SETTINGS.AA >= 1 && (int)rbcore::SETTINGS.AA <= 4)
 	{
 		GLCall(glBindFramebuffer(GL_READ_FRAMEBUFFER, m_Frame.fbMsaa.GetID()));
 		GLCall(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_Frame.fb.GetID()));
-		int width = (int)(rbcore::SETTINGS.width * rbcore::SETTINGS.resolution);
-		int height = (int)(rbcore::SETTINGS.height * rbcore::SETTINGS.resolution);
+		int width = (int)(rbcore::SETTINGS.Width * rbcore::SETTINGS.Resolution);
+		int height = (int)(rbcore::SETTINGS.Height * rbcore::SETTINGS.Resolution);
 		GLCall(glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST));
 	}
 	m_Frame.fb.Unbind();
 	Clear();
-	GLCall(glViewport(0, 0, rbcore::SETTINGS.width, rbcore::SETTINGS.height));
+	GLCall(glViewport(0, 0, rbcore::SETTINGS.Width, rbcore::SETTINGS.Height));
 	// Draw frame buffer's content on the screen;
 	GLCall(glDisable(GL_DEPTH_TEST));
 	m_Shaders.screen.Bind();
 	m_Frame.fb.BindTex();
 	m_Shaders.screen.SetUniform1i("u_ScreenTex", 0);
-	m_Shaders.screen.SetUniform1f("u_Gamma", rbcore::SETTINGS.gamma);
+	m_Shaders.screen.SetUniform1f("u_Gamma", rbcore::SETTINGS.Gamma);
 	m_Frame.va.Bind();
 	m_Frame.ib.Bind();
 	GLCall(glDrawElements(GL_TRIANGLES, m_Frame.ib.GetCount(), GL_UNSIGNED_INT, nullptr));
@@ -313,9 +313,8 @@ void RendererGL::DrawLightCube(Scene& scene)
 bool RendererGL::SaveScreenShot()
 {
 	// Make the BYTE array, factor of 3 because it's RBG.
-	glm::vec2 renderRes = rbcore::GetRenderResolution();
-	BYTE* pixels = new BYTE[3 * renderRes.x * renderRes.y];
-	glReadPixels(0, 0, (int)renderRes.x, (int)renderRes.y, GL_BGR, GL_UNSIGNED_BYTE, pixels);
+	BYTE* pixels = new BYTE[3 * rbcore::SETTINGS.Width * rbcore::SETTINGS.Height];
+	glReadPixels(0, 0, rbcore::SETTINGS.Width, rbcore::SETTINGS.Height, GL_BGR, GL_UNSIGNED_BYTE, pixels);
 	// Generate screenshot file name
 	SYSTEMTIME time;
 	GetLocalTime(&time);
@@ -328,8 +327,8 @@ bool RendererGL::SaveScreenShot()
 							+ std::to_string(time.wSecond)
 							+ ".png";
 	// Convert to FreeImage format & save to file
-	FIBITMAP* image = FreeImage_ConvertFromRawBits(pixels, (int)renderRes.x, (int)renderRes.y, 3 * (int)renderRes.x, 24, 0x0000FF, 0xFF0000, 0x00FF00, false);
-	if (!FreeImage_Save(FIF_PNG, image, filepath.c_str(), 0))
+	FIBITMAP* image = FreeImage_ConvertFromRawBits(pixels, rbcore::SETTINGS.Width, rbcore::SETTINGS.Height, 3 * rbcore::SETTINGS.Width, 24, 0x0000FF, 0xFF0000, 0x00FF00, false);
+	if (!FreeImage_Save(FIF_PNG, image, filepath.c_str(), PNG_Z_BEST_SPEED))
 	{
 		rbcore::ShowWarningMsg("Unknow error! Couldn't save screenshot!");
 		return false;
@@ -343,7 +342,7 @@ bool RendererGL::SaveScreenShot()
 void RendererGL::ChangeResolution()
 {
 	m_Frame.fb.ChangeResolution();
-	if ((int)rbcore::SETTINGS.aa >= 1 && (int)rbcore::SETTINGS.aa <= 4)
+	if ((int)rbcore::SETTINGS.AA >= 1 && (int)rbcore::SETTINGS.AA <= 4)
 	{
 		m_Frame.fbMsaa.ChangeResolution();
 	}
@@ -357,7 +356,7 @@ void RendererGL::ChangeMSAA()
 void RendererGL::ChangePostProcess()
 {
 	m_Shaders.screen.Bind();
-	switch (rbcore::SETTINGS.pp)
+	switch (rbcore::SETTINGS.PP)
 	{
 	case NO_PP:
 		m_Shaders.screen.Init((std::string)SHADER_OPENGL + "post_process/DEFAULT.glsl");

@@ -48,6 +48,6 @@ public:
 	bool DeleteModel(std::string name);
 	bool RenameModel(std::string oldName, std::string newName);
 	// Get Data's members
-	LightCubeDataGL& GetLightCube(LightType type);
+	LightCubeDataGL& GetLightCube(Light_Type type);
 	std::map<std::string, ModelDataGL>& GetModelData();
 };

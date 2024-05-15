@@ -54,16 +54,46 @@ public:
 	glm::mat4 GetViewMat();
 	glm::mat4 GetProjMat();
 	// Get Camera's members
-	bool GetCameraType();
-	glm::vec2 GetWindowSize();
-	float GetFOV();
-	float GetNearPlane();
-	float GetFarPlane();
-	glm::vec2 GetPlane();
-	glm::vec3 GetPosition();
-	glm::vec3 GetEulerAngle();
-	float GetMoveSpeed();
-	float GetRotateSpeed();
+	inline bool GetCameraType() const
+	{
+		return m_Type;
+	};
+	inline glm::vec2 GetWindowSize() const
+	{
+		return m_WindowSize;
+	};
+	inline float GetFOV() const
+	{
+		return m_FOV;
+	};
+	inline float GetNearPlane() const
+	{
+		return m_Plane.x;
+	};
+	inline float GetFarPlane() const
+	{
+		return m_Plane.y;
+	};
+	inline glm::vec2 GetPlane() const
+	{
+		return m_Plane;
+	};
+	inline glm::vec3 GetPosition() const
+	{
+		return m_Position;
+	};
+	inline glm::vec3 GetEulerAngle() const
+	{
+		return m_EulerAngle;
+	};
+	inline float GetMoveSpeed() const
+	{
+		return m_MoveSpeed;
+	};
+	inline float GetRotateSpeed() const
+	{
+		return m_RotateSpeed;
+	};
 	// Draw UI
 	void DrawUI();
 };

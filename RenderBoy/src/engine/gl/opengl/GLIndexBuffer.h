@@ -25,6 +25,12 @@ public:
 	void Unbind() const;
 
 	// Get IndexBuffer's members
-	unsigned int GetID() const;
-	unsigned int GetCount() const;
+	inline unsigned int GetID() const
+	{
+		return m_RendererID;
+	};
+	inline unsigned int GetCount() const
+	{
+		return m_Count;
+	};
 };

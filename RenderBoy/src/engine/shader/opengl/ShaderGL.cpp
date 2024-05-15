@@ -171,11 +171,6 @@ void ShaderGL::Unbind() const
     GLCall(glUseProgram(0));
 }
 
-unsigned int ShaderGL::GetID() const
-{
-    return m_RendererID;
-}
-
 void ShaderGL::SetUniformHandleARB(std::string name, GLuint64 handle)
 {
     GLCall(glUniformHandleui64ARB(glGetUniformLocation(m_RendererID, name.c_str()), handle));

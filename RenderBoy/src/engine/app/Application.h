@@ -63,7 +63,16 @@ public:
 	// Resize window resolution
 	void WindowResize(int width, int height);
 	// Get RenderBoy's members
-	GLFWwindow* GetWindow();
-	Scene& GetScene();
-	Renderer& GetRenderer();
+	inline GLFWwindow* GetWindow()
+	{
+		return m_Window;
+	};
+	inline Scene& GetScene()
+	{
+		return m_Scene;
+	};
+	inline Renderer& GetRenderer()
+	{
+		return m_Renderer;
+	};
 };

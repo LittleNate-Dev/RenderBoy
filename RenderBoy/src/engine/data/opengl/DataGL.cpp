@@ -166,7 +166,7 @@ bool DataGL::RenameModel(std::string oldName, std::string newName)
 	return false;
 }
 
-LightCubeDataGL& DataGL::GetLightCube(LightType type)
+LightCubeDataGL& DataGL::GetLightCube(Light_Type type)
 {
 	switch (type)
 	{

@@ -23,13 +23,13 @@ Model::~Model()
 void Model::UpdateStatics()
 {
     // Mesh statics
-    m_Statics.meshCount = (unsigned int)m_Meshes.size();
+    m_Statics.MeshCount = (unsigned int)m_Meshes.size();
     for (unsigned int i = 0; i < m_Meshes.size(); i++)
     {
         // Vertex statics
-        m_Statics.vertexCount += (unsigned int)m_Meshes[i].GetVertices().size();
+        m_Statics.VertexCount += (unsigned int)m_Meshes[i].GetVertices().size();
         // Triangle statics
-        m_Statics.triangleCount += (unsigned int)m_Meshes[i].GetIndices().size() / 3;
+        m_Statics.TriangleCount += (unsigned int)m_Meshes[i].GetIndices().size() / 3;
     }
 }
 
@@ -128,18 +128,18 @@ Mesh Model::AssimpProcessMesh(aiMesh* mesh, aiNode* node, const aiScene* scene)
         vector.x = mesh->mVertices[i].x;
         vector.y = mesh->mVertices[i].y;
         vector.z = mesh->mVertices[i].z;
-        vertex.position = glm::vec3(transMat * glm::vec4(vector, 1.0f));
+        vertex.Position = glm::vec3(transMat * glm::vec4(vector, 1.0f));
         //Get the normal of the vertex
         if (mesh->mNormals != nullptr)
         {
             vector.x = mesh->mNormals[i].x;
             vector.y = mesh->mNormals[i].y;
             vector.z = mesh->mNormals[i].z;
-            vertex.normal = glm::vec3(transMat * glm::vec4(vector, 1.0f));
+            vertex.Normal = glm::vec3(transMat * glm::vec4(vector, 1.0f));
         }
         else
         {
-            vertex.normal = glm::vec3(0.0f);
+            vertex.Normal = glm::vec3(0.0f);
         }
         //Get the texture coord of the vertex
         if (mesh->mTextureCoords[0]) // does the mesh contain texture coordinates?
@@ -147,11 +147,11 @@ Mesh Model::AssimpProcessMesh(aiMesh* mesh, aiNode* node, const aiScene* scene)
             glm::vec2 vec;
             vec.x = mesh->mTextureCoords[0][i].x;
             vec.y = mesh->mTextureCoords[0][i].y;
-            vertex.texCoord = vec;
+            vertex.TexCoord = vec;
         }
         else
         {
-            vertex.texCoord = glm::vec2(0.0f, 0.0f);
+            vertex.TexCoord = glm::vec2(0.0f, 0.0f);
 
         }
         // Vertex tangent and bitangent
@@ -160,22 +160,22 @@ Mesh Model::AssimpProcessMesh(aiMesh* mesh, aiNode* node, const aiScene* scene)
             vector.x = mesh->mTangents[i].x;
             vector.y = mesh->mTangents[i].y;
             vector.z = mesh->mTangents[i].z;
-            vertex.tangent = glm::vec3(transMat * glm::vec4(vector, 1.0f));
+            vertex.Tangent = glm::vec3(transMat * glm::vec4(vector, 1.0f));
         }
         else
         {
-            vertex.tangent = glm::vec3(0.0f);
+            vertex.Tangent = glm::vec3(0.0f);
         }
         if (mesh->mBitangents != nullptr)
         {
             vector.x = mesh->mBitangents[i].x;
             vector.y = mesh->mBitangents[i].y;
             vector.z = mesh->mBitangents[i].z;
-            vertex.bitangent = glm::vec3(transMat * glm::vec4(vector, 1.0f));
+            vertex.Bitangent = glm::vec3(transMat * glm::vec4(vector, 1.0f));
         }
         else
         {
-            vertex.bitangent = glm::vec3(0.0f);
+            vertex.Bitangent = glm::vec3(0.0f);
         }
         newMesh.GetVertices().push_back(vertex);
     }
@@ -497,31 +497,6 @@ void Model::SetEulerAngle(glm::vec3 eulerAngle, unsigned int current)
     UpdateModelMat(current);
 }
 
-std::string Model::GetFilePath()
-{
-    return m_FilePath;
-}
-
-std::string Model::GetDirectory()
-{
-	return m_FilePath.substr(0, m_FilePath.find_last_of('/'));;
-}
-
-std::string Model::GetName()
-{
-	return m_Name;
-}
-
-ModelStatics Model::GetStatics()
-{
-    return m_Statics;
-}
-
-std::vector<Mesh>& Model::GetMeshes()
-{
-	return m_Meshes;
-}
-
 glm::vec3 Model::GetPosition(unsigned int current)
 {
     current = current > m_Instance ? m_Instance : current;
@@ -559,21 +534,6 @@ glm::vec3 Model::GetEulerAngle(unsigned int current)
     {
         return m_InstanceEulerAngle[current - 1];
     }
-}
-
-unsigned int Model::GetInstance()
-{
-    return m_Instance;
-}
-
-unsigned int Model::GetCurrent()
-{
-    return m_Current;
-}
-
-std::vector<glm::mat4> Model::GetModelMats()
-{
-    return m_ModelMats;
 }
 
 glm::mat4 Model::GetModelMat(unsigned int current)
@@ -672,28 +632,6 @@ void Model::DrawUI()
             ImGui::PopItemWidth();
             ImGui::TreePop();
         }
-        // Scale
-        if (ImGui::TreeNode("Scale"))
-        {
-            ImGui::PushItemWidth(80);
-            ImGui::CenterAlignWidget(80);
-            if (ImGui::InputFloat("Scale X", &m_Scale.x))
-            {
-                SetScale(m_Scale);
-            }
-            ImGui::CenterAlignWidget(80);
-            if (ImGui::InputFloat("Scale Y", &m_Scale.y))
-            {
-                SetScale(m_Scale);
-            }
-            ImGui::CenterAlignWidget(80);
-            if (ImGui::InputFloat("Scale Z", &m_Scale.z))
-            {
-                SetScale(m_Scale);
-            }
-            ImGui::PopItemWidth();
-            ImGui::TreePop();
-        }
         // Rotation
         static bool slideRotate = true;
         if (ImGui::TreeNode("Rotation"))
@@ -738,6 +676,28 @@ void Model::DrawUI()
             }
             ImGui::TreePop();
         }
+        // Scale
+        if (ImGui::TreeNode("Scale"))
+        {
+            ImGui::PushItemWidth(80);
+            ImGui::CenterAlignWidget(80);
+            if (ImGui::InputFloat("Scale X", &m_Scale.x))
+            {
+                SetScale(m_Scale);
+            }
+            ImGui::CenterAlignWidget(80);
+            if (ImGui::InputFloat("Scale Y", &m_Scale.y))
+            {
+                SetScale(m_Scale);
+            }
+            ImGui::CenterAlignWidget(80);
+            if (ImGui::InputFloat("Scale Z", &m_Scale.z))
+            {
+                SetScale(m_Scale);
+            }
+            ImGui::PopItemWidth();
+            ImGui::TreePop();
+        }
     }
     // Set specific instance
     else
@@ -774,28 +734,6 @@ void Model::DrawUI()
             if (ImGui::InputFloat("Pos Z", &m_InstancePosition[m_Current - 1].z))
             {
                 UpdateModelMat(m_Current);
-            }
-            ImGui::PopItemWidth();
-            ImGui::TreePop();
-        }
-        // Scale
-        if (ImGui::TreeNode("Scale"))
-        {
-            ImGui::PushItemWidth(80);
-            ImGui::CenterAlignWidget(80);
-            if (ImGui::InputFloat("Scale X", &m_InstanceScale[m_Current - 1].x))
-            {
-                SetScale(m_InstanceScale[m_Current - 1], m_Current);
-            }
-            ImGui::CenterAlignWidget(80);
-            if (ImGui::InputFloat("Scale Y", &m_InstanceScale[m_Current - 1].y))
-            {
-                SetScale(m_InstanceScale[m_Current - 1], m_Current);
-            }
-            ImGui::CenterAlignWidget(80);
-            if (ImGui::InputFloat("Scale Z", &m_InstanceScale[m_Current - 1].z))
-            {
-                SetScale(m_InstanceScale[m_Current - 1], m_Current);
             }
             ImGui::PopItemWidth();
             ImGui::TreePop();
@@ -844,7 +782,30 @@ void Model::DrawUI()
             }
             ImGui::TreePop();
         }
+        // Scale
+        if (ImGui::TreeNode("Scale"))
+        {
+            ImGui::PushItemWidth(80);
+            ImGui::CenterAlignWidget(80);
+            if (ImGui::InputFloat("Scale X", &m_InstanceScale[m_Current - 1].x))
+            {
+                SetScale(m_InstanceScale[m_Current - 1], m_Current);
+            }
+            ImGui::CenterAlignWidget(80);
+            if (ImGui::InputFloat("Scale Y", &m_InstanceScale[m_Current - 1].y))
+            {
+                SetScale(m_InstanceScale[m_Current - 1], m_Current);
+            }
+            ImGui::CenterAlignWidget(80);
+            if (ImGui::InputFloat("Scale Z", &m_InstanceScale[m_Current - 1].z))
+            {
+                SetScale(m_InstanceScale[m_Current - 1], m_Current);
+            }
+            ImGui::PopItemWidth();
+            ImGui::TreePop();
+        }
     }
+    // Reset all attributes
     ImGui::CenterAlignWidget("Reset");
     if (ImGui::Button("Reset"))
     {

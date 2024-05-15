@@ -289,7 +289,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // ---------------------------------------------------------------------------
 /** @brief  Set the maximum number of triangles in a mesh.
  *
- * This is used by the "SplitLargeMeshes" PostProcess-Step to determine
+ * This is used by the "SplitLargeMeshes" Post_Process-Step to determine
  * whether a mesh must be split or not.
  * @note The default value is AI_SLM_DEFAULT_MAX_TRIANGLES
  * Property type: integer.
@@ -305,7 +305,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // ---------------------------------------------------------------------------
 /** @brief  Set the maximum number of vertices in a mesh.
  *
- * This is used by the "SplitLargeMeshes" PostProcess-Step to determine
+ * This is used by the "SplitLargeMeshes" Post_Process-Step to determine
  * whether a mesh must be split or not.
  * @note The default value is AI_SLM_DEFAULT_MAX_VERTICES
  * Property type: integer.
@@ -321,7 +321,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // ---------------------------------------------------------------------------
 /** @brief Set the maximum number of bones affecting a single vertex
  *
- * This is used by the #aiProcess_LimitBoneWeights PostProcess-Step.
+ * This is used by the #aiProcess_LimitBoneWeights Post_Process-Step.
  * @note The default value is AI_LBW_MAX_WEIGHTS
  * Property type: integer.*/
 #define AI_CONFIG_PP_LBW_MAX_WEIGHTS    \
@@ -335,7 +335,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // ---------------------------------------------------------------------------
 /** @brief Lower the deboning threshold in order to remove more bones.
  *
- * This is used by the #aiProcess_Debone PostProcess-Step.
+ * This is used by the #aiProcess_Debone Post_Process-Step.
  * @note The default value is AI_DEBONE_THRESHOLD
  * Property type: float.*/
 #define AI_CONFIG_PP_DB_THRESHOLD \
@@ -349,7 +349,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // ---------------------------------------------------------------------------
 /** @brief Require all bones qualify for deboning before removing any
  *
- * This is used by the #aiProcess_Debone PostProcess-Step.
+ * This is used by the #aiProcess_Debone Post_Process-Step.
  * @note The default value is 0
  * Property type: bool.*/
 #define AI_CONFIG_PP_DB_ALL_OR_NONE \

@@ -231,6 +231,7 @@
     <ClInclude Include="src\vendor\assimp\XmlParser.h" />
     <ClInclude Include="src\vendor\assimp\XMLTools.h" />
     <ClInclude Include="src\vendor\assimp\ZipArchiveIOSystem.h" />
+    <ClInclude Include="src\vendor\freeimage\FreeImage.h" />
     <ClInclude Include="src\vendor\glm\common.hpp" />
     <ClInclude Include="src\vendor\glm\detail\compute_common.hpp" />
     <ClInclude Include="src\vendor\glm\detail\compute_vector_decl.hpp" />

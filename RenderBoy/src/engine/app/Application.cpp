@@ -1,8 +1,5 @@
 #include "Application.h"
 
-#define STB_IMAGE_IMPLEMENTATION
-#include <stb/stb_image.h>
-
 Application::Application()
 {
     m_Window = nullptr;
@@ -14,7 +11,7 @@ Application::Application()
 
 Application::~Application()
 {
-    switch (rbcore::SETTINGS.core)
+    switch (rbcore::SETTINGS.GraphicsCore)
     {
     case OPENGL:
         ImGui_ImplGlfw_Shutdown();
@@ -43,51 +40,51 @@ bool Application::LoadSettings()
         {
             if (line.find("#WIDTH") != std::string::npos)
             {
-                rbcore::SETTINGS.width = std::atoi(rbcore::GetSettingValue(line).c_str());
+                rbcore::SETTINGS.Width = std::atoi(rbcore::GetSettingValue(line).c_str());
             }
             if (line.find("#HEIGHT") != std::string::npos)
             {
-                rbcore::SETTINGS.height = std::atoi(rbcore::GetSettingValue(line).c_str());
+                rbcore::SETTINGS.Height = std::atoi(rbcore::GetSettingValue(line).c_str());
             }
             if (line.find("#CORE") != std::string::npos)
             {
-                rbcore::SETTINGS.core = (Core)std::atoi(rbcore::GetSettingValue(line).c_str());
+                rbcore::SETTINGS.GraphicsCore = (Core)std::atoi(rbcore::GetSettingValue(line).c_str());
             }
             if (line.find("#FONT_STYLE") != std::string::npos)
             {
-                rbcore::SETTINGS.fontStyle = rbcore::FONT_STYLE[(int)std::atoi(rbcore::GetSettingValue(line).c_str())];
+                rbcore::SETTINGS.FontStyle = rbcore::FONT_STYLE[(int)std::atoi(rbcore::GetSettingValue(line).c_str())];
             }
             if (line.find("#FONT_SIZE") != std::string::npos)
             {
-                rbcore::SETTINGS.fontSize = (int)std::atoi(rbcore::GetSettingValue(line).c_str());
+                rbcore::SETTINGS.FontSize = (int)std::atoi(rbcore::GetSettingValue(line).c_str());
             }
             if (line.find("#UI_STYLE") != std::string::npos)
             {
-                rbcore::SETTINGS.uiStyle = (UIStyle)std::atoi(rbcore::GetSettingValue(line).c_str());
+                rbcore::SETTINGS.UIStyle = (UI_Style)std::atoi(rbcore::GetSettingValue(line).c_str());
             }
             if (line.find("#DRAWMODE") != std::string::npos)
             {
-                rbcore::SETTINGS.drawMode = (DrawMode)std::atof(rbcore::GetSettingValue(line).c_str());
+                rbcore::SETTINGS.DrawMode = (Draw_Mode)std::atof(rbcore::GetSettingValue(line).c_str());
             }
             if (line.find("#SHOW_NORMAL") != std::string::npos)
             {
-                rbcore::SETTINGS.showNormal = (bool)std::atoi(rbcore::GetSettingValue(line).c_str());
+                rbcore::SETTINGS.ShowNormal = (bool)std::atoi(rbcore::GetSettingValue(line).c_str());
             }
             if (line.find("#GAMMA") != std::string::npos)
             {
-                rbcore::SETTINGS.gamma = (float)std::atof(rbcore::GetSettingValue(line).c_str());
+                rbcore::SETTINGS.Gamma = (float)std::atof(rbcore::GetSettingValue(line).c_str());
             }
             if (line.find("#RESOLUTION") != std::string::npos)
             {
-                rbcore::SETTINGS.resolution = (float)std::atof(rbcore::GetSettingValue(line).c_str());
+                rbcore::SETTINGS.Resolution = (float)std::atof(rbcore::GetSettingValue(line).c_str());
             }
             if (line.find("#ANTI_ALISING") != std::string::npos)
             {
-                rbcore::SETTINGS.aa = (AntiAlising)std::atof(rbcore::GetSettingValue(line).c_str());
+                rbcore::SETTINGS.AA = (Anti_Alising)std::atof(rbcore::GetSettingValue(line).c_str());
             }
             if (line.find("#POST_PROCESS") != std::string::npos)
             {
-                rbcore::SETTINGS.pp = (PostProcess)std::atof(rbcore::GetSettingValue(line).c_str());
+                rbcore::SETTINGS.PP = (Post_Process)std::atof(rbcore::GetSettingValue(line).c_str());
             }
             if (line.find("#CAMERA_TYPE") != std::string::npos)
             {
@@ -121,56 +118,56 @@ bool Application::LoadSettings()
 void Application::SaveSettings()
 {
     // Addjust window's resolution, in case it's out of bound when it opens next time
-    if (rbcore::SETTINGS.width >= 2560 && rbcore::SETTINGS.height >= 1440)
+    if (rbcore::SETTINGS.Width >= 2560 && rbcore::SETTINGS.Height >= 1440)
     {
-        rbcore::SETTINGS.width = 2560;
-        rbcore::SETTINGS.height = 1440;
+        rbcore::SETTINGS.Width = 2560;
+        rbcore::SETTINGS.Height = 1440;
     }
-    else if (rbcore::SETTINGS.width >= 1920 && rbcore::SETTINGS.height >= 1080)
+    else if (rbcore::SETTINGS.Width >= 1920 && rbcore::SETTINGS.Height >= 1080)
     {
-        rbcore::SETTINGS.width = 1920;
-        rbcore::SETTINGS.height = 1080;
+        rbcore::SETTINGS.Width = 1920;
+        rbcore::SETTINGS.Height = 1080;
     }
-    else if (rbcore::SETTINGS.width >= 1280 && rbcore::SETTINGS.height >= 720)
+    else if (rbcore::SETTINGS.Width >= 1280 && rbcore::SETTINGS.Height >= 720)
     {
-        rbcore::SETTINGS.width = 1280;
-        rbcore::SETTINGS.height = 720;
+        rbcore::SETTINGS.Width = 1280;
+        rbcore::SETTINGS.Height = 720;
     }
-    else if (rbcore::SETTINGS.width >= 800 && rbcore::SETTINGS.height >= 600)
+    else if (rbcore::SETTINGS.Width >= 800 && rbcore::SETTINGS.Height >= 600)
     {
-        rbcore::SETTINGS.width = 800;
-        rbcore::SETTINGS.height = 600;
+        rbcore::SETTINGS.Width = 800;
+        rbcore::SETTINGS.Height = 600;
     }
     else
     {
-        rbcore::SETTINGS.width = 540;
-        rbcore::SETTINGS.height = 320;
+        rbcore::SETTINGS.Width = 540;
+        rbcore::SETTINGS.Height = 320;
     }
     std::ofstream stream(SETTING_FILEPATH);
     std::string line;
-    line = "#WIDTH " + std::to_string(rbcore::SETTINGS.width) + "\n";
+    line = "#WIDTH " + std::to_string(rbcore::SETTINGS.Width) + "\n";
     stream << line;
-    line = "#HEIGHT " + std::to_string(rbcore::SETTINGS.height) + "\n";
+    line = "#HEIGHT " + std::to_string(rbcore::SETTINGS.Height) + "\n";
     stream << line;
-    line = "#CORE " + std::to_string(rbcore::SETTINGS.core) + "\n";
+    line = "#CORE " + std::to_string(rbcore::SETTINGS.GraphicsCore) + "\n";
     stream << line;
-    line = "#FONT_STYLE " + std::to_string(rbcore::GetFontStyleIndex(rbcore::SETTINGS.fontStyle)) + "\n";
+    line = "#FONT_STYLE " + std::to_string(rbcore::GetFontStyleIndex(rbcore::SETTINGS.FontStyle)) + "\n";
     stream << line;
-    line = "#FONT_SIZE " + std::to_string(rbcore::SETTINGS.fontSize) + "\n";
+    line = "#FONT_SIZE " + std::to_string(rbcore::SETTINGS.FontSize) + "\n";
     stream << line;
-    line = "#UI_STYLE " + std::to_string(rbcore::SETTINGS.uiStyle) + "\n";
+    line = "#UI_STYLE " + std::to_string(rbcore::SETTINGS.UIStyle) + "\n";
     stream << line;
-    line = "#DRAWMODE " + std::to_string(rbcore::SETTINGS.drawMode) + "\n";
+    line = "#DRAWMODE " + std::to_string(rbcore::SETTINGS.DrawMode) + "\n";
     stream << line;
-    line = "#SHOW_NORMAL " + std::to_string(rbcore::SETTINGS.showNormal) + "\n";
+    line = "#SHOW_NORMAL " + std::to_string(rbcore::SETTINGS.ShowNormal) + "\n";
     stream << line;
-    line = "#GAMMA " + std::to_string(rbcore::SETTINGS.gamma) + "\n";
+    line = "#GAMMA " + std::to_string(rbcore::SETTINGS.Gamma) + "\n";
     stream << line;
-    line = "#RESOLUTION " + std::to_string(rbcore::SETTINGS.resolution) + "\n";
+    line = "#RESOLUTION " + std::to_string(rbcore::SETTINGS.Resolution) + "\n";
     stream << line;
-    line = "#ANTI_ALISING " + std::to_string(rbcore::SETTINGS.aa) + "\n";
+    line = "#ANTI_ALISING " + std::to_string(rbcore::SETTINGS.AA) + "\n";
     stream << line;
-    line = "#POST_PROCESS " + std::to_string(rbcore::SETTINGS.pp) + "\n";
+    line = "#POST_PROCESS " + std::to_string(rbcore::SETTINGS.PP) + "\n";
     stream << line;
     line = "#CAMERA_TYPE " + std::to_string(m_Scene.GetCamera().GetCameraType()) + "\n";
     stream << line;
@@ -193,7 +190,7 @@ bool Application::Init()
     LoadSettings();
 
     // Initialize GLEW
-    switch (rbcore::SETTINGS.core)
+    switch (rbcore::SETTINGS.GraphicsCore)
     {
     case Core::OPENGL:
         if (!InitOpenGL())
@@ -204,8 +201,8 @@ bool Application::Init()
     }
 
     // Init renderer and scene
-    m_Width = rbcore::SETTINGS.width;
-    m_Height = rbcore::SETTINGS.height;
+    m_Width = rbcore::SETTINGS.Width;
+    m_Height = rbcore::SETTINGS.Height;
     m_Scene.Init();
     m_Renderer.Init();
     m_Scene.GetCamera().SetWindowSize(m_Width, m_Height);
@@ -222,7 +219,7 @@ bool Application::InitOpenGL()
     }
 
     // Create a windowed mode window
-    m_Window = glfwCreateWindow(rbcore::SETTINGS.width, rbcore::SETTINGS.height, "RenderBoy", nullptr, nullptr);
+    m_Window = glfwCreateWindow(rbcore::SETTINGS.Width, rbcore::SETTINGS.Height, "RenderBoy", nullptr, nullptr);
     if (!m_Window)
     {
         glfwTerminate();
@@ -234,20 +231,13 @@ bool Application::InitOpenGL()
     glfwMakeContextCurrent(m_Window);
 
     // Set RenderBoy's Icon
-    GLFWimage icons[1];
-    unsigned char* iconBuffer;
-    iconBuffer = stbi_load("res/icons/Icon_48.png", &icons[0].width, &icons[0].height, 0, 4);
-    if (!iconBuffer)
-    {
-        spdlog::error("RenderBoy icon missing!");
-    }
-    else
-    {
-        icons[0].pixels = iconBuffer;
-        glfwSetWindowIcon(m_Window, 1, icons);
-        stbi_image_free(icons[0].pixels);
-    }
-
+    FIBITMAP* iconBuffer = FreeImage_Load(FreeImage_GetFileType("res/icons/Icon_48.png", 0), "res/icons/Icon_48.png");
+    FreeImage_FlipVertical(iconBuffer);
+    FreeImage_ConvertToRGB16(iconBuffer);
+    int iconWidth = FreeImage_GetWidth(iconBuffer);
+    int iconHeight = FreeImage_GetHeight(iconBuffer);
+    GLFWimage icon{ iconWidth, iconHeight, FreeImage_GetBits(iconBuffer) };
+    glfwSetWindowIcon(m_Window, 1, &icon);
     // Initialize GLEW library
     if (glewInit() != GLEW_OK)
     {
@@ -262,34 +252,37 @@ bool Application::InitOpenGL()
     ImGui::CreateContext();
     ImGui_ImplGlfw_InitForOpenGL(m_Window, true);
     ImGui_ImplOpenGL3_Init("#version 460");
-    rbcore::SetUiStyle(rbcore::SETTINGS.uiStyle);
+    rbcore::SetUiStyle(rbcore::SETTINGS.UIStyle);
     // Set font
     ImGuiIO& io = ImGui::GetIO(); (void)io;
-    io.Fonts->AddFontFromFileTTF(rbcore::GetFontStylePath(rbcore::SETTINGS.fontStyle).c_str(), rbcore::SETTINGS.fontSize);
+    io.Fonts->AddFontFromFileTTF(rbcore::GetFontStylePath(rbcore::SETTINGS.FontStyle).c_str(), rbcore::SETTINGS.FontSize);
     io.Fonts->Build();
     // Generate a texture id to display icon
-    int iconWidth, iconHeight;
-    iconBuffer = stbi_load("res/icons/Icon_256.png", &iconWidth, &iconHeight, 0, 4);
-    if (!iconBuffer)
+    int logoWidth, logoHeight;
+    FIBITMAP* logoBuffer = FreeImage_Load(FreeImage_GetFileType("res/icons/Icon_256.png", 0), "res/icons/Icon_256.png");
+    FreeImage_FlipVertical(logoBuffer);
+    logoWidth = FreeImage_GetWidth(logoBuffer);
+    logoHeight = FreeImage_GetHeight(logoBuffer);
+    if (!logoBuffer)
     {
         spdlog::error("RenderBoy icon missing!");
     }
     else
     {
-        GLuint iconTexID;
-        GLCall(glGenTextures(1, &iconTexID));
-        GLCall(glBindTexture(GL_TEXTURE_2D, iconTexID));
+        GLuint logoTexID;
+        GLCall(glGenTextures(1, &logoTexID));
+        GLCall(glBindTexture(GL_TEXTURE_2D, logoTexID));
         GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
         GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
         GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER));
         GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER));
-        GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, iconWidth, iconHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, iconBuffer));
+        GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, logoWidth, logoHeight, 0, GL_BGRA, GL_UNSIGNED_BYTE, (void*)FreeImage_GetBits(logoBuffer)));
         GLCall(glBindTexture(GL_TEXTURE_2D, 0));
-        m_IconTexID = (GLuint*)iconTexID;
+        m_IconTexID = (GLuint*)logoTexID;
     }
-    if (iconBuffer)
+    if (logoBuffer)
     {
-        stbi_image_free(iconBuffer);
+        FreeImage_Unload(logoBuffer);
     }
     // Initialize file browser
     m_FileBrowser.SetTitle("File Browser");
@@ -406,9 +399,9 @@ void Application::DrawUI()
         rbcore::RELOAD_FONT = false;
         ImGuiIO& io = ImGui::GetIO(); (void)io;
         io.Fonts->Clear();
-        io.Fonts->AddFontFromFileTTF(rbcore::GetFontStylePath(rbcore::SETTINGS.fontStyle).c_str(), rbcore::SETTINGS.fontSize);
+        io.Fonts->AddFontFromFileTTF(rbcore::GetFontStylePath(rbcore::SETTINGS.FontStyle).c_str(), rbcore::SETTINGS.FontSize);
         io.Fonts->Build();
-        switch (rbcore::SETTINGS.core)
+        switch (rbcore::SETTINGS.GraphicsCore)
         {
         case OPENGL:
             ImGui_ImplOpenGL3_DestroyDeviceObjects();
@@ -439,7 +432,7 @@ void Application::DrawUI()
     }
     ImGui::EndFrame();
     ImGui::Render();
-    switch (rbcore::SETTINGS.core)
+    switch (rbcore::SETTINGS.GraphicsCore)
     {
     case OPENGL:
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -578,12 +571,12 @@ void Application::DrawInfoWindow()
         // Resolution
         {
             ImGui::LabelHighlighted("Resolution:");
-            ImGui::Text("%d * %d", (int)(rbcore::SETTINGS.width * rbcore::SETTINGS.resolution), (int)(rbcore::SETTINGS.height * rbcore::SETTINGS.resolution));
+            ImGui::Text("%d * %d", (int)(rbcore::SETTINGS.Width * rbcore::SETTINGS.Resolution), (int)(rbcore::SETTINGS.Height * rbcore::SETTINGS.Resolution));
         }
         // Driver
         {
             ImGui::LabelHighlighted("Driver:");
-            switch (rbcore::SETTINGS.core)
+            switch (rbcore::SETTINGS.GraphicsCore)
             {
             case OPENGL:
                 ImGui::Text((const char*)glGetString(GL_VERSION));
@@ -635,11 +628,11 @@ void Application::DrawInfoWindow()
                         ImGui::LabelHighlighted("FilePath:");
                         ImGui::TextWrapped(m_Scene.GetModels()[rbcore::currentModelInfo].GetFilePath().c_str());
                         ImGui::LabelHighlighted("Meshes:");
-                        ImGui::Text(std::to_string(m_Scene.GetModels()[rbcore::currentModelInfo].GetStatics().meshCount).c_str());
+                        ImGui::Text(std::to_string(m_Scene.GetModels()[rbcore::currentModelInfo].GetStatics().MeshCount).c_str());
                         ImGui::LabelHighlighted("Triangles:");
-                        ImGui::Text(std::to_string(m_Scene.GetModels()[rbcore::currentModelInfo].GetStatics().triangleCount).c_str());
+                        ImGui::Text(std::to_string(m_Scene.GetModels()[rbcore::currentModelInfo].GetStatics().TriangleCount).c_str());
                         ImGui::LabelHighlighted("Vertices:");
-                        ImGui::Text(std::to_string(m_Scene.GetModels()[rbcore::currentModelInfo].GetStatics().vertexCount).c_str());
+                        ImGui::Text(std::to_string(m_Scene.GetModels()[rbcore::currentModelInfo].GetStatics().VertexCount).c_str());
                     }
                     ImGui::TreePop();
                 }
@@ -690,22 +683,22 @@ void Application::DrawSettingWindow()
                     "Vulkan",
                     "DirectX 12"
                 };
-                static int currentCore = rbcore::SETTINGS.core;
+                static int currentCore = rbcore::SETTINGS.GraphicsCore;
                 if (ImGui::Combo("##Core", &currentCore, coreOps, IM_ARRAYSIZE(coreOps)))
                 {
                     switch (currentCore)
                     {
                     case Core::OPENGL:
-                        rbcore::SETTINGS.core = Core::OPENGL;
+                        rbcore::SETTINGS.GraphicsCore = Core::OPENGL;
                         break;
                     case Core::VULKAN:
-                        rbcore::SETTINGS.core = Core::OPENGL;
+                        rbcore::SETTINGS.GraphicsCore = Core::OPENGL;
                         break;
                     case Core::DIRECTX:
-                        rbcore::SETTINGS.core = Core::OPENGL;
+                        rbcore::SETTINGS.GraphicsCore = Core::OPENGL;
                         break;
                     default:
-                        rbcore::SETTINGS.core = Core::OPENGL;
+                        rbcore::SETTINGS.GraphicsCore = Core::OPENGL;
                         break;
                     }
                 }
@@ -721,25 +714,25 @@ void Application::DrawSettingWindow()
                     "Default Dark",
                     "Spectrum"
                 };
-                static int currentUIStyle = rbcore::SETTINGS.uiStyle;
+                static int currentUIStyle = rbcore::SETTINGS.UIStyle;
                 if (ImGui::Combo("##UI Style", &currentUIStyle, uiStyleOps, IM_ARRAYSIZE(uiStyleOps)))
                 {
                     switch (currentUIStyle)
                     {
-                    case UIStyle::DEFAULT_DARK:
-                        rbcore::SETTINGS.uiStyle = UIStyle::DEFAULT_DARK;
+                    case UI_Style::DEFAULT_DARK:
+                        rbcore::SETTINGS.UIStyle = UI_Style::DEFAULT_DARK;
                         break;
-                    case UIStyle::DEFAULT_LIGHT:
-                        rbcore::SETTINGS.uiStyle = UIStyle::DEFAULT_LIGHT;
+                    case UI_Style::DEFAULT_LIGHT:
+                        rbcore::SETTINGS.UIStyle = UI_Style::DEFAULT_LIGHT;
                         break;
-                    case UIStyle::SPECTRUM:
-                        rbcore::SETTINGS.uiStyle = UIStyle::SPECTRUM;
+                    case UI_Style::SPECTRUM:
+                        rbcore::SETTINGS.UIStyle = UI_Style::SPECTRUM;
                         break;
                     default:
-                        rbcore::SETTINGS.uiStyle = UIStyle::DEFAULT_LIGHT;
+                        rbcore::SETTINGS.UIStyle = UI_Style::DEFAULT_LIGHT;
                         break;
                     }
-                    rbcore::SetUiStyle(rbcore::SETTINGS.uiStyle);
+                    rbcore::SetUiStyle(rbcore::SETTINGS.UIStyle);
                 }
                 ImGui::PopItemWidth();
             }
@@ -748,7 +741,7 @@ void Application::DrawSettingWindow()
                 ImGui::CenterAlignWidget("Font Style", 150.0f);
                 ImGui::LabelHighlighted("Font Style");
                 ImGui::PushItemWidth(150.0f);
-                const char* fontStyle = rbcore::SETTINGS.fontStyle.c_str();
+                const char* fontStyle = rbcore::SETTINGS.FontStyle.c_str();
                 if (ImGui::BeginCombo("##FontStyle", fontStyle))
                 {
                     for (int i = 0; i < rbcore::FONT_STYLE.size(); i++)
@@ -757,7 +750,7 @@ void Application::DrawSettingWindow()
                         if (ImGui::Selectable(rbcore::FONT_STYLE[i].c_str(), isSelected))
                         {
                             fontStyle = rbcore::FONT_STYLE[i].c_str();
-                            rbcore::SETTINGS.fontStyle = fontStyle;
+                            rbcore::SETTINGS.FontStyle = fontStyle;
                             rbcore::RELOAD_FONT = true;
                         }
                     }
@@ -769,16 +762,16 @@ void Application::DrawSettingWindow()
                 ImGui::CenterAlignWidget("Font Size", 100.0f);
                 ImGui::LabelHighlighted("Font Size");
                 ImGui::PushItemWidth(100.0f);
-                static int fontSize = rbcore::SETTINGS.fontSize;
+                static int fontSize = rbcore::SETTINGS.FontSize;
                 if (ImGui::InputInt("##FontSize", &fontSize))
                 {
                     if (fontSize <= 0)
                     {
-                        fontSize = rbcore::SETTINGS.fontSize;
+                        fontSize = rbcore::SETTINGS.FontSize;
                     }
                     else
                     {
-                        rbcore::SETTINGS.fontSize = fontSize;
+                        rbcore::SETTINGS.FontSize = fontSize;
                         rbcore::RELOAD_FONT = true;
                     }
                 }
@@ -801,18 +794,18 @@ void Application::DrawSettingWindow()
                     "UV Set",
                     "Depth"
                 };
-                static int currentDrawMode = rbcore::SETTINGS.drawMode;
-                if (ImGui::Combo("##DrawMode", &currentDrawMode, drawModeOps, IM_ARRAYSIZE(drawModeOps)))
+                static int currentDrawMode = rbcore::SETTINGS.DrawMode;
+                if (ImGui::Combo("##Draw_Mode", &currentDrawMode, drawModeOps, IM_ARRAYSIZE(drawModeOps)))
                 {
-                    rbcore::SETTINGS.drawMode = (DrawMode)currentDrawMode;
+                    rbcore::SETTINGS.DrawMode = (Draw_Mode)currentDrawMode;
                 }
                 ImGui::PopItemWidth();
             }
             // Show normal
             {
                 ImGui::CenterAlignWidget("Show Normal");
-                ImGui::Checkbox("Show Normal", &rbcore::SETTINGS.showNormal);
-                if (rbcore::SETTINGS.showNormal)
+                ImGui::Checkbox("Show Normal", &rbcore::SETTINGS.ShowNormal);
+                if (rbcore::SETTINGS.ShowNormal)
                 {
                     ImGui::CenterAlignWidget("Normal Color", 200.0f);
                     ImGui::LabelHighlighted("Normal Color");
@@ -838,10 +831,10 @@ void Application::DrawSettingWindow()
                     "Gray Scale",
                     "Edge"
                 };
-                static int currentPp = rbcore::SETTINGS.pp;
-                if (ImGui::Combo("##PostProcess", &currentPp, ppOps, IM_ARRAYSIZE(ppOps)))
+                static int currentPp = rbcore::SETTINGS.PP;
+                if (ImGui::Combo("##Post_Process", &currentPp, ppOps, IM_ARRAYSIZE(ppOps)))
                 {
-                    rbcore::SETTINGS.pp = (PostProcess)currentPp;
+                    rbcore::SETTINGS.PP = (Post_Process)currentPp;
                     m_Renderer.ChangePostProcess();
                 }
                 ImGui::PopItemWidth();
@@ -884,7 +877,7 @@ void Application::DrawSettingWindow()
                 ImGui::CenterAlignWidget("Gamma", 150.0f);
                 ImGui::LabelHighlighted("Gamma");
                 ImGui::PushItemWidth(150.0f);
-                ImGui::SliderFloat("##Gamma", &rbcore::SETTINGS.gamma, 0.0f, 3.0f);
+                ImGui::SliderFloat("##Gamma", &rbcore::SETTINGS.Gamma, 0.0f, 3.0f);
                 ImGui::PopItemWidth();
             }
             // Resolution
@@ -892,10 +885,10 @@ void Application::DrawSettingWindow()
                 ImGui::CenterAlignWidget("Resolution", 200.0f);
                 ImGui::LabelHighlighted("Resolution");
                 ImGui::PushItemWidth(200.0f);
-                static int resolution = (int)(100.0f * rbcore::SETTINGS.resolution);
+                static int resolution = (int)(100.0f * rbcore::SETTINGS.Resolution);
                 if (ImGui::SliderInt("##Resolution", &resolution, 20, 400))
                 {
-                    rbcore::SETTINGS.resolution = (float)resolution / 100.0f;
+                    rbcore::SETTINGS.Resolution = (float)resolution / 100.0f;
                     m_Renderer.ChangeResolution();
                 }
                 ImGui::PopItemWidth();
@@ -912,22 +905,22 @@ void Application::DrawSettingWindow()
                     "MSAA 16x",
                     "MSAA 32x"
                 };
-                static int currentAa = rbcore::SETTINGS.aa;
-                if (ImGui::Combo("##AntiAlising", &currentAa, aaOps, IM_ARRAYSIZE(aaOps)))
+                static int currentAa = rbcore::SETTINGS.AA;
+                if (ImGui::Combo("##Anti_Alising", &currentAa, aaOps, IM_ARRAYSIZE(aaOps)))
                 {
-                    rbcore::SETTINGS.aa = (AntiAlising)currentAa;
+                    rbcore::SETTINGS.AA = (Anti_Alising)currentAa;
                     switch (currentAa)
                     {
-                    case AntiAlising::MSAA4X:
+                    case Anti_Alising::MSAA4X:
                         m_Renderer.ChangeMSAA();
                         break;
-                    case AntiAlising::MSAA8X:
+                    case Anti_Alising::MSAA8X:
                         m_Renderer.ChangeMSAA();
                         break;
-                    case AntiAlising::MSAA16X:
+                    case Anti_Alising::MSAA16X:
                         m_Renderer.ChangeMSAA();
                         break;
-                    case AntiAlising::MSAA32X:
+                    case Anti_Alising::MSAA32X:
                         m_Renderer.ChangeMSAA();
                         break;
                     }
@@ -1028,8 +1021,8 @@ void Application::WindowResize(int width, int height)
     }
     m_Width = width;
     m_Height = height;
-    rbcore::SETTINGS.width = width;
-    rbcore::SETTINGS.height = height;
+    rbcore::SETTINGS.Width = width;
+    rbcore::SETTINGS.Height = height;
 }
 
 void Application::KeyboardInput()
@@ -1170,19 +1163,4 @@ void Application::MouseInput()
         }
     }
     // Model Rotation
-}
-
-GLFWwindow* Application::GetWindow()
-{
-    return m_Window;
-}
-
-Scene& Application::GetScene()
-{
-    return m_Scene;
-}
-
-Renderer& Application::GetRenderer()
-{
-    return m_Renderer;
 }

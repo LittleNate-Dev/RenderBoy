@@ -564,7 +564,7 @@ bool Scene::DeleteModel(std::string name)
 	return false;
 }
 
-bool Scene::AddLight(std::string name, LightType type)
+bool Scene::AddLight(std::string name, Light_Type type)
 {
 	switch (type)
 	{
@@ -665,7 +665,7 @@ bool Scene::AddDirectionalLight(std::string name)
 	return true;
 }
 
-bool Scene::DeleteLight(std::string name, LightType type)
+bool Scene::DeleteLight(std::string name, Light_Type type)
 {
 	switch (type)
 	{
@@ -766,7 +766,7 @@ bool Scene::RenameModel(std::string oldName, std::string newName)
 	return false;
 }
 
-bool Scene::RenameLight(std::string oldName, std::string newName, LightType type)
+bool Scene::RenameLight(std::string oldName, std::string newName, Light_Type type)
 {
 	switch (type)
 	{
@@ -902,66 +902,6 @@ void Scene::SetName(std::string name)
 	m_Name = name;
 }
 
-std::string Scene::GetFilePath()
-{
-	return m_FilePath;
-}
-
-std::string Scene::GetName()
-{
-	return m_Name;
-}
-
-Data& Scene::GetData()
-{
-	return m_Data;
-}
-
-Camera& Scene::GetCamera()
-{
-	return m_Camera;
-}
-
-std::vector<std::string>& Scene::GetModelList()
-{
-	return m_ModelList;
-}
-
-std::map<std::string, Model>& Scene::GetModels()
-{
-	return m_Models;
-}
-
-std::vector<std::string>& Scene::GetPointLightList()
-{
-	return m_PointLightList;
-}
-
-std::map<std::string, PointLight>& Scene::GetPointLights()
-{
-	return m_PointLights;
-}
-
-std::vector<std::string>& Scene::GetSpotLightList()
-{
-	return m_SpotLightList;
-}
-
-std::map<std::string, SpotLight>& Scene::GetSpotLights()
-{
-	return m_SpotLights;
-}
-
-std::vector<std::string>& Scene::GetDirectionalLightList()
-{
-	return m_DirLightList;
-}
-
-std::map<std::string, DirectionalLight>& Scene::GetDirectionalLights()
-{
-	return m_DirLights;
-}
-
 void Scene::DrawUI()
 {
 	DrawModelsWindow();
@@ -1055,14 +995,14 @@ void Scene::DrawLightsWindow()
 				"Directional Light"
 			};
 			static int currentLightType = -1;
-			ImGui::Combo("##LightType", &currentLightType, lightTypeOps, IM_ARRAYSIZE(lightTypeOps));
+			ImGui::Combo("##Light_Type", &currentLightType, lightTypeOps, IM_ARRAYSIZE(lightTypeOps));
 			ImGui::PopItemWidth();
 			ImGui::CenterAlignWidget("Add");
 			if (ImGui::Button("Add"))
 			{
 				if (lightName[0] != '\0' && currentLightType >= 0)
 				{
-					AddLight(lightName, (LightType)currentLightType);
+					AddLight(lightName, (Light_Type)currentLightType);
 				}
 				else
 				{

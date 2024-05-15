@@ -18,6 +18,7 @@ GLTexture::~GLTexture()
 void GLTexture::GenTexture(const std::string filepath)
 {
     m_LocalBuffer = FreeImage_Load(FreeImage_GetFileType(filepath.c_str(), 0),filepath.c_str());
+    FreeImage_FlipVertical(m_LocalBuffer);
     m_Width = FreeImage_GetWidth(m_LocalBuffer);
     m_Height = FreeImage_GetHeight(m_LocalBuffer);
     // Load texture

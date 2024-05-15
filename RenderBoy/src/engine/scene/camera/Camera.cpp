@@ -58,7 +58,7 @@ void Camera::SetCameraType(bool type)
 
 void Camera::SetWindowSize()
 {
-	m_WindowSize = glm::vec2(rbcore::SETTINGS.width, rbcore::SETTINGS.height);
+	m_WindowSize = glm::vec2(rbcore::SETTINGS.Width, rbcore::SETTINGS.Height);
 }
 
 void Camera::SetWindowSize(unsigned int width, unsigned int height)
@@ -243,56 +243,6 @@ void Camera::SetRotateSpeed(float speed)
 {
 	speed = speed < 0.0f ? 0.0f : speed;
 	m_RotateSpeed = speed;
-}
-
-bool Camera::GetCameraType()
-{
-	return m_Type;
-}
-
-glm::vec2 Camera::GetWindowSize()
-{
-	return m_WindowSize;
-}
-
-float Camera::GetFOV()
-{
-	return m_FOV;
-}
-
-float Camera::GetNearPlane()
-{
-	return m_Plane.x;
-}
-
-float Camera::GetFarPlane()
-{
-	return m_Plane.y;
-}
-
-glm::vec2 Camera::GetPlane()
-{
-	return m_Plane;
-}
-
-glm::vec3 Camera::GetPosition()
-{
-	return m_Position;
-}
-
-glm::vec3 Camera::GetEulerAngle()
-{
-	return m_EulerAngle;
-}
-
-float Camera::GetMoveSpeed()
-{
-	return m_MoveSpeed;
-}
-
-float Camera::GetRotateSpeed()
-{
-	return m_RotateSpeed;
 }
 
 void Camera::DrawUI()

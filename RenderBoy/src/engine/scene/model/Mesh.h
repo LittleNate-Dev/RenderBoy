@@ -63,25 +63,88 @@ public:
 	bool HasBumpTex();
 	bool HasDisplacementTex();
 	// Get Mesh's members
-	std::vector<Vertex>& GetVertices();
-	std::vector<unsigned int>& GetIndices();
-	std::vector<std::string>& GetDiffuseTexFilePaths();
-	std::vector<std::string>& GetSpecularTexFilePaths();
-	std::vector<std::string>& GetAlbedoTexFilePaths();
-	std::vector<std::string>& GetMetallicTexFilePaths();
-	std::vector<std::string>& GetRoughnessTexFilePaths();
-	std::vector<std::string>& GetAoTexFilePaths();
-	std::vector<std::string>& GetNormalTexFilePaths();
-	std::vector<std::string>& GetBumpTexFilePaths();
-	std::vector<std::string>& GetDisplacementTexFilePaths();
-	glm::vec3 GetAmbientValue();
-	glm::vec3 GetDiffuseValue();
-	glm::vec3 GetSpecularValue();
-	glm::vec3 GetEmissiveValue();
-	float GetReflectionValue();
-	float GetRefractionValue();
-	float GetTransparentValue();
-	float GetDissolveValue();
-	glm::vec3 GetTransmissionValue();
-	unsigned int GetIllumValue();
+	inline std::vector<Vertex>& GetVertices()
+	{
+		return m_Vertices;
+	};
+	inline std::vector<unsigned int>& GetIndices()
+	{
+		return m_Indices;
+	};
+	inline std::vector<std::string>& GetDiffuseTexFilePaths()
+	{
+		return m_AlbedoTexFilePaths;
+	};
+	inline std::vector<std::string>& GetSpecularTexFilePaths()
+	{
+		return m_SpecularTexFilePaths;
+	};
+	inline std::vector<std::string>& GetAlbedoTexFilePaths()
+	{
+		return m_AlbedoTexFilePaths;
+	};
+	inline std::vector<std::string>& GetMetallicTexFilePaths()
+	{
+		return m_MetallicTexFilePaths;
+	};
+	inline std::vector<std::string>& GetRoughnessTexFilePaths()
+	{
+		return m_RoughnessTexFilePaths;
+	};
+	inline std::vector<std::string>& GetAoTexFilePaths()
+	{
+		return m_AoTexFilePaths;
+	};
+	inline std::vector<std::string>& GetNormalTexFilePaths()
+	{
+		return m_NormalTexFilePaths;
+	};
+	inline std::vector<std::string>& GetBumpTexFilePaths()
+	{
+		return m_BumpTexFilePaths;
+	};
+	inline std::vector<std::string>& GetDisplacementTexFilePaths()
+	{
+		return m_DisplacementTexFilePaths;
+	};
+	inline glm::vec3 GetAmbientValue()
+	{
+		return m_AmbientValue;
+	};
+	inline glm::vec3 GetDiffuseValue() const
+	{
+		return m_DiffuseValue;
+	};
+	inline glm::vec3 GetSpecularValue() const
+	{
+		return m_SpecularValue;
+	};
+	inline glm::vec3 GetEmissiveValue() const
+	{
+		return m_EmissiveValue;
+	};
+	inline float GetReflectionValue() const
+	{
+		return m_ReflectionValue;
+	};
+	inline float GetRefractionValue() const
+	{
+		return m_RefractionValue;
+	};
+	inline float GetTransparentValue() const
+	{
+		return m_TransparentValue;
+	};
+	inline float GetDissolveValue() const
+	{
+		return m_DissolveValue;
+	};
+	inline glm::vec3 GetTransmissionValue() const
+	{
+		return m_TransmissionValue;
+	};
+	inline unsigned int GetIllumValue() const
+	{
+		return m_IllumValue;
+	};
 };

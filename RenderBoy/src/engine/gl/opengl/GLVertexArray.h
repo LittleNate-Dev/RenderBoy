@@ -32,5 +32,8 @@ public:
     void Unbind() const;
 
     // Get GLVertexArray's members
-    unsigned int GetID() const;
+    inline unsigned int GetID() const
+    {
+        return m_RendererID;
+    };
 };

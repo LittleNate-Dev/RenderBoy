@@ -25,5 +25,8 @@ public:
     void Unbind() const;
 
     // Get GLVertexBuffer's members
-    unsigned int GetID() const;
+    inline unsigned int GetID() const
+    {
+        return m_RendererID;
+    };
 };

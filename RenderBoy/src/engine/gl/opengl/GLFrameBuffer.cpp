@@ -16,10 +16,10 @@ GLFrameBuffer::~GLFrameBuffer()
 
 void GLFrameBuffer::Init(FBType type)
 {
-	int width = (int)(rbcore::SETTINGS.width * rbcore::SETTINGS.resolution);
-	int height = (int)(rbcore::SETTINGS.height * rbcore::SETTINGS.resolution);
+	int width = (int)(rbcore::SETTINGS.Width * rbcore::SETTINGS.Resolution);
+	int height = (int)(rbcore::SETTINGS.Height * rbcore::SETTINGS.Resolution);
 	int msaa;
-	switch (rbcore::SETTINGS.aa)
+	switch (rbcore::SETTINGS.AA)
 	{
 	case MSAA4X:
 		msaa = 4;
@@ -61,7 +61,7 @@ void GLFrameBuffer::Init(FBType type)
 		// Render buffer
 		GLCall(glGenRenderbuffers(1, &m_RenderBufferID));
 		GLCall(glBindRenderbuffer(GL_RENDERBUFFER, m_RenderBufferID));
-		GLCall(glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height));
+		GLCall(glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH32F_STENCIL8, width, height));
 		GLCall(glBindRenderbuffer(GL_RENDERBUFFER, 0));
 		// Color buffer
 		GLCall(glBindTexture(GL_TEXTURE_2D, m_TexID));
@@ -77,7 +77,7 @@ void GLFrameBuffer::Init(FBType type)
 		// Render buffer
 		GLCall(glGenRenderbuffers(1, &m_RenderBufferID));
 		GLCall(glBindRenderbuffer(GL_RENDERBUFFER, m_RenderBufferID));
-		GLCall(glRenderbufferStorageMultisample(GL_RENDERBUFFER, msaa, GL_DEPTH24_STENCIL8, width, height));
+		GLCall(glRenderbufferStorageMultisample(GL_RENDERBUFFER, msaa, GL_DEPTH32F_STENCIL8, width, height));
 		GLCall(glBindRenderbuffer(GL_RENDERBUFFER, 0));
 		// Color buffer
 		GLCall(glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, m_TexID));
@@ -176,10 +176,10 @@ void GLFrameBuffer::UnbindTex() const
 
 void GLFrameBuffer::ChangeResolution()
 {
-	int width = (int)(rbcore::SETTINGS.width * rbcore::SETTINGS.resolution);
-	int height = (int)(rbcore::SETTINGS.height * rbcore::SETTINGS.resolution);
+	int width = (int)(rbcore::SETTINGS.Width * rbcore::SETTINGS.Resolution);
+	int height = (int)(rbcore::SETTINGS.Height * rbcore::SETTINGS.Resolution);
 	int msaa;
-	switch (rbcore::SETTINGS.aa)
+	switch (rbcore::SETTINGS.AA)
 	{
 	case MSAA4X:
 		msaa = 4;
@@ -226,10 +226,10 @@ void GLFrameBuffer::ChangeMSAA()
 {
 	if (m_Type == MSAA)
 	{
-		int width = (int)(rbcore::SETTINGS.width * rbcore::SETTINGS.resolution);
-		int height = (int)(rbcore::SETTINGS.height * rbcore::SETTINGS.resolution);
+		int width = (int)(rbcore::SETTINGS.Width * rbcore::SETTINGS.Resolution);
+		int height = (int)(rbcore::SETTINGS.Height * rbcore::SETTINGS.Resolution);
 		int msaa;
-		switch (rbcore::SETTINGS.aa)
+		switch (rbcore::SETTINGS.AA)
 		{
 		case MSAA4X:
 			msaa = 4;

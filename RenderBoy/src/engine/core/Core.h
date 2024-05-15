@@ -66,14 +66,14 @@ enum Core
 	DIRECTX = 2
 };
 
-enum UIStyle
+enum UI_Style
 {
 	DEFAULT_LIGHT = 0,
 	DEFAULT_DARK = 1,
 	SPECTRUM = 2
 };
 
-enum LoadType
+enum Load_Type
 {
 	NO_FILE = 0,
 	RESET_SCENE = 1,
@@ -81,14 +81,14 @@ enum LoadType
 	LOAD_SKYBOX = 3
 };
 
-enum LightType
+enum Light_Type
 {
 	POINT_LIGHT = 0,
 	SPOT_LIGHT = 1,
 	DIRECTIONAL_LIGHT = 2
 };
 
-enum DrawMode
+enum Draw_Mode
 {
 	DEFAULT = 0,
 	WIREFRAME = 1,
@@ -97,7 +97,7 @@ enum DrawMode
 	DEPTH = 4
 };
 
-enum AntiAlising
+enum Anti_Alising
 {
 	NO_AA = 0,
 	MSAA4X = 1,
@@ -106,7 +106,7 @@ enum AntiAlising
 	MSAA32X = 4
 };
 
-enum PostProcess
+enum Post_Process
 {
 	NO_PP = 0,
 	INVERSE = 1,
@@ -118,42 +118,42 @@ enum PostProcess
 // Structures
 struct Settings
 {
-	unsigned int width = 1280;
-	unsigned int height = 720;
-	Core core = OPENGL;
-	UIStyle uiStyle = DEFAULT_LIGHT;
-	std::string fontStyle = "Open Sans";
-	int fontSize = 16;
-	float gamma = 2.2f;
-	DrawMode drawMode = DEFAULT;
-	float resolution = 1.0f;
-	AntiAlising aa = NO_AA;
-	PostProcess pp = NO_PP;
-	bool showNormal = false;
+	unsigned int Width = 1280;
+	unsigned int Height = 720;
+	Core GraphicsCore = OPENGL;
+	UI_Style UIStyle = DEFAULT_LIGHT;
+	std::string FontStyle = "Open Sans";
+	int FontSize = 16;
+	float Gamma = 2.2f;
+	Draw_Mode DrawMode = DEFAULT;
+	float Resolution = 1.0f;
+	Anti_Alising AA = NO_AA;
+	Post_Process PP = NO_PP;
+	bool ShowNormal = false;
 };
 
 struct Vertex
 {
-	glm::vec3 position = glm::vec3(0.0f);
-	glm::vec3 normal = glm::vec3(0.0f);
-	glm::vec2 texCoord = glm::vec2(0.0f);
-	glm::vec4 texIndex = glm::vec4(-1.0f);
-	glm::vec3 tangent = glm::vec3(0.0f);
-	glm::vec3 bitangent = glm::vec3(0.0f);
+	glm::vec3 Position = glm::vec3(0.0f);
+	glm::vec3 Normal = glm::vec3(0.0f);
+	glm::vec2 TexCoord = glm::vec2(0.0f);
+	glm::vec4 TexIndex = glm::vec4(-1.0f);
+	glm::vec3 Tangent = glm::vec3(0.0f);
+	glm::vec3 Bitangent = glm::vec3(0.0f);
 };
 
 struct ModelStatics
 {
-	unsigned int meshCount = 0;
-	unsigned int vertexCount = 0;
-	unsigned int triangleCount = 0;
+	unsigned int MeshCount = 0;
+	unsigned int VertexCount = 0;
+	unsigned int TriangleCount = 0;
 };
 
 struct SceneStatics
 {
-	unsigned int pointLight = 0;
-	unsigned int spotLight = 0;
-	unsigned int directionalLight = 0;
+	unsigned int PointLight = 0;
+	unsigned int SpotLight = 0;
+	unsigned int DirectionalLight = 0;
 };
 
 // Statics and Consts
@@ -163,7 +163,7 @@ namespace rbcore
 	// RenderBoy settings
 	extern Settings SETTINGS;
 	// buffer for loading file
-	extern LoadType LOAD_TYPE;
+	extern Load_Type LOAD_TYPE;
 	extern std::string FILEPATH_BUFFER;
 	extern glm::vec3 NORMAL_COLOR;
 	extern float NORMAL_MAGNITUDE;
@@ -216,7 +216,7 @@ namespace rbcore
 	std::string GetFileName(std::string filepath);
 	std::string GetFileNameNoSuffix(std::string filepath);
 	// Set UI style
-	void SetUiStyle(UIStyle style);
+	void SetUiStyle(UI_Style style);
 	// Get Font Style
 	std::string GetFontStylePath(std::string style);
 	int GetFontStyleIndex(std::string style);

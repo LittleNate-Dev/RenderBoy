@@ -35,8 +35,3 @@ void GLVertexBuffer::Unbind() const
 {
     GLCall(glBindBuffer(GL_ARRAY_BUFFER, 0));
 }
-
-unsigned int GLVertexBuffer::GetID() const
-{
-    return m_RendererID;
-}

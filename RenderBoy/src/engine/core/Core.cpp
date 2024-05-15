@@ -5,7 +5,7 @@
 namespace rbcore
 {
 	Settings SETTINGS;
-	LoadType LOAD_TYPE = NO_FILE;
+	Load_Type LOAD_TYPE = NO_FILE;
 	std::string FILEPATH_BUFFER = "";
 	glm::vec3 NORMAL_COLOR = glm::vec3(1.0f);
 	float NORMAL_MAGNITUDE = 1.0f;
@@ -68,8 +68,8 @@ namespace rbcore
 {
 	glm::vec2 GetRenderResolution()
 	{
-		int width = (int)(rbcore::SETTINGS.width * rbcore::SETTINGS.resolution);
-		int height = (int)(rbcore::SETTINGS.height * rbcore::SETTINGS.resolution);
+		int width = (int)(rbcore::SETTINGS.Width * rbcore::SETTINGS.Resolution);
+		int height = (int)(rbcore::SETTINGS.Height * rbcore::SETTINGS.Resolution);
 		glm::vec2 resolution = glm::vec2(width, height);
 		return resolution;
 	}
@@ -153,7 +153,7 @@ namespace rbcore
 		return fileName;
 	}
 
-	void SetUiStyle(UIStyle style)
+	void SetUiStyle(UI_Style style)
 	{
 		ImGui::COLOR_HIGHTLIGHT_STYLE = 0xC9252D;
 		ImGui::ResetStyleColors();

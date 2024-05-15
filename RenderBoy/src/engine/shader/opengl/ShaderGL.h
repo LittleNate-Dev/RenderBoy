@@ -38,7 +38,10 @@ public:
     bool Init(std::string filepath);
     void Bind() const;
     void Unbind() const;
-    unsigned int GetID() const;
+    inline unsigned int GetID() const
+    {
+        return m_RendererID;
+    };
     // Set uniforms
     void SetUniformHandleARB(std::string name, GLuint64 handle);
     void SetUniform1i(const std::string& name, int value);
