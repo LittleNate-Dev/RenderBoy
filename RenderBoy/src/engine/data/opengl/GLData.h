@@ -1,6 +1,6 @@
 /*
 * Class:
-*	DataGL
+*	GLData
 * Description:
 *	This class contains all data needed when rendering with OpenGL
 */
@@ -16,20 +16,20 @@
 
 struct LightCubeDataGL
 {
-	GLVertexArray va;
-	GLVertexBuffer vb;
-	GLIndexBuffer ib;
+	GLVertexArray VA;
+	GLVertexBuffer VB;
+	GLIndexBuffer IB;
 };
 
 struct ModelDataGL
 {
-	GLVertexArray va;
-	GLVertexBuffer vb;
-	GLVertexBuffer instanceVb;
-	GLIndexBuffer ib;
+	GLVertexArray VA;
+	GLVertexBuffer VB;
+	GLVertexBuffer InstanceVB;
+	GLIndexBuffer IB;
 };
 
-class DataGL
+class GLData
 {
 private:
 	LightCubeDataGL m_PointLightCube;
@@ -38,8 +38,8 @@ private:
 	std::map<std::string, ModelDataGL> m_ModelData;
 
 public:
-	DataGL();
-	~DataGL();
+	GLData();
+	~GLData();
 
 	void Init();
 	void Reset();
@@ -49,5 +49,8 @@ public:
 	bool RenameModel(std::string oldName, std::string newName);
 	// Get Data's members
 	LightCubeDataGL& GetLightCube(Light_Type type);
-	std::map<std::string, ModelDataGL>& GetModelData();
+	inline std::map<std::string, ModelDataGL>& GetModelData()
+	{
+		return m_ModelData;
+	};
 };

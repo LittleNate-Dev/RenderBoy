@@ -95,17 +95,18 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\engine\data\opengl\texture\GLCubeMap.cpp" />
     <ClCompile Include="src\engine\data\opengl\texture\GLTexture.cpp" />
-    <ClCompile Include="src\engine\shader\opengl\ShaderGL.cpp" />
+    <ClCompile Include="src\engine\shader\opengl\GLShader.cpp" />
     <ClCompile Include="src\engine\data\Data.cpp" />
-    <ClCompile Include="src\engine\data\opengl\DataGL.cpp" />
+    <ClCompile Include="src\engine\data\opengl\GLData.cpp" />
     <ClCompile Include="src\engine\gl\opengl\GLFrameBuffer.cpp" />
     <ClCompile Include="src\engine\gl\opengl\GLIndexBuffer.cpp" />
     <ClCompile Include="src\engine\gl\opengl\GLVertexArray.cpp" />
     <ClCompile Include="src\engine\gl\opengl\GLVertexBuffer.cpp" />
     <ClCompile Include="src\engine\gl\opengl\GLVertexBufferLayout.cpp" />
     <ClCompile Include="src\engine\renderer\Renderer.cpp" />
-    <ClCompile Include="src\engine\renderer\opengl\RendererGL.cpp" />
+    <ClCompile Include="src\engine\renderer\opengl\GLRenderer.cpp" />
     <ClCompile Include="src\engine\scene\light\SpotLight.cpp" />
     <ClCompile Include="src\engine\scene\light\DirectionalLight.cpp" />
     <ClCompile Include="src\engine\scene\light\PointLight.cpp" />
@@ -128,17 +129,18 @@
     <ClCompile Include="src\vendor\imgui\imgui_widgets.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\engine\data\opengl\texture\GLCubeMap.h" />
     <ClInclude Include="src\engine\data\opengl\texture\GLTexture.h" />
-    <ClInclude Include="src\engine\shader\opengl\ShaderGL.h" />
+    <ClInclude Include="src\engine\shader\opengl\GLShader.h" />
     <ClInclude Include="src\engine\data\Data.h" />
-    <ClInclude Include="src\engine\data\opengl\DataGL.h" />
+    <ClInclude Include="src\engine\data\opengl\GLData.h" />
     <ClInclude Include="src\engine\gl\opengl\GLFrameBuffer.h" />
     <ClInclude Include="src\engine\gl\opengl\GLIndexBuffer.h" />
     <ClInclude Include="src\engine\gl\opengl\GLVertexArray.h" />
     <ClInclude Include="src\engine\gl\opengl\GLVertexBuffer.h" />
     <ClInclude Include="src\engine\gl\opengl\GLVertexBufferLayout.h" />
     <ClInclude Include="src\engine\renderer\Renderer.h" />
-    <ClInclude Include="src\engine\renderer\opengl\RendererGL.h" />
+    <ClInclude Include="src\engine\renderer\opengl\GLRenderer.h" />
     <ClInclude Include="src\engine\scene\light\SpotLight.h" />
     <ClInclude Include="src\engine\scene\light\DirectionalLight.h" />
     <ClInclude Include="src\engine\scene\light\PointLight.h" />

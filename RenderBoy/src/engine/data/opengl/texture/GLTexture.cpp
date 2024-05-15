@@ -29,6 +29,7 @@ void GLTexture::GenTexture(const std::string filepath)
     }
     m_FilePath = filepath;
     // Generate texture id and handle
+    GLCall(glDeleteTextures(1, &m_RendererID));
     GLCall(glGenTextures(1, &m_RendererID));
     GLCall(glBindTexture(GL_TEXTURE_2D, m_RendererID));
     GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));

@@ -7,12 +7,12 @@
 
 #pragma once
 
-#include "opengl/DataGL.h"
+#include "opengl/GLData.h"
 
 class Data
 {
 private:
-	DataGL m_DataGL;
+	GLData m_DataGL;
 
 public:
 	Data();
@@ -25,5 +25,5 @@ public:
 	void DeleteModel(std::string name);
 	void RenameModel(std::string oldName, std::string newName);
 	// Get Data's members
-	DataGL& GetDataGL();
+	GLData& GetDataGL();
 };

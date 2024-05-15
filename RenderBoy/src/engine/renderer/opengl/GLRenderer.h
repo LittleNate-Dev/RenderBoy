@@ -1,6 +1,6 @@
 /*
 * Class:
-*	RendererGL
+*	GLRenderer
 * Description:
 *	This class use OpenGL to draw everything in the scene on the screen
 */
@@ -10,30 +10,30 @@
 #include "core/Core.h"
 #include "scene/Scene.h"
 #include "gl/opengl/GLFrameBuffer.h"
-#include "shader/opengl/ShaderGL.h"
+#include "shader/opengl/GLShader.h"
 #include "data/opengl/texture/GLTexture.h"
 
 struct Frame
 {
-	GLFrameBuffer fb;
-	GLFrameBuffer fbMsaa;
-	GLVertexArray va;
-	GLVertexBuffer vb;
-	GLIndexBuffer ib;
+	GLFrameBuffer FB;
+	GLFrameBuffer FBMsaa;
+	GLVertexArray VA;
+	GLVertexBuffer VB;
+	GLIndexBuffer IB;
 };
 
 struct Shaders
 {
-	ShaderGL wireframe;
-	ShaderGL pointcloud;
-	ShaderGL depth;
-	ShaderGL normal;
-	ShaderGL uvset;
-	ShaderGL lightcube;
-	ShaderGL screen;
+	GLShader Wireframe;
+	GLShader Pointcloud;
+	GLShader Depth;
+	GLShader Normal;
+	GLShader UVset;
+	GLShader Lightcube;
+	GLShader Screen;
 };
 
-class RendererGL
+class GLRenderer
 {
 private:
 	Frame m_Frame;
@@ -49,8 +49,8 @@ private:
 	void DrawLightCube(Scene& scene);
 
 public:
-	RendererGL();
-	~RendererGL();
+	GLRenderer();
+	~GLRenderer();
 
 	void Init();
 	void Draw(Scene& scene);

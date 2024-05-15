@@ -1,14 +1,14 @@
-#include "DataGL.h"
+#include "GLData.h"
 
-DataGL::DataGL()
+GLData::GLData()
 {
 }
 
-DataGL::~DataGL()
+GLData::~GLData()
 {
 }
 
-void DataGL::Init()
+void GLData::Init()
 {
 	// Initialize point light's cube
 	{
@@ -30,12 +30,12 @@ void DataGL::Init()
 			5, 3, 4,
 			5, 4, 1
 		};
-		m_PointLightCube.va.GenVertexArray();
-		m_PointLightCube.vb.GenVertexBuffer(position, sizeof(position));
-		m_PointLightCube.ib.GenIndexBuffer(indices, 24);
+		m_PointLightCube.VA.GenVertexArray();
+		m_PointLightCube.VB.GenVertexBuffer(position, sizeof(position));
+		m_PointLightCube.IB.GenIndexBuffer(indices, 24);
 		GLVertexBufferLayout layout;
 		layout.Push<float>(3);
-		m_PointLightCube.va.AddBuffer(m_PointLightCube.vb, layout);
+		m_PointLightCube.VA.AddBuffer(m_PointLightCube.VB, layout);
 	}
 	// Initialize spot light's cube
 	{
@@ -54,12 +54,12 @@ void DataGL::Init()
 			4, 1, 2,
 			4, 2, 3
 		};
-		m_SpotLightCube.va.GenVertexArray();
-		m_SpotLightCube.vb.GenVertexBuffer(position, sizeof(position));
-		m_SpotLightCube.ib.GenIndexBuffer(indices, 18);
+		m_SpotLightCube.VA.GenVertexArray();
+		m_SpotLightCube.VB.GenVertexBuffer(position, sizeof(position));
+		m_SpotLightCube.IB.GenIndexBuffer(indices, 18);
 		GLVertexBufferLayout layout;
 		layout.Push<float>(3);
-		m_SpotLightCube.va.AddBuffer(m_SpotLightCube.vb, layout);
+		m_SpotLightCube.VA.AddBuffer(m_SpotLightCube.VB, layout);
 	}
 	// Initialize directional light's cube
 	{
@@ -87,21 +87,21 @@ void DataGL::Init()
 			4, 3, 0,
 			4, 7, 3
 		};
-		m_DirLightCube.va.GenVertexArray();
-		m_DirLightCube.vb.GenVertexBuffer(position, sizeof(position));
-		m_DirLightCube.ib.GenIndexBuffer(indices, 36);
+		m_DirLightCube.VA.GenVertexArray();
+		m_DirLightCube.VB.GenVertexBuffer(position, sizeof(position));
+		m_DirLightCube.IB.GenIndexBuffer(indices, 36);
 		GLVertexBufferLayout layout;
 		layout.Push<float>(3);
-		m_DirLightCube.va.AddBuffer(m_DirLightCube.vb, layout);
+		m_DirLightCube.VA.AddBuffer(m_DirLightCube.VB, layout);
 	}
 }
 
-void DataGL::Reset()
+void GLData::Reset()
 {
 	m_ModelData.clear();
 }
 
-void DataGL::AddModel(std::string name, Model model)
+void GLData::AddModel(std::string name, Model model)
 {
 	ModelDataGL modelData;
 	m_ModelData.insert(std::pair<std::string, ModelDataGL>(name, modelData));
@@ -116,9 +116,9 @@ void DataGL::AddModel(std::string name, Model model)
 		}
 		vertices.insert(vertices.end(), model.GetMeshes()[i].GetVertices().begin(), model.GetMeshes()[i].GetVertices().end());
 	}
-	m_ModelData[name].va.GenVertexArray();
-	m_ModelData[name].vb.GenVertexBuffer(&vertices[0], (unsigned int)vertices.size() * sizeof(Vertex));
-	m_ModelData[name].ib.GenIndexBuffer(&indices[0], (unsigned int)indices.size());
+	m_ModelData[name].VA.GenVertexArray();
+	m_ModelData[name].VB.GenVertexBuffer(&vertices[0], (unsigned int)vertices.size() * sizeof(Vertex));
+	m_ModelData[name].IB.GenIndexBuffer(&indices[0], (unsigned int)indices.size());
 	GLVertexBufferLayout layout;
 	//vertex positions
 	layout.Push<float>(3);
@@ -132,19 +132,19 @@ void DataGL::AddModel(std::string name, Model model)
 	layout.Push<float>(3);
 	//vertex bitangent
 	layout.Push<float>(3);
-	m_ModelData[name].va.AddBuffer(m_ModelData[name].vb, layout);
+	m_ModelData[name].VA.AddBuffer(m_ModelData[name].VB, layout);
 	// Add model matrix as vertex attribute
-	m_ModelData[name].instanceVb.GenVertexBuffer(&model.GetModelMats()[0], (unsigned int)model.GetModelMats().size() * sizeof(glm::mat4));
+	m_ModelData[name].InstanceVB.GenVertexBuffer(&model.GetModelMats()[0], (unsigned int)model.GetModelMats().size() * sizeof(glm::mat4));
 	GLVertexBufferLayout instanceLayout;
 	instanceLayout.Push<float>(4);
 	instanceLayout.Push<float>(4);
 	instanceLayout.Push<float>(4);
 	instanceLayout.Push<float>(4);
-	m_ModelData[name].va.AddBuffer(m_ModelData[name].instanceVb, instanceLayout, 1);
+	m_ModelData[name].VA.AddBuffer(m_ModelData[name].InstanceVB, instanceLayout, 1);
 
 }
 
-bool DataGL::DeleteModel(std::string name)
+bool GLData::DeleteModel(std::string name)
 {
 	if (m_ModelData.find(name) != m_ModelData.end())
 	{
@@ -154,7 +154,7 @@ bool DataGL::DeleteModel(std::string name)
 	return false;
 }
 
-bool DataGL::RenameModel(std::string oldName, std::string newName)
+bool GLData::RenameModel(std::string oldName, std::string newName)
 {
 	if (m_ModelData.find(oldName) != m_ModelData.end())
 	{
@@ -166,7 +166,7 @@ bool DataGL::RenameModel(std::string oldName, std::string newName)
 	return false;
 }
 
-LightCubeDataGL& DataGL::GetLightCube(Light_Type type)
+LightCubeDataGL& GLData::GetLightCube(Light_Type type)
 {
 	switch (type)
 	{
@@ -177,9 +177,4 @@ LightCubeDataGL& DataGL::GetLightCube(Light_Type type)
 	case DIRECTIONAL_LIGHT:
 		return m_DirLightCube;
 	}
-}
-
-std::map<std::string, ModelDataGL>& DataGL::GetModelData()
-{
-	return m_ModelData;
 }

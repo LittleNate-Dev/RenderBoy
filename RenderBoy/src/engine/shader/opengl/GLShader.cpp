@@ -1,16 +1,16 @@
-#include "ShaderGL.h"
+#include "GLShader.h"
 
-ShaderGL::ShaderGL()
+GLShader::GLShader()
 {
 	m_RendererID = 0;
 }
 
-ShaderGL::~ShaderGL()
+GLShader::~GLShader()
 {
     GLCall(glDeleteProgram(m_RendererID));
 }
 
-bool ShaderGL::Init(std::string filepath)
+bool GLShader::Init(std::string filepath)
 {
     GLCall(glDeleteProgram(m_RendererID));
     m_FilePath = filepath;
@@ -26,7 +26,7 @@ bool ShaderGL::Init(std::string filepath)
     }
 }
 
-ShaderProgramSource ShaderGL::ParseShader(std::string filepath)
+ShaderProgramSource GLShader::ParseShader(std::string filepath)
 {
     std::ifstream stream(filepath);
     enum class ShaderType
@@ -72,7 +72,7 @@ ShaderProgramSource ShaderGL::ParseShader(std::string filepath)
     return sps;
 }
 
-unsigned int ShaderGL::CreateShader(const ShaderProgramSource& source)
+unsigned int GLShader::CreateShader(const ShaderProgramSource& source)
 {
     unsigned int program = glCreateProgram();
     unsigned int vs, gs, fs;
@@ -110,7 +110,7 @@ unsigned int ShaderGL::CreateShader(const ShaderProgramSource& source)
     return program;
 }
 
-unsigned int ShaderGL::CompileShader(unsigned int type, const std::string& source)
+unsigned int GLShader::CompileShader(unsigned int type, const std::string& source)
 {
     unsigned int id = glCreateShader(type);
     const char* src = source.c_str();
@@ -146,7 +146,7 @@ unsigned int ShaderGL::CompileShader(unsigned int type, const std::string& sourc
     return id;
 }
 
-int ShaderGL::GetUniformLocation(const std::string& name)
+int GLShader::GetUniformLocation(const std::string& name)
 {
     if (m_UniformLocationCache.find(name) != m_UniformLocationCache.end())
     {
@@ -161,52 +161,52 @@ int ShaderGL::GetUniformLocation(const std::string& name)
     return location;
 }
 
-void ShaderGL::Bind() const
+void GLShader::Bind() const
 {
     GLCall(glUseProgram(m_RendererID));
 }
 
-void ShaderGL::Unbind() const
+void GLShader::Unbind() const
 {
     GLCall(glUseProgram(0));
 }
 
-void ShaderGL::SetUniformHandleARB(std::string name, GLuint64 handle)
+void GLShader::SetUniformHandleARB(std::string name, GLuint64 handle)
 {
     GLCall(glUniformHandleui64ARB(glGetUniformLocation(m_RendererID, name.c_str()), handle));
 }
 
-void ShaderGL::SetUniform1i(const std::string& name, int value)
+void GLShader::SetUniform1i(const std::string& name, int value)
 {
     GLCall(glUniform1i(GetUniformLocation(name), value));
 }
 
-void ShaderGL::SetUniform1f(const std::string& name, float value)
+void GLShader::SetUniform1f(const std::string& name, float value)
 {
     GLCall(glUniform1f(GetUniformLocation(name), value));
 }
 
-void ShaderGL::SetUniform4f(const std::string& name, float v0, float v1, float v2, float v3)
+void GLShader::SetUniform4f(const std::string& name, float v0, float v1, float v2, float v3)
 {
     GLCall(glUniform4f(GetUniformLocation(name), v0, v1, v2, v3));
 }
 
-void ShaderGL::SetUniformVec2f(const std::string& name, const glm::vec2& vector)
+void GLShader::SetUniformVec2f(const std::string& name, const glm::vec2& vector)
 {
     GLCall(glUniform2fv(GetUniformLocation(name), 1, &vector[0]));
 }
 
-void ShaderGL::SetUniformVec3f(const std::string& name, const glm::vec3& vector)
+void GLShader::SetUniformVec3f(const std::string& name, const glm::vec3& vector)
 {
     GLCall(glUniform3fv(GetUniformLocation(name), 1, &vector[0]));
 }
 
-void ShaderGL::SetUniformVec4f(const std::string& name, const glm::vec4& vector)
+void GLShader::SetUniformVec4f(const std::string& name, const glm::vec4& vector)
 {
     GLCall(glUniform4fv(GetUniformLocation(name), 1, &vector[0]));
 }
 
-void ShaderGL::SetUniformMat4f(const std::string& name, const glm::mat4& matrix)
+void GLShader::SetUniformMat4f(const std::string& name, const glm::mat4& matrix)
 {
     GLCall(glUniformMatrix4fv(GetUniformLocation(name), 1, GL_FALSE, &matrix[0][0]));
 }

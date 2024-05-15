@@ -68,7 +68,7 @@ void Data::RenameModel(std::string oldName, std::string newName)
 	}
 }
 
-DataGL& Data::GetDataGL()
+GLData& Data::GetDataGL()
 {
 	return m_DataGL;
 }

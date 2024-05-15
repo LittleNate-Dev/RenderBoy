@@ -8,12 +8,12 @@
 #pragma once
 
 #include "core/Core.h"
-#include "opengl/RendererGL.h"
+#include "opengl/GLRenderer.h"
 
 class Renderer
 {
 private:
-	RendererGL m_RendererGL;
+	GLRenderer m_RendererGL;
 
 public:
 	Renderer();

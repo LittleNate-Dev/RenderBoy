@@ -19,7 +19,7 @@ struct ShaderProgramSource
     std::string FragmentSource;
 };
 
-class ShaderGL
+class GLShader
 {
 private:
     unsigned int m_RendererID;
@@ -32,8 +32,8 @@ private:
     int GetUniformLocation(const std::string& name);
 
 public:
-    ShaderGL();
-    ~ShaderGL();
+    GLShader();
+    ~GLShader();
 
     bool Init(std::string filepath);
     void Bind() const;
