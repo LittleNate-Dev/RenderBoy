@@ -115,6 +115,12 @@ enum Post_Process
 	EDGE = 4
 };
 
+enum Skybox_Type
+{
+	PURE_COLOR = 1,
+	MOUNTAIN_LAKE = 2
+};
+
 // Structures
 struct Settings
 {
@@ -130,6 +136,7 @@ struct Settings
 	Anti_Alising AA = NO_AA;
 	Post_Process PP = NO_PP;
 	bool ShowNormal = false;
+	Skybox_Type SkyboxType = PURE_COLOR;
 };
 
 struct Vertex

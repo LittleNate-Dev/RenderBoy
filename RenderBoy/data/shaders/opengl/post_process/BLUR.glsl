@@ -50,7 +50,7 @@ void main()
     for(int i = 0; i < 9; i++)
     {
         sampleTex[i] = texture(u_ScreenTex, v_TexCoord + offsets[i]).rgb;
-        sampleTex[i] = vec3(1.0) - exp(-sampleTex[i] * 1.0);
+        sampleTex[i] = vec3(1.0) - exp(-sampleTex[i] * 2.0);
         sampleTex[i] = pow(sampleTex[i], vec3(1.0 / u_Gamma));
     }
 

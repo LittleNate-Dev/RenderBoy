@@ -80,11 +80,15 @@ bool Application::LoadSettings()
             }
             if (line.find("#ANTI_ALISING") != std::string::npos)
             {
-                rbcore::SETTINGS.AA = (Anti_Alising)std::atof(rbcore::GetSettingValue(line).c_str());
+                rbcore::SETTINGS.AA = (Anti_Alising)std::atoi(rbcore::GetSettingValue(line).c_str());
             }
             if (line.find("#POST_PROCESS") != std::string::npos)
             {
-                rbcore::SETTINGS.PP = (Post_Process)std::atof(rbcore::GetSettingValue(line).c_str());
+                rbcore::SETTINGS.PP = (Post_Process)std::atoi(rbcore::GetSettingValue(line).c_str());
+            }
+            if (line.find("#SKYBOX") != std::string::npos)
+            {
+                rbcore::SETTINGS.SkyboxType = (Skybox_Type)std::atoi(rbcore::GetSettingValue(line).c_str());
             }
             if (line.find("#CAMERA_TYPE") != std::string::npos)
             {
@@ -168,6 +172,8 @@ void Application::SaveSettings()
     line = "#ANTI_ALISING " + std::to_string(rbcore::SETTINGS.AA) + "\n";
     stream << line;
     line = "#POST_PROCESS " + std::to_string(rbcore::SETTINGS.PP) + "\n";
+    stream << line;
+    line = "#SKYBOX " + std::to_string(rbcore::SETTINGS.SkyboxType) + "\n";
     stream << line;
     line = "#CAMERA_TYPE " + std::to_string(m_Scene.GetCamera().GetCameraType()) + "\n";
     stream << line;
@@ -818,6 +824,23 @@ void Application::DrawSettingWindow()
                     ImGui::InputFloat("##NormalMagnitude", &rbcore::NORMAL_MAGNITUDE);
                     ImGui::PopItemWidth();
                 }
+            }
+            // SKybox
+            {
+                ImGui::CenterAlignWidget("Skybox", 150.0f);
+                ImGui::LabelHighlighted("Skybox");
+                ImGui::PushItemWidth(150.0f);
+                const char* skyboxOps[] = {
+                    "Color",
+                    "Mountain Lake"
+                };
+                static int currentSkybox = rbcore::SETTINGS.SkyboxType;
+                if (ImGui::Combo("##Skybox", &currentSkybox, skyboxOps, IM_ARRAYSIZE(skyboxOps)))
+                {
+                    rbcore::SETTINGS.SkyboxType = (Skybox_Type)currentSkybox;
+                    m_Renderer.ChangeSkybox();
+                }
+                ImGui::PopItemWidth();
             }
             // Post-Process
             {

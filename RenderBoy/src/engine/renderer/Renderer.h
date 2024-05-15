@@ -27,4 +27,5 @@ public:
 	void ChangeResolution();
 	void ChangeMSAA();
 	void ChangePostProcess();
+	void ChangeSkybox();
 };

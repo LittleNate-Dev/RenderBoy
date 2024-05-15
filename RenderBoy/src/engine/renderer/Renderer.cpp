@@ -97,3 +97,16 @@ void Renderer::ChangePostProcess()
 		break;
 	}
 }
+
+void Renderer::ChangeSkybox()
+{
+	spdlog::warn((int)rbcore::SETTINGS.SkyboxType);
+	/*switch (rbcore::SETTINGS.GraphicsCore)
+	{
+	case OPENGL:
+		m_RendererGL.ChangePostProcess();
+		break;
+	default:
+		break;
+	}*/
+}
