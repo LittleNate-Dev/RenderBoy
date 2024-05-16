@@ -13,15 +13,17 @@
 #include "gl/opengl/GLVertexBuffer.h"
 #include "gl/opengl/GLVertexBufferLayout.h"
 #include "gl/opengl/GLIndexBuffer.h"
+#include "data/opengl/texture/GLTexture.h"
+#include "data/opengl/texture/GLCubeMap.h"
 
-struct LightCubeDataGL
+struct GLLightCubeData
 {
 	GLVertexArray VA;
 	GLVertexBuffer VB;
 	GLIndexBuffer IB;
 };
 
-struct ModelDataGL
+struct GLModelData
 {
 	GLVertexArray VA;
 	GLVertexBuffer VB;
@@ -29,13 +31,23 @@ struct ModelDataGL
 	GLIndexBuffer IB;
 };
 
+struct GLSkyboxData
+{
+	GLVertexArray VA;
+	GLVertexBuffer VB;
+	GLIndexBuffer IB;
+	GLCubeMap Skybox;
+};
+
 class GLData
 {
 private:
-	LightCubeDataGL m_PointLightCube;
-	LightCubeDataGL m_SpotLightCube;
-	LightCubeDataGL m_DirLightCube;
-	std::map<std::string, ModelDataGL> m_ModelData;
+	GLSkyboxData m_SkyboxData;
+	GLLightCubeData m_PointLightCube;
+	GLLightCubeData m_SpotLightCube;
+	GLLightCubeData m_DirLightCube;
+	std::map<std::string, GLModelData> m_ModelData;
+
 
 public:
 	GLData();
@@ -47,9 +59,14 @@ public:
 	void AddModel(std::string name, Model model);
 	bool DeleteModel(std::string name);
 	bool RenameModel(std::string oldName, std::string newName);
+	bool LoadSkybox(std::vector<std::string> filepath);
 	// Get Data's members
-	LightCubeDataGL& GetLightCube(Light_Type type);
-	inline std::map<std::string, ModelDataGL>& GetModelData()
+	inline GLSkyboxData& GetSkybox()
+	{
+		return m_SkyboxData;
+	};
+	GLLightCubeData& GetLightCube(Light_Type type);
+	inline std::map<std::string, GLModelData>& GetModelData()
 	{
 		return m_ModelData;
 	};

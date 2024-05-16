@@ -15,6 +15,13 @@
 #include "light/SpotLight.h"
 #include "light/DirectionalLight.h"
 
+struct Skybox
+{
+	Skybox_Type Type = PURE_COLOR;
+	glm::vec3 Color = glm::vec3(1.0f);
+	std::vector<std::string> Filepath;
+};
+
 class Scene
 {
 private:
@@ -22,6 +29,7 @@ private:
 	std::string m_Name;
 	Data m_Data;
 	Camera m_Camera;
+	Skybox m_Skybox;
 	std::vector<std::string> m_ModelList;
 	std::map<std::string, Model> m_Models;
 	std::vector<std::string> m_PointLightList;
@@ -32,6 +40,7 @@ private:
 	std::map<std::string, DirectionalLight> m_DirLights;
 
 	// Draw windows
+	void DrawSceneWindow();
 	void DrawModelsWindow();
 	void DrawCameraWindow();
 	void DrawLightsWindow();
@@ -84,6 +93,10 @@ public:
 	inline Camera& GetCamera()
 	{
 		return m_Camera;
+	};
+	inline Skybox& GetSkybox()
+	{
+		return m_Skybox;
 	};
 	inline std::vector<std::string>& GetModelList()
 	{

@@ -33,6 +33,7 @@ void main()
     if (u_UseTex)
     {
         v_FragColor = texture(u_Skybox, v_TexCoord);
+        //v_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
     }
     else
     {

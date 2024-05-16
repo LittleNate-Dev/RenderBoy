@@ -325,7 +325,6 @@ inline void ImGui::FileBrowser::Display()
     isOpened_ = false;
 
     // open the popup window
-
     if(openFlag_ && (flags_ & ImGuiFileBrowserFlags_NoModal))
     {
         if(posIsSet_)
@@ -366,7 +365,10 @@ inline void ImGui::FileBrowser::Display()
     ScopeGuard endPopup([] { EndPopup(); });
 
     // display elements in pwd
-
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    ImVec2 displaySize = io.DisplaySize;
+    ImVec2 windowSize = ImGui::GetWindowSize();
+    ImGui::SetWindowPos(ImVec2((displaySize.x - windowSize.x) / 2.0f, (displaySize.y - windowSize.y) / 2.0f));
 #ifdef _WIN32
     char currentDrive = static_cast<char>(pwd_.c_str()[0]);
     char driveStr[] = { currentDrive, ':', '\0' };

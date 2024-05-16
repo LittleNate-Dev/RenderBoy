@@ -19,7 +19,7 @@ public:
 	Renderer();
 	~Renderer();
 
-	void Init();
+	void Init(Scene& scene);
 	void Draw(Scene& scene);
 	void Clear();
 
@@ -27,5 +27,5 @@ public:
 	void ChangeResolution();
 	void ChangeMSAA();
 	void ChangePostProcess();
-	void ChangeSkybox();
+	void ChangeSkybox(Scene& scene);
 };

@@ -68,6 +68,22 @@ void Data::RenameModel(std::string oldName, std::string newName)
 	}
 }
 
+bool Data::LoadSkybox(std::vector<std::string> filepath)
+{
+	switch (rbcore::SETTINGS.GraphicsCore)
+	{
+	case OPENGL:
+		if (m_DataGL.LoadSkybox(filepath))
+		{
+			return true;
+		}
+		break;
+	default:
+		break;
+	}
+	return false;
+}
+
 GLData& Data::GetDataGL()
 {
 	return m_DataGL;

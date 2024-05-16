@@ -10,6 +10,40 @@ GLData::~GLData()
 
 void GLData::Init()
 {
+	// Initialize VAO to draw skybox
+	{
+		float position[] = {
+			// positions          
+			-1.0f,  1.0f, -1.0f, //0
+			-1.0f, -1.0f, -1.0f, //1
+			 1.0f, -1.0f, -1.0f, //2
+			 1.0f,  1.0f, -1.0f, //3
+			-1.0f, -1.0f,  1.0f, //4
+			-1.0f,  1.0f,  1.0f, //5
+			 1.0f, -1.0f,  1.0f, //6
+			 1.0f,  1.0f,  1.0f  //7
+		};
+		unsigned int indices[] = {
+			0, 1, 2,
+			2, 3, 0,
+			4, 1, 0,
+			0, 5, 4,
+			2, 6, 7,
+			7 ,3, 2,
+			4, 5, 7,
+			7, 6, 4,
+			0, 3, 7,
+			7, 5, 0,
+			1, 4, 2,
+			2, 4, 6
+		};
+		m_SkyboxData.VA.GenVertexArray();
+		m_SkyboxData.VB.GenVertexBuffer(position, sizeof(position));
+		m_SkyboxData.IB.GenIndexBuffer(indices, 36);
+		GLVertexBufferLayout layout;
+		layout.Push<float>(3);
+		m_SkyboxData.VA.AddBuffer(m_SkyboxData.VB, layout);
+	}
 	// Initialize point light's cube
 	{
 		float position[] = {
@@ -99,12 +133,14 @@ void GLData::Init()
 void GLData::Reset()
 {
 	m_ModelData.clear();
+	GLCubeMap newCubeMap;
+	m_SkyboxData.Skybox = newCubeMap;
 }
 
 void GLData::AddModel(std::string name, Model model)
 {
-	ModelDataGL modelData;
-	m_ModelData.insert(std::pair<std::string, ModelDataGL>(name, modelData));
+	GLModelData modelData;
+	m_ModelData.insert(std::pair<std::string, GLModelData>(name, modelData));
 	std::vector<Vertex> vertices;
 	std::vector<unsigned int> indices;
 	for (unsigned int i = 0; i < model.GetMeshes().size(); i++)
@@ -166,7 +202,16 @@ bool GLData::RenameModel(std::string oldName, std::string newName)
 	return false;
 }
 
-LightCubeDataGL& GLData::GetLightCube(Light_Type type)
+bool GLData::LoadSkybox(std::vector<std::string> filepath)
+{
+	if (m_SkyboxData.Skybox.GenTexture(filepath))
+	{
+		return true;
+	}
+	return false;
+}
+
+GLLightCubeData& GLData::GetLightCube(Light_Type type)
 {
 	switch (type)
 	{

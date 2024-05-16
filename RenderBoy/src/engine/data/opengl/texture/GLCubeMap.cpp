@@ -1,18 +1,18 @@
 #include "GLCubeMap.h"
 
-GLCubemap::GLCubemap()
+GLCubeMap::GLCubeMap()
 {
 	m_RendererID = 0;
 	m_Handle = 0;
     m_LocalBuffer = nullptr;
 }
 
-GLCubemap::~GLCubemap()
+GLCubeMap::~GLCubeMap()
 {
 	GLCall(glDeleteTextures(1, &m_RendererID));
 }
 
-bool GLCubemap::GenTexture(std::vector<std::string> filepath)
+bool GLCubeMap::GenTexture(std::vector<std::string> filepath)
 {
     GLCall(glDeleteTextures(1, &m_RendererID));
     GLCall(glGenTextures(1, &m_RendererID));
@@ -20,11 +20,19 @@ bool GLCubemap::GenTexture(std::vector<std::string> filepath)
     for (unsigned int i = 0; i < filepath.size(); i++)
     {
         m_LocalBuffer = FreeImage_Load(FreeImage_GetFileType(filepath[i].c_str(), 0), filepath[i].c_str());
+        FreeImage_FlipVertical(m_LocalBuffer);
         m_Widths.push_back(FreeImage_GetWidth(m_LocalBuffer));
         m_Heights.push_back(FreeImage_GetHeight(m_LocalBuffer));
         if (m_LocalBuffer)
         {
-            GLCall(glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, m_Widths[i], m_Heights[i], 0, GL_RGB, GL_UNSIGNED_BYTE, (void*)FreeImage_GetBits(m_LocalBuffer)));
+            if (rbcore::GetFileFormat(filepath[0]) == "jpg" || rbcore::GetFileFormat(filepath[0]) == "jpeg")
+            {
+                GLCall(glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_SRGB8, m_Widths[i], m_Heights[i], 0, GL_BGR, GL_UNSIGNED_BYTE, (void*)FreeImage_GetBits(m_LocalBuffer)));
+            }
+            else if (rbcore::GetFileFormat(filepath[0]) == "png")
+            {
+                GLCall(glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_SRGB8_ALPHA8, m_Widths[i], m_Heights[i], 0, GL_BGRA, GL_UNSIGNED_BYTE, (void*)FreeImage_GetBits(m_LocalBuffer)));
+            }
             FreeImage_Unload(m_LocalBuffer);
         }
         else
@@ -46,13 +54,13 @@ bool GLCubemap::GenTexture(std::vector<std::string> filepath)
     return true;
 }
 
-void GLCubemap::Bind(unsigned int slot) const
+void GLCubeMap::Bind(unsigned int slot) const
 {
 	glActiveTexture(GL_TEXTURE0 + slot);
 	GLCall(glBindTexture(GL_TEXTURE_CUBE_MAP, m_RendererID));
 }
 
-void GLCubemap::Unbind() const
+void GLCubeMap::Unbind() const
 {
 	GLCall(glBindTexture(GL_TEXTURE_CUBE_MAP, 0));
 }

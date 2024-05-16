@@ -22,6 +22,9 @@ void Scene::Reset()
 	m_Camera.SetPosition(glm::vec3(0.0f));
 	m_Camera.SetEulerAngle(glm::vec3(0.0f));
 	m_Data.Reset();
+	m_Skybox.Color = glm::vec3(1.0f);
+	std::vector<std::string>().swap(m_Skybox.Filepath);
+	m_Skybox.Filepath.clear();
 	std::vector<std::string>().swap(m_ModelList);
 	m_Models.clear();
 	std::vector<std::string>().swap(m_PointLightList);
@@ -96,6 +99,45 @@ bool Scene::LoadScene(std::string filepath)
 					values = rbcore::GetSceneValue(line);
 					glm::vec3 euler = glm::vec3((float)std::atof(values[0].c_str()), (float)std::atof(values[1].c_str()), (float)std::atof(values[2].c_str()));
 					m_Camera.SetEulerAngle(euler);
+				}
+			}
+			// Load Skybox
+			{
+				if (line.find("#SKYBOX_TYPE") != std::string::npos)
+				{
+					values = rbcore::GetSceneValue(line);
+					m_Skybox.Type = (Skybox_Type)std::atoi(values[0].c_str());
+				}
+				if (line.find("#SKYBOX_COLOR") != std::string::npos)
+				{
+					values = rbcore::GetSceneValue(line);
+					glm::vec3 color = glm::vec3((float)std::atof(values[0].c_str()), (float)std::atof(values[1].c_str()), (float)std::atof(values[2].c_str()));
+					m_Skybox.Color = color;
+				}
+				if (line.find("#SKYBOX_FILEPATH") != std::string::npos)
+				{
+					values = rbcore::GetSceneValue(line);
+					std::string filepath;
+					for (unsigned int i = 0; i < values.size(); i++)
+					{
+						filepath += values[i];
+						if (i != values.size() - 1)
+						{
+							filepath += " ";
+						}
+					}
+					std::string directory = rbcore::GetFileDirectory(filepath);
+					std::string format = rbcore::GetFileFormat(filepath);
+					m_Skybox.Filepath.push_back(directory + "right." + format);
+					m_Skybox.Filepath.push_back(directory + "left." + format);
+					m_Skybox.Filepath.push_back(directory + "top." + format);
+					m_Skybox.Filepath.push_back(directory + "bottom." + format);
+					m_Skybox.Filepath.push_back(directory + "front." + format);
+					m_Skybox.Filepath.push_back(directory + "back." + format);
+					if (!m_Data.LoadSkybox(m_Skybox.Filepath))
+					{
+						return false;
+					}
 				}
 			}
 			// Load models
@@ -366,6 +408,18 @@ void Scene::SaveScene()
 		glm::vec3 euler = m_Camera.GetEulerAngle();
 		line = "#CAMERA_EULERANGLE " + std::to_string(euler.x) + " " + std::to_string(euler.y) + " " + std::to_string(euler.z) + "\n";
 		stream << line;
+	}
+	// Save Skybox
+	{
+		line = "#SKYBOX_TYPE " + std::to_string(m_Skybox.Type) + "\n";
+		stream << line;
+		line = "#SKYBOX_COLOR " + std::to_string(m_Skybox.Color.x) + " " + std::to_string(m_Skybox.Color.y) + " " + std::to_string(m_Skybox.Color.z) + "\n";
+		stream << line;
+		if (m_Skybox.Filepath.size())
+		{
+			line = "#SKYBOX_FILEPATH " + m_Skybox.Filepath[0] + "\n";
+			stream << line;
+		}
 	}
 	// Save models
 	for (unsigned int i = 0; i < m_ModelList.size(); i++)
@@ -904,9 +958,60 @@ void Scene::SetName(std::string name)
 
 void Scene::DrawUI()
 {
+	DrawSceneWindow();
 	DrawModelsWindow();
 	DrawCameraWindow();
 	DrawLightsWindow();
+}
+
+void Scene::DrawSceneWindow()
+{
+	if (rbcore::IS_SCENE_OPENED)
+	{
+		ImGuiWindowFlags windowFlags = 0;
+		windowFlags |= ImGuiWindowFlags_AlwaysAutoResize;
+		ImGui::Begin("Scene", &rbcore::IS_MODELS_OPENED, windowFlags);
+		// Skybox
+		if (ImGui::TreeNode("Skybox"))
+		{
+			ImGui::CenterAlignWidget("Skybox", 150.0f);
+			ImGui::LabelHighlighted("Skybox");
+			ImGui::PushItemWidth(150.0f);
+			const char* skyboxOps[] = {
+				"Color",
+				"Picture"
+			};
+			static int currentSkybox = m_Skybox.Type;
+			if (currentSkybox != m_Skybox.Type)
+			{
+				currentSkybox = m_Skybox.Type;
+			}
+			if (ImGui::Combo("##Skybox", &currentSkybox, skyboxOps, IM_ARRAYSIZE(skyboxOps)))
+			{
+				m_Skybox.Type = (Skybox_Type)currentSkybox;
+			}
+			ImGui::PopItemWidth();
+			if (m_Skybox.Type)
+			{
+				ImGui::CenterAlignWidget("Choose Picture");
+				if (ImGui::Button("Choose Picture"))
+				{
+					rbcore::LOAD_TYPE = LOAD_SKYBOX;
+					rbcore::FILE_BROWSER.Open();
+				}
+			}
+			else
+			{
+				ImGui::CenterAlignWidget("Skybox Color", 200.0f);
+				ImGui::LabelHighlighted("Skybox Color");
+				ImGui::PushItemWidth(200.0f);
+				ImGui::ColorEdit3("##SkyboxColor", &m_Skybox.Color[0]);
+				ImGui::PopItemWidth();
+			}
+			ImGui::TreePop();
+		}
+		ImGui::End();
+	}
 }
 
 void Scene::DrawModelsWindow()

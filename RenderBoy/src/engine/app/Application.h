@@ -20,7 +20,6 @@ private:
 	unsigned int m_Width;
 	unsigned int m_Height;
 	// A file browser used for selecting files. Source: https://github.com/AirGuanZ/imgui-filebrowser
-	ImGui::FileBrowser m_FileBrowser;
 	// App icon texture id
 	ImTextureID m_IconTexID;
 	// If app is inited and loaded with scene or models, set this value to true;

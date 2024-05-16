@@ -1,6 +1,6 @@
 /*
 * Class:
-*   GLCubemap
+*   GLCubeMap
 * Description:
 *   A cubemap, what else can it be?
 */
@@ -9,7 +9,7 @@
 
 #include "core/Core.h"
 
-class GLCubemap
+class GLCubeMap
 {
 private:
     unsigned int m_RendererID;
@@ -19,8 +19,8 @@ private:
     std::vector<int> m_Widths, m_Heights;
 
 public:
-    GLCubemap();
-    ~GLCubemap();
+    GLCubeMap();
+    ~GLCubeMap();
 
     // Tell opengl to generate a texture
     bool GenTexture(std::vector<std::string> filepath);

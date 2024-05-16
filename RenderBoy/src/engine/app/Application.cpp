@@ -86,10 +86,6 @@ bool Application::LoadSettings()
             {
                 rbcore::SETTINGS.PP = (Post_Process)std::atoi(rbcore::GetSettingValue(line).c_str());
             }
-            if (line.find("#SKYBOX") != std::string::npos)
-            {
-                rbcore::SETTINGS.SkyboxType = (Skybox_Type)std::atoi(rbcore::GetSettingValue(line).c_str());
-            }
             if (line.find("#CAMERA_TYPE") != std::string::npos)
             {
                 m_Scene.GetCamera().SetCameraType(std::atoi(rbcore::GetSettingValue(line).c_str()));
@@ -173,8 +169,6 @@ void Application::SaveSettings()
     stream << line;
     line = "#POST_PROCESS " + std::to_string(rbcore::SETTINGS.PP) + "\n";
     stream << line;
-    line = "#SKYBOX " + std::to_string(rbcore::SETTINGS.SkyboxType) + "\n";
-    stream << line;
     line = "#CAMERA_TYPE " + std::to_string(m_Scene.GetCamera().GetCameraType()) + "\n";
     stream << line;
     line = "#FOV " + std::to_string(m_Scene.GetCamera().GetFOV()) + "\n";
@@ -210,7 +204,7 @@ bool Application::Init()
     m_Width = rbcore::SETTINGS.Width;
     m_Height = rbcore::SETTINGS.Height;
     m_Scene.Init();
-    m_Renderer.Init();
+    m_Renderer.Init(m_Scene);
     m_Scene.GetCamera().SetWindowSize(m_Width, m_Height);
     return true;
 }
@@ -291,7 +285,7 @@ bool Application::InitOpenGL()
         FreeImage_Unload(logoBuffer);
     }
     // Initialize file browser
-    m_FileBrowser.SetTitle("File Browser");
+    rbcore::FILE_BROWSER.SetTitle("File Browser");
 
     return true;
 }
@@ -319,7 +313,10 @@ void Application::Update()
     ReadFilePath();
     // Rendering
     m_Renderer.Clear();
-    m_Renderer.Draw(m_Scene);
+    if (m_Launched)
+    {
+        m_Renderer.Draw(m_Scene);
+    }
     // Keyboard and mouse input
     MouseInput();
     KeyboardInput();
@@ -330,11 +327,11 @@ void Application::Update()
 
 bool Application::ReadFilePath()
 {
-    if (m_FileBrowser.HasSelected())
+    if (rbcore::FILE_BROWSER.HasSelected())
     {
-        std::string filePath = m_FileBrowser.GetSelected().string();
-        std::string fileType = rbcore::GetFileFormat(m_FileBrowser.GetSelected().string());
-        m_FileBrowser.ClearSelected();
+        std::string filePath = rbcore::FILE_BROWSER.GetSelected().string();
+        std::string fileType = rbcore::GetFileFormat(rbcore::FILE_BROWSER.GetSelected().string());
+        rbcore::FILE_BROWSER.ClearSelected();
         // The selected file is supported format
         if (fileType == "scene" || rbcore::CheckFileFormat(fileType))
         {
@@ -362,6 +359,7 @@ bool Application::LoadFile()
         case RESET_SCENE:
             if (m_Scene.Reset(rbcore::FILEPATH_BUFFER))
             {
+                m_Renderer.ChangeSkybox(m_Scene);
                 m_Launched = true;
                 rbcore::FILEPATH_BUFFER = "";
                 rbcore::LOAD_TYPE = NO_FILE;
@@ -384,6 +382,48 @@ bool Application::LoadFile()
                 return true;
             }
             break;
+        case LOAD_SKYBOX:
+            std::vector<std::string> skyboxName({
+                "left", "right",
+                "top", "bottom",
+                "front", "back"
+                });
+            if (rbcore::GetFileFormat(rbcore::FILEPATH_BUFFER) == "scene" || rbcore::CheckFileFormatAssimp(rbcore::GetFileFormat(rbcore::FILEPATH_BUFFER)))
+            {
+                rbcore::FILEPATH_BUFFER = "";
+                rbcore::LOAD_TYPE = NO_FILE;
+                rbcore::ShowWarningMsg("You have to choose a picture for skybox!");
+                return false;
+            }
+            else if (std::find(skyboxName.begin(), skyboxName.end(), rbcore::GetFileNameNoSuffix(rbcore::FILEPATH_BUFFER)) != skyboxName.end())
+            {
+                std::string directory = rbcore::GetFileDirectory(rbcore::FILEPATH_BUFFER);
+                std::string format = rbcore::GetFileFormat(rbcore::FILEPATH_BUFFER);
+                std::vector<std::string> filepath;
+                filepath.push_back(directory + "right." + format);
+                filepath.push_back(directory + "left." + format);
+                filepath.push_back(directory + "top." + format);
+                filepath.push_back(directory + "bottom." + format);
+                filepath.push_back(directory + "front." + format);
+                filepath.push_back(directory + "back." + format);
+                if (m_Scene.GetData().LoadSkybox(filepath))
+                {
+                    rbcore::FILEPATH_BUFFER = "";
+                    rbcore::LOAD_TYPE = NO_FILE;
+                    m_Scene.GetSkybox().Filepath = filepath;
+                    m_Renderer.ChangeSkybox(m_Scene);
+                    return true;
+                }
+            }
+            else
+            {
+                rbcore::FILEPATH_BUFFER = "";
+                rbcore::LOAD_TYPE = NO_FILE;
+                rbcore::ShowWarningMsg("Incorrect file name! Check README for more details.");
+                rbcore::IS_ABOUT_OPENED = true;
+                return false;
+            }
+            break;
         }
         rbcore::FILEPATH_BUFFER = "";
         rbcore::LOAD_TYPE = NO_FILE;
@@ -399,11 +439,11 @@ bool Application::LoadFile()
 
 void Application::DrawUI()
 {
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
     // Change Font size or style
     if (rbcore::RELOAD_FONT)
     {
         rbcore::RELOAD_FONT = false;
-        ImGuiIO& io = ImGui::GetIO(); (void)io;
         io.Fonts->Clear();
         io.Fonts->AddFontFromFileTTF(rbcore::GetFontStylePath(rbcore::SETTINGS.FontStyle).c_str(), rbcore::SETTINGS.FontSize);
         io.Fonts->Build();
@@ -420,7 +460,8 @@ void Application::DrawUI()
     ImGui_ImplOpenGL3_NewFrame();
     ImGui::NewFrame();
     {
-        m_FileBrowser.Display();
+        
+        rbcore::FILE_BROWSER.Display();
         if (!m_Launched)
         {
             DrawLaunchWindow();
@@ -460,12 +501,12 @@ void Application::DrawMenuBar()
             if (ImGui::MenuItem("Open"))
             {
                 rbcore::LOAD_TYPE = RESET_SCENE;
-                m_FileBrowser.Open();
+                rbcore::FILE_BROWSER.Open();
             }
             if (ImGui::MenuItem("Add"))
             {
                 rbcore::LOAD_TYPE = ADD_MODEL;
-                m_FileBrowser.Open();
+                rbcore::FILE_BROWSER.Open();
             }
             if (ImGui::MenuItem("Save"))
             {
@@ -483,6 +524,10 @@ void Application::DrawMenuBar()
             if (ImGui::MenuItem("Info"))
             {
                 rbcore::IS_INFO_OPENED = true;
+            }
+            if (ImGui::MenuItem("Scene"))
+            {
+                rbcore::IS_SCENE_OPENED = true;
             }
             if (ImGui::MenuItem("Camera"))
             {
@@ -541,7 +586,7 @@ void Application::DrawLaunchWindow()
     if (ImGui::Button("Open File"))
     {
         rbcore::LOAD_TYPE = RESET_SCENE;
-        m_FileBrowser.Open();
+        rbcore::FILE_BROWSER.Open();
     }
     ImGui::End();
 }
@@ -825,23 +870,6 @@ void Application::DrawSettingWindow()
                     ImGui::PopItemWidth();
                 }
             }
-            // SKybox
-            {
-                ImGui::CenterAlignWidget("Skybox", 150.0f);
-                ImGui::LabelHighlighted("Skybox");
-                ImGui::PushItemWidth(150.0f);
-                const char* skyboxOps[] = {
-                    "Color",
-                    "Mountain Lake"
-                };
-                static int currentSkybox = rbcore::SETTINGS.SkyboxType;
-                if (ImGui::Combo("##Skybox", &currentSkybox, skyboxOps, IM_ARRAYSIZE(skyboxOps)))
-                {
-                    rbcore::SETTINGS.SkyboxType = (Skybox_Type)currentSkybox;
-                    m_Renderer.ChangeSkybox();
-                }
-                ImGui::PopItemWidth();
-            }
             // Post-Process
             {
                 ImGui::CenterAlignWidget("Post-Processing", 120.0f);
@@ -1120,12 +1148,16 @@ void Application::KeyboardInput()
         {
             glm::vec3 rotate = m_Scene.GetCamera().GetEulerAngle();
             rotate.x += m_Scene.GetCamera().GetRotateSpeed() * 4.0f;
+            rotate.x = rotate.x > 89.0f ? 89.0f : rotate.x;
+            rotate.x = rotate.x < -89.0f ? -89.0f : rotate.x;
             m_Scene.GetCamera().SetEulerAngle(rotate);
         }
         if (glfwGetKey(m_Window, GLFW_KEY_DOWN) == GLFW_PRESS) // Tilt down
         {
             glm::vec3 rotate = m_Scene.GetCamera().GetEulerAngle();
             rotate.x -= m_Scene.GetCamera().GetRotateSpeed() * 4.0f;
+            rotate.x = rotate.x > 89.0f ? 89.0f : rotate.x;
+            rotate.x = rotate.x < -89.0f ? -89.0f : rotate.x;
             m_Scene.GetCamera().SetEulerAngle(rotate);
         }
         if (glfwGetKey(m_Window, GLFW_KEY_LEFT) == GLFW_PRESS) // Turn left

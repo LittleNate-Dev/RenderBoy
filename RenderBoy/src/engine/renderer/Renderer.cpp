@@ -8,12 +8,12 @@ Renderer::~Renderer()
 {
 }
 
-void Renderer::Init()
+void Renderer::Init(Scene& scene)
 {
 	switch (rbcore::SETTINGS.GraphicsCore)
 	{
 	case OPENGL:
-		m_RendererGL.Init();
+		m_RendererGL.Init(scene);
 		break;
 	default:
 		break;
@@ -98,15 +98,14 @@ void Renderer::ChangePostProcess()
 	}
 }
 
-void Renderer::ChangeSkybox()
+void Renderer::ChangeSkybox(Scene& scene)
 {
-	spdlog::warn((int)rbcore::SETTINGS.SkyboxType);
-	/*switch (rbcore::SETTINGS.GraphicsCore)
+	switch (rbcore::SETTINGS.GraphicsCore)
 	{
 	case OPENGL:
-		m_RendererGL.ChangePostProcess();
+		m_RendererGL.ChangeSkybox(scene);
 		break;
 	default:
 		break;
-	}*/
+	}
 }

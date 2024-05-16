@@ -8,7 +8,7 @@ GLRenderer::~GLRenderer()
 {
 }
 
-void GLRenderer::Init()
+void GLRenderer::Init(Scene& scene)
 {
 	GLCall(glEnable(GL_BLEND));
 	GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
@@ -22,12 +22,15 @@ void GLRenderer::Init()
 	m_Shaders.Normal.Init((std::string)SHADER_OPENGL + "NORMAL.glsl");
 	m_Shaders.Lightcube.Init((std::string)SHADER_OPENGL + "LIGHTCUBE.glsl");
 	m_Shaders.UVset.Init((std::string)SHADER_OPENGL + "UVSET.glsl");
+	m_Shaders.Skybox.Init((std::string)SHADER_OPENGL + "SKYBOX.glsl");
 	// Initialize uv checker map texture
 	m_CheckerMap.GenTexture(UV_MAP_FILEPATH);
 	m_Shaders.UVset.Bind();
 	m_Shaders.UVset.SetUniformHandleARB("u_CheckerMap", m_CheckerMap.GetHandle());
 	m_Shaders.UVset.Unbind();
 	ChangePostProcess();
+	// Initialize skybox texture
+	ChangeSkybox(scene);
 	// Initialize frame buffers
 	m_Frame.FBMsaa.Init(FBType::MSAA);
 	if (!m_Frame.FBMsaa.IsInitialized())
@@ -106,6 +109,8 @@ void GLRenderer::Draw(Scene& scene)
 	{
 		DrawNormal(scene);
 	}
+	// Draw Skybox
+	DrawSkybox(scene);
 	// Draw your content inside this scope
 	if ((int)rbcore::SETTINGS.AA >= 1 && (int)rbcore::SETTINGS.AA <= 4)
 	{
@@ -310,6 +315,24 @@ void GLRenderer::DrawLightCube(Scene& scene)
 	m_Shaders.Lightcube.Unbind();
 }
 
+void GLRenderer::DrawSkybox(Scene& scene)
+{
+	GLCall(glDepthFunc(GL_LEQUAL));
+	m_Shaders.Skybox.Bind();
+	m_Shaders.Skybox.SetUniformMat4f("u_ProjMat", scene.GetCamera().GetProjMat());
+	// Remove translation from view matrix
+	m_Shaders.Skybox.SetUniformMat4f("u_ViewMat", glm::mat4(glm::mat3(scene.GetCamera().GetViewMat())));
+	m_Shaders.Skybox.SetUniform1i("u_UseTex", scene.GetSkybox().Type);
+	m_Shaders.Skybox.SetUniformVec3f("u_Color", scene.GetSkybox().Color);
+	scene.GetData().GetDataGL().GetSkybox().VA.Bind();
+	scene.GetData().GetDataGL().GetSkybox().IB.Bind();
+	GLCall(glDrawElements(GL_TRIANGLES, scene.GetData().GetDataGL().GetSkybox().IB.GetCount(), GL_UNSIGNED_INT, nullptr));
+	scene.GetData().GetDataGL().GetSkybox().VA.Unbind();
+	scene.GetData().GetDataGL().GetSkybox().IB.Unbind();
+	m_Shaders.Skybox.Unbind();
+	GLCall(glDepthFunc(GL_LESS)); // set depth function back to default
+}
+
 bool GLRenderer::SaveScreenShot()
 {
 	// Make the BYTE array, factor of 3 because it's RBG.
@@ -378,4 +401,11 @@ void GLRenderer::ChangePostProcess()
 		break;
 	}
 	m_Shaders.Screen.Unbind();
+}
+
+void GLRenderer::ChangeSkybox(Scene& scene)
+{
+	m_Shaders.Skybox.Bind();
+	m_Shaders.Skybox.SetUniformHandleARB("u_Skybox", scene.GetData().GetDataGL().GetSkybox().Skybox.GetHandle());
+	m_Shaders.Skybox.Unbind();
 }

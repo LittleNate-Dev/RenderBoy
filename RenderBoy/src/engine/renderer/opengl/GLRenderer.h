@@ -31,6 +31,7 @@ struct Shaders
 	GLShader UVset;
 	GLShader Lightcube;
 	GLShader Screen;
+	GLShader Skybox;
 };
 
 class GLRenderer
@@ -47,16 +48,18 @@ private:
 	void DrawUVSet(Scene& scene);
 	void DrawNormal(Scene& scene);
 	void DrawLightCube(Scene& scene);
+	void DrawSkybox(Scene& scene);
 
 public:
 	GLRenderer();
 	~GLRenderer();
 
-	void Init();
+	void Init(Scene& scene);
 	void Draw(Scene& scene);
 	
 	bool SaveScreenShot();
 	void ChangeResolution();
 	void ChangeMSAA();
 	void ChangePostProcess();
+	void ChangeSkybox(Scene& scene);
 };

@@ -38,7 +38,7 @@
 
 #include <freeimage/FreeImage.h>
 
-#define APP_VERSION "ver 0.4.2"
+#define APP_VERSION "ver 0.5.0"
 #define GIT_REPO "https://github.com/LittleNate-Dev/RenderBoy"
 #define SCENE_FILEPATH "saves/scene/"
 #define SETTING_FILEPATH "data/config/settings.config"
@@ -117,8 +117,8 @@ enum Post_Process
 
 enum Skybox_Type
 {
-	PURE_COLOR = 1,
-	MOUNTAIN_LAKE = 2
+	PURE_COLOR = 0,
+	PICTURE = 1
 };
 
 // Structures
@@ -136,7 +136,6 @@ struct Settings
 	Anti_Alising AA = NO_AA;
 	Post_Process PP = NO_PP;
 	bool ShowNormal = false;
-	Skybox_Type SkyboxType = PURE_COLOR;
 };
 
 struct Vertex
@@ -170,6 +169,7 @@ namespace rbcore
 	// RenderBoy settings
 	extern Settings SETTINGS;
 	// buffer for loading file
+	extern ImGui::FileBrowser FILE_BROWSER;
 	extern Load_Type LOAD_TYPE;
 	extern std::string FILEPATH_BUFFER;
 	extern glm::vec3 NORMAL_COLOR;
@@ -188,6 +188,7 @@ namespace rbcore
 	extern bool IS_INFO_OPENED;
 	extern bool IS_SETTINGS_OPENED;
 	extern bool IS_WARNING_OPENED;
+	extern bool IS_SCENE_OPENED;
 	extern bool IS_MODELS_OPENED;
 	extern bool IS_CAMERA_OPENED;
 	extern bool IS_LIGHTS_OPENED;
@@ -219,6 +220,7 @@ namespace rbcore
 	// Get scene value from scene file
 	std::vector<std::string> GetSceneValue(std::string scene);
 	// Get file info
+	std::string GetFileDirectory(std::string filepath);
 	std::string GetFileFormat(std::string filepath);
 	std::string GetFileName(std::string filepath);
 	std::string GetFileNameNoSuffix(std::string filepath);

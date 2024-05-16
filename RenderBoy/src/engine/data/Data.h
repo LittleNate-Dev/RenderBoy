@@ -24,6 +24,7 @@ public:
 	void AddModel(std::string name, Model model);
 	void DeleteModel(std::string name);
 	void RenameModel(std::string oldName, std::string newName);
+	bool LoadSkybox(std::vector<std::string> filepath);
 	// Get Data's members
 	GLData& GetDataGL();
 };

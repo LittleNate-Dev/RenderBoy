@@ -5,6 +5,7 @@
 namespace rbcore
 {
 	Settings SETTINGS;
+	ImGui::FileBrowser FILE_BROWSER;
 	Load_Type LOAD_TYPE = NO_FILE;
 	std::string FILEPATH_BUFFER = "";
 	glm::vec3 NORMAL_COLOR = glm::vec3(1.0f);
@@ -21,12 +22,13 @@ namespace rbcore
 	bool IS_SETTINGS_OPENED = false;
 	bool IS_WARNING_OPENED = false;
 	bool IS_LOADING_OPENED = false;
+	bool IS_SCENE_OPENED = false;
 	bool IS_MODELS_OPENED = false;
 	bool IS_CAMERA_OPENED = false;
 	bool IS_LIGHTS_OPENED = false;
 	std::string POPUP_MSG = "";
 	const std::vector<std::string> FILE_TYPE({
-		"gltf", "obj"
+		"gltf", "obj", "jpg", "png"
 		});
 	const std::vector<std::string> FILE_TYPE_ASSIMP({
 		"3mf", "blend", "3ds", "ase", "gltf", "fbx",
@@ -130,6 +132,13 @@ namespace rbcore
 			skip++;
 		}
 		return values;
+	}
+
+	std::string GetFileDirectory(std::string filepath)
+	{
+		std::string::size_type iPos = (filepath.find_last_of('\\') + 1) == 0 ? filepath.find_last_of('/') + 1 : filepath.find_last_of('\\') + 1;
+		std::string directory = filepath.substr(0, iPos);
+		return directory;
 	}
 
 	std::string GetFileFormat(std::string filepath)
