@@ -2,7 +2,7 @@
 #version 460 core
 
 layout (location = 0) in vec4 a_Position;
-layout (location = 6) in mat4 a_ModelMat;
+layout (location = 7) in mat4 a_ModelMat;
 
 uniform mat4 u_ProjMat;
 uniform mat4 u_ViewMat;

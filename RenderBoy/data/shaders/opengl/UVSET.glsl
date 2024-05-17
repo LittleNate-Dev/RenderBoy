@@ -3,7 +3,7 @@
 
 layout (location = 0) in vec4 a_Position;
 layout (location = 2) in vec2 a_TexCoord;
-layout (location = 6) in mat4 a_ModelMat;
+layout (location = 7) in mat4 a_ModelMat;
 
 out vec2 v_TexCoord;
 

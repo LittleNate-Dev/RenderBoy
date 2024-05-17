@@ -162,8 +162,10 @@ void GLData::AddModel(std::string name, Model model)
 	layout.Push<float>(3);
 	//vertex texture coords
 	layout.Push<float>(2);
-	//vertex texture index
+	//vertex material index
 	layout.Push<float>(4);
+	//vertex Normal, Bump or Displacement map index
+	layout.Push<float>(3);
 	//vertex tangent
 	layout.Push<float>(3);
 	//vertex bitangent

@@ -148,7 +148,8 @@ struct Vertex
 	glm::vec3 Position = glm::vec3(0.0f);
 	glm::vec3 Normal = glm::vec3(0.0f);
 	glm::vec2 TexCoord = glm::vec2(0.0f);
-	glm::vec4 TexIndex = glm::vec4(-1.0f);
+	glm::vec4 MaterialIndex = glm::vec4(-1.0f);
+	glm::vec3 NBDIndex = glm::vec3(-1.0f); // NBD stands for normal, bump and displacement
 	glm::vec3 Tangent = glm::vec3(0.0f);
 	glm::vec3 Bitangent = glm::vec3(0.0f);
 };

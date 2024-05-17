@@ -90,7 +90,6 @@ Mesh Model::AssimpProcessMesh(aiMesh* mesh, aiNode* node, const aiScene* scene)
     newMesh.SetAmbientValue(glm::vec3(color.r, color.g, color.b));
     material->Get(AI_MATKEY_COLOR_DIFFUSE, color);
     newMesh.SetDiffuseValue(glm::vec3(color.r, color.g, color.b));
-    std::cout << color.r << ", " << color.g << ", " << color.b << std::endl;
     material->Get(AI_MATKEY_COLOR_SPECULAR, color);
     newMesh.SetSpecularValue(glm::vec3(color.r, color.g, color.b));
     material->Get(AI_MATKEY_COLOR_EMISSIVE, color);
