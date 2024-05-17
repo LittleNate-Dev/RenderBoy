@@ -30,5 +30,4 @@ void main()
     vec3 result = vec3(1.0) - exp(-hdrColor * 1.0);
     result = pow(result, vec3(1.0 / u_Gamma));
     v_FragColor = vec4(vec3(1.0 - result), 1.0);
-    //v_FragColor = vec4(vec3(1.0 - texture(u_ScreenTex, v_TexCoord)), 1.0);
 } 

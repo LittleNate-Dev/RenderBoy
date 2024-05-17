@@ -971,6 +971,19 @@ void Scene::DrawSceneWindow()
 		ImGuiWindowFlags windowFlags = 0;
 		windowFlags |= ImGuiWindowFlags_AlwaysAutoResize;
 		ImGui::Begin("Scene", &rbcore::IS_MODELS_OPENED, windowFlags);
+		// rename
+		ImGui::LabelHighlighted("Name");
+		ImGui::PushItemWidth(200.f);
+		static char sceneName[256] = "";
+		strcpy_s(sceneName, m_Name.data());
+		ImGuiInputTextFlags inputFlags = 0;
+		inputFlags |= ImGuiInputTextFlags_CharsNoBlank;
+		inputFlags |= ImGuiInputTextFlags_EnterReturnsTrue;
+		if (ImGui::InputText("##SceneName", sceneName, IM_ARRAYSIZE(sceneName), inputFlags))
+		{
+			SetName(sceneName);
+		}
+		ImGui::PopItemWidth();
 		// Skybox
 		if (ImGui::TreeNode("Skybox"))
 		{

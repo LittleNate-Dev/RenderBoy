@@ -50,6 +50,8 @@ void main()
     for(int i = 0; i < 9; i++)
     {
         sampleTex[i] = vec3(texture(u_ScreenTex, v_TexCoord.st + offsets[i]));
+        sampleTex[i] = vec3(1.0) - exp(-sampleTex[i] * 2.0);
+        sampleTex[i] = pow(sampleTex[i], vec3(1.0 / u_Gamma));
     }
     vec3 col = vec3(0.0);
     for(int i = 0; i < 9; i++)
@@ -57,7 +59,5 @@ void main()
         col += sampleTex[i] * kernel[i];
     }
 
-    vec3 result = vec3(1.0) - exp(col * 1.0);
-    result = pow(result, vec3(1.0 / u_Gamma));
-    v_FragColor = vec4(result, 1.0);
+    v_FragColor = vec4(col, 1.0);
 }  

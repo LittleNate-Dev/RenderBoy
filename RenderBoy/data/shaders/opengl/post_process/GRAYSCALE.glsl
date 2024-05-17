@@ -28,10 +28,8 @@ uniform float u_Exposure;
 void main()
 {
     vec3 hdrColor = texture(u_ScreenTex, v_TexCoord).rgb;
-    //vec3 result = vec3(1.0) - exp(-hdrColor * u_Exposure);
     vec3 result = vec3(1.0) - exp(-hdrColor * 1.0);
     result = pow(result, vec3(1.0 / u_Gamma));
     float average = 0.2126 * result.r + 0.7152 * result.g + 0.0722 * result.b;
-    //v_FragColor = vec4(result, 1.0);
     v_FragColor = vec4(vec3(average), 1.0);
 } 

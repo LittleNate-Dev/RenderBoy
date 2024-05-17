@@ -601,7 +601,6 @@ void Application::DrawInfoWindow()
         windowFlags |= ImGuiWindowFlags_NoSavedSettings;
         windowFlags |= ImGuiWindowFlags_AlwaysAutoResize;
         ImGui::Begin("Info", &rbcore::IS_INFO_OPENED, windowFlags);
-        //ImGui::SetWindowFontScale(rbcore::FONT_SIZE);
         // FPS
         {
             ImGui::LabelHighlighted("FPS:");
@@ -638,18 +637,8 @@ void Application::DrawInfoWindow()
         if (ImGui::TreeNode("Scene"))
         {
             // Scene
-            ImGui::LabelHighlighted("Name");
-            ImGui::PushItemWidth(200.f);
-            static char sceneName[256] = "";
-            strcpy_s(sceneName, m_Scene.GetName().data());
-            ImGuiInputTextFlags inputFlags = 0;
-            inputFlags |= ImGuiInputTextFlags_CharsNoBlank;
-            inputFlags |= ImGuiInputTextFlags_EnterReturnsTrue;
-            if (ImGui::InputText("##SceneName", sceneName, IM_ARRAYSIZE(sceneName), inputFlags))
-            {
-                m_Scene.SetName(sceneName);
-            }
-            ImGui::PopItemWidth();
+            ImGui::LabelHighlighted("FilePath:");
+            ImGui::TextWrapped(m_Scene.GetFilePath().c_str());
             ImGui::LabelHighlighted("Models:");
             ImGui::Text(std::to_string(m_Scene.GetModelList().size()).c_str());
             ImGui::LabelHighlighted("Lights:");
