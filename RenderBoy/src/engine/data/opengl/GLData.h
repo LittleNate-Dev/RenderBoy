@@ -29,6 +29,18 @@ struct GLModelData
 	GLVertexBuffer VB;
 	GLVertexBuffer InstanceVB;
 	GLIndexBuffer IB;
+	std::vector<GLTexture> AlbedoTex;
+	std::vector<GLTexture> SpecularTex;
+	std::vector<GLTexture> MetallicTex;
+	std::vector<GLTexture> RoughnessTex;
+	std::vector<GLTexture> AoTex;
+	std::vector<GLTexture> NormalTex;
+	std::vector<GLTexture> BumpTex;
+	std::vector<GLTexture> DisplacementTex;
+	std::vector<glm::vec3> AmbientValue;
+	std::vector<glm::vec3> DiffuseValue;
+	std::vector<glm::vec3> SpecularValue;
+	std::vector<glm::vec3> EmissiveValue;
 };
 
 struct GLSkyboxData

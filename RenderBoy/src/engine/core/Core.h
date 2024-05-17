@@ -97,6 +97,11 @@ enum Draw_Mode
 	DEPTH = 4
 };
 
+enum Render_Mode
+{
+
+};
+
 enum Anti_Alising
 {
 	NO_AA = 0,

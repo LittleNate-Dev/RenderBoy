@@ -355,8 +355,8 @@ inline void ImGui::FileBrowser::Display()
         }
     }
     else if(!BeginPopupModal(openLabel_.c_str(), nullptr,
-                             flags_ & ImGuiFileBrowserFlags_NoTitleBar ?
-                                ImGuiWindowFlags_NoTitleBar : 0))
+        flags_ & (ImGuiFileBrowserFlags_NoTitleBar ? ImGuiWindowFlags_NoTitleBar : 0)
+                | ImGuiWindowFlags_NoMove))
     {
         return;
     }
