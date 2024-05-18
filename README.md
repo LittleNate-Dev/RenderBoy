@@ -1,5 +1,5 @@
 # RenderBoy
-[RenderBoy](https://github.com/AirGuanZ/imgui-filebrowser) is a simple renderer that allows you to load models and render them with various visual effects.
+[RenderBoy](https://github.com/LittleNate-Dev/RenderBoy) is a simple renderer that allows you to load models and render them with various visual effects.
 
 RenderBoy is still under development, and I haven't got time to write a proper README (Once I finished the development of v1.0, I'll write one, I promise).
 
