@@ -194,6 +194,12 @@ namespace rbcore
 		return std::find(FONT_STYLE.begin(), FONT_STYLE.end(), style) - FONT_STYLE.begin();
 	}
 
+	float GetWidgetWidthCoefficient()
+	{
+		float coefficient = (float)rbcore::SETTINGS.FontSize / 17.0f;
+		return coefficient;
+	}
+
 	glm::mat4 GetRodrigue(glm::vec4 axis, float angle)
 	{
 		glm::mat3 part1 = glm::cos(glm::radians(angle)) * glm::mat3(1.0f);

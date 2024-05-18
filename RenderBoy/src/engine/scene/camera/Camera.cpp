@@ -254,33 +254,33 @@ void Camera::DrawUI()
 	// Attributes
 	if (ImGui::TreeNode("Attributes"))
 	{
-		ImGui::CenterAlignWidget("Near Plane", 120.0f);
+		ImGui::CenterAlignWidget("Near Plane", 120.0f * rbcore::GetWidgetWidthCoefficient());
 		ImGui::LabelHighlighted("Near Plane");
-		ImGui::PushItemWidth(120.0f);
+		ImGui::PushItemWidth(120.0f * rbcore::GetWidgetWidthCoefficient());
 		if (ImGui::InputFloat("##NearPlane", &m_Plane.x))
 		{
 			SetNearPlane(m_Plane.x);
 		}
 		ImGui::PopItemWidth();
-		ImGui::CenterAlignWidget("Far Plane", 120.0f);
+		ImGui::CenterAlignWidget("Far Plane", 120.0f * rbcore::GetWidgetWidthCoefficient());
 		ImGui::LabelHighlighted("Far Plane");
-		ImGui::PushItemWidth(120.0f);
+		ImGui::PushItemWidth(120.0f * rbcore::GetWidgetWidthCoefficient());
 		if (ImGui::InputFloat("##FarPlane", &m_Plane.y))
 		{
 			SetFarPlane(m_Plane.y);
 		}
 		ImGui::PopItemWidth();
-		ImGui::CenterAlignWidget("Move Speed", 120.0f);
+		ImGui::CenterAlignWidget("Move Speed", 120.0f * rbcore::GetWidgetWidthCoefficient());
 		ImGui::LabelHighlighted("Move Speed");
-		ImGui::PushItemWidth(120.0f);
+		ImGui::PushItemWidth(120.0f * rbcore::GetWidgetWidthCoefficient());
 		if (ImGui::InputFloat("##MoveSpeed", &m_MoveSpeed))
 		{
 			SetMoveSpeed(m_MoveSpeed);
 		}
 		ImGui::PopItemWidth();
-		ImGui::CenterAlignWidget("Rotate Speed", 120.0f);
+		ImGui::CenterAlignWidget("Rotate Speed", 120.0f * rbcore::GetWidgetWidthCoefficient());
 		ImGui::LabelHighlighted("Rotate Speed");
-		ImGui::PushItemWidth(120.0f);
+		ImGui::PushItemWidth(120.0f * rbcore::GetWidgetWidthCoefficient());
 		if (ImGui::InputFloat("##RotateSpeed", &m_RotateSpeed))
 		{
 			SetRotateSpeed(m_RotateSpeed);
@@ -292,12 +292,12 @@ void Camera::DrawUI()
 	// Position
 	if (ImGui::TreeNode("Position"))
 	{
-		ImGui::PushItemWidth(80);
-		ImGui::CenterAlignWidget(80);
+		ImGui::PushItemWidth(80.0f * rbcore::GetWidgetWidthCoefficient());
+		ImGui::CenterAlignWidget(80.0f * rbcore::GetWidgetWidthCoefficient());
 		ImGui::InputFloat("Pos X", &m_Position.x);
-		ImGui::CenterAlignWidget(80);
+		ImGui::CenterAlignWidget(80.0f * rbcore::GetWidgetWidthCoefficient());
 		ImGui::InputFloat("Pos Y", &m_Position.y);
-		ImGui::CenterAlignWidget(80);
+		ImGui::CenterAlignWidget(80.0f * rbcore::GetWidgetWidthCoefficient());
 		ImGui::InputFloat("Pos Z", &m_Position.z);
 		ImGui::PopItemWidth();
 		ImGui::TreePop();
@@ -309,7 +309,7 @@ void Camera::DrawUI()
 		ImGui::Checkbox("Slider", &slideRotate);
 		if (slideRotate)
 		{
-			ImGui::PushItemWidth(280);
+			ImGui::PushItemWidth(280.0f * rbcore::GetWidgetWidthCoefficient());
 			ImGui::SliderFloat("Pitch", &m_EulerAngle.x, -360.0f, 360.0f);
 			ImGui::SliderFloat("Yaw", &m_EulerAngle.y, -360.0f, 360.0f);
 			ImGui::SliderFloat("Roll", &m_EulerAngle.z, -360.0f, 360.0f);
@@ -317,18 +317,18 @@ void Camera::DrawUI()
 		}
 		else
 		{
-			ImGui::PushItemWidth(80);
-			ImGui::CenterAlignWidget(80);
+			ImGui::PushItemWidth(80.0f * rbcore::GetWidgetWidthCoefficient());
+			ImGui::CenterAlignWidget(80.0f * rbcore::GetWidgetWidthCoefficient());
 			if (ImGui::InputFloat("Pitch", &m_EulerAngle.x))
 			{
 				SetPitch(m_EulerAngle.x);
 			}
-			ImGui::CenterAlignWidget(80);
+			ImGui::CenterAlignWidget(80.0f * rbcore::GetWidgetWidthCoefficient());
 			if (ImGui::InputFloat("Yaw", &m_EulerAngle.y))
 			{
 				SetYaw(m_EulerAngle.y);
 			}
-			ImGui::CenterAlignWidget(80);
+			ImGui::CenterAlignWidget(80.0f * rbcore::GetWidgetWidthCoefficient());
 			if (ImGui::InputFloat("Roll", &m_EulerAngle.z))
 			{
 				SetRoll(m_EulerAngle.z);

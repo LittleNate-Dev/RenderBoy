@@ -343,34 +343,34 @@ void SpotLight::DrawUI()
 		// Attributes
 		if (ImGui::TreeNode("Attributes"))
 		{
-			ImGui::CenterAlignWidget("Color", 200.0f);
+			ImGui::CenterAlignWidget("Color", 200.0f * rbcore::GetWidgetWidthCoefficient());
 			ImGui::LabelHighlighted("Color");
-			ImGui::PushItemWidth(200.0f);
+			ImGui::PushItemWidth(200.0f * rbcore::GetWidgetWidthCoefficient());
 			ImGui::ColorEdit3("##SpotColor", &m_Color[0]);
 			ImGui::PopItemWidth();
 			static bool slider = true;
 			ImGui::Checkbox("Slider", &slider);
 			if (slider)
 			{
-				ImGui::CenterAlignWidget("Angle", 150.0f);
+				ImGui::CenterAlignWidget("Angle", 150.0f * rbcore::GetWidgetWidthCoefficient());
 				ImGui::LabelHighlighted("Angle");
-				ImGui::PushItemWidth(150.0f);
+				ImGui::PushItemWidth(150.0f * rbcore::GetWidgetWidthCoefficient());
 				ImGui::SliderFloat("##Angle", &m_Angle, 0.0f, 180.0f - m_DimAngle);
-				ImGui::CenterAlignWidget("Dim Angle", 150.0f);
+				ImGui::CenterAlignWidget("Dim Angle", 150.0f * rbcore::GetWidgetWidthCoefficient());
 				ImGui::LabelHighlighted("Dim Angle");
 				ImGui::SliderFloat("##DimAngle", &m_DimAngle, 0.0f, 180.0f - m_Angle);
 				ImGui::PopItemWidth();
 			}
 			else
 			{
-				ImGui::CenterAlignWidget("Angle", 80.0f);
+				ImGui::CenterAlignWidget("Angle", 80.0f * rbcore::GetWidgetWidthCoefficient());
 				ImGui::LabelHighlighted("Angle");
-				ImGui::PushItemWidth(80.0f);
+				ImGui::PushItemWidth(80.0f * rbcore::GetWidgetWidthCoefficient());
 				if (ImGui::InputFloat("##Angle", &m_Angle))
 				{
 					SetAngle(m_Angle);
 				}
-				ImGui::CenterAlignWidget("Dim Angle", 80.0f);
+				ImGui::CenterAlignWidget("Dim Angle", 80.0f * rbcore::GetWidgetWidthCoefficient());
 				ImGui::LabelHighlighted("Dim Angle");
 				if (ImGui::InputFloat("##DimAngle", &m_DimAngle))
 				{
@@ -378,17 +378,17 @@ void SpotLight::DrawUI()
 				}
 				ImGui::PopItemWidth();
 			}
-			ImGui::CenterAlignWidget("Range", 120.0f);
+			ImGui::CenterAlignWidget("Range", 120.0f * rbcore::GetWidgetWidthCoefficient());
 			ImGui::LabelHighlighted("Range");
-			ImGui::PushItemWidth(120.0f);
+			ImGui::PushItemWidth(120.0f * rbcore::GetWidgetWidthCoefficient());
 			if (ImGui::InputFloat("##SpotRange", &m_Range))
 			{
 				SetRange(m_Range);
 			}
 			ImGui::PopItemWidth();
-			ImGui::CenterAlignWidget("Intensity", 80.0f);
+			ImGui::CenterAlignWidget("Intensity", 80.0f * rbcore::GetWidgetWidthCoefficient());
 			ImGui::LabelHighlighted("Intensity");
-			ImGui::PushItemWidth(80.0f);
+			ImGui::PushItemWidth(80.0f * rbcore::GetWidgetWidthCoefficient());
 			if (ImGui::InputFloat("##SpotIntensity", &m_Intensity, 0.0f, 0.0f, "%.6f"))
 			{
 				SetIntensity(m_Intensity);
@@ -399,12 +399,12 @@ void SpotLight::DrawUI()
 		// Position
 		if (ImGui::TreeNode("Position"))
 		{
-			ImGui::PushItemWidth(80);
-			ImGui::CenterAlignWidget(80);
+			ImGui::PushItemWidth(80.0f * rbcore::GetWidgetWidthCoefficient());
+			ImGui::CenterAlignWidget(80.0f * rbcore::GetWidgetWidthCoefficient());
 			ImGui::InputFloat("Pos X", &m_Position.x);
-			ImGui::CenterAlignWidget(80);
+			ImGui::CenterAlignWidget(80.0f * rbcore::GetWidgetWidthCoefficient());
 			ImGui::InputFloat("Pos Y", &m_Position.y);
-			ImGui::CenterAlignWidget(80);
+			ImGui::CenterAlignWidget(80.0f * rbcore::GetWidgetWidthCoefficient());
 			ImGui::InputFloat("Pos Z", &m_Position.z);
 			ImGui::PopItemWidth();
 			ImGui::TreePop();
@@ -416,20 +416,20 @@ void SpotLight::DrawUI()
 			ImGui::Checkbox("Slider", &slideRotate);
 			if (slideRotate)
 			{
-				ImGui::PushItemWidth(280);
+				ImGui::PushItemWidth(280.0f * rbcore::GetWidgetWidthCoefficient());
 				ImGui::SliderFloat("Pitch", &m_EulerAngle.x, -360.0f, 360.0f);
 				ImGui::SliderFloat("Yaw", &m_EulerAngle.y, -360.0f, 360.0f);
 				ImGui::PopItemWidth();
 			}
 			else
 			{
-				ImGui::PushItemWidth(80);
-				ImGui::CenterAlignWidget(80);
+				ImGui::PushItemWidth(80.0f * rbcore::GetWidgetWidthCoefficient());
+				ImGui::CenterAlignWidget(80.0f * rbcore::GetWidgetWidthCoefficient());
 				if (ImGui::InputFloat("Pitch", &m_EulerAngle.x))
 				{
 					SetPitch(m_EulerAngle.x);
 				}
-				ImGui::CenterAlignWidget(80);
+				ImGui::CenterAlignWidget(80.0f * rbcore::GetWidgetWidthCoefficient());
 				if (ImGui::InputFloat("Yaw", &m_EulerAngle.y))
 				{
 					SetYaw(m_EulerAngle.y);
@@ -448,9 +448,9 @@ void SpotLight::DrawUI()
 		// Shadow resolution
 		if (m_CastShadow)
 		{
-			ImGui::CenterAlignWidget("Shadow Resolution", 60.0f);
+			ImGui::CenterAlignWidget("Shadow Resolution", 60.0f * rbcore::GetWidgetWidthCoefficient());
 			ImGui::LabelHighlighted("Shadow Resolution");
-			ImGui::PushItemWidth(60.0f);
+			ImGui::PushItemWidth(60.0f * rbcore::GetWidgetWidthCoefficient());
 			const char* shadowResOps[] = {
 				"1X",
 				"2X",
@@ -489,29 +489,29 @@ void SpotLight::DrawUI()
 		// Advanced settings
 		if (ImGui::TreeNode("Advanced settings"))
 		{
-			ImGui::PushItemWidth(80.0f);
-			ImGui::CenterAlignWidget(80.0f);
+			ImGui::PushItemWidth(80.0f * rbcore::GetWidgetWidthCoefficient());
+			ImGui::CenterAlignWidget(80.0f * rbcore::GetWidgetWidthCoefficient());
 			if (ImGui::InputFloat("Ambient", &m_ADS.x, 0.0f, 0.0f, "%.6f"))
 			{
 				SetAmbient(m_ADS.x);
 			}
-			ImGui::CenterAlignWidget(80.0f);
+			ImGui::CenterAlignWidget(80.0f * rbcore::GetWidgetWidthCoefficient());
 			if (ImGui::InputFloat("Diffuse", &m_ADS.y, 0.0f, 0.0f, "%.6f"))
 			{
 				SetDiffuse(m_ADS.y);
 			}
-			ImGui::CenterAlignWidget(80.0f);
+			ImGui::CenterAlignWidget(80.0f * rbcore::GetWidgetWidthCoefficient());
 			if (ImGui::InputFloat("Specular", &m_ADS.z, 0.0f, 0.0f, "%.6f"))
 			{
 				SetSpecular(m_ADS.z);
 			}
 			ImGui::PopItemWidth();
-			ImGui::PushItemWidth(100.0f);
-			ImGui::CenterAlignWidget(100.0f);
+			ImGui::PushItemWidth(100.0f * rbcore::GetWidgetWidthCoefficient());
+			ImGui::CenterAlignWidget(100.0f * rbcore::GetWidgetWidthCoefficient());
 			ImGui::InputFloat("Constant", &m_CLQ.x, 0.0f, 0.0f, "%.8f");
-			ImGui::CenterAlignWidget(100.0f);
+			ImGui::CenterAlignWidget(100.0f * rbcore::GetWidgetWidthCoefficient());
 			ImGui::InputFloat("Linear", &m_CLQ.y, 0.0f, 0.0f, "%.8f");
-			ImGui::CenterAlignWidget(100.0f);
+			ImGui::CenterAlignWidget(100.0f * rbcore::GetWidgetWidthCoefficient());
 			ImGui::InputFloat("Quadratic", &m_CLQ.z, 0.0f, 0.0f, "%.8f");
 			ImGui::PopItemWidth();
 			ImGui::TreePop();

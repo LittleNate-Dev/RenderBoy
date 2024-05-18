@@ -203,22 +203,22 @@ void PointLight::DrawUI()
 		// Attributes
 		if (ImGui::TreeNode("Attributes"))
 		{
-			ImGui::CenterAlignWidget("Color", 200.0f);
+			ImGui::CenterAlignWidget("Color", 200.0f * rbcore::GetWidgetWidthCoefficient());
 			ImGui::LabelHighlighted("Color");
-			ImGui::PushItemWidth(200.0f);
+			ImGui::PushItemWidth(200.0f * rbcore::GetWidgetWidthCoefficient());
 			ImGui::ColorEdit3("##PointColor", &m_Color[0]);
 			ImGui::PopItemWidth();			
-			ImGui::CenterAlignWidget("Range", 120.0f);
+			ImGui::CenterAlignWidget("Range", 120.0f * rbcore::GetWidgetWidthCoefficient());
 			ImGui::LabelHighlighted("Range");
-			ImGui::PushItemWidth(120.0f);
+			ImGui::PushItemWidth(120.0f * rbcore::GetWidgetWidthCoefficient());
 			if (ImGui::InputFloat("##PointRange", &m_Range))
 			{
 				SetRange(m_Range);
 			}
 			ImGui::PopItemWidth();
-			ImGui::CenterAlignWidget("Intensity", 80.0f);
+			ImGui::CenterAlignWidget("Intensity", 80.0f * rbcore::GetWidgetWidthCoefficient());
 			ImGui::LabelHighlighted("Intensity");
-			ImGui::PushItemWidth(80.0f);
+			ImGui::PushItemWidth(80.0f * rbcore::GetWidgetWidthCoefficient());
 			if (ImGui::InputFloat("##PointIntensity", &m_Intensity, 0.0f, 0.0f, "%.6f"))
 			{
 				SetIntensity(m_Intensity);
@@ -229,12 +229,12 @@ void PointLight::DrawUI()
 		// Position
 		if (ImGui::TreeNode("Position"))
 		{
-			ImGui::PushItemWidth(80);
-			ImGui::CenterAlignWidget(80);
+			ImGui::PushItemWidth(80.0f * rbcore::GetWidgetWidthCoefficient());
+			ImGui::CenterAlignWidget(80.0f * rbcore::GetWidgetWidthCoefficient());
 			ImGui::InputFloat("Pos X", &m_Position.x);
-			ImGui::CenterAlignWidget(80);
+			ImGui::CenterAlignWidget(80.0f * rbcore::GetWidgetWidthCoefficient());
 			ImGui::InputFloat("Pos Y", &m_Position.y);
-			ImGui::CenterAlignWidget(80);
+			ImGui::CenterAlignWidget(80.0f * rbcore::GetWidgetWidthCoefficient());
 			ImGui::InputFloat("Pos Z", &m_Position.z);
 			ImGui::PopItemWidth();
 			ImGui::TreePop();
@@ -249,9 +249,9 @@ void PointLight::DrawUI()
 		// Shadow resolution
 		if (m_CastShadow)
 		{
-			ImGui::CenterAlignWidget("Shadow Resolution", 60.0f);
+			ImGui::CenterAlignWidget("Shadow Resolution", 60.0f * rbcore::GetWidgetWidthCoefficient());
 			ImGui::LabelHighlighted("Shadow Resolution");
-			ImGui::PushItemWidth(60.0f);
+			ImGui::PushItemWidth(60.0f * rbcore::GetWidgetWidthCoefficient());
 			const char* shadowResOps[] = {
 				"1X",
 				"2X",
@@ -290,29 +290,29 @@ void PointLight::DrawUI()
 		// Advanced settings
 		if (ImGui::TreeNode("Advanced settings"))
 		{
-			ImGui::PushItemWidth(80.0f);
-			ImGui::CenterAlignWidget(80.0f);
+			ImGui::PushItemWidth(80.0f * rbcore::GetWidgetWidthCoefficient());
+			ImGui::CenterAlignWidget(80.0f * rbcore::GetWidgetWidthCoefficient());
 			if (ImGui::InputFloat("Ambient", &m_ADS.x, 0.0f, 0.0f, "%.6f"))
 			{
 				SetAmbient(m_ADS.x);
 			}
-			ImGui::CenterAlignWidget(80.0f);
+			ImGui::CenterAlignWidget(80.0f * rbcore::GetWidgetWidthCoefficient());
 			if (ImGui::InputFloat("Diffuse", &m_ADS.y, 0.0f, 0.0f, "%.6f"))
 			{
 				SetDiffuse(m_ADS.y);
 			}
-			ImGui::CenterAlignWidget(80.0f);
+			ImGui::CenterAlignWidget(80.0f * rbcore::GetWidgetWidthCoefficient());
 			if (ImGui::InputFloat("Specular", &m_ADS.z, 0.0f, 0.0f, "%.6f"))
 			{
 				SetSpecular(m_ADS.z);
 			}
 			ImGui::PopItemWidth();
-			ImGui::PushItemWidth(100.0f);
-			ImGui::CenterAlignWidget(100.0f);
+			ImGui::PushItemWidth(100.0f * rbcore::GetWidgetWidthCoefficient());
+			ImGui::CenterAlignWidget(100.0f * rbcore::GetWidgetWidthCoefficient());
 			ImGui::InputFloat("Constant", &m_CLQ.x, 0.0f, 0.0f, "%.8f");
-			ImGui::CenterAlignWidget(100.0f);
+			ImGui::CenterAlignWidget(100.0f * rbcore::GetWidgetWidthCoefficient());
 			ImGui::InputFloat("Linear", &m_CLQ.y, 0.0f, 0.0f, "%.8f");
-			ImGui::CenterAlignWidget(100.0f);
+			ImGui::CenterAlignWidget(100.0f * rbcore::GetWidgetWidthCoefficient());
 			ImGui::InputFloat("Quadratic", &m_CLQ.z, 0.0f, 0.0f, "%.8f");
 			ImGui::PopItemWidth();
 			ImGui::TreePop();

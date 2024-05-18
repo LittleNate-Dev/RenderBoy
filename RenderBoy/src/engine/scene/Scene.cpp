@@ -973,7 +973,7 @@ void Scene::DrawSceneWindow()
 		ImGui::Begin("Scene", &rbcore::IS_MODELS_OPENED, windowFlags);
 		// rename
 		ImGui::LabelHighlighted("Name");
-		ImGui::PushItemWidth(200.f);
+		ImGui::PushItemWidth(200.f * rbcore::GetWidgetWidthCoefficient());
 		static char sceneName[256] = "";
 		strcpy_s(sceneName, m_Name.data());
 		ImGuiInputTextFlags inputFlags = 0;
@@ -987,9 +987,9 @@ void Scene::DrawSceneWindow()
 		// Skybox
 		if (ImGui::TreeNode("Skybox"))
 		{
-			ImGui::CenterAlignWidget("Skybox", 150.0f);
+			ImGui::CenterAlignWidget("Skybox", 90.0f * rbcore::GetWidgetWidthCoefficient());
 			ImGui::LabelHighlighted("Skybox");
-			ImGui::PushItemWidth(150.0f);
+			ImGui::PushItemWidth(90.0f * rbcore::GetWidgetWidthCoefficient());
 			const char* skyboxOps[] = {
 				"Color",
 				"Picture"
@@ -1015,9 +1015,9 @@ void Scene::DrawSceneWindow()
 			}
 			else
 			{
-				ImGui::CenterAlignWidget("Skybox Color", 200.0f);
+				ImGui::CenterAlignWidget("Skybox Color", 200.0f * rbcore::GetWidgetWidthCoefficient());
 				ImGui::LabelHighlighted("Skybox Color");
-				ImGui::PushItemWidth(200.0f);
+				ImGui::PushItemWidth(200.0f * rbcore::GetWidgetWidthCoefficient());
 				ImGui::ColorEdit3("##SkyboxColor", &m_Skybox.Color[0]);
 				ImGui::PopItemWidth();
 			}
@@ -1049,9 +1049,9 @@ void Scene::DrawModelsWindow()
 		}
 		if (rbcore::currentModelScene)
 		{
-			ImGui::CenterAlignWidget("Name", 200.0f);
+			ImGui::CenterAlignWidget("Name", 200.0f * rbcore::GetWidgetWidthCoefficient());
 			ImGui::LabelHighlighted("Name");
-			ImGui::PushItemWidth(200.f);
+			ImGui::PushItemWidth(200.f * rbcore::GetWidgetWidthCoefficient());
 			static char modelName[256] = "";
 			strcpy_s(modelName, rbcore::currentModelScene);
 			ImGuiInputTextFlags inputFlags = 0;
@@ -1099,12 +1099,12 @@ void Scene::DrawLightsWindow()
 		// Add light
 		if (ImGui::TreeNode("Add Light"))
 		{
-			ImGui::CenterAlignWidget("Name", 200.0f);
+			ImGui::CenterAlignWidget("Name", 200.0f * rbcore::GetWidgetWidthCoefficient());
 			ImGui::LabelHighlighted("Name");
 			ImGui::PushItemWidth(200.0f);
 			static char lightName[256] = "";
 			ImGui::InputText("##LightName", lightName, IM_ARRAYSIZE(lightName));
-			ImGui::CenterAlignWidget("Type", 200.0f);
+			ImGui::CenterAlignWidget("Type", 200.0f * rbcore::GetWidgetWidthCoefficient());
 			ImGui::LabelHighlighted("Type");
 			ImGui::PushItemWidth(200.0f);
 			const char* lightTypeOps[] = {
@@ -1152,9 +1152,9 @@ void Scene::DrawLightsWindow()
 				}
 				if (rbcore::currentPointLight)
 				{
-					ImGui::CenterAlignWidget("Name", 200.0f);
+					ImGui::CenterAlignWidget("Name", 200.0f * rbcore::GetWidgetWidthCoefficient());
 					ImGui::LabelHighlighted("Name");
-					ImGui::PushItemWidth(200.f);
+					ImGui::PushItemWidth(200.f * rbcore::GetWidgetWidthCoefficient());
 					static char pointLightName[256] = "";
 					strcpy_s(pointLightName, rbcore::currentPointLight);
 					ImGuiInputTextFlags inputFlags = 0;
@@ -1198,9 +1198,9 @@ void Scene::DrawLightsWindow()
 				}
 				if (rbcore::currentSpotLight)
 				{
-					ImGui::CenterAlignWidget("Name", 200.0f);
+					ImGui::CenterAlignWidget("Name", 200.0f * rbcore::GetWidgetWidthCoefficient());
 					ImGui::LabelHighlighted("Name");
-					ImGui::PushItemWidth(200.f);
+					ImGui::PushItemWidth(200.f * rbcore::GetWidgetWidthCoefficient());
 					static char spotLightName[256] = "";
 					strcpy_s(spotLightName, rbcore::currentSpotLight);
 					ImGuiInputTextFlags inputFlags = 0;
@@ -1244,9 +1244,9 @@ void Scene::DrawLightsWindow()
 				}
 				if (rbcore::currentDirLight)
 				{
-					ImGui::CenterAlignWidget("Name", 200.0f);
+					ImGui::CenterAlignWidget("Name", 200.0f * rbcore::GetWidgetWidthCoefficient());
 					ImGui::LabelHighlighted("Name");
-					ImGui::PushItemWidth(200.f);
+					ImGui::PushItemWidth(200.f * rbcore::GetWidgetWidthCoefficient());
 					static char dirLightName[256] = "";
 					strcpy_s(dirLightName, rbcore::currentDirLight);
 					ImGuiInputTextFlags inputFlags = 0;

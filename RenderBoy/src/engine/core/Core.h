@@ -235,6 +235,8 @@ namespace rbcore
 	// Get Font Style
 	std::string GetFontStylePath(std::string style);
 	int GetFontStyleIndex(std::string style);
+	// Get ImGui widgets width based on current font size
+	float GetWidgetWidthCoefficient();
 	// Get Rodrigue rotation matrix
 	glm::mat4 GetRodrigue(glm::vec4 axis, float angle);
 	// Get viewport matrix

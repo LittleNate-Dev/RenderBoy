@@ -491,7 +491,7 @@ void Application::DrawMenuBar()
 {
     if (ImGui::BeginMainMenuBar())
     {
-        ImGui::SetNextItemWidth(4.0f);
+        ImGui::SetNextItemWidth(4.0f * rbcore::GetWidgetWidthCoefficient());
         if (ImGui::BeginMenu("File"))
         {
             if (ImGui::MenuItem("New"))
@@ -518,7 +518,7 @@ void Application::DrawMenuBar()
             }
             ImGui::EndMenu();
         }
-        ImGui::SetNextItemWidth(4.0f);
+        ImGui::SetNextItemWidth(4.0f * rbcore::GetWidgetWidthCoefficient());
         if (ImGui::BeginMenu("View"))
         {
             if (ImGui::MenuItem("Info"))
@@ -543,7 +543,7 @@ void Application::DrawMenuBar()
             }
             ImGui::EndMenu();
         }
-        ImGui::SetNextItemWidth(4.0f);
+        ImGui::SetNextItemWidth(4.0f * rbcore::GetWidgetWidthCoefficient());
         if (ImGui::BeginMenu("Help"))
         {
             if (ImGui::MenuItem("About RenderBoy"))
@@ -715,9 +715,9 @@ void Application::DrawSettingWindow()
         {
             // Core
             {
-                ImGui::CenterAlignWidget("Core", 120.0f);
+                ImGui::CenterAlignWidget("Core", 100.0f * rbcore::GetWidgetWidthCoefficient());
                 ImGui::LabelHighlighted("Core");
-                ImGui::PushItemWidth(120.0f);
+                ImGui::PushItemWidth(100.0f * rbcore::GetWidgetWidthCoefficient());
                 const char* coreOps[] = {
                     "OpenGL",
                     "Vulkan",
@@ -746,9 +746,9 @@ void Application::DrawSettingWindow()
             }
             // UI style
             {
-                ImGui::CenterAlignWidget("UI Style", 180.0f);
+                ImGui::CenterAlignWidget("UI Style", 120.0f * rbcore::GetWidgetWidthCoefficient());
                 ImGui::LabelHighlighted("UI Style");
-                ImGui::PushItemWidth(180.0f);
+                ImGui::PushItemWidth(120.0f * rbcore::GetWidgetWidthCoefficient());
                 const char* uiStyleOps[] = {
                     "Default Light",
                     "Default Dark",
@@ -778,9 +778,9 @@ void Application::DrawSettingWindow()
             }
             // Font Style
             {
-                ImGui::CenterAlignWidget("Font Style", 150.0f);
+                ImGui::CenterAlignWidget("Font Style", 100.0f * rbcore::GetWidgetWidthCoefficient());
                 ImGui::LabelHighlighted("Font Style");
-                ImGui::PushItemWidth(150.0f);
+                ImGui::PushItemWidth(100.0f * rbcore::GetWidgetWidthCoefficient());
                 const char* fontStyle = rbcore::SETTINGS.FontStyle.c_str();
                 if (ImGui::BeginCombo("##FontStyle", fontStyle))
                 {
@@ -799,9 +799,9 @@ void Application::DrawSettingWindow()
             }
             // Font size
             {
-                ImGui::CenterAlignWidget("Font Size", 100.0f);
+                ImGui::CenterAlignWidget("Font Size", 90.0f * rbcore::GetWidgetWidthCoefficient());
                 ImGui::LabelHighlighted("Font Size");
-                ImGui::PushItemWidth(100.0f);
+                ImGui::PushItemWidth(90.0f * rbcore::GetWidgetWidthCoefficient());
                 static int fontSize = rbcore::SETTINGS.FontSize;
                 if (ImGui::InputInt("##FontSize", &fontSize))
                 {
@@ -824,9 +824,9 @@ void Application::DrawSettingWindow()
         {
             // Draw mode
             {
-                ImGui::CenterAlignWidget("Draw Mode", 150.0f);
+                ImGui::CenterAlignWidget("Draw Mode", 120.0f * rbcore::GetWidgetWidthCoefficient());
                 ImGui::LabelHighlighted("Draw Mode");
-                ImGui::PushItemWidth(150.0f);
+                ImGui::PushItemWidth(120.0f * rbcore::GetWidgetWidthCoefficient());
                 const char* drawModeOps[] = {
                     "Default",
                     "Wireframe",
@@ -847,23 +847,23 @@ void Application::DrawSettingWindow()
                 ImGui::Checkbox("Show Normal", &rbcore::SETTINGS.ShowNormal);
                 if (rbcore::SETTINGS.ShowNormal)
                 {
-                    ImGui::CenterAlignWidget("Normal Color", 200.0f);
+                    ImGui::CenterAlignWidget("Normal Color", 200.0f * rbcore::GetWidgetWidthCoefficient());
                     ImGui::LabelHighlighted("Normal Color");
-                    ImGui::PushItemWidth(200.0f);
+                    ImGui::PushItemWidth(200.0f * rbcore::GetWidgetWidthCoefficient());
                     ImGui::ColorEdit3("##NormalColor", &rbcore::NORMAL_COLOR[0]);
                     ImGui::PopItemWidth();
-                    ImGui::CenterAlignWidget("Magnitude", 60.0f);
+                    ImGui::CenterAlignWidget("Magnitude", 60.0f * rbcore::GetWidgetWidthCoefficient());
                     ImGui::LabelHighlighted("Magnitude");
-                    ImGui::PushItemWidth(60.0f);
+                    ImGui::PushItemWidth(60.0f * rbcore::GetWidgetWidthCoefficient());
                     ImGui::InputFloat("##NormalMagnitude", &rbcore::NORMAL_MAGNITUDE);
                     ImGui::PopItemWidth();
                 }
             }
             // Post-Process
             {
-                ImGui::CenterAlignWidget("Post-Processing", 120.0f);
+                ImGui::CenterAlignWidget("Post-Processing", 105.0f * rbcore::GetWidgetWidthCoefficient());
                 ImGui::LabelHighlighted("Post-Processing");
-                ImGui::PushItemWidth(120.0f);
+                ImGui::PushItemWidth(105.0f * rbcore::GetWidgetWidthCoefficient());
                 const char* ppOps[] = {
                     "None",
                     "Inverse",
@@ -886,9 +886,9 @@ void Application::DrawSettingWindow()
         {
             // Projection Type
             {
-                ImGui::CenterAlignWidget("Projection Type", 150.0f);
+                ImGui::CenterAlignWidget("Projection Type", 120.0f * rbcore::GetWidgetWidthCoefficient());
                 ImGui::LabelHighlighted("Projection Type");
-                ImGui::PushItemWidth(150.0f);
+                ImGui::PushItemWidth(120.0f * rbcore::GetWidgetWidthCoefficient());
                 const char* projOps[] = {
                     "Orthographic",
                     "Persepctive"
@@ -902,10 +902,10 @@ void Application::DrawSettingWindow()
             }
             // Camera FOV
             {
-                ImGui::CenterAlignWidget("FOV", 220.0f);
+                ImGui::CenterAlignWidget("FOV", 220.0f * rbcore::GetWidgetWidthCoefficient());
                 ImGui::LabelHighlighted("FOV");
                 static int fov = (float)m_Scene.GetCamera().GetFOV();
-                ImGui::PushItemWidth(220.0f);
+                ImGui::PushItemWidth(220.0f * rbcore::GetWidgetWidthCoefficient());
                 if (ImGui::SliderInt("##FOV", &fov, MIN_FOV, MAX_FOV))
                 {
                     m_Scene.GetCamera().SetFOV(fov);
@@ -914,17 +914,17 @@ void Application::DrawSettingWindow()
             }
             // Gamma
             {
-                ImGui::CenterAlignWidget("Gamma", 150.0f);
+                ImGui::CenterAlignWidget("Gamma", 150.0f * rbcore::GetWidgetWidthCoefficient());
                 ImGui::LabelHighlighted("Gamma");
-                ImGui::PushItemWidth(150.0f);
+                ImGui::PushItemWidth(150.0f * rbcore::GetWidgetWidthCoefficient());
                 ImGui::SliderFloat("##Gamma", &rbcore::SETTINGS.Gamma, 0.0f, 3.0f);
                 ImGui::PopItemWidth();
             }
             // Resolution
             {
-                ImGui::CenterAlignWidget("Resolution", 200.0f);
+                ImGui::CenterAlignWidget("Resolution", 200.0f * rbcore::GetWidgetWidthCoefficient());
                 ImGui::LabelHighlighted("Resolution");
-                ImGui::PushItemWidth(200.0f);
+                ImGui::PushItemWidth(200.0f * rbcore::GetWidgetWidthCoefficient());
                 static int resolution = (int)(100.0f * rbcore::SETTINGS.Resolution);
                 if (ImGui::SliderInt("##Resolution", &resolution, 20, 400))
                 {
@@ -935,9 +935,9 @@ void Application::DrawSettingWindow()
             }
             // Anti-Alising
             {
-                ImGui::CenterAlignWidget("Anti-Alising", 120.0f);
+                ImGui::CenterAlignWidget("Anti-Alising", 100.0f * rbcore::GetWidgetWidthCoefficient());
                 ImGui::LabelHighlighted("Anti-Alising");
-                ImGui::PushItemWidth(120.0f);
+                ImGui::PushItemWidth(100.0f * rbcore::GetWidgetWidthCoefficient());
                 const char* aaOps[] = {
                     "None",
                     "MSAA 4x",
@@ -967,7 +967,6 @@ void Application::DrawSettingWindow()
                 }
                 ImGui::PopItemWidth();
             }
-            
             ImGui::TreePop();
         }
         ImGui::End();
