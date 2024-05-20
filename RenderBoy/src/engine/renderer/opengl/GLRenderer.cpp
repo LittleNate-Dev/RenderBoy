@@ -16,13 +16,13 @@ void GLRenderer::Init(Scene& scene)
 	GLCall(glLineWidth(0.4f));
 	GLCall(glPointSize(1.5f));
 	// Initialize shaders
-	m_Shaders.Wireframe.Init((std::string)SHADER_OPENGL + "WIREFRAME.glsl");
-	m_Shaders.Pointcloud.Init((std::string)SHADER_OPENGL + "POINTCLOUD.glsl");
-	m_Shaders.Depth.Init((std::string)SHADER_OPENGL + "DEPTH.glsl");
-	m_Shaders.Normal.Init((std::string)SHADER_OPENGL + "NORMAL.glsl");
-	m_Shaders.Lightcube.Init((std::string)SHADER_OPENGL + "LIGHTCUBE.glsl");
-	m_Shaders.UVset.Init((std::string)SHADER_OPENGL + "UVSET.glsl");
-	m_Shaders.Skybox.Init((std::string)SHADER_OPENGL + "SKYBOX.glsl");
+	m_Shaders.Wireframe.Init(SHADER_OPENGL_WIREFRAME);
+	m_Shaders.Pointcloud.Init(SHADER_OPENGL_POINTCLOUD);
+	m_Shaders.Depth.Init(SHADER_OPENGL_DEPTH);
+	m_Shaders.UVset.Init(SHADER_OPENGL_UVSET);
+	m_Shaders.Normal.Init(SHADER_OPENGL_NORMAL);
+	m_Shaders.Lightcube.Init(SHADER_OPENGL_LIGHTCUBE);
+	m_Shaders.Skybox.Init(SHADER_OPENGL_SKYBOX);
 	// Initialize uv checker map texture
 	m_CheckerMap.GenTexture(UV_MAP_FILEPATH);
 	m_Shaders.UVset.Bind();

@@ -47,6 +47,13 @@
 #define SCREENSHOT_FILEPATH "saves/screenshot/"
 #define UV_MAP_FILEPATH "res/checkermap/CheckerMap.png"
 #define SHADER_OPENGL "data/shaders/opengl/"
+#define SHADER_OPENGL_WIREFRAME "data/shaders/opengl/draw_mode/WIREFRAME.glsl"
+#define SHADER_OPENGL_DEPTH "data/shaders/opengl/draw_mode/DEPTH.glsl"
+#define SHADER_OPENGL_UVSET "data/shaders/opengl/draw_mode/UVSET.glsl"
+#define SHADER_OPENGL_POINTCLOUD "data/shaders/opengl/draw_mode/POINTCLOUD.glsl"
+#define SHADER_OPENGL_SKYBOX "data/shaders/opengl/others/SKYBOX.glsl"
+#define SHADER_OPENGL_NORMAL "data/shaders/opengl/others/NORMAL.glsl"
+#define SHADER_OPENGL_LIGHTCUBE "data/shaders/opengl/others/LIGHTCUBE.glsl"
 #define MAX_FOV 120
 #define MIN_FOV 40
 
@@ -99,7 +106,16 @@ enum Draw_Mode
 
 enum Render_Mode
 {
-
+	NOTEX_NOCOLOR = 0,
+	NOTEX_HASCOLOR = 1,
+	HASRTEX_ALLTEX_ALBEDO = 3,
+	HASTEX_ALLTEX_BLINN = 4,
+	HASTEX_ALLTEX_PBR_3 = 5,
+	HASTEX_ALLTEX_PBR_4 = 5,
+	HASTEX_PARTTEX_ALBEDO = 6,
+	HASTEX_PARTTEX_BLINN = 7,
+	HASTEX_PARTTEX_PBR_3 = 8,
+	HASTEX_PARTTEX_PBR_4 = 5,
 };
 
 enum Anti_Alising
@@ -159,6 +175,7 @@ struct ModelStatics
 	unsigned int MeshCount = 0;
 	unsigned int VertexCount = 0;
 	unsigned int TriangleCount = 0;
+	Render_Mode RenderMode = NOTEX_NOCOLOR;
 };
 
 struct SceneStatics
@@ -205,6 +222,7 @@ namespace rbcore
 	extern const std::vector<std::string> FILE_TYPE_ASSIMP;
 	extern const std::vector<std::string> FONT_STYLE;
 }
+
 // Use these statics to set ui style
 namespace ImGui
 {

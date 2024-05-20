@@ -31,6 +31,9 @@ void Model::UpdateStatics()
         // Triangle statics
         m_Statics.TriangleCount += (unsigned int)m_Meshes[i].GetIndices().size() / 3;
     }
+
+    // Analysing model's data and decide it's render mode
+
 }
 
 bool Model::LoadModel(std::string name, std::string filepath)
