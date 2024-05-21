@@ -33,7 +33,37 @@ void Model::UpdateStatics()
     }
 
     // Analysing model's data and decide it's render mode
-
+    bool hasTexture = false;
+    bool allHasTexture = true;
+    bool hasColor = false;
+    for (unsigned int i = 0; i < m_Meshes.size(); i++)
+    {
+        hasTexture |= m_Meshes[i].HasTexture();
+        allHasTexture &= m_Meshes[i].HasTexture();
+        hasColor |= m_Meshes[i].HasColorValue();
+    }
+    if (hasTexture)
+    {
+        if (allHasTexture)
+        {
+            spdlog::warn("All has texture");
+        }
+        else
+        {
+            spdlog::warn("partly textured");
+        }
+    }
+    else
+    {
+        if (hasColor)
+        {
+            m_Statics.RenderMode = NOTEX_HASCOLOR;
+        }
+        else
+        {
+            m_Statics.RenderMode = NOTEX_NOCOLOR;
+        }
+    }
 }
 
 bool Model::LoadModel(std::string name, std::string filepath)
@@ -97,6 +127,10 @@ Mesh Model::AssimpProcessMesh(aiMesh* mesh, aiNode* node, const aiScene* scene)
     newMesh.SetSpecularValue(glm::vec3(color.r, color.g, color.b));
     material->Get(AI_MATKEY_COLOR_EMISSIVE, color);
     newMesh.SetEmissiveValue(glm::vec3(color.r, color.g, color.b));
+    material->Get(AI_MATKEY_COLOR_REFLECTIVE, color);
+    newMesh.SetReflectiveValue(color.r);
+    material->Get(AI_MATKEY_COLOR_TRANSPARENT, color);
+    newMesh.SetTransparentValue(color.r);
     // TODO: Load Tf, Ns, Ni, Tr, d, illum from .mtl file
     // Load texture path
     newMesh.GetAlbedoTexFilePaths() = AssimpLoadTexturePath(material, aiTextureType_DIFFUSE);

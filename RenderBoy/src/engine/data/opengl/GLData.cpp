@@ -143,12 +143,31 @@ void GLData::AddModel(std::string name, Model model)
 	m_ModelData.insert(std::pair<std::string, GLModelData>(name, modelData));
 	std::vector<Vertex> vertices;
 	std::vector<unsigned int> indices;
+	// Handle vertex position and index
 	for (unsigned int i = 0; i < model.GetMeshes().size(); i++)
 	{
 		unsigned int indexOffset = (unsigned int)vertices.size();
 		for (unsigned int j = 0; j < model.GetMeshes()[i].GetIndices().size(); j++)
 		{
 			indices.push_back(model.GetMeshes()[i].GetIndices()[j] + indexOffset);
+		}
+		// Handle materials
+		m_ModelData[name].ReflectiveValue.push_back(model.GetMeshes()[i].GetReflectivenValue());
+		m_ModelData[name].TransparentValue.push_back(model.GetMeshes()[i].GetTransparentValue());
+		switch (model.GetStatics().RenderMode)
+		{
+		case NOTEX_HASCOLOR:
+			m_ModelData[name].AmbientValue.push_back(model.GetMeshes()[i].GetAmbientValue());
+			m_ModelData[name].DiffuseValue.push_back(model.GetMeshes()[i].GetDiffuseValue());
+			m_ModelData[name].SpecularValue.push_back(model.GetMeshes()[i].GetSpecularValue());
+			m_ModelData[name].EmissiveValue.push_back(model.GetMeshes()[i].GetEmissiveValue());
+			for (unsigned int j = 0; j < model.GetMeshes()[i].GetVertices().size(); j++)
+			{
+				model.GetMeshes()[i].GetVertices()[j].MaterialIndex = glm::vec4(j);
+			}
+			break;
+		default:
+			break;
 		}
 		vertices.insert(vertices.end(), model.GetMeshes()[i].GetVertices().begin(), model.GetMeshes()[i].GetVertices().end());
 	}

@@ -6,10 +6,9 @@ Mesh::Mesh()
 	m_DiffuseValue = glm::vec3(0.0f);
 	m_SpecularValue = glm::vec3(0.0f);
 	m_EmissiveValue = glm::vec3(0.0f);
-	m_ReflectionValue = 0.0f;
+	m_ReflectiveValue = 0.0f;
 	m_RefractionValue = 0.0f;
 	m_TransparentValue = 0.0f;
-	m_DissolveValue = 0.0f;
 	m_TransmissionValue = glm::vec3(0.0f);
 	m_IllumValue = 0;
 }
@@ -38,9 +37,9 @@ void Mesh::SetEmissiveValue(glm::vec3 value)
 	m_EmissiveValue = value;
 }
 
-void Mesh::SetReflectionValue(float value)
+void Mesh::SetReflectiveValue(float value)
 {
-	m_ReflectionValue = value;
+	m_ReflectiveValue = value;
 }
 
 void Mesh::SetRefractionValue(float value)
@@ -55,7 +54,7 @@ void Mesh::SetTransparentValue(float value)
 
 void Mesh::SetDissolveValue(float value)
 {
-	m_DissolveValue = value;
+	m_TransparentValue = 1.0f - value;
 }
 
 void Mesh::SetTransmissionValue(glm::vec3 value)
@@ -71,9 +70,8 @@ void Mesh::SetIllumValue(unsigned int value)
 bool Mesh::HasTexture()
 {
 	bool hasTexture = false;
-	hasTexture |= HasDiffuseTex();
-	hasTexture |= HasSpecularTex();
 	hasTexture |= HasAlbedoTex();
+	hasTexture |= HasSpecularTex();
 	hasTexture |= HasMetallicTex();
 	hasTexture |= HasRoughnessTex();
 	hasTexture |= HasAoTex();
@@ -87,72 +85,72 @@ bool Mesh::HasDiffuseTex()
 {
 	if (m_AlbedoTexFilePaths.size())
 	{
-		return false;
+		return true;
 	}
-	return true;
+	return false;
 }
 
 bool Mesh::HasSpecularTex()
 {
 	if (m_SpecularTexFilePaths.size())
 	{
-		return false;
+		return true;
 	}
-	return true;
+	return false;
 }
 
 bool Mesh::HasAlbedoTex()
 {
 	if (m_AlbedoTexFilePaths.size())
 	{
-		return false;
+		return true;
 	}
-	return true;
+	return false;
 }
 
 bool Mesh::HasMetallicTex()
 {
 	if (m_MetallicTexFilePaths.size())
 	{
-		return false;
+		return true;
 	}
-	return true;
+	return false;
 }
 
 bool Mesh::HasRoughnessTex()
 {
 	if (m_RoughnessTexFilePaths.size())
 	{
-		return false;
+		return true;
 	}
-	return true;
+	return false;
 }
 
 bool Mesh::HasAoTex()
 {
 	if (m_AoTexFilePaths.size())
 	{
-		return false;
+		return true;
 	}
-	return true;
+	return false;
 }
 
 bool Mesh::HasNormalTex()
 {
 	if (m_NormalTexFilePaths.size())
 	{
-		return false;
+		return true;
 	}
-	return true;
+	return false;
 }
 
 bool Mesh::HasBumpTex()
 {
 	if (m_BumpTexFilePaths.size())
 	{
-		return false;
+		return true;
 	}
-	return true;
+	return false;
 }
 
 bool Mesh::HasDisplacementTex()
@@ -162,4 +160,13 @@ bool Mesh::HasDisplacementTex()
 		return true;
 	}
 	return false;
+}
+
+bool Mesh::HasColorValue()
+{
+	if (m_DiffuseValue == glm::vec3(0.0f))
+	{
+		return false;
+	}
+	return true;
 }

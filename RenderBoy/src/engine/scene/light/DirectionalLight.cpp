@@ -318,10 +318,13 @@ void DirectionalLight::DrawUI()
 	if (ImGui::TreeNode("Settings"))
 	{
 		ImGui::Checkbox("Switch", &m_LightSwitch);
-		ImGui::Checkbox("Show Light Cube", &m_ShowCube);
-		ImGui::Checkbox("Cast Shadow", &m_CastShadow);
+		if (m_LightSwitch)
+		{
+			ImGui::Checkbox("Show Light Cube", &m_ShowCube);
+			ImGui::Checkbox("Cast Shadow", &m_CastShadow);
+		}
 		// Shadow resolution
-		if (m_CastShadow)
+		if (m_CastShadow && m_LightSwitch)
 		{
 			ImGui::CenterAlignWidget("Shadow Resolution", 60.0f * rbcore::GetWidgetWidthCoefficient());
 			ImGui::LabelHighlighted("Shadow Resolution");

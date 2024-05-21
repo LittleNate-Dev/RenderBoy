@@ -13,6 +13,7 @@
 #include "gl/opengl/GLVertexBuffer.h"
 #include "gl/opengl/GLVertexBufferLayout.h"
 #include "gl/opengl/GLIndexBuffer.h"
+#include "shader/opengl/GLShader.h"
 #include "data/opengl/texture/GLTexture.h"
 #include "data/opengl/texture/GLCubeMap.h"
 
@@ -29,6 +30,7 @@ struct GLModelData
 	GLVertexBuffer VB;
 	GLVertexBuffer InstanceVB;
 	GLIndexBuffer IB;
+	GLShader Shader;
 	std::vector<GLTexture> AlbedoTex;
 	std::vector<GLTexture> SpecularTex;
 	std::vector<GLTexture> MetallicTex;
@@ -41,6 +43,8 @@ struct GLModelData
 	std::vector<glm::vec3> DiffuseValue;
 	std::vector<glm::vec3> SpecularValue;
 	std::vector<glm::vec3> EmissiveValue;
+	std::vector<float> ReflectiveValue;
+	std::vector<float> TransparentValue;
 };
 
 struct GLSkyboxData

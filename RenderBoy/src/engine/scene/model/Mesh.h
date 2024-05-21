@@ -27,10 +27,9 @@ private:
 	glm::vec3 m_DiffuseValue; // kd
 	glm::vec3 m_SpecularValue; // ks
 	glm::vec3 m_EmissiveValue; // ke
-	float m_ReflectionValue; // Ns
+	float m_ReflectiveValue; // Ns
 	float m_RefractionValue; // Ni
 	float m_TransparentValue; // Tr
-	float m_DissolveValue; // d
 	glm::vec3 m_TransmissionValue; // Tf
 	unsigned int m_IllumValue; // illum
 
@@ -44,14 +43,14 @@ public:
 	void SetDiffuseValue(glm::vec3 value);
 	void SetSpecularValue(glm::vec3 value);
 	void SetEmissiveValue(glm::vec3 value);
-	void SetReflectionValue(float value);
+	void SetReflectiveValue(float value);
 	void SetRefractionValue(float value);
 	void SetTransparentValue(float value);
 	void SetDissolveValue(float value);
 	void SetTransmissionValue(glm::vec3 value);
 	void SetIllumValue(unsigned int value);
 
-	// Do this mesh has ____ texture?
+	// Does this mesh has ____ texture?
 	bool HasTexture();
 	bool HasDiffuseTex();
 	bool HasSpecularTex();
@@ -62,6 +61,8 @@ public:
 	bool HasNormalTex();
 	bool HasBumpTex();
 	bool HasDisplacementTex();
+	// Does this mesh has color value?
+	bool HasColorValue();
 	// Get Mesh's members
 	inline std::vector<Vertex>& GetVertices()
 	{
@@ -123,9 +124,9 @@ public:
 	{
 		return m_EmissiveValue;
 	};
-	inline float GetReflectionValue() const
+	inline float GetReflectivenValue() const
 	{
-		return m_ReflectionValue;
+		return m_ReflectiveValue;
 	};
 	inline float GetRefractionValue() const
 	{
@@ -137,7 +138,7 @@ public:
 	};
 	inline float GetDissolveValue() const
 	{
-		return m_DissolveValue;
+		return 1.0f - m_TransparentValue;
 	};
 	inline glm::vec3 GetTransmissionValue() const
 	{

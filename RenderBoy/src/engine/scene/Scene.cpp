@@ -970,7 +970,7 @@ void Scene::DrawSceneWindow()
 	{
 		ImGuiWindowFlags windowFlags = 0;
 		windowFlags |= ImGuiWindowFlags_AlwaysAutoResize;
-		ImGui::Begin("Scene", &rbcore::IS_MODELS_OPENED, windowFlags);
+		ImGui::Begin("Scene", &rbcore::IS_SCENE_OPENED, windowFlags);
 		// rename
 		ImGui::LabelHighlighted("Name");
 		ImGui::PushItemWidth(200.f * rbcore::GetWidgetWidthCoefficient());
