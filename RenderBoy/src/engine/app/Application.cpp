@@ -714,7 +714,7 @@ void Application::DrawSettingWindow()
         if (ImGui::TreeNode("Application"))
         {
             // Core
-            {
+            /*{
                 ImGui::CenterAlignWidget("Core", 100.0f * rbcore::GetWidgetWidthCoefficient());
                 ImGui::LabelHighlighted("Core");
                 ImGui::PushItemWidth(100.0f * rbcore::GetWidgetWidthCoefficient());
@@ -743,7 +743,7 @@ void Application::DrawSettingWindow()
                     }
                 }
                 ImGui::PopItemWidth();
-            }
+            }*/
             // UI style
             {
                 ImGui::CenterAlignWidget("UI Style", 120.0f * rbcore::GetWidgetWidthCoefficient());
