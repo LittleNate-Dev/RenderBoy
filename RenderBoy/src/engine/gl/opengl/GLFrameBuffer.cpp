@@ -111,13 +111,27 @@ void GLFrameBuffer::Init(FBType type, unsigned int width, unsigned int height)
 	}
 	
 	m_Type = type;
+	m_TexWidth = width;
+	m_TexHeight = height;
 	GLCall(glGenFramebuffers(1, &m_RendererID));
 	GLCall(glBindFramebuffer(GL_FRAMEBUFFER, m_RendererID));
 	GLCall(glGenTextures(1, &m_TexID));
-	if (m_Type == DEPTH_CUBE)
+	if (m_Type == DEPTH_MAP)
 	{
-		m_TexWidth = width;
-		m_TexHeight = height;
+		GLCall(glBindTexture(GL_TEXTURE_2D, m_TexID));
+		GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL));
+		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
+		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
+		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT));
+		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT));
+		GLCall(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_TexID, 0));
+		// Generate texture handle
+		m_Handle = glGetTextureHandleARB(m_TexID);
+		GLCall(glMakeTextureHandleResidentARB(m_Handle));
+		GLCall(glBindTexture(GL_TEXTURE_2D, 0));
+	}
+	else if (m_Type == DEPTH_CUBE)
+	{
 		GLCall(glBindTexture(GL_TEXTURE_CUBE_MAP, m_TexID));
 		for (unsigned int i = 0; i < 6; i++)
 		{
@@ -171,6 +185,8 @@ void GLFrameBuffer::BindTex(unsigned int slot) const
 		GLCall(glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, m_TexID));
 		break;
 	case DEPTH_MAP:
+		GLCall(glActiveTexture(GL_TEXTURE0 + slot));
+		GLCall(glBindTexture(GL_TEXTURE_2D, m_TexID));
 		break;
 	case DEPTH_CUBE:
 		GLCall(glActiveTexture(GL_TEXTURE0 + slot));
@@ -190,6 +206,7 @@ void GLFrameBuffer::UnbindTex() const
 		GLCall(glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0));
 		break;
 	case DEPTH_MAP:
+		GLCall(glBindTexture(GL_TEXTURE_2D, 0));
 		break;
 	case DEPTH_CUBE:
 		GLCall(glBindTexture(GL_TEXTURE_CUBE_MAP, 0));
@@ -287,9 +304,27 @@ void GLFrameBuffer::ChangeMSAA()
 
 void GLFrameBuffer::ChangeShadowRes(unsigned int width, unsigned int height)
 {
-	if (m_Type == DEPTH_CUBE)
+	GLCall(glDeleteTextures(1, &m_TexID));
+	GLCall(glBindFramebuffer(GL_FRAMEBUFFER, m_RendererID));
+	if (m_Type == DEPTH_MAP)
 	{
 		GLCall(glBindFramebuffer(GL_FRAMEBUFFER, m_RendererID));
+		GLCall(glGenTextures(1, &m_TexID));
+		GLCall(glBindTexture(GL_TEXTURE_2D, m_TexID));
+		GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL));
+		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
+		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
+		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT));
+		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT));
+		GLCall(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_TexID, 0));
+		// Generate texture handle
+		m_Handle = glGetTextureHandleARB(m_TexID);
+		GLCall(glMakeTextureHandleResidentARB(m_Handle));
+		GLCall(glBindTexture(GL_TEXTURE_2D, 0));
+	}
+	else if (m_Type == DEPTH_CUBE)
+	{
+		
 		GLCall(glGenTextures(1, &m_TexID));
 		if (m_Type == DEPTH_CUBE)
 		{
@@ -311,6 +346,6 @@ void GLFrameBuffer::ChangeShadowRes(unsigned int width, unsigned int height)
 			GLCall(glMakeTextureHandleResidentARB(m_Handle));
 			GLCall(glBindTexture(GL_TEXTURE_CUBE_MAP, 0));
 		}
-		GLCall(glBindFramebuffer(GL_FRAMEBUFFER, 0));
 	}
+	GLCall(glBindFramebuffer(GL_FRAMEBUFFER, 0));
 }

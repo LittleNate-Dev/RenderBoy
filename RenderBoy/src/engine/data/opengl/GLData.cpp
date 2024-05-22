@@ -288,7 +288,9 @@ void GLData::AddPointLight(std::string name)
 
 void GLData::AddSpotLight(std::string name)
 {
-	// TODO
+	GLFrameBuffer fb;
+	m_SpotLightData.DepthMap.insert(std::pair<std::string, GLFrameBuffer>(name, fb));
+	m_PointLightData.DepthMap[name].Init(DEPTH_MAP, 1024, 1024);
 }
 
 void GLData::AddDirLight(std::string name)
@@ -303,7 +305,7 @@ void GLData::DeletePointLight(std::string name)
 
 void GLData::DeleteSpotLight(std::string name)
 {
-	// TODO
+	m_SpotLightData.DepthMap.erase(name);
 }
 
 void GLData::DeleteDirLight(std::string name)
@@ -323,7 +325,12 @@ void GLData::RenamePointLight(std::string oldName, std::string newName)
 
 void GLData::RenameSpotLight(std::string oldName, std::string newName)
 {
-	// TODO
+	unsigned int width = m_PointLightData.DepthMap[oldName].GetTexWidth();
+	unsigned int height = m_PointLightData.DepthMap[oldName].GetTexHeight();
+	GLFrameBuffer fb;
+	m_SpotLightData.DepthMap.erase(oldName);
+	m_SpotLightData.DepthMap.insert(std::pair<std::string, GLFrameBuffer>(newName, fb));
+	m_SpotLightData.DepthMap[newName].Init(DEPTH_MAP, width, height);
 }
 
 void GLData::RenameDirLight(std::string oldName, std::string newName)

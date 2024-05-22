@@ -693,6 +693,7 @@ bool Scene::AddSpotLight(std::string name)
 	m_SpotLightList.push_back(name);
 	m_SpotLights.insert(std::pair<std::string, SpotLight>(name, light));
 	core::currentSpotLight = nullptr;
+	m_Data.AddLight(name, SPOT_LIGHT);
 	return true;
 }
 
@@ -769,6 +770,7 @@ bool Scene::DeleteSpotLight(std::string name)
 		m_SpotLightList.shrink_to_fit();
 		m_SpotLights.erase(name);
 		core::currentSpotLight = nullptr;
+		m_Data.DeleteLight(name, SPOT_LIGHT);
 		return true;
 	}
 	return false;
@@ -915,6 +917,7 @@ bool Scene::RenameSpotLight(std::string oldName, std::string newName)
 				break;
 			}
 		}
+		m_Data.RenameLight(oldName, newName, SPOT_LIGHT);
 		return true;
 	}
 	return false;

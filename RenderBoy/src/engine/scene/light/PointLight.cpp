@@ -178,22 +178,9 @@ void PointLight::SetCastShadow(bool castShadow)
 
 void PointLight::SetShadowRes(unsigned int res)
 {
-	if (res <= 1024)
-	{
-		res = 1024;
-	}
-	else if (res <= 2048)
-	{
-		res = 2048;
-	}
-	else if (res <= 3072)
-	{
-		res = 3072;
-	}
-	else
-	{
-		res = 4096;
-	}
+	res = res == 0 ? m_ShadowRes : res;
+	m_ShadowRes = res;
+	((Data*)core::SCENE_DATA)->GetDataGL().GetPointLightData().DepthMap[m_Name].ChangeShadowRes(m_ShadowRes, m_ShadowRes);
 }
 
 void PointLight::DrawUI()
@@ -261,7 +248,22 @@ void PointLight::DrawUI()
 				"3X",
 				"4X"
 			};
-			static int currentRes = 0;
+			static int currentRes;
+			switch (m_ShadowRes)
+			{
+			case 1024:
+				currentRes = 0;
+				break;
+			case 2048:
+				currentRes = 1;
+				break;
+			case 3072:
+				currentRes = 2;
+				break;
+			case 4096:
+				currentRes = 3;
+				break;
+			}
 			if (ImGui::Combo("##ShadowRes", &currentRes, shadowResOps, IM_ARRAYSIZE(shadowResOps)))
 			{
 				switch (currentRes)

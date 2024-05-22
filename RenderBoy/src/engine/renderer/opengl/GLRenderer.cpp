@@ -26,7 +26,7 @@ void GLRenderer::Init(Scene& scene)
 	m_Shaders.Lightcube.Init(SHADER_OPENGL_LIGHTCUBE);
 	m_Shaders.Skybox.Init(SHADER_OPENGL_SKYBOX);
 	m_Shaders.PointShadow.Init(SHADER_OPENGL_SHADOW_POINT);
-	//m_Shaders.SpotShadow.Init(SHADER_OPENGL_SHADOW_SPOT);
+	m_Shaders.SpotShadow.Init(SHADER_OPENGL_SHADOW_SPOT);
 	// Initialize uv checker map texture
 	m_CheckerMap.GenTexture(UV_MAP_FILEPATH);
 	m_Shaders.UVset.Bind();
@@ -79,9 +79,12 @@ void GLRenderer::Clear()
 void GLRenderer::Draw(Scene& scene)
 {
 	// Draw Shadow Depth map
+	DrawPointLightShadow(scene);
+	DrawSpotLightShadow(scene);
 	if (core::SETTINGS.DrawMode == DEFAULT)
 	{
 		DrawPointLightShadow(scene);
+		DrawSpotLightShadow(scene);
 	}
 	// MSAA
 	if ((int)core::SETTINGS.AA >= 1 && (int)core::SETTINGS.AA <= 4)
@@ -349,6 +352,10 @@ void GLRenderer::DrawPointLightShadow(Scene& scene)
 	for (unsigned int i = 0; i < scene.GetPointLightList().size(); i++)
 	{
 		light = scene.GetPointLightList()[i];
+		// If light's shadow can't be seen, then skip
+		{
+
+		}
 		if (scene.GetPointLights()[light].CastShadow())
 		{
 			GLCall(glViewport(0, 0, scene.GetPointLights()[light].GetShadowRes() , scene.GetPointLights()[light].GetShadowRes()));
@@ -380,6 +387,41 @@ void GLRenderer::DrawPointLightShadow(Scene& scene)
 		}
 	}
 	m_Shaders.PointShadow.Unbind();
+}
+
+void GLRenderer::DrawSpotLightShadow(Scene& scene)
+{
+	std::string light;
+	m_Shaders.SpotShadow.Bind();
+	for (unsigned int i = 0; i < scene.GetSpotLightList().size(); i++)
+	{
+		light = scene.GetSpotLightList()[i];
+		if (scene.GetSpotLights()[light].CastShadow())
+		{
+			GLCall(glViewport(0, 0, scene.GetSpotLights()[light].GetShadowRes(), scene.GetSpotLights()[light].GetShadowRes()));
+			scene.GetData().GetDataGL().GetSpotLightData().DepthMap[light].Bind();
+			GLCall(glClear(GL_DEPTH_BUFFER_BIT));
+			m_Shaders.SpotShadow.SetUniformMat4f("u_ProjMat", scene.GetSpotLights()[light].GetProjMat());
+			m_Shaders.SpotShadow.SetUniformMat4f("u_ViewMat", scene.GetSpotLights()[light].GetViewMat());
+			// Draw Scene
+			std::string model;
+			for (unsigned int j = 0; j < scene.GetModelList().size(); j++)
+			{
+				model = scene.GetModelList()[j];
+				scene.GetData().GetDataGL().GetModelData()[model].InstanceVB.UpdateVertexBuffer(
+					&scene.GetModels()[model].GetModelMats()[0],
+					(unsigned int)scene.GetModels()[model].GetModelMats().size() * sizeof(glm::mat4)
+				);
+				scene.GetData().GetDataGL().GetModelData()[model].VA.Bind();
+				scene.GetData().GetDataGL().GetModelData()[model].IB.Bind();
+				// Draw Model
+				GLCall(glDrawElementsInstanced(GL_TRIANGLES, scene.GetData().GetDataGL().GetModelData()[model].IB.GetCount(), GL_UNSIGNED_INT, nullptr, scene.GetModels()[model].GetInstance()));
+				scene.GetData().GetDataGL().GetModelData()[model].VA.Unbind();
+				scene.GetData().GetDataGL().GetModelData()[model].IB.Unbind();
+			}
+		}
+	}
+	m_Shaders.SpotShadow.Unbind();
 }
 
 bool GLRenderer::SaveScreenShot()

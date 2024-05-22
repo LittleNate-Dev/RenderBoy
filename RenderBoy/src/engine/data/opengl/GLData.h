@@ -31,6 +31,7 @@ struct GLSpotLightData
 	GLVertexArray VA;
 	GLVertexBuffer VB;
 	GLIndexBuffer IB;
+	std::map<std::string, GLFrameBuffer> DepthMap;
 };
 
 struct GLDirLightData
