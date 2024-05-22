@@ -290,7 +290,7 @@ void GLData::AddSpotLight(std::string name)
 {
 	GLFrameBuffer fb;
 	m_SpotLightData.DepthMap.insert(std::pair<std::string, GLFrameBuffer>(name, fb));
-	m_PointLightData.DepthMap[name].Init(DEPTH_MAP, 1024, 1024);
+	m_SpotLightData.DepthMap[name].Init(DEPTH_MAP, 1024, 1024);
 }
 
 void GLData::AddDirLight(std::string name)
@@ -325,8 +325,8 @@ void GLData::RenamePointLight(std::string oldName, std::string newName)
 
 void GLData::RenameSpotLight(std::string oldName, std::string newName)
 {
-	unsigned int width = m_PointLightData.DepthMap[oldName].GetTexWidth();
-	unsigned int height = m_PointLightData.DepthMap[oldName].GetTexHeight();
+	unsigned int width = m_SpotLightData.DepthMap[oldName].GetTexWidth();
+	unsigned int height = m_SpotLightData.DepthMap[oldName].GetTexHeight();
 	GLFrameBuffer fb;
 	m_SpotLightData.DepthMap.erase(oldName);
 	m_SpotLightData.DepthMap.insert(std::pair<std::string, GLFrameBuffer>(newName, fb));

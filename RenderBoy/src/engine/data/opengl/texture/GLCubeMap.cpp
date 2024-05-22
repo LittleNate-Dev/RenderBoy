@@ -9,6 +9,10 @@ GLCubeMap::GLCubeMap()
 
 GLCubeMap::~GLCubeMap()
 {
+    if (m_Handle)
+    {
+        GLCall(glMakeTextureHandleNonResidentARB(m_Handle));
+    }
 	GLCall(glDeleteTextures(1, &m_RendererID));
 }
 

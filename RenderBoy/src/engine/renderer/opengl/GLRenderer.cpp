@@ -79,8 +79,6 @@ void GLRenderer::Clear()
 void GLRenderer::Draw(Scene& scene)
 {
 	// Draw Shadow Depth map
-	DrawPointLightShadow(scene);
-	DrawSpotLightShadow(scene);
 	if (core::SETTINGS.DrawMode == DEFAULT)
 	{
 		DrawPointLightShadow(scene);
@@ -354,7 +352,7 @@ void GLRenderer::DrawPointLightShadow(Scene& scene)
 		light = scene.GetPointLightList()[i];
 		// If light's shadow can't be seen, then skip
 		{
-
+			// TODO
 		}
 		if (scene.GetPointLights()[light].CastShadow())
 		{
@@ -396,6 +394,10 @@ void GLRenderer::DrawSpotLightShadow(Scene& scene)
 	for (unsigned int i = 0; i < scene.GetSpotLightList().size(); i++)
 	{
 		light = scene.GetSpotLightList()[i];
+		// If light's shadow can't be seen, then skip
+		{
+			// TODO
+		}
 		if (scene.GetSpotLights()[light].CastShadow())
 		{
 			GLCall(glViewport(0, 0, scene.GetSpotLights()[light].GetShadowRes(), scene.GetSpotLights()[light].GetShadowRes()));

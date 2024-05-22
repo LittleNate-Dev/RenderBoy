@@ -12,6 +12,10 @@ GLTexture::GLTexture()
 
 GLTexture::~GLTexture()
 {
+    if (m_Handle)
+    {
+        GLCall(glMakeTextureHandleNonResidentARB(m_Handle));
+    }
     GLCall(glDeleteTextures(1, &m_RendererID));
 }
 

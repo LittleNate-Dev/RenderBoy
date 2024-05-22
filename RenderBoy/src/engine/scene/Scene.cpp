@@ -796,7 +796,7 @@ bool Scene::RenameModel(std::string oldName, std::string newName)
 		// If name already exist, rename
 		unsigned int rename = 1;
 		std::string newRename = newName;
-		while (m_Models.find(newName) != m_Models.end())
+		while (m_Models.find(newRename) != m_Models.end())
 		{
 			newRename = newName + "(" + std::to_string(rename) + ")";
 			rename++;
@@ -858,7 +858,7 @@ bool Scene::RenamePointLight(std::string oldName, std::string newName)
 		// If name already exist, rename
 		unsigned int rename = 1;
 		std::string newRename = newName;
-		while (m_PointLights.find(newName) != m_PointLights.end())
+		while (m_PointLights.find(newRename) != m_PointLights.end())
 		{
 			newRename = newName + "(" + std::to_string(rename) + ")";
 			rename++;
@@ -894,7 +894,7 @@ bool Scene::RenameSpotLight(std::string oldName, std::string newName)
 		// If name already exist, rename
 		unsigned int rename = 1;
 		std::string newRename = newName;
-		while (m_SpotLights.find(newName) != m_SpotLights.end())
+		while (m_SpotLights.find(newRename) != m_SpotLights.end())
 		{
 			newRename = newName + "(" + std::to_string(rename) + ")";
 			rename++;
@@ -930,7 +930,7 @@ bool Scene::RenameDirectionalLight(std::string oldName, std::string newName)
 		// If name already exist, rename
 		unsigned int rename = 1;
 		std::string newRename = newName;
-		while (m_DirLights.find(newName) != m_DirLights.end())
+		while (m_DirLights.find(newRename) != m_DirLights.end())
 		{
 			newRename = newName + "(" + std::to_string(rename) + ")";
 			rename++;
@@ -1064,7 +1064,7 @@ void Scene::DrawModelsWindow()
 			ImGuiInputTextFlags inputFlags = 0;
 			inputFlags |= ImGuiInputTextFlags_CharsNoBlank;
 			inputFlags |= ImGuiInputTextFlags_EnterReturnsTrue;
-			if (ImGui::InputText("##spotLightName", modelName, IM_ARRAYSIZE(modelName), inputFlags))
+			if (ImGui::InputText("##ModelName", modelName, IM_ARRAYSIZE(modelName), inputFlags))
 			{
 				if (modelName != core::currentModelScene)
 				{
@@ -1167,13 +1167,14 @@ void Scene::DrawLightsWindow()
 					ImGuiInputTextFlags inputFlags = 0;
 					inputFlags |= ImGuiInputTextFlags_CharsNoBlank;
 					inputFlags |= ImGuiInputTextFlags_EnterReturnsTrue;
-					if (ImGui::InputText("##spotLightName", pointLightName, IM_ARRAYSIZE(pointLightName), inputFlags))
+					if (ImGui::InputText("##PointLightName", pointLightName, IM_ARRAYSIZE(pointLightName), inputFlags))
 					{
 						if (pointLightName != core::currentPointLight)
 						{
 							RenamePointLight(core::currentPointLight, pointLightName);
 						}
 					}
+					ImGui::PopItemWidth();
 					m_PointLights[core::currentPointLight].DrawUI();
 					ImGui::PushStyleColor(ImGuiCol_Text, ImGui::ColorConvertU32ToFloat4(ImGui::COLOR_WARNING_SYTLE));
 					ImGui::CenterAlignWidget("Delete");
@@ -1213,13 +1214,14 @@ void Scene::DrawLightsWindow()
 					ImGuiInputTextFlags inputFlags = 0;
 					inputFlags |= ImGuiInputTextFlags_CharsNoBlank;
 					inputFlags |= ImGuiInputTextFlags_EnterReturnsTrue;
-					if (ImGui::InputText("##spotLightName", spotLightName, IM_ARRAYSIZE(spotLightName), inputFlags))
+					if (ImGui::InputText("##SpotLightName", spotLightName, IM_ARRAYSIZE(spotLightName), inputFlags))
 					{
 						if (spotLightName != core::currentSpotLight)
 						{
 							RenameSpotLight(core::currentSpotLight, spotLightName);
 						}
 					}
+					ImGui::PopItemWidth();
 					m_SpotLights[core::currentSpotLight].DrawUI();
 					ImGui::PushStyleColor(ImGuiCol_Text, ImGui::ColorConvertU32ToFloat4(ImGui::COLOR_WARNING_SYTLE));
 					ImGui::CenterAlignWidget("Delete");
@@ -1259,13 +1261,14 @@ void Scene::DrawLightsWindow()
 					ImGuiInputTextFlags inputFlags = 0;
 					inputFlags |= ImGuiInputTextFlags_CharsNoBlank;
 					inputFlags |= ImGuiInputTextFlags_EnterReturnsTrue;
-					if (ImGui::InputText("##spotLightName", dirLightName, IM_ARRAYSIZE(dirLightName), inputFlags))
+					if (ImGui::InputText("##DirLightName", dirLightName, IM_ARRAYSIZE(dirLightName), inputFlags))
 					{
 						if (dirLightName != core::currentDirLight)
 						{
 							RenameDirectionalLight(core::currentDirLight, dirLightName);
 						}
 					}
+					ImGui::PopItemWidth();
 					m_DirLights[core::currentDirLight].DrawUI();
 					ImGui::PushStyleColor(ImGuiCol_Text, ImGui::ColorConvertU32ToFloat4(ImGui::COLOR_WARNING_SYTLE));
 					ImGui::CenterAlignWidget("Delete");
