@@ -52,6 +52,7 @@ private:
 	void DrawNormal(Scene& scene);
 	void DrawLightCube(Scene& scene);
 	void DrawSkybox(Scene& scene);
+	void DrawPointLightShadow(Scene& scene);
 
 public:
 	GLRenderer();

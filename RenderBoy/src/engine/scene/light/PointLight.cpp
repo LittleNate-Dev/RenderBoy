@@ -50,7 +50,7 @@ glm::mat4 PointLight::GetViewMat(unsigned int face)
 
 glm::mat4 PointLight::GetProjMat()
 {
-	glm::mat4 projMat = glm::perspective(glm::radians(90.0f), 1.0f, 0.05f, m_Intensity);
+	glm::mat4 projMat = glm::perspective(glm::radians(90.0f), 1.0f, 0.05f, m_Range);
 	return projMat;
 }
 

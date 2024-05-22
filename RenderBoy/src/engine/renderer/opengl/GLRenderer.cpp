@@ -78,6 +78,12 @@ void GLRenderer::Clear()
 
 void GLRenderer::Draw(Scene& scene)
 {
+	// Draw Shadow Depth map
+	//DrawPointLightShadow(scene);
+	if (core::SETTINGS.DrawMode == DEFAULT)
+	{
+		DrawPointLightShadow(scene);
+	}
 	// MSAA
 	if ((int)core::SETTINGS.AA >= 1 && (int)core::SETTINGS.AA <= 4)
 	{
@@ -335,6 +341,46 @@ void GLRenderer::DrawSkybox(Scene& scene)
 	scene.GetData().GetDataGL().GetSkybox().IB.Unbind();
 	m_Shaders.Skybox.Unbind();
 	GLCall(glDepthFunc(GL_LESS)); // set depth function back to default
+}
+
+void GLRenderer::DrawPointLightShadow(Scene& scene)
+{
+	std::string light;
+	m_Shaders.PointShadow.Bind();
+	for (unsigned int i = 0; i < scene.GetPointLightList().size(); i++)
+	{
+		light = scene.GetPointLightList()[i];
+		if (scene.GetPointLights()[light].CastShadow())
+		{
+			GLCall(glViewport(0, 0, scene.GetPointLights()[light].GetShadowRes() , scene.GetPointLights()[light].GetShadowRes()));
+			scene.GetData().GetDataGL().GetPointLightData().DepthMap[light].Bind();
+			GLCall(glClear(GL_DEPTH_BUFFER_BIT));
+			for (unsigned int j = 0; j < 6; j++)
+			{
+				glm::mat4 shadowMat = scene.GetPointLights()[light].GetProjMat() * scene.GetPointLights()[light].GetViewMat(j);
+				m_Shaders.PointShadow.SetUniformMat4f("u_ShadowMat[" + std::to_string(j) + "]", shadowMat);
+			}
+			m_Shaders.PointShadow.SetUniformVec3f("u_LightPos", scene.GetPointLights()[light].GetPosition());
+			m_Shaders.PointShadow.SetUniform1f("u_FarPlane", scene.GetPointLights()[light].GetRange());
+			// Draw Scene
+			std::string model;
+			for (unsigned int j = 0; j < scene.GetModelList().size(); j++)
+			{
+				model = scene.GetModelList()[j];
+				scene.GetData().GetDataGL().GetModelData()[model].InstanceVB.UpdateVertexBuffer(
+					&scene.GetModels()[model].GetModelMats()[0],
+					(unsigned int)scene.GetModels()[model].GetModelMats().size() * sizeof(glm::mat4)
+				);
+				scene.GetData().GetDataGL().GetModelData()[model].VA.Bind();
+				scene.GetData().GetDataGL().GetModelData()[model].IB.Bind();
+				// Draw Model
+				GLCall(glDrawElementsInstanced(GL_TRIANGLES, scene.GetData().GetDataGL().GetModelData()[model].IB.GetCount(), GL_UNSIGNED_INT, nullptr, scene.GetModels()[model].GetInstance()));
+				scene.GetData().GetDataGL().GetModelData()[model].VA.Unbind();
+				scene.GetData().GetDataGL().GetModelData()[model].IB.Unbind();
+			}
+		}
+	}
+	m_Shaders.PointShadow.Unbind();
 }
 
 bool GLRenderer::SaveScreenShot()
