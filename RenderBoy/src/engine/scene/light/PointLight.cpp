@@ -282,6 +282,7 @@ void PointLight::DrawUI()
 					m_ShadowRes = 1024;
 					break;
 				}
+				((Data*)core::SCENE_DATA)->GetDataGL().GetPointLightData().DepthMap[m_Name].ChangeShadowRes(m_ShadowRes, m_ShadowRes);
 			}
 			ImGui::PopItemWidth();
 		}

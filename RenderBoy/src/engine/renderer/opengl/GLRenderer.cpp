@@ -79,7 +79,6 @@ void GLRenderer::Clear()
 void GLRenderer::Draw(Scene& scene)
 {
 	// Draw Shadow Depth map
-	//DrawPointLightShadow(scene);
 	if (core::SETTINGS.DrawMode == DEFAULT)
 	{
 		DrawPointLightShadow(scene);

@@ -289,16 +289,28 @@ void GLFrameBuffer::ChangeShadowRes(unsigned int width, unsigned int height)
 {
 	if (m_Type == DEPTH_CUBE)
 	{
-		m_TexWidth = width;
-		m_TexHeight = height;
-		GLCall(glBindTexture(GL_TEXTURE_CUBE_MAP, m_TexID));
-		for (unsigned int i = 0; i < 6; i++)
+		GLCall(glBindFramebuffer(GL_FRAMEBUFFER, m_RendererID));
+		GLCall(glGenTextures(1, &m_TexID));
+		if (m_Type == DEPTH_CUBE)
 		{
-			GLCall(glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_DEPTH_COMPONENT, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL));
+			m_TexWidth = width;
+			m_TexHeight = height;
+			GLCall(glBindTexture(GL_TEXTURE_CUBE_MAP, m_TexID));
+			for (unsigned int i = 0; i < 6; i++)
+			{
+				GLCall(glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_DEPTH_COMPONENT, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL));
+			}
+			GLCall(glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
+			GLCall(glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
+			GLCall(glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
+			GLCall(glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
+			GLCall(glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE));
+			GLCall(glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, m_TexID, 0));
+			// Generate texture handle
+			m_Handle = glGetTextureHandleARB(m_TexID);
+			GLCall(glMakeTextureHandleResidentARB(m_Handle));
+			GLCall(glBindTexture(GL_TEXTURE_CUBE_MAP, 0));
 		}
-		// Generate texture handle
-		m_Handle = glGetTextureHandleARB(m_TexID);
-		GLCall(glMakeTextureHandleResidentARB(m_Handle));
-		GLCall(glBindTexture(GL_TEXTURE_CUBE_MAP, 0));
+		GLCall(glBindFramebuffer(GL_FRAMEBUFFER, 0));
 	}
 }

@@ -11,6 +11,7 @@ namespace core
 	glm::vec3 NORMAL_COLOR = glm::vec3(1.0f);
 	float NORMAL_MAGNITUDE = 1.0f;
 	bool RELOAD_FONT = false;
+	void* SCENE_DATA = nullptr;
 	const char* currentModelInfo = nullptr;
 	const char* currentModelScene = nullptr;
 	const char* currentPointLight = nullptr;

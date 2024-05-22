@@ -8,6 +8,7 @@
 #pragma once
 
 #include "core/Core.h"
+#include "data/Data.h"
 
 class PointLight
 {

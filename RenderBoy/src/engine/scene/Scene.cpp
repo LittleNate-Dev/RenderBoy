@@ -13,6 +13,7 @@ Scene::~Scene()
 void Scene::Init()
 {
 	m_Data.Init();
+	core::SCENE_DATA = &m_Data;
 }
 
 void Scene::Reset()

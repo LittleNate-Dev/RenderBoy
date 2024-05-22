@@ -202,6 +202,8 @@ namespace core
 	extern float NORMAL_MAGNITUDE;
 	// Reload font flag
 	extern bool RELOAD_FONT;
+	// A pointer point to scene data
+	extern void* SCENE_DATA;
 	// used for combo widgets
 	extern const char* currentModelInfo;
 	extern const char* currentModelScene;
