@@ -52,7 +52,7 @@ void WindowResize(GLFWwindow* window, int width, int height)
 {
 	if (width && height)
 	{
-		rbcore::IS_RENDERBOY_OPENED = true;
+		core::IS_RENDERBOY_OPENED = true;
 		renderBoy.WindowResize(width, height);
 		renderBoy.GetScene().GetCamera().SetWindowSize(width, height);
 		renderBoy.GetRenderer().ChangeResolution();
@@ -61,10 +61,10 @@ void WindowResize(GLFWwindow* window, int width, int height)
 
 void WindowRestore(GLFWwindow* window, int restore)
 {
-	rbcore::IS_RENDERBOY_OPENED = true;
+	core::IS_RENDERBOY_OPENED = true;
 }
 
 void WindowIconify(GLFWwindow* window, int iconify)
 {
-	rbcore::IS_RENDERBOY_OPENED = false;
+	core::IS_RENDERBOY_OPENED = false;
 }

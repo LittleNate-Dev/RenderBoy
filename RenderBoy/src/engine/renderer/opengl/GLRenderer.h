@@ -32,6 +32,9 @@ struct Shaders
 	GLShader Lightcube;
 	GLShader Screen;
 	GLShader Skybox;
+	GLShader PointShadow;
+	GLShader SpotShadow;
+	GLShader DirShadow;
 };
 
 class GLRenderer

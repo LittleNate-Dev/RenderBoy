@@ -69,7 +69,7 @@ void Model::UpdateStatics()
 bool Model::LoadModel(std::string name, std::string filepath)
 {
     m_Name = name;
-    if (rbcore::CheckFileFormatAssimp(rbcore::GetFileFormat(filepath)))
+    if (core::CheckFileFormatAssimp(core::GetFileFormat(filepath)))
     {
         if (LoadModelAssimp(filepath))
         {
@@ -86,7 +86,7 @@ bool Model::LoadModelAssimp(std::string filepath)
     const aiScene* scene = import.ReadFile(filepath, aiProcess_Triangulate | aiProcess_FlipUVs);
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
     {
-        rbcore::ShowWarningMsg("Failed to load file! Check log for details.");
+        core::ShowWarningMsg("Failed to load file! Check log for details.");
         spdlog::error("ERROR::ASSIMP " + std::string(import.GetErrorString()));
         return false;
     }
@@ -626,14 +626,14 @@ glm::mat4 Model::GetRotateMat(unsigned int current)
         rotateMat = glm::rotate(glm::mat4(1.0f), glm::radians(m_EulerAngle.y), glm::vec3(0, 1, 0)) *
             glm::rotate(glm::mat4(1.0f), glm::radians(m_EulerAngle.x), glm::vec3(1, 0, 0));
         glm::vec4 axis = rotateMat * glm::vec4(0.0f, 0.0f, 1.0f, 0.0f);
-        rotateMat = rbcore::GetRodrigue(glm::normalize(axis), m_EulerAngle.z) * rotateMat;
+        rotateMat = core::GetRodrigue(glm::normalize(axis), m_EulerAngle.z) * rotateMat;
     }
     else
     {
         rotateMat = glm::rotate(glm::mat4(1.0f), glm::radians(m_EulerAngle.y + m_InstanceEulerAngle[current - 1].y), glm::vec3(0, 1, 0)) * 
                     glm::rotate(glm::mat4(1.0f), glm::radians(m_EulerAngle.x + m_InstanceEulerAngle[current - 1].x), glm::vec3(1, 0, 0));
         glm::vec4 axis = rotateMat * glm::vec4(0.0f, 0.0f, 1.0f, 0.0f);
-        rotateMat = rbcore::GetRodrigue(glm::normalize(axis), m_EulerAngle.z + m_InstanceEulerAngle[current - 1].z) * rotateMat;
+        rotateMat = core::GetRodrigue(glm::normalize(axis), m_EulerAngle.z + m_InstanceEulerAngle[current - 1].z) * rotateMat;
     }
     return rotateMat;
 }
@@ -650,18 +650,18 @@ void Model::DrawUI()
         // Position
         if (ImGui::TreeNode("Position"))
         {
-            ImGui::PushItemWidth(80.0f * rbcore::GetWidgetWidthCoefficient());
-            ImGui::CenterAlignWidget(80.0f * rbcore::GetWidgetWidthCoefficient());
+            ImGui::PushItemWidth(80.0f * core::GetWidgetWidthCoefficient());
+            ImGui::CenterAlignWidget(80.0f * core::GetWidgetWidthCoefficient());
             if (ImGui::InputFloat("Pos X", &m_Position.x))
             {
                 UpdateModelMat();
             }
-            ImGui::CenterAlignWidget(80.0f * rbcore::GetWidgetWidthCoefficient());
+            ImGui::CenterAlignWidget(80.0f * core::GetWidgetWidthCoefficient());
             if (ImGui::InputFloat("Pos Y", &m_Position.y))
             {
                 UpdateModelMat();
             }
-            ImGui::CenterAlignWidget(80.0f * rbcore::GetWidgetWidthCoefficient());
+            ImGui::CenterAlignWidget(80.0f * core::GetWidgetWidthCoefficient());
             if (ImGui::InputFloat("Pos Z", &m_Position.z))
             {
                 UpdateModelMat();
@@ -676,7 +676,7 @@ void Model::DrawUI()
             ImGui::Checkbox("Slider", &slideRotate);
             if (slideRotate)
             {
-                ImGui::PushItemWidth(280.0f * rbcore::GetWidgetWidthCoefficient());
+                ImGui::PushItemWidth(280.0f * core::GetWidgetWidthCoefficient());
                 if (ImGui::SliderFloat("Pitch", &m_EulerAngle.x, -360.0f, 360.0f))
                 {
                     UpdateModelMat();
@@ -693,18 +693,18 @@ void Model::DrawUI()
             }
             else
             {
-                ImGui::PushItemWidth(80.0f * rbcore::GetWidgetWidthCoefficient());
-                ImGui::CenterAlignWidget(80.0f * rbcore::GetWidgetWidthCoefficient());
+                ImGui::PushItemWidth(80.0f * core::GetWidgetWidthCoefficient());
+                ImGui::CenterAlignWidget(80.0f * core::GetWidgetWidthCoefficient());
                 if (ImGui::InputFloat("Pitch", &m_EulerAngle.x))
                 {
                     SetPitch(m_EulerAngle.x);
                 }
-                ImGui::CenterAlignWidget(80.0f * rbcore::GetWidgetWidthCoefficient());
+                ImGui::CenterAlignWidget(80.0f * core::GetWidgetWidthCoefficient());
                 if (ImGui::InputFloat("Yaw", &m_EulerAngle.y))
                 {
                     SetYaw(m_EulerAngle.y);
                 }
-                ImGui::CenterAlignWidget(80.0f * rbcore::GetWidgetWidthCoefficient());
+                ImGui::CenterAlignWidget(80.0f * core::GetWidgetWidthCoefficient());
                 if (ImGui::InputFloat("Roll", &m_EulerAngle.z))
                 {
                     SetRoll(m_EulerAngle.z);
@@ -716,18 +716,18 @@ void Model::DrawUI()
         // Scale
         if (ImGui::TreeNode("Scale"))
         {
-            ImGui::PushItemWidth(80.0f * rbcore::GetWidgetWidthCoefficient());
-            ImGui::CenterAlignWidget(80.0f * rbcore::GetWidgetWidthCoefficient());
+            ImGui::PushItemWidth(80.0f * core::GetWidgetWidthCoefficient());
+            ImGui::CenterAlignWidget(80.0f * core::GetWidgetWidthCoefficient());
             if (ImGui::InputFloat("Scale X", &m_Scale.x))
             {
                 SetScale(m_Scale);
             }
-            ImGui::CenterAlignWidget(80.0f * rbcore::GetWidgetWidthCoefficient());
+            ImGui::CenterAlignWidget(80.0f * core::GetWidgetWidthCoefficient());
             if (ImGui::InputFloat("Scale Y", &m_Scale.y))
             {
                 SetScale(m_Scale);
             }
-            ImGui::CenterAlignWidget(80.0f * rbcore::GetWidgetWidthCoefficient());
+            ImGui::CenterAlignWidget(80.0f * core::GetWidgetWidthCoefficient());
             if (ImGui::InputFloat("Scale Z", &m_Scale.z))
             {
                 SetScale(m_Scale);
@@ -740,14 +740,14 @@ void Model::DrawUI()
     else
     {
         int instance = m_Instance;
-        ImGui::CenterAlignWidget(120.0f * rbcore::GetWidgetWidthCoefficient());
-        ImGui::PushItemWidth(120.0f * rbcore::GetWidgetWidthCoefficient());
+        ImGui::CenterAlignWidget(120.0f * core::GetWidgetWidthCoefficient());
+        ImGui::PushItemWidth(120.0f * core::GetWidgetWidthCoefficient());
         if (ImGui::InputInt("Instance", &instance))
         {
             SetInstance(instance);
         }
         int current = m_Current;
-        ImGui::CenterAlignWidget(120.0f * rbcore::GetWidgetWidthCoefficient());
+        ImGui::CenterAlignWidget(120.0f * core::GetWidgetWidthCoefficient());
         if (ImGui::InputInt("Current", &current))
         {
             SetCurrent(current);
@@ -756,18 +756,18 @@ void Model::DrawUI()
         // Position
         if (ImGui::TreeNode("Position"))
         {
-            ImGui::PushItemWidth(80.0f * rbcore::GetWidgetWidthCoefficient());
-            ImGui::CenterAlignWidget(80.0f * rbcore::GetWidgetWidthCoefficient());
+            ImGui::PushItemWidth(80.0f * core::GetWidgetWidthCoefficient());
+            ImGui::CenterAlignWidget(80.0f * core::GetWidgetWidthCoefficient());
             if (ImGui::InputFloat("Pos X", &m_InstancePosition[m_Current - 1].x))
             {
                 UpdateModelMat(m_Current);
             }
-            ImGui::CenterAlignWidget(80.0f * rbcore::GetWidgetWidthCoefficient());
+            ImGui::CenterAlignWidget(80.0f * core::GetWidgetWidthCoefficient());
             if (ImGui::InputFloat("Pos Y", &m_InstancePosition[m_Current - 1].y))
             {
                 UpdateModelMat(m_Current);
             }
-            ImGui::CenterAlignWidget(80.0f * rbcore::GetWidgetWidthCoefficient());
+            ImGui::CenterAlignWidget(80.0f * core::GetWidgetWidthCoefficient());
             if (ImGui::InputFloat("Pos Z", &m_InstancePosition[m_Current - 1].z))
             {
                 UpdateModelMat(m_Current);
@@ -782,7 +782,7 @@ void Model::DrawUI()
             ImGui::Checkbox("Slider", &slideRotate);
             if (slideRotate)
             {
-                ImGui::PushItemWidth(280.0f * rbcore::GetWidgetWidthCoefficient());
+                ImGui::PushItemWidth(280.0f * core::GetWidgetWidthCoefficient());
                 if (ImGui::SliderFloat("Pitch", &m_InstanceEulerAngle[m_Current - 1].x, -360.0f, 360.0f))
                 {
                     UpdateModelMat(m_Current);
@@ -799,18 +799,18 @@ void Model::DrawUI()
             }
             else
             {
-                ImGui::PushItemWidth(80.0f * rbcore::GetWidgetWidthCoefficient());
-                ImGui::CenterAlignWidget(80.0f * rbcore::GetWidgetWidthCoefficient());
+                ImGui::PushItemWidth(80.0f * core::GetWidgetWidthCoefficient());
+                ImGui::CenterAlignWidget(80.0f * core::GetWidgetWidthCoefficient());
                 if (ImGui::InputFloat("Pitch", &m_InstanceEulerAngle[m_Current - 1].x))
                 {
                     SetPitch(m_InstanceEulerAngle[m_Current - 1].x, m_Current);
                 }
-                ImGui::CenterAlignWidget(80.0f * rbcore::GetWidgetWidthCoefficient());
+                ImGui::CenterAlignWidget(80.0f * core::GetWidgetWidthCoefficient());
                 if (ImGui::InputFloat("Yaw", &m_InstanceEulerAngle[m_Current - 1].y))
                 {
                     SetYaw(m_InstanceEulerAngle[m_Current - 1].y, m_Current);
                 }
-                ImGui::CenterAlignWidget(80.0f * rbcore::GetWidgetWidthCoefficient());
+                ImGui::CenterAlignWidget(80.0f * core::GetWidgetWidthCoefficient());
                 if (ImGui::InputFloat("Roll", &m_InstanceEulerAngle[m_Current - 1].z))
                 {
                     SetRoll(m_InstanceEulerAngle[m_Current - 1].z, m_Current);
@@ -822,18 +822,18 @@ void Model::DrawUI()
         // Scale
         if (ImGui::TreeNode("Scale"))
         {
-            ImGui::PushItemWidth(80.0f * rbcore::GetWidgetWidthCoefficient());
-            ImGui::CenterAlignWidget(80.0f * rbcore::GetWidgetWidthCoefficient());
+            ImGui::PushItemWidth(80.0f * core::GetWidgetWidthCoefficient());
+            ImGui::CenterAlignWidget(80.0f * core::GetWidgetWidthCoefficient());
             if (ImGui::InputFloat("Scale X", &m_InstanceScale[m_Current - 1].x))
             {
                 SetScale(m_InstanceScale[m_Current - 1], m_Current);
             }
-            ImGui::CenterAlignWidget(80.0f * rbcore::GetWidgetWidthCoefficient());
+            ImGui::CenterAlignWidget(80.0f * core::GetWidgetWidthCoefficient());
             if (ImGui::InputFloat("Scale Y", &m_InstanceScale[m_Current - 1].y))
             {
                 SetScale(m_InstanceScale[m_Current - 1], m_Current);
             }
-            ImGui::CenterAlignWidget(80.0f * rbcore::GetWidgetWidthCoefficient());
+            ImGui::CenterAlignWidget(80.0f * core::GetWidgetWidthCoefficient());
             if (ImGui::InputFloat("Scale Z", &m_InstanceScale[m_Current - 1].z))
             {
                 SetScale(m_InstanceScale[m_Current - 1], m_Current);

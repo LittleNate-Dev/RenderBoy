@@ -41,7 +41,7 @@ glm::mat4 DirectionalLight::GetRotateMat()
 {
 	glm::mat4 rotateMat = glm::rotate(glm::mat4(1.0f), glm::radians(m_EulerAngle.y), glm::vec3(0, 1, 0)) * glm::rotate(glm::mat4(1.0f), glm::radians(m_EulerAngle.x), glm::vec3(1, 0, 0));
 	glm::vec4 axis = rotateMat * glm::vec4(0.0f, 0.0f, 1.0f, 0.0f);
-	rotateMat = rbcore::GetRodrigue(glm::normalize(axis), m_EulerAngle.z) * rotateMat;
+	rotateMat = core::GetRodrigue(glm::normalize(axis), m_EulerAngle.z) * rotateMat;
 	return rotateMat;
 }
 
@@ -269,14 +269,14 @@ void DirectionalLight::DrawUI()
 		// Attributes
 		if (ImGui::TreeNode("Attributes"))
 		{
-			ImGui::CenterAlignWidget("Color", 200.0f * rbcore::GetWidgetWidthCoefficient());
+			ImGui::CenterAlignWidget("Color", 200.0f * core::GetWidgetWidthCoefficient());
 			ImGui::LabelHighlighted("Color");
-			ImGui::PushItemWidth(200.0f * rbcore::GetWidgetWidthCoefficient());
+			ImGui::PushItemWidth(200.0f * core::GetWidgetWidthCoefficient());
 			ImGui::ColorEdit3("##DirColor", &m_Color[0]);
 			ImGui::PopItemWidth();
-			ImGui::CenterAlignWidget("Intensity", 80.0f * rbcore::GetWidgetWidthCoefficient());
+			ImGui::CenterAlignWidget("Intensity", 80.0f * core::GetWidgetWidthCoefficient());
 			ImGui::LabelHighlighted("Intensity");
-			ImGui::PushItemWidth(80.0f * rbcore::GetWidgetWidthCoefficient());
+			ImGui::PushItemWidth(80.0f * core::GetWidgetWidthCoefficient());
 			if (ImGui::InputFloat("##SpotIntensity", &m_Intensity, 0.0f, 0.0f, "%.6f"))
 			{
 				SetIntensity(m_Intensity);
@@ -291,20 +291,20 @@ void DirectionalLight::DrawUI()
 			ImGui::Checkbox("Slider", &slideRotate);
 			if (slideRotate)
 			{
-				ImGui::PushItemWidth(280.0f * rbcore::GetWidgetWidthCoefficient());
+				ImGui::PushItemWidth(280.0f * core::GetWidgetWidthCoefficient());
 				ImGui::SliderFloat("Pitch", &m_EulerAngle.x, -360.0f, 360.0f);
 				ImGui::SliderFloat("Yaw", &m_EulerAngle.y, -360.0f, 360.0f);
 				ImGui::PopItemWidth();
 			}
 			else
 			{
-				ImGui::PushItemWidth(80.0f * rbcore::GetWidgetWidthCoefficient());
-				ImGui::CenterAlignWidget(80.0f * rbcore::GetWidgetWidthCoefficient());
+				ImGui::PushItemWidth(80.0f * core::GetWidgetWidthCoefficient());
+				ImGui::CenterAlignWidget(80.0f * core::GetWidgetWidthCoefficient());
 				if (ImGui::InputFloat("Pitch", &m_EulerAngle.x))
 				{
 					SetPitch(m_EulerAngle.x);
 				}
-				ImGui::CenterAlignWidget(80.0f * rbcore::GetWidgetWidthCoefficient());
+				ImGui::CenterAlignWidget(80.0f * core::GetWidgetWidthCoefficient());
 				if (ImGui::InputFloat("Yaw", &m_EulerAngle.y))
 				{
 					SetYaw(m_EulerAngle.y);
@@ -326,9 +326,9 @@ void DirectionalLight::DrawUI()
 		// Shadow resolution
 		if (m_CastShadow && m_LightSwitch)
 		{
-			ImGui::CenterAlignWidget("Shadow Resolution", 60.0f * rbcore::GetWidgetWidthCoefficient());
+			ImGui::CenterAlignWidget("Shadow Resolution", 60.0f * core::GetWidgetWidthCoefficient());
 			ImGui::LabelHighlighted("Shadow Resolution");
-			ImGui::PushItemWidth(60.0f * rbcore::GetWidgetWidthCoefficient());
+			ImGui::PushItemWidth(60.0f * core::GetWidgetWidthCoefficient());
 			const char* shadowResOps[] = {
 				"1X",
 				"2X",
@@ -367,18 +367,18 @@ void DirectionalLight::DrawUI()
 		// Advanced settings
 		if (ImGui::TreeNode("Advanced settings"))
 		{
-			ImGui::PushItemWidth(80.0f * rbcore::GetWidgetWidthCoefficient());
-			ImGui::CenterAlignWidget(80.0f * rbcore::GetWidgetWidthCoefficient());
+			ImGui::PushItemWidth(80.0f * core::GetWidgetWidthCoefficient());
+			ImGui::CenterAlignWidget(80.0f * core::GetWidgetWidthCoefficient());
 			if (ImGui::InputFloat("Ambient", &m_ADS.x, 0.0f, 0.0f, "%.6f"))
 			{
 				SetAmbient(m_ADS.x);
 			}
-			ImGui::CenterAlignWidget(80.0f * rbcore::GetWidgetWidthCoefficient());
+			ImGui::CenterAlignWidget(80.0f * core::GetWidgetWidthCoefficient());
 			if (ImGui::InputFloat("Diffuse", &m_ADS.y, 0.0f, 0.0f, "%.6f"))
 			{
 				SetDiffuse(m_ADS.y);
 			}
-			ImGui::CenterAlignWidget(80.0f * rbcore::GetWidgetWidthCoefficient());
+			ImGui::CenterAlignWidget(80.0f * core::GetWidgetWidthCoefficient());
 			if (ImGui::InputFloat("Specular", &m_ADS.z, 0.0f, 0.0f, "%.6f"))
 			{
 				SetSpecular(m_ADS.z);

@@ -2,7 +2,7 @@
 
 // Statics and Consts
 // Use these bools to open or close a window
-namespace rbcore
+namespace core
 {
 	Settings SETTINGS;
 	ImGui::FileBrowser FILE_BROWSER;
@@ -66,12 +66,12 @@ bool GLLogCall(const char* function, const char* file, int line)
 	return true;
 }
 
-namespace rbcore
+namespace core
 {
 	glm::vec2 GetRenderResolution()
 	{
-		int width = (int)(rbcore::SETTINGS.Width * rbcore::SETTINGS.Resolution);
-		int height = (int)(rbcore::SETTINGS.Height * rbcore::SETTINGS.Resolution);
+		int width = (int)(core::SETTINGS.Width * core::SETTINGS.Resolution);
+		int height = (int)(core::SETTINGS.Height * core::SETTINGS.Resolution);
 		glm::vec2 resolution = glm::vec2(width, height);
 		return resolution;
 	}
@@ -196,7 +196,7 @@ namespace rbcore
 
 	float GetWidgetWidthCoefficient()
 	{
-		float coefficient = (float)rbcore::SETTINGS.FontSize / 17.0f;
+		float coefficient = (float)core::SETTINGS.FontSize / 17.0f;
 		return coefficient;
 	}
 

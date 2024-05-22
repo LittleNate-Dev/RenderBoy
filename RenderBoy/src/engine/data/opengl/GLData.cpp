@@ -64,12 +64,12 @@ void GLData::Init()
 			5, 3, 4,
 			5, 4, 1
 		};
-		m_PointLightCube.VA.GenVertexArray();
-		m_PointLightCube.VB.GenVertexBuffer(position, sizeof(position));
-		m_PointLightCube.IB.GenIndexBuffer(indices, 24);
+		m_PointLightData.VA.GenVertexArray();
+		m_PointLightData.VB.GenVertexBuffer(position, sizeof(position));
+		m_PointLightData.IB.GenIndexBuffer(indices, 24);
 		GLVertexBufferLayout layout;
 		layout.Push<float>(3);
-		m_PointLightCube.VA.AddBuffer(m_PointLightCube.VB, layout);
+		m_PointLightData.VA.AddBuffer(m_PointLightData.VB, layout);
 	}
 	// Initialize spot light's cube
 	{
@@ -88,12 +88,12 @@ void GLData::Init()
 			4, 1, 2,
 			4, 2, 3
 		};
-		m_SpotLightCube.VA.GenVertexArray();
-		m_SpotLightCube.VB.GenVertexBuffer(position, sizeof(position));
-		m_SpotLightCube.IB.GenIndexBuffer(indices, 18);
+		m_SpotLightData.VA.GenVertexArray();
+		m_SpotLightData.VB.GenVertexBuffer(position, sizeof(position));
+		m_SpotLightData.IB.GenIndexBuffer(indices, 18);
 		GLVertexBufferLayout layout;
 		layout.Push<float>(3);
-		m_SpotLightCube.VA.AddBuffer(m_SpotLightCube.VB, layout);
+		m_SpotLightData.VA.AddBuffer(m_SpotLightData.VB, layout);
 	}
 	// Initialize directional light's cube
 	{
@@ -121,12 +121,12 @@ void GLData::Init()
 			4, 3, 0,
 			4, 7, 3
 		};
-		m_DirLightCube.VA.GenVertexArray();
-		m_DirLightCube.VB.GenVertexBuffer(position, sizeof(position));
-		m_DirLightCube.IB.GenIndexBuffer(indices, 36);
+		m_DirLightData.VA.GenVertexArray();
+		m_DirLightData.VB.GenVertexBuffer(position, sizeof(position));
+		m_DirLightData.IB.GenIndexBuffer(indices, 36);
 		GLVertexBufferLayout layout;
 		layout.Push<float>(3);
-		m_DirLightCube.VA.AddBuffer(m_DirLightCube.VB, layout);
+		m_DirLightData.VA.AddBuffer(m_DirLightData.VB, layout);
 	}
 }
 
@@ -198,7 +198,6 @@ void GLData::AddModel(std::string name, Model model)
 	instanceLayout.Push<float>(4);
 	instanceLayout.Push<float>(4);
 	m_ModelData[name].VA.AddBuffer(m_ModelData[name].InstanceVB, instanceLayout, 1);
-
 }
 
 bool GLData::DeleteModel(std::string name)
@@ -223,6 +222,54 @@ bool GLData::RenameModel(std::string oldName, std::string newName)
 	return false;
 }
 
+void GLData::AddLight(std::string name, Light_Type type)
+{
+	switch (type)
+	{
+	case POINT_LIGHT:
+		AddPointLight(name);
+		break;
+	case SPOT_LIGHT:
+		AddSpotLight(name);
+		break;
+	case DIRECTIONAL_LIGHT:
+		AddDirLight(name);
+		break;
+	}
+}
+
+void GLData::DeleteLight(std::string name, Light_Type type)
+{
+	switch (type)
+	{
+	case POINT_LIGHT:
+		DeletePointLight(name);
+		break;
+	case SPOT_LIGHT:
+		DeleteSpotLight(name);
+		break;
+	case DIRECTIONAL_LIGHT:
+		DeleteDirLight(name);
+		break;
+	}
+}
+
+void GLData::RenameLight(std::string oldName, std::string newName, Light_Type type)
+{
+	switch (type)
+	{
+	case POINT_LIGHT:
+		RenamePointLight(oldName, newName);
+		break;
+	case SPOT_LIGHT:
+		RenameSpotLight(oldName, newName);
+		break;
+	case DIRECTIONAL_LIGHT:
+		RenameDirLight(oldName, newName);
+		break;
+	}
+}
+
 bool GLData::LoadSkybox(std::vector<std::string> filepath)
 {
 	if (m_SkyboxData.Skybox.GenTexture(filepath))
@@ -232,15 +279,54 @@ bool GLData::LoadSkybox(std::vector<std::string> filepath)
 	return false;
 }
 
-GLLightCubeData& GLData::GetLightCube(Light_Type type)
+void GLData::AddPointLight(std::string name)
 {
-	switch (type)
-	{
-	case POINT_LIGHT:
-		return m_PointLightCube;
-	case SPOT_LIGHT:
-		return m_SpotLightCube;
-	case DIRECTIONAL_LIGHT:
-		return m_DirLightCube;
-	}
+	GLFrameBuffer fb;
+	m_PointLightData.DepthMap.insert(std::pair<std::string, GLFrameBuffer>(name, fb));
+	m_PointLightData.DepthMap[name].Init(DEPTH_CUBE, 1024, 1024);
+}
+
+void GLData::AddSpotLight(std::string name)
+{
+	// TODO
+}
+
+void GLData::AddDirLight(std::string name)
+{
+	// TODO
+}
+
+void GLData::DeletePointLight(std::string name)
+{
+	m_PointLightData.DepthMap.erase(name);
+}
+
+void GLData::DeleteSpotLight(std::string name)
+{
+	// TODO
+}
+
+void GLData::DeleteDirLight(std::string name)
+{
+	// TODO
+}
+
+void GLData::RenamePointLight(std::string oldName, std::string newName)
+{
+	unsigned int width = m_PointLightData.DepthMap[oldName].GetTexWidth();
+	unsigned int height = m_PointLightData.DepthMap[oldName].GetTexHeight();
+	GLFrameBuffer fb;
+	m_PointLightData.DepthMap.erase(oldName);
+	m_PointLightData.DepthMap.insert(std::pair<std::string, GLFrameBuffer>(newName, fb));
+	m_PointLightData.DepthMap[newName].Init(DEPTH_CUBE, width, height);
+}
+
+void GLData::RenameSpotLight(std::string oldName, std::string newName)
+{
+	// TODO
+}
+
+void GLData::RenameDirLight(std::string oldName, std::string newName)
+{
+	// TODO
 }

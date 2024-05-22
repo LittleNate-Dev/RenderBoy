@@ -54,6 +54,9 @@
 #define SHADER_OPENGL_SKYBOX "data/shaders/opengl/others/SKYBOX.glsl"
 #define SHADER_OPENGL_NORMAL "data/shaders/opengl/others/NORMAL.glsl"
 #define SHADER_OPENGL_LIGHTCUBE "data/shaders/opengl/others/LIGHTCUBE.glsl"
+#define SHADER_OPENGL_SHADOW_POINT "data/shaders/opengl/shadow/POINTLIGHT.glsl"
+#define SHADER_OPENGL_SHADOW_SPOT "data/shaders/opengl/shadow/SPOTLIGHT.glsl"
+#define SHADER_OPENGL_SHADOW_DIR "data/shaders/opengl/shadow/DIRLIGHT.glsl"
 #define MAX_FOV 120
 #define MIN_FOV 40
 
@@ -187,7 +190,7 @@ struct SceneStatics
 
 // Statics and Consts
 // Use these bools to open or close a window
-namespace rbcore
+namespace core
 {
 	// RenderBoy settings
 	extern Settings SETTINGS;
@@ -230,7 +233,7 @@ namespace ImGui
 	extern unsigned int COLOR_WARNING_SYTLE;
 }
 
-namespace rbcore
+namespace core
 {
 	// Get current render resolution
 	glm::vec2 GetRenderResolution();

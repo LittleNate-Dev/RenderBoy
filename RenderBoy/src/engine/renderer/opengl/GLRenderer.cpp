@@ -25,6 +25,8 @@ void GLRenderer::Init(Scene& scene)
 	m_Shaders.Normal.Init(SHADER_OPENGL_NORMAL);
 	m_Shaders.Lightcube.Init(SHADER_OPENGL_LIGHTCUBE);
 	m_Shaders.Skybox.Init(SHADER_OPENGL_SKYBOX);
+	m_Shaders.PointShadow.Init(SHADER_OPENGL_SHADOW_POINT);
+	//m_Shaders.SpotShadow.Init(SHADER_OPENGL_SHADOW_SPOT);
 	// Initialize uv checker map texture
 	m_CheckerMap.GenTexture(UV_MAP_FILEPATH);
 	m_Shaders.UVset.Bind();
@@ -37,7 +39,7 @@ void GLRenderer::Init(Scene& scene)
 	m_Frame.FBMsaa.Init(FBType::MSAA);
 	if (!m_Frame.FBMsaa.IsInitialized())
 	{
-		rbcore::ShowWarningMsg("Failed to initialize OpenGL renderer!");
+		core::ShowWarningMsg("Failed to initialize OpenGL renderer!");
 	}
 	m_Frame.FB.Init(FBType::FRAME);
 	if (m_Frame.FB.IsInitialized())
@@ -64,7 +66,7 @@ void GLRenderer::Init(Scene& scene)
 	}
 	else
 	{
-		rbcore::ShowWarningMsg("Failed to initialize OpenGL renderer!");
+		core::ShowWarningMsg("Failed to initialize OpenGL renderer!");
 	}	
 }
 
@@ -77,7 +79,7 @@ void GLRenderer::Clear()
 void GLRenderer::Draw(Scene& scene)
 {
 	// MSAA
-	if ((int)rbcore::SETTINGS.AA >= 1 && (int)rbcore::SETTINGS.AA <= 4)
+	if ((int)core::SETTINGS.AA >= 1 && (int)core::SETTINGS.AA <= 4)
 	{
 		m_Frame.FBMsaa.Bind();
 	}
@@ -87,9 +89,9 @@ void GLRenderer::Draw(Scene& scene)
 	}
 	// Draw your content inside this scope
 	Clear();
-	glm::vec2 renderRes = rbcore::GetRenderResolution();
+	glm::vec2 renderRes = core::GetRenderResolution();
 	GLCall(glViewport(0, 0, (GLsizei)renderRes.x, (GLsizei)renderRes.y));
-	switch (rbcore::SETTINGS.DrawMode)
+	switch (core::SETTINGS.DrawMode)
 	{
 	case WIREFRAME:
 		DrawWireFrame(scene);
@@ -107,30 +109,30 @@ void GLRenderer::Draw(Scene& scene)
 	// Draw Light Cube
 	DrawLightCube(scene);
 	// Draw normals
-	if (rbcore::SETTINGS.ShowNormal)
+	if (core::SETTINGS.ShowNormal)
 	{
 		DrawNormal(scene);
 	}
 	// Draw Skybox
 	DrawSkybox(scene);
 	// Draw your content inside this scope
-	if ((int)rbcore::SETTINGS.AA >= 1 && (int)rbcore::SETTINGS.AA <= 4)
+	if ((int)core::SETTINGS.AA >= 1 && (int)core::SETTINGS.AA <= 4)
 	{
 		GLCall(glBindFramebuffer(GL_READ_FRAMEBUFFER, m_Frame.FBMsaa.GetID()));
 		GLCall(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_Frame.FB.GetID()));
-		int width = (int)(rbcore::SETTINGS.Width * rbcore::SETTINGS.Resolution);
-		int height = (int)(rbcore::SETTINGS.Height * rbcore::SETTINGS.Resolution);
+		int width = (int)(core::SETTINGS.Width * core::SETTINGS.Resolution);
+		int height = (int)(core::SETTINGS.Height * core::SETTINGS.Resolution);
 		GLCall(glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST));
 	}
 	m_Frame.FB.Unbind();
 	Clear();
-	GLCall(glViewport(0, 0, rbcore::SETTINGS.Width, rbcore::SETTINGS.Height));
+	GLCall(glViewport(0, 0, core::SETTINGS.Width, core::SETTINGS.Height));
 	// Draw frame buffer's content on the screen;
 	GLCall(glDisable(GL_DEPTH_TEST));
 	m_Shaders.Screen.Bind();
 	m_Frame.FB.BindTex();
 	m_Shaders.Screen.SetUniform1i("u_ScreenTex", 0);
-	m_Shaders.Screen.SetUniform1f("u_Gamma", rbcore::SETTINGS.Gamma);
+	m_Shaders.Screen.SetUniform1f("u_Gamma", core::SETTINGS.Gamma);
 	m_Frame.VA.Bind();
 	m_Frame.IB.Bind();
 	GLCall(glDrawElements(GL_TRIANGLES, m_Frame.IB.GetCount(), GL_UNSIGNED_INT, nullptr));
@@ -147,8 +149,8 @@ void GLRenderer::DrawWireFrame(Scene& scene)
 	m_Shaders.Wireframe.Bind();
 	m_Shaders.Wireframe.SetUniformMat4f("u_ProjMat", scene.GetCamera().GetProjMat());
 	m_Shaders.Wireframe.SetUniformMat4f("u_ViewMat", scene.GetCamera().GetViewMat());
-	glm::vec2 renderRes = rbcore::GetRenderResolution();
-	m_Shaders.Wireframe.SetUniformMat4f("u_ViewPortMat", rbcore::GetViewPortMatrix((unsigned int)renderRes.x, (unsigned int)renderRes.y));
+	glm::vec2 renderRes = core::GetRenderResolution();
+	m_Shaders.Wireframe.SetUniformMat4f("u_ViewPortMat", core::GetViewPortMatrix((unsigned int)renderRes.x, (unsigned int)renderRes.y));
 	m_Shaders.Wireframe.SetUniformVec2f("u_RenderRes", renderRes);
 	for (unsigned int i = 0; i < scene.GetModelList().size(); i++)
 	{
@@ -242,8 +244,8 @@ void GLRenderer::DrawNormal(Scene& scene)
 	m_Shaders.Normal.Bind();
 	m_Shaders.Normal.SetUniformMat4f("u_ProjMat", scene.GetCamera().GetProjMat());
 	m_Shaders.Normal.SetUniformMat4f("u_ViewMat", scene.GetCamera().GetViewMat());
-	m_Shaders.Normal.SetUniform1f("u_Magnitude", rbcore::NORMAL_MAGNITUDE);
-	m_Shaders.Normal.SetUniformVec3f("u_Color", rbcore::NORMAL_COLOR);
+	m_Shaders.Normal.SetUniform1f("u_Magnitude", core::NORMAL_MAGNITUDE);
+	m_Shaders.Normal.SetUniformVec3f("u_Color", core::NORMAL_COLOR);
 	for (unsigned int i = 0; i < scene.GetModelList().size(); i++)
 	{
 		model = scene.GetModelList()[i];
@@ -263,42 +265,42 @@ void GLRenderer::DrawNormal(Scene& scene)
 void GLRenderer::DrawLightCube(Scene& scene)
 {
 	m_Shaders.Lightcube.Bind();
-	glm::vec2 renderRes = rbcore::GetRenderResolution();
+	glm::vec2 renderRes = core::GetRenderResolution();
 	m_Shaders.Lightcube.SetUniformMat4f("u_ProjMat", scene.GetCamera().GetProjMat());
 	m_Shaders.Lightcube.SetUniformMat4f("u_ViewMat", scene.GetCamera().GetViewMat());
-	m_Shaders.Lightcube.SetUniformMat4f("u_ViewPortMat", rbcore::GetViewPortMatrix((unsigned int)renderRes.x, (unsigned int)renderRes.y));
+	m_Shaders.Lightcube.SetUniformMat4f("u_ViewPortMat", core::GetViewPortMatrix((unsigned int)renderRes.x, (unsigned int)renderRes.y));
 	m_Shaders.Lightcube.SetUniformVec2f("u_RenderRes", renderRes);
 	// Draw Point light's cube
-	scene.GetData().GetDataGL().GetLightCube(POINT_LIGHT).VA.Bind();
-	scene.GetData().GetDataGL().GetLightCube(POINT_LIGHT).IB.Bind();
+	scene.GetData().GetDataGL().GetPointLightData().VA.Bind();
+	scene.GetData().GetDataGL().GetPointLightData().IB.Bind();
 	for (unsigned int i = 0; i < scene.GetPointLightList().size(); i++)
 	{
 		if (scene.GetPointLights()[scene.GetPointLightList()[i]].ShowCube())
 		{
 			m_Shaders.Lightcube.SetUniformMat4f("u_ModelMat", scene.GetPointLights()[scene.GetPointLightList()[i]].GetModelMat());
 			m_Shaders.Lightcube.SetUniformVec3f("u_Color", scene.GetPointLights()[scene.GetPointLightList()[i]].GetColor());
-			GLCall(glDrawElements(GL_TRIANGLES, scene.GetData().GetDataGL().GetLightCube(POINT_LIGHT).IB.GetCount(), GL_UNSIGNED_INT, nullptr));
+			GLCall(glDrawElements(GL_TRIANGLES, scene.GetData().GetDataGL().GetPointLightData().IB.GetCount(), GL_UNSIGNED_INT, nullptr));
 		}
 	}
-	scene.GetData().GetDataGL().GetLightCube(POINT_LIGHT).VA.Unbind();
-	scene.GetData().GetDataGL().GetLightCube(POINT_LIGHT).IB.Unbind();
+	scene.GetData().GetDataGL().GetPointLightData().VA.Unbind();
+	scene.GetData().GetDataGL().GetPointLightData().IB.Unbind();
 	// Draw Spot light's cube
-	scene.GetData().GetDataGL().GetLightCube(SPOT_LIGHT).VA.Bind();
-	scene.GetData().GetDataGL().GetLightCube(SPOT_LIGHT).IB.Bind();
+	scene.GetData().GetDataGL().GetSpotLightData().VA.Bind();
+	scene.GetData().GetDataGL().GetSpotLightData().IB.Bind();
 	for (unsigned int i = 0; i < scene.GetSpotLightList().size(); i++)
 	{
 		if (scene.GetSpotLights()[scene.GetSpotLightList()[i]].ShowCube())
 		{
 			m_Shaders.Lightcube.SetUniformMat4f("u_ModelMat", scene.GetSpotLights()[scene.GetSpotLightList()[i]].GetModelMat());
 			m_Shaders.Lightcube.SetUniformVec3f("u_Color", scene.GetSpotLights()[scene.GetSpotLightList()[i]].GetColor());
-			GLCall(glDrawElements(GL_TRIANGLES, scene.GetData().GetDataGL().GetLightCube(SPOT_LIGHT).IB.GetCount(), GL_UNSIGNED_INT, nullptr));
+			GLCall(glDrawElements(GL_TRIANGLES, scene.GetData().GetDataGL().GetSpotLightData().IB.GetCount(), GL_UNSIGNED_INT, nullptr));
 		}
 	}
-	scene.GetData().GetDataGL().GetLightCube(SPOT_LIGHT).VA.Unbind();
-	scene.GetData().GetDataGL().GetLightCube(SPOT_LIGHT).IB.Unbind();
+	scene.GetData().GetDataGL().GetSpotLightData().VA.Unbind();
+	scene.GetData().GetDataGL().GetSpotLightData().IB.Unbind();
 	// Draw Directional light's cube
-	scene.GetData().GetDataGL().GetLightCube(DIRECTIONAL_LIGHT).VA.Bind();
-	scene.GetData().GetDataGL().GetLightCube(DIRECTIONAL_LIGHT).IB.Bind();
+	scene.GetData().GetDataGL().GetDirLightData().VA.Bind();
+	scene.GetData().GetDataGL().GetDirLightData().IB.Bind();
 	GLCall(glDisable(GL_DEPTH_TEST));
 	for (unsigned int i = 0; i < scene.GetDirectionalLightList().size(); i++)
 	{
@@ -308,11 +310,11 @@ void GLRenderer::DrawLightCube(Scene& scene)
 								* glm::scale(glm::mat4(1.0f), glm::vec3(glm::length(scene.GetCamera().GetPosition()) / 20.0f));
 			m_Shaders.Lightcube.SetUniformMat4f("u_ModelMat", modelMat);
 			m_Shaders.Lightcube.SetUniformVec3f("u_Color", scene.GetDirectionalLights()[scene.GetDirectionalLightList()[i]].GetColor());
-			GLCall(glDrawElements(GL_TRIANGLES, scene.GetData().GetDataGL().GetLightCube(DIRECTIONAL_LIGHT).IB.GetCount(), GL_UNSIGNED_INT, nullptr));
+			GLCall(glDrawElements(GL_TRIANGLES, scene.GetData().GetDataGL().GetDirLightData().IB.GetCount(), GL_UNSIGNED_INT, nullptr));
 		}
 	}
-	scene.GetData().GetDataGL().GetLightCube(DIRECTIONAL_LIGHT).VA.Unbind();
-	scene.GetData().GetDataGL().GetLightCube(DIRECTIONAL_LIGHT).IB.Unbind();
+	scene.GetData().GetDataGL().GetDirLightData().VA.Unbind();
+	scene.GetData().GetDataGL().GetDirLightData().IB.Unbind();
 	GLCall(glEnable(GL_DEPTH_TEST));
 	m_Shaders.Lightcube.Unbind();
 }
@@ -338,8 +340,8 @@ void GLRenderer::DrawSkybox(Scene& scene)
 bool GLRenderer::SaveScreenShot()
 {
 	// Make the BYTE array, factor of 3 because it's RBG.
-	BYTE* pixels = new BYTE[3 * rbcore::SETTINGS.Width * rbcore::SETTINGS.Height];
-	glReadPixels(0, 0, rbcore::SETTINGS.Width, rbcore::SETTINGS.Height, GL_BGR, GL_UNSIGNED_BYTE, pixels);
+	BYTE* pixels = new BYTE[3 * core::SETTINGS.Width * core::SETTINGS.Height];
+	glReadPixels(0, 0, core::SETTINGS.Width, core::SETTINGS.Height, GL_BGR, GL_UNSIGNED_BYTE, pixels);
 	// Generate screenshot file name
 	SYSTEMTIME time;
 	GetLocalTime(&time);
@@ -352,13 +354,13 @@ bool GLRenderer::SaveScreenShot()
 							+ std::to_string(time.wSecond)
 							+ ".png";
 	// Convert to FreeImage format & save to file
-	FIBITMAP* image = FreeImage_ConvertFromRawBits(pixels, rbcore::SETTINGS.Width, rbcore::SETTINGS.Height, 3 * rbcore::SETTINGS.Width, 24, 0x0000FF, 0xFF0000, 0x00FF00, false);
+	FIBITMAP* image = FreeImage_ConvertFromRawBits(pixels, core::SETTINGS.Width, core::SETTINGS.Height, 3 * core::SETTINGS.Width, 24, 0x0000FF, 0xFF0000, 0x00FF00, false);
 	if (!FreeImage_Save(FIF_PNG, image, filepath.c_str(), PNG_Z_BEST_SPEED))
 	{
-		rbcore::ShowWarningMsg("Unknow error! Couldn't save screenshot!");
+		core::ShowWarningMsg("Unknow error! Couldn't save screenshot!");
 		return false;
 	}
-	rbcore::ShowWarningMsg("Screenshot saved at: " + filepath);
+	core::ShowWarningMsg("Screenshot saved at: " + filepath);
 	FreeImage_Unload(image);
 	delete[] pixels;
 	return true;
@@ -367,7 +369,7 @@ bool GLRenderer::SaveScreenShot()
 void GLRenderer::ChangeResolution()
 {
 	m_Frame.FB.ChangeResolution();
-	if ((int)rbcore::SETTINGS.AA >= 1 && (int)rbcore::SETTINGS.AA <= 4)
+	if ((int)core::SETTINGS.AA >= 1 && (int)core::SETTINGS.AA <= 4)
 	{
 		m_Frame.FBMsaa.ChangeResolution();
 	}
@@ -381,7 +383,7 @@ void GLRenderer::ChangeMSAA()
 void GLRenderer::ChangePostProcess()
 {
 	m_Shaders.Screen.Bind();
-	switch (rbcore::SETTINGS.PP)
+	switch (core::SETTINGS.PP)
 	{
 	case NO_PP:
 		m_Shaders.Screen.Init((std::string)SHADER_OPENGL + "post_process/DEFAULT.glsl");

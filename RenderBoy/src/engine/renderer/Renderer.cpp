@@ -10,7 +10,7 @@ Renderer::~Renderer()
 
 void Renderer::Init(Scene& scene)
 {
-	switch (rbcore::SETTINGS.GraphicsCore)
+	switch (core::SETTINGS.GraphicsCore)
 	{
 	case OPENGL:
 		m_RendererGL.Init(scene);
@@ -22,7 +22,7 @@ void Renderer::Init(Scene& scene)
 
 void Renderer::Draw(Scene& scene)
 {
-	switch (rbcore::SETTINGS.GraphicsCore)
+	switch (core::SETTINGS.GraphicsCore)
 	{
 	case OPENGL:
 		m_RendererGL.Draw(scene);
@@ -34,7 +34,7 @@ void Renderer::Draw(Scene& scene)
 
 void Renderer::Clear()
 {
-	switch (rbcore::SETTINGS.GraphicsCore)
+	switch (core::SETTINGS.GraphicsCore)
 	{
 	case OPENGL:
 		GLCall(glClearColor(0.0f, 0.0f, 0.0f, 1.0f));
@@ -47,7 +47,7 @@ void Renderer::Clear()
 
 bool Renderer::SaveScreenShot()
 {
-	switch (rbcore::SETTINGS.GraphicsCore)
+	switch (core::SETTINGS.GraphicsCore)
 	{
 	case OPENGL:
 		if (m_RendererGL.SaveScreenShot())
@@ -64,7 +64,7 @@ bool Renderer::SaveScreenShot()
 
 void Renderer::ChangeResolution()
 {
-	switch (rbcore::SETTINGS.GraphicsCore)
+	switch (core::SETTINGS.GraphicsCore)
 	{
 	case OPENGL:
 		m_RendererGL.ChangeResolution();
@@ -76,7 +76,7 @@ void Renderer::ChangeResolution()
 
 void Renderer::ChangeMSAA()
 {
-	switch (rbcore::SETTINGS.GraphicsCore)
+	switch (core::SETTINGS.GraphicsCore)
 	{
 	case OPENGL:
 		m_RendererGL.ChangeMSAA();
@@ -88,7 +88,7 @@ void Renderer::ChangeMSAA()
 
 void Renderer::ChangePostProcess()
 {
-	switch (rbcore::SETTINGS.GraphicsCore)
+	switch (core::SETTINGS.GraphicsCore)
 	{
 	case OPENGL:
 		m_RendererGL.ChangePostProcess();
@@ -100,7 +100,7 @@ void Renderer::ChangePostProcess()
 
 void Renderer::ChangeSkybox(Scene& scene)
 {
-	switch (rbcore::SETTINGS.GraphicsCore)
+	switch (core::SETTINGS.GraphicsCore)
 	{
 	case OPENGL:
 		m_RendererGL.ChangeSkybox(scene);

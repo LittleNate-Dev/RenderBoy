@@ -10,7 +10,7 @@ Data::~Data()
 
 void Data::Init()
 {
-	switch (rbcore::SETTINGS.GraphicsCore)
+	switch (core::SETTINGS.GraphicsCore)
 	{
 	case OPENGL:
 		m_DataGL.Init();
@@ -22,7 +22,7 @@ void Data::Init()
 
 void Data::Reset()
 {
-	switch (rbcore::SETTINGS.GraphicsCore)
+	switch (core::SETTINGS.GraphicsCore)
 	{
 	case OPENGL:
 		m_DataGL.Reset();
@@ -34,7 +34,7 @@ void Data::Reset()
 
 void Data::AddModel(std::string name, Model model)
 {
-	switch (rbcore::SETTINGS.GraphicsCore)
+	switch (core::SETTINGS.GraphicsCore)
 	{
 	case OPENGL:
 		m_DataGL.AddModel(name, model);
@@ -46,7 +46,7 @@ void Data::AddModel(std::string name, Model model)
 
 void Data::DeleteModel(std::string name)
 {
-	switch (rbcore::SETTINGS.GraphicsCore)
+	switch (core::SETTINGS.GraphicsCore)
 	{
 	case OPENGL:
 		m_DataGL.DeleteModel(name);
@@ -58,7 +58,7 @@ void Data::DeleteModel(std::string name)
 
 void Data::RenameModel(std::string oldName, std::string newName)
 {
-	switch (rbcore::SETTINGS.GraphicsCore)
+	switch (core::SETTINGS.GraphicsCore)
 	{
 	case OPENGL:
 		m_DataGL.RenameModel(oldName, newName);
@@ -68,9 +68,45 @@ void Data::RenameModel(std::string oldName, std::string newName)
 	}
 }
 
+void Data::AddLight(std::string name, Light_Type type)
+{
+	switch (core::SETTINGS.GraphicsCore)
+	{
+	case OPENGL:
+		m_DataGL.AddLight(name, type);
+		break;
+	default:
+		break;
+	}
+}
+
+void Data::DeleteLight(std::string name, Light_Type type)
+{
+	switch (core::SETTINGS.GraphicsCore)
+	{
+	case OPENGL:
+		m_DataGL.DeleteLight(name, type);
+		break;
+	default:
+		break;
+	}
+}
+
+void Data::RenameLight(std::string oldName, std::string newName, Light_Type type)
+{
+	switch (core::SETTINGS.GraphicsCore)
+	{
+	case OPENGL:
+		m_DataGL.RenameLight(oldName, newName, type);
+		break;
+	default:
+		break;
+	}
+}
+
 bool Data::LoadSkybox(std::vector<std::string> filepath)
 {
-	switch (rbcore::SETTINGS.GraphicsCore)
+	switch (core::SETTINGS.GraphicsCore)
 	{
 	case OPENGL:
 		if (m_DataGL.LoadSkybox(filepath))

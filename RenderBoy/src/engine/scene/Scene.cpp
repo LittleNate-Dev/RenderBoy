@@ -33,16 +33,16 @@ void Scene::Reset()
 	m_SpotLights.clear();
 	std::vector<std::string>().swap(m_DirLightList);
 	m_DirLights.clear();
-	rbcore::currentModelScene = nullptr;
-	rbcore::currentModelInfo = nullptr;
-	rbcore::currentPointLight = nullptr;
-	rbcore::currentSpotLight = nullptr;
-	rbcore::currentDirLight = nullptr;
+	core::currentModelScene = nullptr;
+	core::currentModelInfo = nullptr;
+	core::currentPointLight = nullptr;
+	core::currentSpotLight = nullptr;
+	core::currentDirLight = nullptr;
 }
 
 bool Scene::Reset(std::string filepath)
 {
-	std::string fileType = rbcore::GetFileFormat(filepath);
+	std::string fileType = core::GetFileFormat(filepath);
 	if (fileType == "scene")
 	{
 		if (LoadScene(filepath))
@@ -50,7 +50,7 @@ bool Scene::Reset(std::string filepath)
 			return true;
 		}
 	}
-	else if (rbcore::CheckFileFormat(fileType))
+	else if (core::CheckFileFormat(fileType))
 	{
 		Reset();
 		if (AddModel(filepath))
@@ -69,8 +69,8 @@ bool Scene::LoadScene(std::string filepath)
 	// If setting file doesn't exist, creat a new one
 	if (!stream)
 	{
-		spdlog::warn("Loading " + rbcore::GetFileName(filepath) + " failed!");
-		rbcore::ShowWarningMsg("Loading " + rbcore::GetFileName(filepath) + " failed!");
+		spdlog::warn("Loading " + core::GetFileName(filepath) + " failed!");
+		core::ShowWarningMsg("Loading " + core::GetFileName(filepath) + " failed!");
 		return false;
 	}
 	else
@@ -83,20 +83,20 @@ bool Scene::LoadScene(std::string filepath)
 			// Load scene info
 			if (line.find("#SCENE_NAME") != std::string::npos)
 			{
-				values = rbcore::GetSceneValue(line);
+				values = core::GetSceneValue(line);
 				m_Name = values[0];
 			}
 			// Load Camera
 			{
 				if (line.find("#CAMERA_POSITION") != std::string::npos)
 				{
-					values = rbcore::GetSceneValue(line);
+					values = core::GetSceneValue(line);
 					glm::vec3 pos = glm::vec3((float)std::atof(values[0].c_str()), (float)std::atof(values[1].c_str()), (float)std::atof(values[2].c_str()));
 					m_Camera.SetPosition(pos);
 				}
 				if (line.find("#CAMERA_EULERANGLE") != std::string::npos)
 				{
-					values = rbcore::GetSceneValue(line);
+					values = core::GetSceneValue(line);
 					glm::vec3 euler = glm::vec3((float)std::atof(values[0].c_str()), (float)std::atof(values[1].c_str()), (float)std::atof(values[2].c_str()));
 					m_Camera.SetEulerAngle(euler);
 				}
@@ -105,18 +105,18 @@ bool Scene::LoadScene(std::string filepath)
 			{
 				if (line.find("#SKYBOX_TYPE") != std::string::npos)
 				{
-					values = rbcore::GetSceneValue(line);
+					values = core::GetSceneValue(line);
 					m_Skybox.Type = (Skybox_Type)std::atoi(values[0].c_str());
 				}
 				if (line.find("#SKYBOX_COLOR") != std::string::npos)
 				{
-					values = rbcore::GetSceneValue(line);
+					values = core::GetSceneValue(line);
 					glm::vec3 color = glm::vec3((float)std::atof(values[0].c_str()), (float)std::atof(values[1].c_str()), (float)std::atof(values[2].c_str()));
 					m_Skybox.Color = color;
 				}
 				if (line.find("#SKYBOX_FILEPATH") != std::string::npos)
 				{
-					values = rbcore::GetSceneValue(line);
+					values = core::GetSceneValue(line);
 					std::string filepath;
 					for (unsigned int i = 0; i < values.size(); i++)
 					{
@@ -126,8 +126,8 @@ bool Scene::LoadScene(std::string filepath)
 							filepath += " ";
 						}
 					}
-					std::string directory = rbcore::GetFileDirectory(filepath);
-					std::string format = rbcore::GetFileFormat(filepath);
+					std::string directory = core::GetFileDirectory(filepath);
+					std::string format = core::GetFileFormat(filepath);
 					m_Skybox.Filepath.push_back(directory + "right." + format);
 					m_Skybox.Filepath.push_back(directory + "left." + format);
 					m_Skybox.Filepath.push_back(directory + "top." + format);
@@ -144,12 +144,12 @@ bool Scene::LoadScene(std::string filepath)
 			{
 				if (line.find("#MODEL_NAME") != std::string::npos)
 				{
-					values = rbcore::GetSceneValue(line);
+					values = core::GetSceneValue(line);
 					model = values[0];
 				}
 				if (line.find("#" + model + "_FILEPATH") != std::string::npos)
 				{
-					values = rbcore::GetSceneValue(line);
+					values = core::GetSceneValue(line);
 					std::string modelPath;
 					for (unsigned int i = 0; i < values.size(); i++)
 					{
@@ -167,49 +167,49 @@ bool Scene::LoadScene(std::string filepath)
 				}
 				if (line.find("#" + model + "_POSITION") != std::string::npos)
 				{
-					values = rbcore::GetSceneValue(line);
+					values = core::GetSceneValue(line);
 					glm::vec3 pos = glm::vec3((float)std::atof(values[0].c_str()), (float)std::atof(values[1].c_str()), (float)std::atof(values[2].c_str()));
 					m_Models[model].SetPosition(pos);
 				}
 				if (line.find("#" + model + "_SCALE") != std::string::npos)
 				{
-					values = rbcore::GetSceneValue(line);
+					values = core::GetSceneValue(line);
 					glm::vec3 scale = glm::vec3((float)std::atof(values[0].c_str()), (float)std::atof(values[1].c_str()), (float)std::atof(values[2].c_str()));
 					m_Models[model].SetScale(scale);
 				}
 				if (line.find("#" + model + "_EULERANGLE") != std::string::npos)
 				{
-					values = rbcore::GetSceneValue(line);
+					values = core::GetSceneValue(line);
 					glm::vec3 euler = glm::vec3((float)std::atof(values[0].c_str()), (float)std::atof(values[1].c_str()), (float)std::atof(values[2].c_str()));
 					m_Models[model].SetEulerAngle(euler);
 				}
 				if (line.find("#" + model + "_INSTANCE_NUM") != std::string::npos)
 				{
-					values = rbcore::GetSceneValue(line);
+					values = core::GetSceneValue(line);
 					m_Models[model].SetInstance(std::atoi(values[0].c_str()));
 				}
 				if (line.find("#" + model + "_CURRENT") != std::string::npos)
 				{
-					values = rbcore::GetSceneValue(line);
+					values = core::GetSceneValue(line);
 					m_Models[model].SetCurrent(std::atoi(values[0].c_str()));
 				}
 				if (line.find("#" + model + "_INSTANCE_POSITION") != std::string::npos)
 				{
-					values = rbcore::GetSceneValue(line);
+					values = core::GetSceneValue(line);
 					int current = std::atoi(values[0].c_str());
 					glm::vec3 pos = glm::vec3((float)std::atof(values[1].c_str()), (float)std::atof(values[2].c_str()), (float)std::atof(values[3].c_str()));
 					m_Models[model].SetPosition(pos, current);
 				}
 				if (line.find("#" + model + "_INSTANCE_SCALE") != std::string::npos)
 				{
-					values = rbcore::GetSceneValue(line);
+					values = core::GetSceneValue(line);
 					int current = std::atoi(values[0].c_str());
 					glm::vec3 scale = glm::vec3((float)std::atof(values[1].c_str()), (float)std::atof(values[2].c_str()), (float)std::atof(values[3].c_str()));
 					m_Models[model].SetScale(scale, current);
 				}
 				if (line.find("#" + model + "_INSTANCE_EULERANGLE") != std::string::npos)
 				{
-					values = rbcore::GetSceneValue(line);
+					values = core::GetSceneValue(line);
 					int current = std::atoi(values[0].c_str());
 					glm::vec3 euler = glm::vec3((float)std::atof(values[1].c_str()), (float)std::atof(values[2].c_str()), (float)std::atof(values[3].c_str()));
 					m_Models[model].SetEulerAngle(euler, current);
@@ -219,57 +219,57 @@ bool Scene::LoadScene(std::string filepath)
 			{
 				if (line.find("#POINT_LIGHT_NAME") != std::string::npos)
 				{
-					values = rbcore::GetSceneValue(line);
+					values = core::GetSceneValue(line);
 					light = values[0];
 					AddLight(light, POINT_LIGHT);
 				}
 				if (line.find("#POINT_LIGHT_" + light + "_POSITION") != std::string::npos)
 				{
-					values = rbcore::GetSceneValue(line);
+					values = core::GetSceneValue(line);
 					glm::vec3 pos = glm::vec3((float)std::atof(values[0].c_str()), (float)std::atof(values[1].c_str()), (float)std::atof(values[2].c_str()));
 					m_PointLights[light].SetPosition(pos);
 				}
 				if (line.find("#POINT_LIGHT_" + light + "_COLOR") != std::string::npos)
 				{
-					values = rbcore::GetSceneValue(line);
+					values = core::GetSceneValue(line);
 					glm::vec3 color = glm::vec3((float)std::atof(values[0].c_str()), (float)std::atof(values[1].c_str()), (float)std::atof(values[2].c_str()));
 					m_PointLights[light].SetColor(color);
 				}
 				if (line.find("#POINT_LIGHT_" + light + "_RANGE") != std::string::npos)
 				{
-					values = rbcore::GetSceneValue(line);
+					values = core::GetSceneValue(line);
 					m_PointLights[light].SetRange((float)std::atof(values[0].c_str()));
 				}
 				if (line.find("#POINT_LIGHT_" + light + "_INTENSITY") != std::string::npos)
 				{
-					values = rbcore::GetSceneValue(line);
+					values = core::GetSceneValue(line);
 					m_PointLights[light].SetIntensity((float)std::atof(values[0].c_str()));
 				}
 				if (line.find("#POINT_LIGHT_" + light + "_ADS") != std::string::npos)
 				{
-					values = rbcore::GetSceneValue(line);
+					values = core::GetSceneValue(line);
 					glm::vec3 ads = glm::vec3((float)std::atof(values[0].c_str()), (float)std::atof(values[1].c_str()), (float)std::atof(values[2].c_str()));
 					m_PointLights[light].SetADS(ads);
 				}
 				if (line.find("#POINT_LIGHT_" + light + "_CLQ") != std::string::npos)
 				{
-					values = rbcore::GetSceneValue(line);
+					values = core::GetSceneValue(line);
 					glm::vec3 clq = glm::vec3((float)std::atof(values[0].c_str()), (float)std::atof(values[1].c_str()), (float)std::atof(values[2].c_str()));
 					m_PointLights[light].SetCLQ(clq);
 				}
 				if (line.find("#POINT_LIGHT_" + light + "_SWITCH") != std::string::npos)
 				{
-					values = rbcore::GetSceneValue(line);
+					values = core::GetSceneValue(line);
 					m_PointLights[light].SetLightSwitch((bool)std::atoi(values[0].c_str()));
 				}
 				if (line.find("#POINT_LIGHT_" + light + "_SHADOW") != std::string::npos)
 				{
-					values = rbcore::GetSceneValue(line);
+					values = core::GetSceneValue(line);
 					m_PointLights[light].SetCastShadow((bool)std::atoi(values[0].c_str()));
 				}
 				if (line.find("#POINT_LIGHT_" + light + "_SHADOW_RES") != std::string::npos)
 				{
-					values = rbcore::GetSceneValue(line);
+					values = core::GetSceneValue(line);
 					m_PointLights[light].SetShadowRes((int)std::atoi(values[0].c_str()));
 				}
 			}
@@ -277,73 +277,73 @@ bool Scene::LoadScene(std::string filepath)
 			{
 				if (line.find("#SPOT_LIGHT_NAME") != std::string::npos)
 				{
-					values = rbcore::GetSceneValue(line);
+					values = core::GetSceneValue(line);
 					light = values[0];
 					AddLight(light, SPOT_LIGHT);
 				}
 				if (line.find("#SPOT_LIGHT_" + light + "_POSITION") != std::string::npos)
 				{
-					values = rbcore::GetSceneValue(line);
+					values = core::GetSceneValue(line);
 					glm::vec3 pos = glm::vec3((float)std::atof(values[0].c_str()), (float)std::atof(values[1].c_str()), (float)std::atof(values[2].c_str()));
 					m_SpotLights[light].SetPosition(pos);
 				}
 				if (line.find("#SPOT_LIGHT_" + light + "_EULERANGLE") != std::string::npos)
 				{
-					values = rbcore::GetSceneValue(line);
+					values = core::GetSceneValue(line);
 					glm::vec3 euler = glm::vec3((float)std::atof(values[0].c_str()), (float)std::atof(values[1].c_str()), (float)std::atof(values[2].c_str()));
 					m_SpotLights[light].SetEulerAngle(euler);
 				}
 				if (line.find("#SPOT_LIGHT_" + light + "_COLOR") != std::string::npos)
 				{
-					values = rbcore::GetSceneValue(line);
+					values = core::GetSceneValue(line);
 					glm::vec3 color = glm::vec3((float)std::atof(values[0].c_str()), (float)std::atof(values[1].c_str()), (float)std::atof(values[2].c_str()));
 					m_SpotLights[light].SetColor(color);
 				}
 				if (line.find("#SPOT_LIGHT_" + light + "_RANGE") != std::string::npos)
 				{
-					values = rbcore::GetSceneValue(line);
+					values = core::GetSceneValue(line);
 					m_SpotLights[light].SetRange((float)std::atof(values[0].c_str()));
 				}
 				if (line.find("#SPOT_LIGHT_" + light + "_INTENSITY") != std::string::npos)
 				{
-					values = rbcore::GetSceneValue(line);
+					values = core::GetSceneValue(line);
 					m_SpotLights[light].SetIntensity((float)std::atof(values[0].c_str()));
 				}
 				if (line.find("#SPOT_LIGHT_" + light + "_ANGLE") != std::string::npos)
 				{
-					values = rbcore::GetSceneValue(line);
+					values = core::GetSceneValue(line);
 					m_SpotLights[light].SetAngle((float)std::atof(values[0].c_str()));
 				}
 				if (line.find("#SPOT_LIGHT_" + light + "_DIMANGLE") != std::string::npos)
 				{
-					values = rbcore::GetSceneValue(line);
+					values = core::GetSceneValue(line);
 					m_SpotLights[light].SetDimAngle((float)std::atof(values[0].c_str()));
 				}
 				if (line.find("#SPOT_LIGHT_" + light + "_ADS") != std::string::npos)
 				{
-					values = rbcore::GetSceneValue(line);
+					values = core::GetSceneValue(line);
 					glm::vec3 ads = glm::vec3((float)std::atof(values[0].c_str()), (float)std::atof(values[1].c_str()), (float)std::atof(values[2].c_str()));
 					m_SpotLights[light].SetADS(ads);
 				}
 				if (line.find("#SPOT_LIGHT_" + light + "_CLQ") != std::string::npos)
 				{
-					values = rbcore::GetSceneValue(line);
+					values = core::GetSceneValue(line);
 					glm::vec3 clq = glm::vec3((float)std::atof(values[0].c_str()), (float)std::atof(values[1].c_str()), (float)std::atof(values[2].c_str()));
 					m_SpotLights[light].SetCLQ(clq);
 				}
 				if (line.find("#SPOT_LIGHT_" + light + "_SWITCH") != std::string::npos)
 				{
-					values = rbcore::GetSceneValue(line);
+					values = core::GetSceneValue(line);
 					m_SpotLights[light].SetLightSwitch((bool)std::atoi(values[0].c_str()));
 				}
 				if (line.find("#SPOT_LIGHT_" + light + "_SHADOW") != std::string::npos)
 				{
-					values = rbcore::GetSceneValue(line);
+					values = core::GetSceneValue(line);
 					m_SpotLights[light].SetCastShadow((bool)std::atoi(values[0].c_str()));
 				}
 				if (line.find("#SPOT_LIGHT_" + light + "_SHADOW_RES") != std::string::npos)
 				{
-					values = rbcore::GetSceneValue(line);
+					values = core::GetSceneValue(line);
 					m_SpotLights[light].SetShadowRes((int)std::atoi(values[0].c_str()));
 				}
 			}
@@ -351,30 +351,30 @@ bool Scene::LoadScene(std::string filepath)
 			{
 				if (line.find("#DIR_LIGHT_NAME") != std::string::npos)
 				{
-					values = rbcore::GetSceneValue(line);
+					values = core::GetSceneValue(line);
 					light = values[0];
 					AddLight(light, DIRECTIONAL_LIGHT);
 				}
 				if (line.find("#DIR_LIGHT_" + light + "_EULERANGLE") != std::string::npos)
 				{
-					values = rbcore::GetSceneValue(line);
+					values = core::GetSceneValue(line);
 					glm::vec3 euler = glm::vec3((float)std::atof(values[0].c_str()), (float)std::atof(values[1].c_str()), (float)std::atof(values[2].c_str()));
 					m_DirLights[light].SetEulerAngle(euler);
 				}
 				if (line.find("#DIR_LIGHT_" + light + "_COLOR") != std::string::npos)
 				{
-					values = rbcore::GetSceneValue(line);
+					values = core::GetSceneValue(line);
 					glm::vec3 color = glm::vec3((float)std::atof(values[0].c_str()), (float)std::atof(values[1].c_str()), (float)std::atof(values[2].c_str()));
 					m_DirLights[light].SetColor(color);
 				}
 				if (line.find("#DIR_LIGHT_" + light + "_INTENSITY") != std::string::npos)
 				{
-					values = rbcore::GetSceneValue(line);
+					values = core::GetSceneValue(line);
 					m_DirLights[light].SetIntensity((float)std::atof(values[0].c_str()));
 				}
 				if (line.find("#DIR_LIGHT_" + light + "_ADS") != std::string::npos)
 				{
-					values = rbcore::GetSceneValue(line);
+					values = core::GetSceneValue(line);
 					glm::vec3 ads = glm::vec3((float)std::atof(values[0].c_str()), (float)std::atof(values[1].c_str()), (float)std::atof(values[2].c_str()));
 					m_DirLights[light].SetADS(ads);
 				}
@@ -539,14 +539,14 @@ void Scene::SaveScene()
 		stream << line;
 	}
 	stream.close();
-	rbcore::ShowWarningMsg("Scene saved at: " + savePath);
+	core::ShowWarningMsg("Scene saved at: " + savePath);
 }
 
 bool Scene::AddModel(std::string filepath)
 {
 	// If name already exist, rename
 	unsigned int rename = 1;
-	std::string name = rbcore::GetFileNameNoSuffix(filepath);
+	std::string name = core::GetFileNameNoSuffix(filepath);
 	std::string newName = name;
 	while (m_Models.find(newName) != m_Models.end())
 	{
@@ -557,7 +557,7 @@ bool Scene::AddModel(std::string filepath)
 	{
 		name = newName;
 		spdlog::warn("Model name already exist! Rename to: " + name);
-		rbcore::ShowWarningMsg("Model name already exist! Rename to: " + name);
+		core::ShowWarningMsg("Model name already exist! Rename to: " + name);
 	}
 
 	Model model;
@@ -566,8 +566,8 @@ bool Scene::AddModel(std::string filepath)
 		m_ModelList.push_back(name);
 		m_Models.insert(std::pair<std::string, Model>(name, model));
 		m_Data.AddModel(name, model);
-		rbcore::currentModelScene = nullptr;
-		rbcore::currentModelInfo = nullptr;
+		core::currentModelScene = nullptr;
+		core::currentModelInfo = nullptr;
 		return true;
 	}
 	return false;
@@ -587,7 +587,7 @@ bool Scene::AddModel(std::string name, std::string filepath)
 	{
 		name = newName;
 		spdlog::warn("Model name already exist! Rename to: " + name);
-		rbcore::ShowWarningMsg("Model name already exist! Rename to: " + name);
+		core::ShowWarningMsg("Model name already exist! Rename to: " + name);
 	}
 
 	Model model;
@@ -596,8 +596,8 @@ bool Scene::AddModel(std::string name, std::string filepath)
 		m_ModelList.push_back(name);
 		m_Models.insert(std::pair<std::string, Model>(name, model));
 		m_Data.AddModel(name, model);
-		rbcore::currentModelScene = nullptr;
-		rbcore::currentModelInfo = nullptr;
+		core::currentModelScene = nullptr;
+		core::currentModelInfo = nullptr;
 		return true;
 	}
 	return false;
@@ -611,8 +611,8 @@ bool Scene::DeleteModel(std::string name)
 		m_ModelList.shrink_to_fit();
 		m_Models.erase(name);
 		m_Data.DeleteModel(name);
-		rbcore::currentModelScene = nullptr;
-		rbcore::currentModelInfo = nullptr;
+		core::currentModelScene = nullptr;
+		core::currentModelInfo = nullptr;
 		return true;
 	}
 	return false;
@@ -658,14 +658,15 @@ bool Scene::AddPointLight(std::string name)
 	{
 		name = newName;
 		spdlog::warn("Light name already exist! Rename to: " + name);
-		rbcore::ShowWarningMsg("Light name already exist! Rename to: " + name);
+		core::ShowWarningMsg("Light name already exist! Rename to: " + name);
 	}
 
 	PointLight light;
 	light.SetName(name);
 	m_PointLightList.push_back(name);
 	m_PointLights.insert(std::pair<std::string, PointLight>(name, light));
-	rbcore::currentPointLight = nullptr;
+	core::currentPointLight = nullptr;
+	m_Data.AddLight(name, POINT_LIGHT);
 	return true;
 }
 
@@ -683,14 +684,14 @@ bool Scene::AddSpotLight(std::string name)
 	{
 		name = newName;
 		spdlog::warn("Light name already exist! Rename to: " + name);
-		rbcore::ShowWarningMsg("Light name already exist! Rename to: " + name);
+		core::ShowWarningMsg("Light name already exist! Rename to: " + name);
 	}
 
 	SpotLight light;
 	light.SetName(name);
 	m_SpotLightList.push_back(name);
 	m_SpotLights.insert(std::pair<std::string, SpotLight>(name, light));
-	rbcore::currentSpotLight = nullptr;
+	core::currentSpotLight = nullptr;
 	return true;
 }
 
@@ -708,14 +709,14 @@ bool Scene::AddDirectionalLight(std::string name)
 	{
 		name = newName;
 		spdlog::warn("Light name already exist! Rename to: " + name);
-		rbcore::ShowWarningMsg("Light name already exist! Rename to: " + name);
+		core::ShowWarningMsg("Light name already exist! Rename to: " + name);
 	}
 
 	DirectionalLight light;
 	light.SetName(name);
 	m_DirLightList.push_back(name);
 	m_DirLights.insert(std::pair<std::string, DirectionalLight>(name, light));
-	rbcore::currentDirLight = nullptr;
+	core::currentDirLight = nullptr;
 	return true;
 }
 
@@ -752,7 +753,8 @@ bool Scene::DeletePointLight(std::string name)
 		m_PointLightList.erase(std::remove(m_PointLightList.begin(), m_PointLightList.end(), name), m_PointLightList.end());
 		m_PointLightList.shrink_to_fit();
 		m_PointLights.erase(name);
-		rbcore::currentPointLight = nullptr;
+		core::currentPointLight = nullptr;
+		m_Data.DeleteLight(name, POINT_LIGHT);
 		return true;
 	}
 	return false;
@@ -765,7 +767,7 @@ bool Scene::DeleteSpotLight(std::string name)
 		m_SpotLightList.erase(std::remove(m_SpotLightList.begin(), m_SpotLightList.end(), name), m_SpotLightList.end());
 		m_SpotLightList.shrink_to_fit();
 		m_SpotLights.erase(name);
-		rbcore::currentSpotLight = nullptr;
+		core::currentSpotLight = nullptr;
 		return true;
 	}
 	return false;
@@ -778,7 +780,7 @@ bool Scene::DeleteDirectionalLight(std::string name)
 		m_DirLightList.erase(std::remove(m_DirLightList.begin(), m_DirLightList.end(), name), m_DirLightList.end());
 		m_DirLightList.shrink_to_fit();
 		m_DirLights.erase(name);
-		rbcore::currentDirLight = nullptr;
+		core::currentDirLight = nullptr;
 		return true;
 	}
 	return false;
@@ -800,7 +802,7 @@ bool Scene::RenameModel(std::string oldName, std::string newName)
 		{
 			newName = newRename;
 			spdlog::warn("Model name already exist! Rename to: " + newName);
-			rbcore::ShowWarningMsg("Model name already exist! Rename to: " + newName);
+			core::ShowWarningMsg("Model name already exist! Rename to: " + newName);
 		}
 		Model model = m_Models[oldName];
 		model.SetName(newName);
@@ -862,7 +864,7 @@ bool Scene::RenamePointLight(std::string oldName, std::string newName)
 		{
 			newName = newRename;
 			spdlog::warn("Light name already exist! Rename to: " + newName);
-			rbcore::ShowWarningMsg("Light name already exist! Rename to: " + newName);
+			core::ShowWarningMsg("Light name already exist! Rename to: " + newName);
 		}
 		PointLight light = m_PointLights[oldName];
 		light.SetName(newName);
@@ -876,6 +878,7 @@ bool Scene::RenamePointLight(std::string oldName, std::string newName)
 				break;
 			}
 		}
+		m_Data.RenameLight(oldName, newName, POINT_LIGHT);
 		return true;
 	}
 	return false;
@@ -897,7 +900,7 @@ bool Scene::RenameSpotLight(std::string oldName, std::string newName)
 		{
 			newName = newRename;
 			spdlog::warn("Light name already exist! Rename to: " + newName);
-			rbcore::ShowWarningMsg("Light name already exist! Rename to: " + newName);
+			core::ShowWarningMsg("Light name already exist! Rename to: " + newName);
 		}
 		SpotLight light = m_SpotLights[oldName];
 		light.SetName(newName);
@@ -932,7 +935,7 @@ bool Scene::RenameDirectionalLight(std::string oldName, std::string newName)
 		{
 			newName = newRename;
 			spdlog::warn("Light name already exist! Rename to: " + newName);
-			rbcore::ShowWarningMsg("Light name already exist! Rename to: " + newName);
+			core::ShowWarningMsg("Light name already exist! Rename to: " + newName);
 		}
 		DirectionalLight light = m_DirLights[oldName];
 		light.SetName(newName);
@@ -966,14 +969,14 @@ void Scene::DrawUI()
 
 void Scene::DrawSceneWindow()
 {
-	if (rbcore::IS_SCENE_OPENED)
+	if (core::IS_SCENE_OPENED)
 	{
 		ImGuiWindowFlags windowFlags = 0;
 		windowFlags |= ImGuiWindowFlags_AlwaysAutoResize;
-		ImGui::Begin("Scene", &rbcore::IS_SCENE_OPENED, windowFlags);
+		ImGui::Begin("Scene", &core::IS_SCENE_OPENED, windowFlags);
 		// rename
 		ImGui::LabelHighlighted("Name");
-		ImGui::PushItemWidth(200.f * rbcore::GetWidgetWidthCoefficient());
+		ImGui::PushItemWidth(200.f * core::GetWidgetWidthCoefficient());
 		static char sceneName[256] = "";
 		strcpy_s(sceneName, m_Name.data());
 		ImGuiInputTextFlags inputFlags = 0;
@@ -987,9 +990,9 @@ void Scene::DrawSceneWindow()
 		// Skybox
 		if (ImGui::TreeNode("Skybox"))
 		{
-			ImGui::CenterAlignWidget("Skybox", 90.0f * rbcore::GetWidgetWidthCoefficient());
+			ImGui::CenterAlignWidget("Skybox", 90.0f * core::GetWidgetWidthCoefficient());
 			ImGui::LabelHighlighted("Skybox");
-			ImGui::PushItemWidth(90.0f * rbcore::GetWidgetWidthCoefficient());
+			ImGui::PushItemWidth(90.0f * core::GetWidgetWidthCoefficient());
 			const char* skyboxOps[] = {
 				"Color",
 				"Picture"
@@ -1009,15 +1012,15 @@ void Scene::DrawSceneWindow()
 				ImGui::CenterAlignWidget("Choose Picture");
 				if (ImGui::Button("Choose Picture"))
 				{
-					rbcore::LOAD_TYPE = LOAD_SKYBOX;
-					rbcore::FILE_BROWSER.Open();
+					core::LOAD_TYPE = LOAD_SKYBOX;
+					core::FILE_BROWSER.Open();
 				}
 			}
 			else
 			{
-				ImGui::CenterAlignWidget("Skybox Color", 200.0f * rbcore::GetWidgetWidthCoefficient());
+				ImGui::CenterAlignWidget("Skybox Color", 200.0f * core::GetWidgetWidthCoefficient());
 				ImGui::LabelHighlighted("Skybox Color");
-				ImGui::PushItemWidth(200.0f * rbcore::GetWidgetWidthCoefficient());
+				ImGui::PushItemWidth(200.0f * core::GetWidgetWidthCoefficient());
 				ImGui::ColorEdit3("##SkyboxColor", &m_Skybox.Color[0]);
 				ImGui::PopItemWidth();
 			}
@@ -1029,47 +1032,47 @@ void Scene::DrawSceneWindow()
 
 void Scene::DrawModelsWindow()
 {
-	if (rbcore::IS_MODELS_OPENED)
+	if (core::IS_MODELS_OPENED)
 	{
 		ImGuiWindowFlags windowFlags = 0;
 		windowFlags |= ImGuiWindowFlags_AlwaysAutoResize;
-		ImGui::Begin("Models", &rbcore::IS_MODELS_OPENED, windowFlags);
+		ImGui::Begin("Models", &core::IS_MODELS_OPENED, windowFlags);
 		ImGui::LabelHighlighted("Model ");
-		if (ImGui::BeginCombo("##Model", rbcore::currentModelScene))
+		if (ImGui::BeginCombo("##Model", core::currentModelScene))
 		{
 			for (int i = 0; i < m_ModelList.size(); i++)
 			{
-				bool isSelected = (rbcore::currentModelScene == m_ModelList[i].c_str());
+				bool isSelected = (core::currentModelScene == m_ModelList[i].c_str());
 				if (ImGui::Selectable(m_ModelList[i].c_str(), isSelected))
 				{
-					rbcore::currentModelScene = m_ModelList[i].c_str();
+					core::currentModelScene = m_ModelList[i].c_str();
 				}
 			}
 			ImGui::EndCombo();
 		}
-		if (rbcore::currentModelScene)
+		if (core::currentModelScene)
 		{
-			ImGui::CenterAlignWidget("Name", 200.0f * rbcore::GetWidgetWidthCoefficient());
+			ImGui::CenterAlignWidget("Name", 200.0f * core::GetWidgetWidthCoefficient());
 			ImGui::LabelHighlighted("Name");
-			ImGui::PushItemWidth(200.f * rbcore::GetWidgetWidthCoefficient());
+			ImGui::PushItemWidth(200.f * core::GetWidgetWidthCoefficient());
 			static char modelName[256] = "";
-			strcpy_s(modelName, rbcore::currentModelScene);
+			strcpy_s(modelName, core::currentModelScene);
 			ImGuiInputTextFlags inputFlags = 0;
 			inputFlags |= ImGuiInputTextFlags_CharsNoBlank;
 			inputFlags |= ImGuiInputTextFlags_EnterReturnsTrue;
 			if (ImGui::InputText("##spotLightName", modelName, IM_ARRAYSIZE(modelName), inputFlags))
 			{
-				if (modelName != rbcore::currentModelScene)
+				if (modelName != core::currentModelScene)
 				{
-					RenameModel(rbcore::currentModelScene, modelName);
+					RenameModel(core::currentModelScene, modelName);
 				}
 			}
-			m_Models[rbcore::currentModelScene].DrawUI();
+			m_Models[core::currentModelScene].DrawUI();
 			ImGui::PushStyleColor(ImGuiCol_Text, ImGui::ColorConvertU32ToFloat4(ImGui::COLOR_WARNING_SYTLE));
 			ImGui::CenterAlignWidget("Delete");
 			if (ImGui::Button("Delete"))
 			{
-				DeleteModel(rbcore::currentModelScene);
+				DeleteModel(core::currentModelScene);
 			}
 			ImGui::PopStyleColor(1);
 		}
@@ -1079,11 +1082,11 @@ void Scene::DrawModelsWindow()
 
 void Scene::DrawCameraWindow()
 {
-	if (rbcore::IS_CAMERA_OPENED)
+	if (core::IS_CAMERA_OPENED)
 	{
 		ImGuiWindowFlags windowFlags = 0;
 		windowFlags |= ImGuiWindowFlags_AlwaysAutoResize;
-		ImGui::Begin("Camera", &rbcore::IS_CAMERA_OPENED, windowFlags);
+		ImGui::Begin("Camera", &core::IS_CAMERA_OPENED, windowFlags);
 		m_Camera.DrawUI();
 		ImGui::End();
 	}
@@ -1091,20 +1094,20 @@ void Scene::DrawCameraWindow()
 
 void Scene::DrawLightsWindow()
 {
-	if (rbcore::IS_LIGHTS_OPENED)
+	if (core::IS_LIGHTS_OPENED)
 	{
 		ImGuiWindowFlags windowFlags = 0;
 		windowFlags |= ImGuiWindowFlags_AlwaysAutoResize;
-		ImGui::Begin("Lights", &rbcore::IS_LIGHTS_OPENED, windowFlags);
+		ImGui::Begin("Lights", &core::IS_LIGHTS_OPENED, windowFlags);
 		// Add light
 		if (ImGui::TreeNode("Add Light"))
 		{
-			ImGui::CenterAlignWidget("Name", 200.0f * rbcore::GetWidgetWidthCoefficient());
+			ImGui::CenterAlignWidget("Name", 200.0f * core::GetWidgetWidthCoefficient());
 			ImGui::LabelHighlighted("Name");
 			ImGui::PushItemWidth(200.0f);
 			static char lightName[256] = "";
 			ImGui::InputText("##LightName", lightName, IM_ARRAYSIZE(lightName));
-			ImGui::CenterAlignWidget("Type", 200.0f * rbcore::GetWidgetWidthCoefficient());
+			ImGui::CenterAlignWidget("Type", 200.0f * core::GetWidgetWidthCoefficient());
 			ImGui::LabelHighlighted("Type");
 			ImGui::PushItemWidth(200.0f);
 			const char* lightTypeOps[] = {
@@ -1124,7 +1127,7 @@ void Scene::DrawLightsWindow()
 				}
 				else
 				{
-					rbcore::ShowWarningMsg("Incomplete light info!");
+					core::ShowWarningMsg("Incomplete light info!");
 				}
 				memset(lightName, '\0', sizeof(lightName));
 				currentLightType = -1;
@@ -1138,41 +1141,41 @@ void Scene::DrawLightsWindow()
 		{
 			if (ImGui::TreeNode("Point Light"))
 			{
-				if (ImGui::BeginCombo("##PointLight", rbcore::currentPointLight))
+				if (ImGui::BeginCombo("##PointLight", core::currentPointLight))
 				{
 					for (int i = 0; i < m_PointLightList.size(); i++)
 					{
-						bool isSelected = (rbcore::currentPointLight == m_PointLightList[i].c_str());
+						bool isSelected = (core::currentPointLight == m_PointLightList[i].c_str());
 						if (ImGui::Selectable(m_PointLightList[i].c_str(), isSelected))
 						{
-							rbcore::currentPointLight = m_PointLightList[i].c_str();
+							core::currentPointLight = m_PointLightList[i].c_str();
 						}
 					}
 					ImGui::EndCombo();
 				}
-				if (rbcore::currentPointLight)
+				if (core::currentPointLight)
 				{
-					ImGui::CenterAlignWidget("Name", 200.0f * rbcore::GetWidgetWidthCoefficient());
+					ImGui::CenterAlignWidget("Name", 200.0f * core::GetWidgetWidthCoefficient());
 					ImGui::LabelHighlighted("Name");
-					ImGui::PushItemWidth(200.f * rbcore::GetWidgetWidthCoefficient());
+					ImGui::PushItemWidth(200.f * core::GetWidgetWidthCoefficient());
 					static char pointLightName[256] = "";
-					strcpy_s(pointLightName, rbcore::currentPointLight);
+					strcpy_s(pointLightName, core::currentPointLight);
 					ImGuiInputTextFlags inputFlags = 0;
 					inputFlags |= ImGuiInputTextFlags_CharsNoBlank;
 					inputFlags |= ImGuiInputTextFlags_EnterReturnsTrue;
 					if (ImGui::InputText("##spotLightName", pointLightName, IM_ARRAYSIZE(pointLightName), inputFlags))
 					{
-						if (pointLightName != rbcore::currentPointLight)
+						if (pointLightName != core::currentPointLight)
 						{
-							RenamePointLight(rbcore::currentPointLight, pointLightName);
+							RenamePointLight(core::currentPointLight, pointLightName);
 						}
 					}
-					m_PointLights[rbcore::currentPointLight].DrawUI();
+					m_PointLights[core::currentPointLight].DrawUI();
 					ImGui::PushStyleColor(ImGuiCol_Text, ImGui::ColorConvertU32ToFloat4(ImGui::COLOR_WARNING_SYTLE));
 					ImGui::CenterAlignWidget("Delete");
 					if (ImGui::Button("Delete"))
 					{
-						DeletePointLight(rbcore::currentPointLight);
+						DeletePointLight(core::currentPointLight);
 					}
 					ImGui::PopStyleColor(1);
 				}
@@ -1184,41 +1187,41 @@ void Scene::DrawLightsWindow()
 		{
 			if (ImGui::TreeNode("Spot Light"))
 			{
-				if (ImGui::BeginCombo("##SpotLight", rbcore::currentSpotLight))
+				if (ImGui::BeginCombo("##SpotLight", core::currentSpotLight))
 				{
 					for (int i = 0; i < m_SpotLightList.size(); i++)
 					{
-						bool isSelected = (rbcore::currentSpotLight == m_SpotLightList[i].c_str());
+						bool isSelected = (core::currentSpotLight == m_SpotLightList[i].c_str());
 						if (ImGui::Selectable(m_SpotLightList[i].c_str(), isSelected))
 						{
-							rbcore::currentSpotLight = m_SpotLightList[i].c_str();
+							core::currentSpotLight = m_SpotLightList[i].c_str();
 						}
 					}
 					ImGui::EndCombo();
 				}
-				if (rbcore::currentSpotLight)
+				if (core::currentSpotLight)
 				{
-					ImGui::CenterAlignWidget("Name", 200.0f * rbcore::GetWidgetWidthCoefficient());
+					ImGui::CenterAlignWidget("Name", 200.0f * core::GetWidgetWidthCoefficient());
 					ImGui::LabelHighlighted("Name");
-					ImGui::PushItemWidth(200.f * rbcore::GetWidgetWidthCoefficient());
+					ImGui::PushItemWidth(200.f * core::GetWidgetWidthCoefficient());
 					static char spotLightName[256] = "";
-					strcpy_s(spotLightName, rbcore::currentSpotLight);
+					strcpy_s(spotLightName, core::currentSpotLight);
 					ImGuiInputTextFlags inputFlags = 0;
 					inputFlags |= ImGuiInputTextFlags_CharsNoBlank;
 					inputFlags |= ImGuiInputTextFlags_EnterReturnsTrue;
 					if (ImGui::InputText("##spotLightName", spotLightName, IM_ARRAYSIZE(spotLightName), inputFlags))
 					{
-						if (spotLightName != rbcore::currentSpotLight)
+						if (spotLightName != core::currentSpotLight)
 						{
-							RenameSpotLight(rbcore::currentSpotLight, spotLightName);
+							RenameSpotLight(core::currentSpotLight, spotLightName);
 						}
 					}
-					m_SpotLights[rbcore::currentSpotLight].DrawUI();
+					m_SpotLights[core::currentSpotLight].DrawUI();
 					ImGui::PushStyleColor(ImGuiCol_Text, ImGui::ColorConvertU32ToFloat4(ImGui::COLOR_WARNING_SYTLE));
 					ImGui::CenterAlignWidget("Delete");
 					if (ImGui::Button("Delete"))
 					{
-						DeleteSpotLight(rbcore::currentSpotLight);
+						DeleteSpotLight(core::currentSpotLight);
 					}
 					ImGui::PopStyleColor(1);
 				}
@@ -1230,41 +1233,41 @@ void Scene::DrawLightsWindow()
 		{
 			if (ImGui::TreeNode("Directional Light"))
 			{
-				if (ImGui::BeginCombo("##DirectionalLight", rbcore::currentDirLight))
+				if (ImGui::BeginCombo("##DirectionalLight", core::currentDirLight))
 				{
 					for (int i = 0; i < m_DirLightList.size(); i++)
 					{
-						bool isSelected = (rbcore::currentDirLight == m_DirLightList[i].c_str());
+						bool isSelected = (core::currentDirLight == m_DirLightList[i].c_str());
 						if (ImGui::Selectable(m_DirLightList[i].c_str(), isSelected))
 						{
-							rbcore::currentDirLight = m_DirLightList[i].c_str();
+							core::currentDirLight = m_DirLightList[i].c_str();
 						}
 					}
 					ImGui::EndCombo();
 				}
-				if (rbcore::currentDirLight)
+				if (core::currentDirLight)
 				{
-					ImGui::CenterAlignWidget("Name", 200.0f * rbcore::GetWidgetWidthCoefficient());
+					ImGui::CenterAlignWidget("Name", 200.0f * core::GetWidgetWidthCoefficient());
 					ImGui::LabelHighlighted("Name");
-					ImGui::PushItemWidth(200.f * rbcore::GetWidgetWidthCoefficient());
+					ImGui::PushItemWidth(200.f * core::GetWidgetWidthCoefficient());
 					static char dirLightName[256] = "";
-					strcpy_s(dirLightName, rbcore::currentDirLight);
+					strcpy_s(dirLightName, core::currentDirLight);
 					ImGuiInputTextFlags inputFlags = 0;
 					inputFlags |= ImGuiInputTextFlags_CharsNoBlank;
 					inputFlags |= ImGuiInputTextFlags_EnterReturnsTrue;
 					if (ImGui::InputText("##spotLightName", dirLightName, IM_ARRAYSIZE(dirLightName), inputFlags))
 					{
-						if (dirLightName != rbcore::currentDirLight)
+						if (dirLightName != core::currentDirLight)
 						{
-							RenameDirectionalLight(rbcore::currentDirLight, dirLightName);
+							RenameDirectionalLight(core::currentDirLight, dirLightName);
 						}
 					}
-					m_DirLights[rbcore::currentDirLight].DrawUI();
+					m_DirLights[core::currentDirLight].DrawUI();
 					ImGui::PushStyleColor(ImGuiCol_Text, ImGui::ColorConvertU32ToFloat4(ImGui::COLOR_WARNING_SYTLE));
 					ImGui::CenterAlignWidget("Delete");
 					if (ImGui::Button("Delete"))
 					{
-						DeleteDirectionalLight(rbcore::currentDirLight);
+						DeleteDirectionalLight(core::currentDirLight);
 					}
 					ImGui::PopStyleColor(1);
 				}
