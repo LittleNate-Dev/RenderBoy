@@ -7,7 +7,7 @@ GLVertexBuffer::GLVertexBuffer()
 
 GLVertexBuffer::~GLVertexBuffer()
 {
-    GLCall(glDeleteBuffers(1, &m_RendererID));
+    glDeleteBuffers(1, &m_RendererID);
 }
 
 //public

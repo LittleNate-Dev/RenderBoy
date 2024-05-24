@@ -7,7 +7,7 @@ GLShader::GLShader()
 
 GLShader::~GLShader()
 {
-    GLCall(glDeleteProgram(m_RendererID));
+    glDeleteProgram(m_RendererID);
 }
 
 bool GLShader::Init(std::string filepath)

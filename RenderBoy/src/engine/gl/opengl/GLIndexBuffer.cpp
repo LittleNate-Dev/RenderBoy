@@ -8,7 +8,7 @@ GLIndexBuffer::GLIndexBuffer()
 
 GLIndexBuffer::~GLIndexBuffer()
 {
-    GLCall(glDeleteBuffers(1, &m_RendererID));
+    glDeleteBuffers(1, &m_RendererID);
 }
 
 //public

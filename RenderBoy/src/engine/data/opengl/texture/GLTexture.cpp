@@ -14,9 +14,9 @@ GLTexture::~GLTexture()
 {
     if (m_Handle)
     {
-        GLCall(glMakeTextureHandleNonResidentARB(m_Handle));
+        glMakeTextureHandleNonResidentARB(m_Handle);
     }
-    GLCall(glDeleteTextures(1, &m_RendererID));
+    glDeleteTextures(1, &m_RendererID);
 }
 
 void GLTexture::GenTexture(const std::string filepath)

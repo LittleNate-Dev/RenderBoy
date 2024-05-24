@@ -12,13 +12,13 @@ GLFrameBuffer::GLFrameBuffer()
 
 GLFrameBuffer::~GLFrameBuffer()
 {
-	GLCall(glDeleteFramebuffers(1, &m_RendererID));
-	GLCall(glDeleteRenderbuffers(1, &m_RenderBufferID));
+	glDeleteFramebuffers(1, &m_RendererID);
+	glDeleteRenderbuffers(1, &m_RenderBufferID);
 	if (m_Handle)
 	{
-		GLCall(glMakeTextureHandleNonResidentARB(m_Handle));
+		glMakeTextureHandleNonResidentARB(m_Handle);
 	}
-	GLCall(glDeleteTextures(1, &m_TexID));
+	glDeleteTextures(1, &m_TexID);
 }
 
 void GLFrameBuffer::Init(FBType type)

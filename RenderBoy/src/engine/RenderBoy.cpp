@@ -3,11 +3,11 @@
 *Title:
 *	RenderBoy
 *Description:
-*	RenderBoy is a simple renderer that allows you to view various model formats.
+*	RenderBoy is a simple real-time renderer that allows you to view various model formats.
 *State:
 *	In Development
 *Version:
-*	0.0.1
+*	0.5.5
 *
 * -- Dev --
 * Name:
@@ -15,7 +15,7 @@
 * Email:
 *	Nathan_Song_Zhijie@outlook.com
 * Github:
-*	https://github.com/LittleNate-Dev
+*	https://github.com/LittleNate-Dev/RenderBoy
 */
 
 #include "app/Application.h"

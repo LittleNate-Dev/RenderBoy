@@ -8,7 +8,7 @@ GLVertexArray::GLVertexArray()
 
 GLVertexArray::~GLVertexArray()
 {
-    GLCall(glDeleteVertexArrays(1, &m_RendererID));
+    glDeleteVertexArrays(1, &m_RendererID);
 }
 
 void GLVertexArray::GenVertexArray()
