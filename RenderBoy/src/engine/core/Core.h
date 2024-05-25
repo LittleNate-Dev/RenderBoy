@@ -160,6 +160,7 @@ struct Settings
 	Anti_Alising AA = NO_AA;
 	Post_Process PP = NO_PP;
 	bool ShowNormal = false;
+	glm::vec2 DeadZone = glm::vec2(0.05f, 0.05f);
 };
 
 struct Vertex

@@ -23,7 +23,6 @@
 Application renderBoy;
 
 void BindInput();
-void KeyboardInput(GLFWwindow* window, int key, int scancode, int action, int mods);
 void WindowResize(GLFWwindow* window, int width, int height);
 void WindowRestore(GLFWwindow* window, int restore);
 void WindowIconify(GLFWwindow* window, int iconify);
@@ -44,18 +43,9 @@ int main(void)
 
 void BindInput()
 {
-	glfwSetKeyCallback(renderBoy.GetWindow(), KeyboardInput);
 	glfwSetFramebufferSizeCallback(renderBoy.GetWindow(), WindowResize);
 	glfwSetWindowIconifyCallback(renderBoy.GetWindow(), WindowIconify);
 	glfwSetWindowMaximizeCallback(renderBoy.GetWindow(), WindowRestore);
-}
-
-void KeyboardInput(GLFWwindow* window, int key, int scancode, int action, int mods)
-{
-	if (key == GLFW_KEY_F2 && action == GLFW_PRESS && renderBoy.IsLaunched())
-	{
-		core::IS_UI_OPENED = !core::IS_UI_OPENED;
-	}
 }
 
 void WindowResize(GLFWwindow* window, int width, int height)

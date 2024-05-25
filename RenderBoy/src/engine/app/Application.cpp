@@ -320,6 +320,7 @@ void Application::Update()
     // Keyboard and mouse input
     MouseInput();
     KeyboardInput();
+    GamepadInput();
     // Draw UI
     DrawUI();
     LoadFile();
@@ -1014,7 +1015,7 @@ void Application::KeyboardInput()
     if (!core::IS_SETTINGS_OPENED)
     {
         glm::vec3 move = glm::vec4(0.0f);
-        if (glfwGetKey(m_Window, GLFW_KEY_W) == GLFW_PRESS) // Forward
+        if (ImGui::IsKeyDown(ImGuiKey_W)) // Forward
         {
             glm::vec3 direction = m_Scene.GetCamera().GetDirection(glm::vec3(0.0f, 0.0f, -1.0f));
             direction = glm::normalize(glm::vec3(direction.x, 0.0f, direction.z));
@@ -1022,7 +1023,7 @@ void Application::KeyboardInput()
             move += m_Scene.GetCamera().GetPosition();
             m_Scene.GetCamera().SetPosition(move);
         }
-        if (glfwGetKey(m_Window, GLFW_KEY_S) == GLFW_PRESS) // Backward
+        if (ImGui::IsKeyDown(ImGuiKey_S)) // Backward
         {
             glm::vec3 direction = m_Scene.GetCamera().GetDirection(glm::vec3(0.0f, 0.0f, 1.0f));
             direction = glm::normalize(glm::vec3(direction.x, 0.0f, direction.z));
@@ -1030,7 +1031,7 @@ void Application::KeyboardInput()
             move += m_Scene.GetCamera().GetPosition();
             m_Scene.GetCamera().SetPosition(move);
         }
-        if (glfwGetKey(m_Window, GLFW_KEY_A) == GLFW_PRESS) // Left
+        if (ImGui::IsKeyDown(ImGuiKey_A)) // Left
         {
             glm::vec3 direction = m_Scene.GetCamera().GetDirection(glm::vec3(-1.0f, 0.0f, 0.0f));
             direction = glm::normalize(glm::vec3(direction.x, 0.0f, direction.z));
@@ -1038,7 +1039,7 @@ void Application::KeyboardInput()
             move += m_Scene.GetCamera().GetPosition();
             m_Scene.GetCamera().SetPosition(move);
         }
-        if (glfwGetKey(m_Window, GLFW_KEY_D) == GLFW_PRESS) // Right
+        if (ImGui::IsKeyDown(ImGuiKey_D)) // Right
         {
             glm::vec3 direction = m_Scene.GetCamera().GetDirection(glm::vec3(1.0f, 0.0f, 0.0f));
             direction = glm::normalize(glm::vec3(direction.x, 0.0f, direction.z));
@@ -1046,13 +1047,13 @@ void Application::KeyboardInput()
             move += m_Scene.GetCamera().GetPosition();
             m_Scene.GetCamera().SetPosition(move);
         }
-        if (glfwGetKey(m_Window, GLFW_KEY_SPACE) == GLFW_PRESS) // Up
+        if (ImGui::IsKeyDown(ImGuiKey_Space)) // Up
         {
             move = glm::vec3(0.0f, 1.0f, 0.0f) * m_Scene.GetCamera().GetMoveSpeed();
             move += m_Scene.GetCamera().GetPosition();
             m_Scene.GetCamera().SetPosition(move);
         }
-        if (glfwGetKey(m_Window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) // Down
+        if (ImGui::IsKeyDown(ImGuiKey_LeftCtrl)) // Down
         {
             move = glm::vec3(0.0f, -1.0f, 0.0f) * m_Scene.GetCamera().GetMoveSpeed();
             move += m_Scene.GetCamera().GetPosition();
@@ -1064,51 +1065,51 @@ void Application::KeyboardInput()
     // Camera Rotation
     if (!core::IS_SETTINGS_OPENED)
     {
-        if (glfwGetKey(m_Window, GLFW_KEY_Q) == GLFW_PRESS) // Roll left
+        if (ImGui::IsKeyDown(ImGuiKey_Q)) // Roll left
         {
             glm::vec3 rotate = m_Scene.GetCamera().GetEulerAngle();
-            rotate.z -= 0.5f;
+            rotate.z -= m_Scene.GetCamera().GetRotateSpeed();
             m_Scene.GetCamera().SetEulerAngle(rotate);
         }
-        if (glfwGetKey(m_Window, GLFW_KEY_E) == GLFW_PRESS) // Roll right
+        if (ImGui::IsKeyDown(ImGuiKey_E)) // Roll right
         {
             glm::vec3 rotate = m_Scene.GetCamera().GetEulerAngle();
-            rotate.z += 0.5f;
+            rotate.z += m_Scene.GetCamera().GetRotateSpeed();
             m_Scene.GetCamera().SetEulerAngle(rotate);
         }
-        if (glfwGetKey(m_Window, GLFW_KEY_UP) == GLFW_PRESS) // Tilt up
+        if (ImGui::IsKeyDown(ImGuiKey_UpArrow)) // Tilt up
         {
             glm::vec3 rotate = m_Scene.GetCamera().GetEulerAngle();
-            rotate.x += m_Scene.GetCamera().GetRotateSpeed() * 4.0f;
+            rotate.x += m_Scene.GetCamera().GetRotateSpeed();
             rotate.x = rotate.x > 89.0f ? 89.0f : rotate.x;
             rotate.x = rotate.x < -89.0f ? -89.0f : rotate.x;
             m_Scene.GetCamera().SetEulerAngle(rotate);
         }
-        if (glfwGetKey(m_Window, GLFW_KEY_DOWN) == GLFW_PRESS) // Tilt down
+        if (ImGui::IsKeyDown(ImGuiKey_DownArrow)) // Tilt down
         {
             glm::vec3 rotate = m_Scene.GetCamera().GetEulerAngle();
-            rotate.x -= m_Scene.GetCamera().GetRotateSpeed() * 4.0f;
+            rotate.x -= m_Scene.GetCamera().GetRotateSpeed();
             rotate.x = rotate.x > 89.0f ? 89.0f : rotate.x;
             rotate.x = rotate.x < -89.0f ? -89.0f : rotate.x;
             m_Scene.GetCamera().SetEulerAngle(rotate);
         }
-        if (glfwGetKey(m_Window, GLFW_KEY_LEFT) == GLFW_PRESS) // Turn left
+        if (ImGui::IsKeyDown(ImGuiKey_LeftArrow)) // Turn left
         {
             glm::vec3 rotate = m_Scene.GetCamera().GetEulerAngle();
-            rotate.y += m_Scene.GetCamera().GetRotateSpeed() * 4.0f;
+            rotate.y += m_Scene.GetCamera().GetRotateSpeed();
             m_Scene.GetCamera().SetEulerAngle(rotate);
         }
-        if (glfwGetKey(m_Window, GLFW_KEY_RIGHT) == GLFW_PRESS) // Turn right
+        if (ImGui::IsKeyDown(ImGuiKey_RightArrow)) // Turn right
         {
             glm::vec3 rotate = m_Scene.GetCamera().GetEulerAngle();
-            rotate.y -= m_Scene.GetCamera().GetRotateSpeed() * 4.0f;
+            rotate.y -= m_Scene.GetCamera().GetRotateSpeed();
             m_Scene.GetCamera().SetEulerAngle(rotate);
         }
     }
     // Camera Rotation
 
     // Save Screenshot
-    if (glfwGetKey(m_Window, GLFW_KEY_F5) == GLFW_PRESS && m_Launched)
+    if (ImGui::IsKeyReleased(ImGuiKey_F5) && m_Launched)
     {
         if (!core::IS_WARNING_OPENED)
         {
@@ -1116,6 +1117,12 @@ void Application::KeyboardInput()
         }
     }
     // Save Screenshot
+
+    // Hide UI
+    if (ImGui::IsKeyReleased(ImGuiKey_F2) && m_Launched)
+    {
+        core::IS_UI_OPENED = !core::IS_UI_OPENED;
+    }
 }
 
 void Application::MouseInput()
@@ -1150,4 +1157,110 @@ void Application::MouseInput()
         }
     }
     // Model Rotation
+}
+
+void Application::GamepadInput()
+{
+    GLFWgamepadstate state;
+    if (glfwGetGamepadState(GLFW_JOYSTICK_1, &state) && m_Launched)
+    {
+        if (!core::IS_SETTINGS_OPENED)
+        {
+            glm::vec3 move = glm::vec4(0.0f);
+            // Camera movement
+            if (abs(state.axes[GLFW_GAMEPAD_AXIS_LEFT_X]) > core::SETTINGS.DeadZone.x || abs(state.axes[GLFW_GAMEPAD_AXIS_LEFT_Y]) > core::SETTINGS.DeadZone.x)
+            {
+                glm::vec3 direction = m_Scene.GetCamera().GetDirection(glm::vec3(-1.0f, 0.0f, 0.0f));
+                direction = glm::normalize(glm::vec3(direction.x, 0.0f, direction.z));
+                move = direction * m_Scene.GetCamera().GetMoveSpeed() * state.axes[GLFW_GAMEPAD_AXIS_LEFT_X];
+                move -= m_Scene.GetCamera().GetPosition();
+                m_Scene.GetCamera().SetPosition(move);
+                direction = m_Scene.GetCamera().GetDirection(glm::vec3(0.0f, 0.0f, -1.0f));
+                direction = glm::normalize(glm::vec3(direction.x, 0.0f, direction.z));
+                move = direction * m_Scene.GetCamera().GetMoveSpeed() * -state.axes[GLFW_GAMEPAD_AXIS_LEFT_Y];
+                move -= m_Scene.GetCamera().GetPosition();
+                m_Scene.GetCamera().SetPosition(move);
+            }
+            if (state.buttons[GLFW_GAMEPAD_BUTTON_LEFT_THUMB])
+            {
+                move = glm::vec3(0.0f, 1.0f, 0.0f) * m_Scene.GetCamera().GetMoveSpeed();
+                move += m_Scene.GetCamera().GetPosition();
+                m_Scene.GetCamera().SetPosition(move);
+            }
+            if (state.buttons[GLFW_GAMEPAD_BUTTON_RIGHT_THUMB])
+            {
+                move = glm::vec3(0.0f, -1.0f, 0.0f) * m_Scene.GetCamera().GetMoveSpeed();
+                move += m_Scene.GetCamera().GetPosition();
+                m_Scene.GetCamera().SetPosition(move);
+            }
+            // Camera movement
+
+            // Camera rotation
+            if (abs(state.axes[GLFW_GAMEPAD_AXIS_RIGHT_X]) > core::SETTINGS.DeadZone.y || abs(state.axes[GLFW_GAMEPAD_AXIS_RIGHT_Y]) > core::SETTINGS.DeadZone.y)
+            {
+                glm::vec3 rotate = m_Scene.GetCamera().GetEulerAngle();
+                rotate.y += m_Scene.GetCamera().GetRotateSpeed() * -state.axes[GLFW_GAMEPAD_AXIS_RIGHT_X];
+                m_Scene.GetCamera().SetEulerAngle(rotate);
+                rotate = m_Scene.GetCamera().GetEulerAngle();
+                rotate.x += m_Scene.GetCamera().GetRotateSpeed() * -state.axes[GLFW_GAMEPAD_AXIS_RIGHT_Y];
+                rotate.x = rotate.x > 89.0f ? 89.0f : rotate.x;
+                rotate.x = rotate.x < -89.0f ? -89.0f : rotate.x;
+                m_Scene.GetCamera().SetEulerAngle(rotate);
+            }
+            if (state.axes[GLFW_GAMEPAD_AXIS_LEFT_TRIGGER] >-1.0f)
+            {
+                glm::vec3 rotate = m_Scene.GetCamera().GetEulerAngle();
+                rotate.z -= m_Scene.GetCamera().GetRotateSpeed() * (state.axes[GLFW_GAMEPAD_AXIS_LEFT_TRIGGER] + 1.0f) / 2.0f;
+                m_Scene.GetCamera().SetEulerAngle(rotate);
+            }
+            if (state.axes[GLFW_GAMEPAD_AXIS_RIGHT_TRIGGER] > -1.0f)
+            {
+                glm::vec3 rotate = m_Scene.GetCamera().GetEulerAngle();
+                rotate.z += m_Scene.GetCamera().GetRotateSpeed() * (state.axes[GLFW_GAMEPAD_AXIS_RIGHT_TRIGGER] + 1.0f) / 2.0f;
+                m_Scene.GetCamera().SetEulerAngle(rotate);
+            }
+            // Camera rotation
+
+            // Reset Camera
+            if (state.buttons[GLFW_GAMEPAD_BUTTON_DPAD_DOWN])
+            {
+                m_Scene.GetCamera().SetPosition(glm::vec3(0.0f));
+                m_Scene.GetCamera().SetEulerAngle(glm::vec3(0.0f));
+            }
+            if (state.buttons[GLFW_GAMEPAD_BUTTON_LEFT_BUMPER] && state.buttons[GLFW_GAMEPAD_BUTTON_RIGHT_BUMPER])
+            {
+                m_Scene.GetCamera().SetRoll(0.0f);
+            }
+            // Reset Camera
+        }
+
+        static bool isGamepadStartPressed;
+        if (state.buttons[GLFW_GAMEPAD_BUTTON_START])
+        {
+            isGamepadStartPressed = true;
+        }
+        if (isGamepadStartPressed != state.buttons[GLFW_GAMEPAD_BUTTON_START])
+        {
+            // Open Settings
+            isGamepadStartPressed = false;
+            core::IS_SETTINGS_OPENED = !core::IS_SETTINGS_OPENED;
+        }
+
+        static bool isGamepadDpadUpPressed;
+        if (state.buttons[GLFW_GAMEPAD_BUTTON_DPAD_UP])
+        {
+            isGamepadDpadUpPressed = true;
+        }
+        if (isGamepadDpadUpPressed != state.buttons[GLFW_GAMEPAD_BUTTON_DPAD_UP])
+        {
+            // Save screenshot
+            isGamepadDpadUpPressed = false;
+            m_Renderer.SaveScreenShot();
+        }
+
+        if (core::IS_WARNING_OPENED && state.buttons[GLFW_GAMEPAD_BUTTON_B])
+        {
+            core::IS_WARNING_OPENED = false;
+        }
+    }
 }

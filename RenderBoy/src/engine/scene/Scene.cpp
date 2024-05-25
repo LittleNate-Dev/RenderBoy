@@ -23,6 +23,7 @@ void Scene::Reset()
 	m_Camera.SetPosition(glm::vec3(0.0f));
 	m_Camera.SetEulerAngle(glm::vec3(0.0f));
 	m_Data.Reset();
+	m_Skybox.Type = PURE_COLOR;
 	m_Skybox.Color = glm::vec3(1.0f);
 	std::vector<std::string>().swap(m_Skybox.Filepath);
 	m_Skybox.Filepath.clear();

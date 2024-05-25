@@ -40,6 +40,7 @@ private:
 	// Handle Keyboard and mouse input
 	void KeyboardInput();
 	void MouseInput();
+	void GamepadInput();
 	// Draw windows
 	void DrawLaunchWindow();
 	void DrawMenuBar();
