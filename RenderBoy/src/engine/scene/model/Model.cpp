@@ -842,6 +842,18 @@ void Model::DrawUI()
             ImGui::TreePop();
         }
     }
+    if (ImGui::TreeNode("Info"))
+    {
+        ImGui::LabelHighlighted("FilePath:");
+        ImGui::TextWrapped(m_FilePath.c_str());
+        ImGui::LabelHighlighted("Meshes:");
+        ImGui::Text(std::to_string(m_Statics.MeshCount).c_str());
+        ImGui::LabelHighlighted("Triangles:");
+        ImGui::Text(std::to_string(m_Statics.TriangleCount).c_str());
+        ImGui::LabelHighlighted("Vertices:");
+        ImGui::Text(std::to_string(m_Statics.VertexCount).c_str());
+        ImGui::TreePop();
+    }
     // Reset all attributes
     ImGui::CenterAlignWidget("Reset");
     if (ImGui::Button("Reset"))

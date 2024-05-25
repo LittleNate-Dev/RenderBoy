@@ -12,14 +12,13 @@ namespace core
 	float NORMAL_MAGNITUDE = 1.0f;
 	bool RELOAD_FONT = false;
 	void* SCENE_DATA = nullptr;
-	const char* currentModelInfo = nullptr;
 	const char* currentModelScene = nullptr;
 	const char* currentPointLight = nullptr;
 	const char* currentSpotLight = nullptr;
 	const char* currentDirLight = nullptr;
 	bool IS_RENDERBOY_OPENED = true;
 	bool IS_ABOUT_OPENED = false;
-	bool IS_INFO_OPENED = false;
+	bool IS_PERF_OPENED = false;
 	bool IS_SETTINGS_OPENED = false;
 	bool IS_WARNING_OPENED = false;
 	bool IS_LOADING_OPENED = false;

@@ -470,7 +470,7 @@ void Application::DrawUI()
         {
             DrawMenuBar();
             DrawAboutRenderBoyWindow();
-            DrawInfoWindow();
+            DrawPerfWindow();
             DrawSettingWindow();
             m_Scene.DrawUI();
         }
@@ -521,9 +521,9 @@ void Application::DrawMenuBar()
         ImGui::SetNextItemWidth(4.0f * core::GetWidgetWidthCoefficient());
         if (ImGui::BeginMenu("View"))
         {
-            if (ImGui::MenuItem("Info"))
+            if (ImGui::MenuItem("Perf"))
             {
-                core::IS_INFO_OPENED = true;
+                core::IS_PERF_OPENED = true;
             }
             if (ImGui::MenuItem("Scene"))
             {
@@ -591,16 +591,15 @@ void Application::DrawLaunchWindow()
     ImGui::End();
 }
 
-void Application::DrawInfoWindow()
+void Application::DrawPerfWindow()
 {
-    if (core::IS_INFO_OPENED)
+    if (core::IS_PERF_OPENED)
     {
-        //ImGui::SetNextWindowSizeConstraints(ImVec2(270.0f, 90.0f), ImVec2(500.0f, 350.0f));
         ImGuiIO& io = ImGui::GetIO(); (void)io;
         ImGuiWindowFlags windowFlags = 0;
         windowFlags |= ImGuiWindowFlags_NoSavedSettings;
         windowFlags |= ImGuiWindowFlags_AlwaysAutoResize;
-        ImGui::Begin("Info", &core::IS_INFO_OPENED, windowFlags);
+        ImGui::Begin("Performance", &core::IS_PERF_OPENED, windowFlags);
         // FPS
         {
             ImGui::LabelHighlighted("FPS:");
@@ -632,66 +631,6 @@ void Application::DrawInfoWindow()
                 ImGui::Text((const char*)glGetString(GL_VERSION));
                 break;
             }
-        }
-        // Scene
-        if (ImGui::TreeNode("Scene"))
-        {
-            // Scene
-            ImGui::LabelHighlighted("FilePath:");
-            ImGui::TextWrapped(m_Scene.GetFilePath().c_str());
-            ImGui::LabelHighlighted("Models:");
-            ImGui::Text(std::to_string(m_Scene.GetModelList().size()).c_str());
-            ImGui::LabelHighlighted("Lights:");
-            int lightCount = (int)m_Scene.GetPointLightList().size() +
-                             (int)m_Scene.GetSpotLightList().size() +
-                             (int)m_Scene.GetDirectionalLightList().size();
-            ImGui::Text(std::to_string(lightCount).c_str());
-            // Models
-            if (m_Scene.GetModelList().size())
-            {
-                if (ImGui::TreeNode("Models"))
-                {
-                    if (ImGui::BeginCombo("##ModelInfo", core::currentModelInfo))
-                    {
-                        for (unsigned int i = 0; i < m_Scene.GetModelList().size(); i++)
-                        {
-                            bool isSelected = (core::currentModelInfo == m_Scene.GetModelList()[i].c_str());
-                            if (ImGui::Selectable(m_Scene.GetModelList()[i].c_str(), isSelected))
-                            {
-                                core::currentModelInfo = m_Scene.GetModelList()[i].c_str();
-                            }
-                        }
-                        ImGui::EndCombo();
-                    }
-                    if (core::currentModelInfo)
-                    {
-                        ImGui::LabelHighlighted("FilePath:");
-                        ImGui::TextWrapped(m_Scene.GetModels()[core::currentModelInfo].GetFilePath().c_str());
-                        ImGui::LabelHighlighted("Meshes:");
-                        ImGui::Text(std::to_string(m_Scene.GetModels()[core::currentModelInfo].GetStatics().MeshCount).c_str());
-                        ImGui::LabelHighlighted("Triangles:");
-                        ImGui::Text(std::to_string(m_Scene.GetModels()[core::currentModelInfo].GetStatics().TriangleCount).c_str());
-                        ImGui::LabelHighlighted("Vertices:");
-                        ImGui::Text(std::to_string(m_Scene.GetModels()[core::currentModelInfo].GetStatics().VertexCount).c_str());
-                    }
-                    ImGui::TreePop();
-                }
-            }
-            // Lights
-            if (m_Scene.GetPointLightList().size() || m_Scene.GetSpotLightList().size() || m_Scene.GetDirectionalLightList().size())
-            {
-                if (ImGui::TreeNode("Lights"))
-                {
-                    ImGui::LabelHighlighted("Point Lights:");
-                    ImGui::Text(std::to_string(m_Scene.GetPointLightList().size()).c_str());
-                    ImGui::LabelHighlighted("Spot Lights:");
-                    ImGui::Text(std::to_string(m_Scene.GetSpotLightList().size()).c_str());
-                    ImGui::LabelHighlighted("Directional Lights:");
-                    ImGui::Text(std::to_string(m_Scene.GetDirectionalLightList().size()).c_str());
-                    ImGui::TreePop();
-                }
-            }
-            ImGui::TreePop();
         }
         ImGui::End();
     }

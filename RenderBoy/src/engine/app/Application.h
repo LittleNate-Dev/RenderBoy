@@ -44,7 +44,7 @@ private:
 	void DrawLaunchWindow();
 	void DrawMenuBar();
 	void DrawAboutRenderBoyWindow();
-	void DrawInfoWindow();
+	void DrawPerfWindow();
 	void DrawSettingWindow();
 	void DrawWarningWindow();
 	void DrawLoadingWindow();

@@ -35,7 +35,6 @@ void Scene::Reset()
 	std::vector<std::string>().swap(m_DirLightList);
 	m_DirLights.clear();
 	core::currentModelScene = nullptr;
-	core::currentModelInfo = nullptr;
 	core::currentPointLight = nullptr;
 	core::currentSpotLight = nullptr;
 	core::currentDirLight = nullptr;
@@ -568,7 +567,6 @@ bool Scene::AddModel(std::string filepath)
 		m_Models.insert(std::pair<std::string, Model>(name, model));
 		m_Data.AddModel(name, model);
 		core::currentModelScene = nullptr;
-		core::currentModelInfo = nullptr;
 		return true;
 	}
 	return false;
@@ -598,7 +596,6 @@ bool Scene::AddModel(std::string name, std::string filepath)
 		m_Models.insert(std::pair<std::string, Model>(name, model));
 		m_Data.AddModel(name, model);
 		core::currentModelScene = nullptr;
-		core::currentModelInfo = nullptr;
 		return true;
 	}
 	return false;
@@ -613,7 +610,6 @@ bool Scene::DeleteModel(std::string name)
 		m_Models.erase(name);
 		m_Data.DeleteModel(name);
 		core::currentModelScene = nullptr;
-		core::currentModelInfo = nullptr;
 		return true;
 	}
 	return false;
@@ -1028,6 +1024,22 @@ void Scene::DrawSceneWindow()
 				ImGui::ColorEdit3("##SkyboxColor", &m_Skybox.Color[0]);
 				ImGui::PopItemWidth();
 			}
+			ImGui::TreePop();
+		}
+		// Scene
+		if (ImGui::TreeNode("Info"))
+		{
+			// Scene
+			ImGui::LabelHighlighted("FilePath:");
+			ImGui::TextWrapped(m_FilePath.c_str());
+			ImGui::LabelHighlighted("Models:");
+			ImGui::Text(std::to_string(m_ModelList.size()).c_str());
+			ImGui::LabelHighlighted("Point Lights:");
+			ImGui::Text(std::to_string(m_PointLightList.size()).c_str());
+			ImGui::LabelHighlighted("Spot Lights:");
+			ImGui::Text(std::to_string(m_SpotLightList.size()).c_str());
+			ImGui::LabelHighlighted("Directional Lights:");
+			ImGui::Text(std::to_string(m_DirLightList.size()).c_str());
 			ImGui::TreePop();
 		}
 		ImGui::End();

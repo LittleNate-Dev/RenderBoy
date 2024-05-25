@@ -205,7 +205,6 @@ namespace core
 	// A pointer point to scene data
 	extern void* SCENE_DATA;
 	// used for combo widgets
-	extern const char* currentModelInfo;
 	extern const char* currentModelScene;
 	extern const char* currentPointLight;
 	extern const char* currentSpotLight;
@@ -213,7 +212,7 @@ namespace core
 	// bools to display windows
 	extern bool IS_RENDERBOY_OPENED;
 	extern bool IS_ABOUT_OPENED;
-	extern bool IS_INFO_OPENED;
+	extern bool IS_PERF_OPENED;
 	extern bool IS_SETTINGS_OPENED;
 	extern bool IS_WARNING_OPENED;
 	extern bool IS_SCENE_OPENED;
