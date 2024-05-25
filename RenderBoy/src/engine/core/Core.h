@@ -211,6 +211,7 @@ namespace core
 	extern const char* currentDirLight;
 	// bools to display windows
 	extern bool IS_RENDERBOY_OPENED;
+	extern bool IS_UI_OPENED;
 	extern bool IS_ABOUT_OPENED;
 	extern bool IS_PERF_OPENED;
 	extern bool IS_SETTINGS_OPENED;

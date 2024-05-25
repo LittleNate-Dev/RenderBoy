@@ -59,6 +59,11 @@ public:
 	void Run();
 	// Draw UI
 	void DrawUI();
+	// Is RenderBoy launched?
+	inline bool IsLaunched() const
+	{
+		return m_Launched;
+	};
 	// Resize window resolution
 	void WindowResize(int width, int height);
 	// Get RenderBoy's members

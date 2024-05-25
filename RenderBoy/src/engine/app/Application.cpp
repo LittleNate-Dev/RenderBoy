@@ -460,13 +460,15 @@ void Application::DrawUI()
     ImGui_ImplOpenGL3_NewFrame();
     ImGui::NewFrame();
     {
-        
-        core::FILE_BROWSER.Display();
+        if (core::IS_UI_OPENED)
+        {
+            core::FILE_BROWSER.Display();
+        }
         if (!m_Launched)
         {
             DrawLaunchWindow();
         }
-        else
+        else if (core::IS_UI_OPENED)
         {
             DrawMenuBar();
             DrawAboutRenderBoyWindow();
@@ -474,8 +476,11 @@ void Application::DrawUI()
             DrawSettingWindow();
             m_Scene.DrawUI();
         }
-        DrawWarningWindow();
-        DrawLoadingWindow();
+        if (core::IS_UI_OPENED)
+        {
+            DrawWarningWindow();
+            DrawLoadingWindow();
+        }
     }
     ImGui::EndFrame();
     ImGui::Render();
