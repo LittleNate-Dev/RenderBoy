@@ -1033,6 +1033,11 @@ void Scene::DrawSceneWindow()
 			// Scene
 			ImGui::LabelHighlighted("FilePath:");
 			ImGui::TextWrapped(m_FilePath.c_str());
+			if (m_Skybox.Type == PICTURE)
+			{
+				ImGui::LabelHighlighted("Skybox FilePath:");
+				ImGui::TextWrapped(core::GetFileDirectory(m_Skybox.Filepath[0]).c_str());
+			}
 			ImGui::LabelHighlighted("Models:");
 			ImGui::Text(std::to_string(m_ModelList.size()).c_str());
 			ImGui::LabelHighlighted("Point Lights:");

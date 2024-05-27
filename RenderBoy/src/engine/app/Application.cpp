@@ -50,6 +50,22 @@ bool Application::LoadSettings()
             {
                 core::SETTINGS.GraphicsCore = (Core)std::atoi(core::GetSettingValue(line).c_str());
             }
+            if (line.find("#MOUSE_SENSITIVITY") != std::string::npos)
+            {
+                core::SETTINGS.Sensitivity = (float)std::atof(core::GetSettingValue(line).c_str());
+            }
+            if (line.find("#CONTROLLER_SWITCH") != std::string::npos)
+            {
+                core::SETTINGS.EnableController = (bool)std::atoi(core::GetSettingValue(line).c_str());
+            }
+            if (line.find("#CONTROLLER_DEADZONE_LEFT") != std::string::npos)
+            {
+                core::SETTINGS.DeadZone.x = (float)std::atof(core::GetSettingValue(line).c_str());
+            }
+            if (line.find("#CONTROLLER_DEADZONE_RIGHT") != std::string::npos)
+            {
+                core::SETTINGS.DeadZone.y = (float)std::atof(core::GetSettingValue(line).c_str());
+            }
             if (line.find("#FONT_STYLE") != std::string::npos)
             {
                 core::SETTINGS.FontStyle = core::FONT_STYLE[(int)std::atoi(core::GetSettingValue(line).c_str())];
@@ -150,6 +166,14 @@ void Application::SaveSettings()
     line = "#HEIGHT " + std::to_string(core::SETTINGS.Height) + "\n";
     stream << line;
     line = "#CORE " + std::to_string(core::SETTINGS.GraphicsCore) + "\n";
+    stream << line;
+    line = "#MOUSE_SENSITIVITY " + std::to_string(core::SETTINGS.Sensitivity) + "\n";
+    stream << line;
+    line = "#CONTROLLER_SWITCH " + std::to_string(core::SETTINGS.EnableController) + "\n";
+    stream << line;
+    line = "#CONTROLLER_DEADZONE_LEFT " + std::to_string(core::SETTINGS.DeadZone.x) + "\n";
+    stream << line;
+    line = "#CONTROLLER_DEADZONE_RIGHT " + std::to_string(core::SETTINGS.DeadZone.y) + "\n";
     stream << line;
     line = "#FONT_STYLE " + std::to_string(core::GetFontStyleIndex(core::SETTINGS.FontStyle)) + "\n";
     stream << line;
@@ -320,7 +344,10 @@ void Application::Update()
     // Keyboard and mouse input
     MouseInput();
     KeyboardInput();
-    GamepadInput();
+    if (core::SETTINGS.EnableController)
+    {
+        GamepadInput();
+    }
     // Draw UI
     DrawUI();
     LoadFile();
@@ -699,7 +726,8 @@ void Application::DrawSettingWindow()
                     "Default Dark",
                     "Spectrum"
                 };
-                static int currentUIStyle = core::SETTINGS.UIStyle;
+                static int currentUIStyle;
+                currentUIStyle = core::SETTINGS.UIStyle;
                 if (ImGui::Combo("##UI Style", &currentUIStyle, uiStyleOps, IM_ARRAYSIZE(uiStyleOps)))
                 {
                     switch (currentUIStyle)
@@ -764,6 +792,49 @@ void Application::DrawSettingWindow()
             }
             ImGui::TreePop();
         }
+        // Input
+        if (ImGui::TreeNode("Input"))
+        {
+            // Mouse
+            if (ImGui::TreeNode("Mouse"))
+            {
+                // Sensitivity
+                {
+                    ImGui::CenterAlignWidget("Sensitivity", 220.0f * core::GetWidgetWidthCoefficient());
+                    ImGui::LabelHighlighted("Sensitivity");
+                    ImGui::PushItemWidth(220.0f * core::GetWidgetWidthCoefficient());
+                    ImGui::SliderFloat("##MouseSensitivity", &core::SETTINGS.Sensitivity, MIN_MOUSE_SEN, MAX_MOUSE_SEN);
+                }
+                ImGui::TreePop();
+            }
+            // Controller
+            if (ImGui::TreeNode("Controller"))
+            {
+                // Enable controller
+                {
+                    ImGui::CenterAlignWidget("Enable Controller");
+                    ImGui::Checkbox("Enable Controller", &core::SETTINGS.EnableController);
+                }
+                // Dead zone
+                if (core::SETTINGS.EnableController)
+                {
+                    ImGui::CenterAlignWidget("Deadzone", 80.0f * core::GetWidgetWidthCoefficient());
+                    ImGui::LabelHighlighted("Deadzone");
+                    ImGui::PushItemWidth(80.0f * core::GetWidgetWidthCoefficient());
+                    if (ImGui::InputFloat("##DeadzoneLeft", &core::SETTINGS.DeadZone.x, 0.0f, 0.0f, "%.6f"))
+                    {
+                        core::SETTINGS.DeadZone.x = core::SETTINGS.DeadZone.x < 0.0f ? 0.0f : core::SETTINGS.DeadZone.x;
+                    } ImGui::SameLine();
+                    if (ImGui::InputFloat("##DeadzoneRight", &core::SETTINGS.DeadZone.y, 0.0f, 0.0f, "%.6f"))
+                    {
+                        core::SETTINGS.DeadZone.y = core::SETTINGS.DeadZone.y < 0.0f ? 0.0f : core::SETTINGS.DeadZone.y;
+                    }
+                    ImGui::PopItemWidth();
+                }
+                ImGui::TreePop();
+            }
+            ImGui::TreePop();
+        }
         // Visual effects
         if (ImGui::TreeNode("Visual Effects"))
         {
@@ -779,7 +850,8 @@ void Application::DrawSettingWindow()
                     "UV Set",
                     "Depth"
                 };
-                static int currentDrawMode = core::SETTINGS.DrawMode;
+                static int currentDrawMode;
+                currentDrawMode = core::SETTINGS.DrawMode;
                 if (ImGui::Combo("##Draw_Mode", &currentDrawMode, drawModeOps, IM_ARRAYSIZE(drawModeOps)))
                 {
                     core::SETTINGS.DrawMode = (Draw_Mode)currentDrawMode;
@@ -816,7 +888,8 @@ void Application::DrawSettingWindow()
                     "Gray Scale",
                     "Edge"
                 };
-                static int currentPp = core::SETTINGS.PP;
+                static int currentPp;
+                currentPp = core::SETTINGS.PP;
                 if (ImGui::Combo("##Post_Process", &currentPp, ppOps, IM_ARRAYSIZE(ppOps)))
                 {
                     core::SETTINGS.PP = (Post_Process)currentPp;
@@ -838,7 +911,8 @@ void Application::DrawSettingWindow()
                     "Orthographic",
                     "Persepctive"
                 };
-                static int currentProj = 1;
+                static int currentProj;
+                currentProj = m_Scene.GetCamera().GetCameraType();
                 if (ImGui::Combo("##Projection", &currentProj, projOps, IM_ARRAYSIZE(projOps)))
                 {
                     m_Scene.GetCamera().SetCameraType(currentProj);
@@ -849,7 +923,8 @@ void Application::DrawSettingWindow()
             {
                 ImGui::CenterAlignWidget("FOV", 220.0f * core::GetWidgetWidthCoefficient());
                 ImGui::LabelHighlighted("FOV");
-                static int fov = (float)m_Scene.GetCamera().GetFOV();
+                static int fov;
+                fov = (int)m_Scene.GetCamera().GetFOV();
                 ImGui::PushItemWidth(220.0f * core::GetWidgetWidthCoefficient());
                 if (ImGui::SliderInt("##FOV", &fov, MIN_FOV, MAX_FOV))
                 {
@@ -870,7 +945,8 @@ void Application::DrawSettingWindow()
                 ImGui::CenterAlignWidget("Resolution", 200.0f * core::GetWidgetWidthCoefficient());
                 ImGui::LabelHighlighted("Resolution");
                 ImGui::PushItemWidth(200.0f * core::GetWidgetWidthCoefficient());
-                static int resolution = (int)(100.0f * core::SETTINGS.Resolution);
+                static int resolution;
+                resolution = (int)(100.0f * core::SETTINGS.Resolution);
                 if (ImGui::SliderInt("##Resolution", &resolution, 20, 400))
                 {
                     core::SETTINGS.Resolution = (float)resolution / 100.0f;
@@ -890,7 +966,8 @@ void Application::DrawSettingWindow()
                     "MSAA 16x",
                     "MSAA 32x"
                 };
-                static int currentAa = core::SETTINGS.AA;
+                static int currentAa;
+                currentAa = core::SETTINGS.AA;
                 if (ImGui::Combo("##Anti_Alising", &currentAa, aaOps, IM_ARRAYSIZE(aaOps)))
                 {
                     core::SETTINGS.AA = (Anti_Alising)currentAa;
@@ -914,6 +991,29 @@ void Application::DrawSettingWindow()
             }
             ImGui::TreePop();
         }
+        // Reset all settings to default
+        ImGui::PushStyleColor(ImGuiCol_Text, ImGui::ColorConvertU32ToFloat4(ImGui::COLOR_WARNING_SYTLE));
+        ImGui::CenterAlignWidget("Reset");
+        if (ImGui::Button("Reset"))
+        {
+            core::SETTINGS.Sensitivity = 1.0f;
+            core::SETTINGS.EnableController = false;
+            core::SETTINGS.DeadZone = glm::vec2(0.05f, 0.05f);
+            core::SETTINGS.DrawMode = WIREFRAME;
+            core::SETTINGS.ShowNormal = false;
+            core::NORMAL_COLOR = glm::vec3(1.0f);
+            core::NORMAL_MAGNITUDE = 1.0f;
+            core::SETTINGS.PP = NO_PP;
+            m_Renderer.ChangePostProcess();
+            m_Scene.GetCamera().SetCameraType(true);
+            m_Scene.GetCamera().SetFOV(80);
+            core::SETTINGS.Gamma = 2.2f;
+            core::SETTINGS.Resolution = 1.0f;
+            m_Renderer.ChangeResolution();
+            core::SETTINGS.AA = NO_AA;
+            m_Renderer.ChangeMSAA();
+        }
+        ImGui::PopStyleColor(1);
         ImGui::End();
     }
 }
@@ -1133,8 +1233,8 @@ void Application::MouseInput()
         if (ImGui::GetIO().MouseDown[1] && (ImGui::GetIO().MousePos.x >= 0.0f && ImGui::GetIO().MousePos.y >= 0.0f))
         {
             glm::vec3 rotate = m_Scene.GetCamera().GetEulerAngle();
-            rotate.y += m_Scene.GetCamera().GetRotateSpeed() * ImGui::GetIO().MouseDelta.x;
-            rotate.x += m_Scene.GetCamera().GetRotateSpeed() * ImGui::GetIO().MouseDelta.y;
+            rotate.y += m_Scene.GetCamera().GetRotateSpeed() * ImGui::GetIO().MouseDelta.x * core::SETTINGS.Sensitivity;
+            rotate.x += m_Scene.GetCamera().GetRotateSpeed() * ImGui::GetIO().MouseDelta.y * core::SETTINGS.Sensitivity;
             rotate.x = rotate.x > 89.0f ? 89.0f : rotate.x;
             rotate.x = rotate.x < -89.0f ? -89.0f : rotate.x;
             m_Scene.GetCamera().SetEulerAngle(rotate);
@@ -1150,8 +1250,8 @@ void Application::MouseInput()
             if (core::currentModelScene)
             {
                 glm::vec3 rotate = m_Scene.GetModels()[core::currentModelScene].GetEulerAngle(m_Scene.GetModels()[core::currentModelScene].GetCurrent());
-                rotate.y += 0.5f * ImGui::GetIO().MouseDelta.x;
-                rotate.x -= 0.5f * ImGui::GetIO().MouseDelta.y;
+                rotate.y += ImGui::GetIO().MouseDelta.x * core::SETTINGS.Sensitivity;
+                rotate.x -= ImGui::GetIO().MouseDelta.y * core::SETTINGS.Sensitivity;
                 m_Scene.GetModels()[core::currentModelScene].SetEulerAngle(rotate, m_Scene.GetModels()[core::currentModelScene].GetCurrent());
             }
         }
@@ -1171,13 +1271,27 @@ void Application::GamepadInput()
             if (abs(state.axes[GLFW_GAMEPAD_AXIS_LEFT_X]) > core::SETTINGS.DeadZone.x || abs(state.axes[GLFW_GAMEPAD_AXIS_LEFT_Y]) > core::SETTINGS.DeadZone.x)
             {
                 glm::vec3 direction = m_Scene.GetCamera().GetDirection(glm::vec3(-1.0f, 0.0f, 0.0f));
-                direction = glm::normalize(glm::vec3(direction.x, 0.0f, direction.z));
-                move = direction * m_Scene.GetCamera().GetMoveSpeed() * state.axes[GLFW_GAMEPAD_AXIS_LEFT_X];
+                direction = glm::normalize(direction);
+                if (state.axes[GLFW_GAMEPAD_AXIS_LEFT_X] > 0.0f)
+                {
+                    move = direction * m_Scene.GetCamera().GetMoveSpeed() * (state.axes[GLFW_GAMEPAD_AXIS_LEFT_X] - core::SETTINGS.DeadZone.x);
+                }
+                else
+                {
+                    move = direction * m_Scene.GetCamera().GetMoveSpeed() * (state.axes[GLFW_GAMEPAD_AXIS_LEFT_X] + core::SETTINGS.DeadZone.x);
+                }
                 move -= m_Scene.GetCamera().GetPosition();
                 m_Scene.GetCamera().SetPosition(move);
                 direction = m_Scene.GetCamera().GetDirection(glm::vec3(0.0f, 0.0f, -1.0f));
-                direction = glm::normalize(glm::vec3(direction.x, 0.0f, direction.z));
-                move = direction * m_Scene.GetCamera().GetMoveSpeed() * -state.axes[GLFW_GAMEPAD_AXIS_LEFT_Y];
+                direction = glm::normalize(direction);
+                if (state.axes[GLFW_GAMEPAD_AXIS_LEFT_Y] > 0.0f)
+                {
+                    move = direction * m_Scene.GetCamera().GetMoveSpeed() * -(state.axes[GLFW_GAMEPAD_AXIS_LEFT_Y] - core::SETTINGS.DeadZone.x);
+                }
+                else
+                {
+                    move = direction * m_Scene.GetCamera().GetMoveSpeed() * -(state.axes[GLFW_GAMEPAD_AXIS_LEFT_Y] + core::SETTINGS.DeadZone.x);
+                }
                 move -= m_Scene.GetCamera().GetPosition();
                 m_Scene.GetCamera().SetPosition(move);
             }
@@ -1199,24 +1313,38 @@ void Application::GamepadInput()
             if (abs(state.axes[GLFW_GAMEPAD_AXIS_RIGHT_X]) > core::SETTINGS.DeadZone.y || abs(state.axes[GLFW_GAMEPAD_AXIS_RIGHT_Y]) > core::SETTINGS.DeadZone.y)
             {
                 glm::vec3 rotate = m_Scene.GetCamera().GetEulerAngle();
-                rotate.y += m_Scene.GetCamera().GetRotateSpeed() * -state.axes[GLFW_GAMEPAD_AXIS_RIGHT_X];
+                if (state.axes[GLFW_GAMEPAD_AXIS_RIGHT_X] > 0.0f)
+                {
+                    rotate.y += m_Scene.GetCamera().GetRotateSpeed() * -(state.axes[GLFW_GAMEPAD_AXIS_RIGHT_X] - core::SETTINGS.DeadZone.y);
+                }
+                else
+                {
+                    rotate.y += m_Scene.GetCamera().GetRotateSpeed() * -(state.axes[GLFW_GAMEPAD_AXIS_RIGHT_X] + core::SETTINGS.DeadZone.y);
+                }
                 m_Scene.GetCamera().SetEulerAngle(rotate);
                 rotate = m_Scene.GetCamera().GetEulerAngle();
-                rotate.x += m_Scene.GetCamera().GetRotateSpeed() * -state.axes[GLFW_GAMEPAD_AXIS_RIGHT_Y];
+                if (state.axes[GLFW_GAMEPAD_AXIS_RIGHT_Y] > 0.0f)
+                {
+                    rotate.x += m_Scene.GetCamera().GetRotateSpeed() * -(state.axes[GLFW_GAMEPAD_AXIS_RIGHT_Y] - core::SETTINGS.DeadZone.y);
+                }
+                else
+                {
+                    rotate.x += m_Scene.GetCamera().GetRotateSpeed() * -(state.axes[GLFW_GAMEPAD_AXIS_RIGHT_Y] + core::SETTINGS.DeadZone.y);
+                }
                 rotate.x = rotate.x > 89.0f ? 89.0f : rotate.x;
                 rotate.x = rotate.x < -89.0f ? -89.0f : rotate.x;
                 m_Scene.GetCamera().SetEulerAngle(rotate);
             }
-            if (state.axes[GLFW_GAMEPAD_AXIS_LEFT_TRIGGER] >-1.0f)
+            if (state.axes[GLFW_GAMEPAD_AXIS_LEFT_TRIGGER] > -1.0f)
             {
                 glm::vec3 rotate = m_Scene.GetCamera().GetEulerAngle();
-                rotate.z -= m_Scene.GetCamera().GetRotateSpeed() * (state.axes[GLFW_GAMEPAD_AXIS_LEFT_TRIGGER] + 1.0f) / 2.0f;
+                rotate.z -= m_Scene.GetCamera().GetRotateSpeed() * (state.axes[GLFW_GAMEPAD_AXIS_LEFT_TRIGGER] + 1.0f) * 0.5f;
                 m_Scene.GetCamera().SetEulerAngle(rotate);
             }
             if (state.axes[GLFW_GAMEPAD_AXIS_RIGHT_TRIGGER] > -1.0f)
             {
                 glm::vec3 rotate = m_Scene.GetCamera().GetEulerAngle();
-                rotate.z += m_Scene.GetCamera().GetRotateSpeed() * (state.axes[GLFW_GAMEPAD_AXIS_RIGHT_TRIGGER] + 1.0f) / 2.0f;
+                rotate.z += m_Scene.GetCamera().GetRotateSpeed() * (state.axes[GLFW_GAMEPAD_AXIS_RIGHT_TRIGGER] + 1.0f) * 0.5f;
                 m_Scene.GetCamera().SetEulerAngle(rotate);
             }
             // Camera rotation
@@ -1256,6 +1384,30 @@ void Application::GamepadInput()
             // Save screenshot
             isGamepadDpadUpPressed = false;
             m_Renderer.SaveScreenShot();
+        }
+
+        static bool isGamepadDpadLeftPressed;
+        if (state.buttons[GLFW_GAMEPAD_BUTTON_DPAD_LEFT])
+        {
+            isGamepadDpadLeftPressed = true;
+        }
+        if (isGamepadDpadLeftPressed != state.buttons[GLFW_GAMEPAD_BUTTON_DPAD_LEFT])
+        {
+            // Switch draw mode
+            isGamepadDpadLeftPressed = false;
+            core::SETTINGS.DrawMode = (Draw_Mode)((core::SETTINGS.DrawMode - 1) % 5);
+        }
+
+        static bool isGamepadDpadRightPressed;
+        if (state.buttons[GLFW_GAMEPAD_BUTTON_DPAD_RIGHT])
+        {
+            isGamepadDpadRightPressed = true;
+        }
+        if (isGamepadDpadRightPressed != state.buttons[GLFW_GAMEPAD_BUTTON_DPAD_RIGHT])
+        {
+            // Switch draw mode
+            isGamepadDpadRightPressed = false;
+            core::SETTINGS.DrawMode = (Draw_Mode)((core::SETTINGS.DrawMode + 1) % 5);
         }
 
         if (core::IS_WARNING_OPENED && state.buttons[GLFW_GAMEPAD_BUTTON_B])

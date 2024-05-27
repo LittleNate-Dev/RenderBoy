@@ -59,6 +59,8 @@
 #define SHADER_OPENGL_SHADOW_DIR "data/shaders/opengl/shadow/DIRLIGHT.glsl"
 #define MAX_FOV 120
 #define MIN_FOV 40
+#define MIN_MOUSE_SEN 0.1f
+#define MAX_MOUSE_SEN 2.0f
 
 #define ASSERT(x) if (!(x)) __debugbreak();
 #define GLCall(x) GLClearError();\
@@ -160,6 +162,8 @@ struct Settings
 	Anti_Alising AA = NO_AA;
 	Post_Process PP = NO_PP;
 	bool ShowNormal = false;
+	float Sensitivity = 1.0f;
+	bool EnableController = false;
 	glm::vec2 DeadZone = glm::vec2(0.05f, 0.05f);
 };
 
