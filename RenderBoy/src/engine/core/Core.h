@@ -165,6 +165,7 @@ struct Settings
 	float Sensitivity = 1.0f;
 	bool EnableController = false;
 	glm::vec2 DeadZone = glm::vec2(0.05f, 0.05f);
+	bool FullScreen = true;
 };
 
 struct Vertex

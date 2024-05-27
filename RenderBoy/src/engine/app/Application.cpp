@@ -253,6 +253,12 @@ bool Application::InitOpenGL()
 
     // Make the window's context current
     glfwMakeContextCurrent(m_Window);
+    /*if (core::SETTINGS.FullScreen)
+    {
+        GLFWmonitor* monitor = glfwGetWindowMonitor(m_Window);
+        const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+        glfwSetWindowMonitor(m_Window, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
+    }*/
 
     // Set RenderBoy's Icon
     FIBITMAP* iconBuffer = FreeImage_Load(FreeImage_GetFileType("res/icons/Icon_48.png", 0), "res/icons/Icon_48.png");
@@ -902,6 +908,10 @@ void Application::DrawSettingWindow()
         // Graphics
         if (ImGui::TreeNode("Graphics"))
         {
+            // Full screen
+            {
+                // TODO
+            }
             // Projection Type
             {
                 ImGui::CenterAlignWidget("Projection Type", 120.0f * core::GetWidgetWidthCoefficient());
@@ -1350,14 +1360,14 @@ void Application::GamepadInput()
             // Camera rotation
 
             // Reset Camera
-            if (state.buttons[GLFW_GAMEPAD_BUTTON_DPAD_DOWN])
-            {
-                m_Scene.GetCamera().SetPosition(glm::vec3(0.0f));
-                m_Scene.GetCamera().SetEulerAngle(glm::vec3(0.0f));
-            }
             if (state.buttons[GLFW_GAMEPAD_BUTTON_LEFT_BUMPER] && state.buttons[GLFW_GAMEPAD_BUTTON_RIGHT_BUMPER])
             {
                 m_Scene.GetCamera().SetRoll(0.0f);
+            }
+            if (state.buttons[GLFW_GAMEPAD_BUTTON_LEFT_THUMB] && state.buttons[GLFW_GAMEPAD_BUTTON_RIGHT_THUMB])
+            {
+                m_Scene.GetCamera().SetEulerAngle(glm::vec3(0.0f));
+                m_Scene.GetCamera().SetPosition(glm::vec3(0.0f));
             }
             // Reset Camera
         }
@@ -1369,9 +1379,9 @@ void Application::GamepadInput()
         }
         if (isGamepadStartPressed != state.buttons[GLFW_GAMEPAD_BUTTON_START])
         {
-            // Open Settings
+            // Save Screenshot
             isGamepadStartPressed = false;
-            core::IS_SETTINGS_OPENED = !core::IS_SETTINGS_OPENED;
+            m_Renderer.SaveScreenShot();
         }
 
         static bool isGamepadDpadUpPressed;
@@ -1381,9 +1391,23 @@ void Application::GamepadInput()
         }
         if (isGamepadDpadUpPressed != state.buttons[GLFW_GAMEPAD_BUTTON_DPAD_UP])
         {
-            // Save screenshot
+            // Switch post process effect
             isGamepadDpadUpPressed = false;
-            m_Renderer.SaveScreenShot();
+            core::SETTINGS.PP = (Post_Process)((core::SETTINGS.PP + 1) % 5);
+            m_Renderer.ChangePostProcess();
+        }
+
+        static bool isGamepadDpadDownPressed;
+        if (state.buttons[GLFW_GAMEPAD_BUTTON_DPAD_DOWN])
+        {
+            isGamepadDpadDownPressed = true;
+        }
+        if (isGamepadDpadDownPressed != state.buttons[GLFW_GAMEPAD_BUTTON_DPAD_DOWN])
+        {
+            // Switch post process effect
+            isGamepadDpadDownPressed = false;
+            core::SETTINGS.PP = (Post_Process)((core::SETTINGS.PP - 1 < 0 ? 4 : core::SETTINGS.PP - 1) % 5);
+            m_Renderer.ChangePostProcess();
         }
 
         static bool isGamepadDpadLeftPressed;
@@ -1395,7 +1419,7 @@ void Application::GamepadInput()
         {
             // Switch draw mode
             isGamepadDpadLeftPressed = false;
-            core::SETTINGS.DrawMode = (Draw_Mode)((core::SETTINGS.DrawMode - 1) % 5);
+            core::SETTINGS.DrawMode = (Draw_Mode)((core::SETTINGS.DrawMode - 1 < 0 ? 4 : core::SETTINGS.DrawMode - 1) % 5);
         }
 
         static bool isGamepadDpadRightPressed;
@@ -1413,6 +1437,11 @@ void Application::GamepadInput()
         if (core::IS_WARNING_OPENED && state.buttons[GLFW_GAMEPAD_BUTTON_B])
         {
             core::IS_WARNING_OPENED = false;
+        }
+
+        if (state.buttons[GLFW_GAMEPAD_BUTTON_GUIDE])
+        {
+            spdlog::warn("test");
         }
     }
 }
