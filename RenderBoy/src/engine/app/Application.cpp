@@ -375,7 +375,7 @@ bool Application::LoadFile()
                 core::ShowWarningMsg("You can't add a scene to an existing scene!");
                 return false;
             }
-            else if (m_Scene.AddModel(core::FILEPATH_BUFFER))
+            else if (core::CheckFileFormatAssimp(core::FILEPATH_BUFFER) && m_Scene.AddModel(core::FILEPATH_BUFFER))
             {
                 m_Launched = true;
                 core::FILEPATH_BUFFER = "";

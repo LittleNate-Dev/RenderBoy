@@ -51,7 +51,7 @@ bool Scene::Reset(std::string filepath)
 			return true;
 		}
 	}
-	else if (core::CheckFileFormat(fileType))
+	else if (core::CheckFileFormatAssimp(fileType))
 	{
 		Reset();
 		if (AddModel(filepath))

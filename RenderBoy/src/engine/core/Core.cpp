@@ -29,7 +29,7 @@ namespace core
 	bool IS_LIGHTS_OPENED = false;
 	std::string POPUP_MSG = "";
 	const std::vector<std::string> FILE_TYPE({
-		"gltf", "obj", "jpg", "png"
+		"gltf", "obj", "jpg", "png", "scene"
 		});
 	const std::vector<std::string> FILE_TYPE_ASSIMP({
 		"3mf", "blend", "3ds", "ase", "gltf", "fbx",
