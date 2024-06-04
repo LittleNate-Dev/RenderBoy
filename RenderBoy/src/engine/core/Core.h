@@ -1,6 +1,7 @@
 /*
 * Description:
-*	This header file contains every basic header file that is needed in this program, to keep things simple, you only need to include this header file instead of bunch of shits
+*	This header file contains every basic header file that is needed in this program,
+*   to keep things simple, you only need to include this header file instead of bunch of shits
 */
 
 #pragma once

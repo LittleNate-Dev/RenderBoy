@@ -20,6 +20,9 @@ void Scene::Reset()
 {
 	m_Name = "Default";
 	m_FilePath = "";
+	m_Camera.SetPlane(glm::vec2(0.1f, 500.0f));
+	m_Camera.SetMoveSpeed(1.0f);
+	m_Camera.SetRotateSpeed(1.0f);
 	m_Camera.SetPosition(glm::vec3(0.0f));
 	m_Camera.SetEulerAngle(glm::vec3(0.0f));
 	m_Data.Reset();
@@ -89,6 +92,22 @@ bool Scene::LoadScene(std::string filepath)
 			}
 			// Load Camera
 			{
+				if (line.find("#CAMERA_NEAR_PLANE") != std::string::npos)
+				{
+					m_Camera.SetNearPlane((float)std::atof(core::GetSettingValue(line).c_str()));
+				}
+				if (line.find("#CAMERA_FAR_PLANE") != std::string::npos)
+				{
+					m_Camera.SetFarPlane((float)std::atof(core::GetSettingValue(line).c_str()));
+				}
+				if (line.find("#CAMERA_MOVE_SPEED") != std::string::npos)
+				{
+					m_Camera.SetMoveSpeed((float)std::atof(core::GetSettingValue(line).c_str()));
+				}
+				if (line.find("#CAMERA_ROTATE_SPEED") != std::string::npos)
+				{
+					m_Camera.SetRotateSpeed((float)std::atof(core::GetSettingValue(line).c_str()));
+				}
 				if (line.find("#CAMERA_POSITION") != std::string::npos)
 				{
 					values = core::GetSceneValue(line);
@@ -403,6 +422,14 @@ void Scene::SaveScene()
 	stream << line;
 	// Save Camera
 	{
+		line = "#CAMERA_NEAR_PLANE " + std::to_string(m_Camera.GetNearPlane()) + "\n";
+		stream << line;
+		line = "#CAMERA_FAR_PLANE " + std::to_string(m_Camera.GetFarPlane()) + "\n";
+		stream << line;
+		line = "#CAMERA_MOVE_SPEED " + std::to_string(m_Camera.GetMoveSpeed()) + "\n";
+		stream << line;
+		line = "#CAMERA_ROTATE_SPEED " + std::to_string(m_Camera.GetRotateSpeed()) + "\n";
+		stream << line;
 		glm::vec3 pos = m_Camera.GetPosition();
 		line = "#CAMERA_POSITION " + std::to_string(pos.x) + " " + std::to_string(pos.y) + " " + std::to_string(pos.z) + "\n";
 		stream << line;

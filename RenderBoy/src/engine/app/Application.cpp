@@ -31,7 +31,6 @@ bool Application::LoadSettings()
     if (!stream)
     {
         spdlog::warn("Setting file not detected. All RenderBoy Settings will be set to default.");
-        core::ShowWarningMsg("Setting file not detected. All RenderBoy Settings will be set to default.");
         return false;
     }
     else
@@ -110,22 +109,6 @@ bool Application::LoadSettings()
             {
                 m_Scene.GetCamera().SetFOV((float)std::atof(core::GetSettingValue(line).c_str()));
             }
-            if (line.find("#NEAR_PLANE") != std::string::npos)
-            {
-                m_Scene.GetCamera().SetNearPlane((float)std::atof(core::GetSettingValue(line).c_str()));
-            }
-            if (line.find("#FAR_PLANE") != std::string::npos)
-            {
-                m_Scene.GetCamera().SetFarPlane((float)std::atof(core::GetSettingValue(line).c_str()));
-            }
-            if (line.find("#MOVE_SPEED") != std::string::npos)
-            {
-                m_Scene.GetCamera().SetMoveSpeed((float)std::atof(core::GetSettingValue(line).c_str()));
-            }
-            if (line.find("#ROTATE_SPEED") != std::string::npos)
-            {
-                m_Scene.GetCamera().SetRotateSpeed((float)std::atof(core::GetSettingValue(line).c_str()));
-            }
         }
         return true;
     }
@@ -196,14 +179,6 @@ void Application::SaveSettings()
     line = "#CAMERA_TYPE " + std::to_string(m_Scene.GetCamera().GetCameraType()) + "\n";
     stream << line;
     line = "#FOV " + std::to_string(m_Scene.GetCamera().GetFOV()) + "\n";
-    stream << line;
-    line = "#NEAR_PLANE " + std::to_string(m_Scene.GetCamera().GetNearPlane()) + "\n";
-    stream << line;
-    line = "#FAR_PLANE " + std::to_string(m_Scene.GetCamera().GetFarPlane()) + "\n";
-    stream << line;
-    line = "#MOVE_SPEED " + std::to_string(m_Scene.GetCamera().GetMoveSpeed()) + "\n";
-    stream << line;
-    line = "#ROTATE_SPEED " + std::to_string(m_Scene.GetCamera().GetRotateSpeed()) + "\n";
     stream << line;
     stream.close();
 }
@@ -798,8 +773,8 @@ void Application::DrawSettingWindow()
             }
             ImGui::TreePop();
         }
-        // Input
-        if (ImGui::TreeNode("Input"))
+        // Control
+        if (ImGui::TreeNode("Control"))
         {
             // Mouse
             if (ImGui::TreeNode("Mouse"))
