@@ -441,9 +441,12 @@ void Scene::SaveScene()
 	{
 		line = "#SKYBOX_TYPE " + std::to_string(m_Skybox.Type) + "\n";
 		stream << line;
-		line = "#SKYBOX_COLOR " + std::to_string(m_Skybox.Color.x) + " " + std::to_string(m_Skybox.Color.y) + " " + std::to_string(m_Skybox.Color.z) + "\n";
-		stream << line;
-		if (m_Skybox.Filepath.size())
+		if (m_Skybox.Type == PURE_COLOR)
+		{
+			line = "#SKYBOX_COLOR " + std::to_string(m_Skybox.Color.x) + " " + std::to_string(m_Skybox.Color.y) + " " + std::to_string(m_Skybox.Color.z) + "\n";
+			stream << line;
+		}
+		else if (m_Skybox.Type == PICTURE && m_Skybox.Filepath.size())
 		{
 			line = "#SKYBOX_FILEPATH " + m_Skybox.Filepath[0] + "\n";
 			stream << line;

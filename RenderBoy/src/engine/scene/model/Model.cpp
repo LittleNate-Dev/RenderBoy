@@ -652,17 +652,17 @@ void Model::DrawUI()
         {
             ImGui::PushItemWidth(80.0f * core::GetWidgetWidthCoefficient());
             ImGui::CenterAlignWidget(80.0f * core::GetWidgetWidthCoefficient());
-            if (ImGui::InputFloat("Pos X", &m_Position.x))
+            if (ImGui::InputFloat("X", &m_Position.x))
             {
                 UpdateModelMat();
             }
             ImGui::CenterAlignWidget(80.0f * core::GetWidgetWidthCoefficient());
-            if (ImGui::InputFloat("Pos Y", &m_Position.y))
+            if (ImGui::InputFloat("Y", &m_Position.y))
             {
                 UpdateModelMat();
             }
             ImGui::CenterAlignWidget(80.0f * core::GetWidgetWidthCoefficient());
-            if (ImGui::InputFloat("Pos Z", &m_Position.z))
+            if (ImGui::InputFloat("Z", &m_Position.z))
             {
                 UpdateModelMat();
             }
@@ -714,23 +714,35 @@ void Model::DrawUI()
             ImGui::TreePop();
         }
         // Scale
+        static bool keepScale = false;
         if (ImGui::TreeNode("Scale"))
         {
+            ImGui::Checkbox("Keep Scale", &keepScale);
             ImGui::PushItemWidth(80.0f * core::GetWidgetWidthCoefficient());
             ImGui::CenterAlignWidget(80.0f * core::GetWidgetWidthCoefficient());
-            if (ImGui::InputFloat("Scale X", &m_Scale.x))
+            if (keepScale)
             {
-                SetScale(m_Scale);
+                if (ImGui::InputFloat("Scale", &m_Scale.x))
+                {
+                    SetScale(glm::vec3(m_Scale.x));
+                }
             }
-            ImGui::CenterAlignWidget(80.0f * core::GetWidgetWidthCoefficient());
-            if (ImGui::InputFloat("Scale Y", &m_Scale.y))
+            else
             {
-                SetScale(m_Scale);
-            }
-            ImGui::CenterAlignWidget(80.0f * core::GetWidgetWidthCoefficient());
-            if (ImGui::InputFloat("Scale Z", &m_Scale.z))
-            {
-                SetScale(m_Scale);
+                if (ImGui::InputFloat("X", &m_Scale.x))
+                {
+                    SetScale(m_Scale);
+                }
+                ImGui::CenterAlignWidget(80.0f * core::GetWidgetWidthCoefficient());
+                if (ImGui::InputFloat("Y", &m_Scale.y))
+                {
+                    SetScale(m_Scale);
+                }
+                ImGui::CenterAlignWidget(80.0f * core::GetWidgetWidthCoefficient());
+                if (ImGui::InputFloat("Z", &m_Scale.z))
+                {
+                    SetScale(m_Scale);
+                }
             }
             ImGui::PopItemWidth();
             ImGui::TreePop();
@@ -758,17 +770,17 @@ void Model::DrawUI()
         {
             ImGui::PushItemWidth(80.0f * core::GetWidgetWidthCoefficient());
             ImGui::CenterAlignWidget(80.0f * core::GetWidgetWidthCoefficient());
-            if (ImGui::InputFloat("Pos X", &m_InstancePosition[m_Current - 1].x))
+            if (ImGui::InputFloat("X", &m_InstancePosition[m_Current - 1].x))
             {
                 UpdateModelMat(m_Current);
             }
             ImGui::CenterAlignWidget(80.0f * core::GetWidgetWidthCoefficient());
-            if (ImGui::InputFloat("Pos Y", &m_InstancePosition[m_Current - 1].y))
+            if (ImGui::InputFloat("Y", &m_InstancePosition[m_Current - 1].y))
             {
                 UpdateModelMat(m_Current);
             }
             ImGui::CenterAlignWidget(80.0f * core::GetWidgetWidthCoefficient());
-            if (ImGui::InputFloat("Pos Z", &m_InstancePosition[m_Current - 1].z))
+            if (ImGui::InputFloat("Z", &m_InstancePosition[m_Current - 1].z))
             {
                 UpdateModelMat(m_Current);
             }
@@ -820,23 +832,35 @@ void Model::DrawUI()
             ImGui::TreePop();
         }
         // Scale
+        static bool keepScale = false;
         if (ImGui::TreeNode("Scale"))
         {
+            ImGui::Checkbox("Keep Scale", &keepScale);
             ImGui::PushItemWidth(80.0f * core::GetWidgetWidthCoefficient());
             ImGui::CenterAlignWidget(80.0f * core::GetWidgetWidthCoefficient());
-            if (ImGui::InputFloat("Scale X", &m_InstanceScale[m_Current - 1].x))
+            if (keepScale)
             {
-                SetScale(m_InstanceScale[m_Current - 1], m_Current);
+                if (ImGui::InputFloat("Scale", &m_InstanceScale[m_Current - 1].x))
+                {
+                    SetScale(glm::vec3(m_InstanceScale[m_Current - 1].x), m_Current);
+                }
             }
-            ImGui::CenterAlignWidget(80.0f * core::GetWidgetWidthCoefficient());
-            if (ImGui::InputFloat("Scale Y", &m_InstanceScale[m_Current - 1].y))
+            else
             {
-                SetScale(m_InstanceScale[m_Current - 1], m_Current);
-            }
-            ImGui::CenterAlignWidget(80.0f * core::GetWidgetWidthCoefficient());
-            if (ImGui::InputFloat("Scale Z", &m_InstanceScale[m_Current - 1].z))
-            {
-                SetScale(m_InstanceScale[m_Current - 1], m_Current);
+                if (ImGui::InputFloat("X", &m_InstanceScale[m_Current - 1].x))
+                {
+                    SetScale(m_InstanceScale[m_Current - 1], m_Current);
+                }
+                ImGui::CenterAlignWidget(80.0f * core::GetWidgetWidthCoefficient());
+                if (ImGui::InputFloat("Y", &m_InstanceScale[m_Current - 1].y))
+                {
+                    SetScale(m_InstanceScale[m_Current - 1], m_Current);
+                }
+                ImGui::CenterAlignWidget(80.0f * core::GetWidgetWidthCoefficient());
+                if (ImGui::InputFloat("Z", &m_InstanceScale[m_Current - 1].z))
+                {
+                    SetScale(m_InstanceScale[m_Current - 1], m_Current);
+                }
             }
             ImGui::PopItemWidth();
             ImGui::TreePop();
@@ -858,12 +882,18 @@ void Model::DrawUI()
     ImGui::CenterAlignWidget("Reset");
     if (ImGui::Button("Reset"))
     {
-        SetPosition(glm::vec3(0.0f), 1);
-        SetScale(glm::vec3(1.0f), 1);
-        SetEulerAngle(glm::vec3(0.0f), 1);
-        SetPosition(glm::vec3(0.0f));
-        SetScale(glm::vec3(1.0f));
-        SetEulerAngle(glm::vec3(0.0f));
-        SetInstance(1);
+        if (m_SetInstance)
+        {
+            SetPosition(glm::vec3(0.0f));
+            SetScale(glm::vec3(1.0f));
+            SetEulerAngle(glm::vec3(0.0f));
+        }
+        else
+        {
+            SetPosition(glm::vec3(0.0f), 1);
+            SetScale(glm::vec3(1.0f), 1);
+            SetEulerAngle(glm::vec3(0.0f), 1);
+            SetInstance(1);
+        }
     }
 }
