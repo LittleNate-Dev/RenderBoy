@@ -156,7 +156,7 @@ void GLData::AddModel(std::string name, Model model)
 		m_ModelData[name].TransparentValue.push_back(model.GetMeshes()[i].GetTransparentValue());
 		switch (model.GetStatics().RenderMode)
 		{
-		case NOTEX_HASCOLOR:
+		case NOTEX:
 			m_ModelData[name].AmbientValue.push_back(model.GetMeshes()[i].GetAmbientValue());
 			m_ModelData[name].DiffuseValue.push_back(model.GetMeshes()[i].GetDiffuseValue());
 			m_ModelData[name].SpecularValue.push_back(model.GetMeshes()[i].GetSpecularValue());

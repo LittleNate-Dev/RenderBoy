@@ -35,12 +35,10 @@ void Model::UpdateStatics()
     // Analysing model's data and decide it's render mode
     bool hasTexture = false;
     bool allHasTexture = true;
-    bool hasColor = false;
     for (unsigned int i = 0; i < m_Meshes.size(); i++)
     {
         hasTexture |= m_Meshes[i].HasTexture();
         allHasTexture &= m_Meshes[i].HasTexture();
-        hasColor |= m_Meshes[i].HasColorValue();
     }
     if (hasTexture)
     {
@@ -55,14 +53,8 @@ void Model::UpdateStatics()
     }
     else
     {
-        if (hasColor)
-        {
-            m_Statics.RenderMode = NOTEX_HASCOLOR;
-        }
-        else
-        {
-            m_Statics.RenderMode = NOTEX_NOCOLOR;
-        }
+        spdlog::warn("no texture");
+        m_Statics.RenderMode = NOTEX;
     }
 }
 

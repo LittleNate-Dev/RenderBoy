@@ -112,16 +112,15 @@ enum Draw_Mode
 
 enum Render_Mode
 {
-	NOTEX_NOCOLOR = 0,
-	NOTEX_HASCOLOR = 1,
-	HASRTEX_ALLTEX_ALBEDO = 3,
-	HASTEX_ALLTEX_BLINN = 4,
-	HASTEX_ALLTEX_PBR_3 = 5,
-	HASTEX_ALLTEX_PBR_4 = 5,
-	HASTEX_PARTTEX_ALBEDO = 6,
-	HASTEX_PARTTEX_BLINN = 7,
-	HASTEX_PARTTEX_PBR_3 = 8,
-	HASTEX_PARTTEX_PBR_4 = 5,
+	NOTEX = 0,
+	HASRTEX_ALLTEX_ALBEDO = 1,
+	HASTEX_ALLTEX_BLINN = 2,
+	HASTEX_ALLTEX_PBR_3 = 3,
+	HASTEX_ALLTEX_PBR_4 = 4,
+	HASTEX_PARTTEX_ALBEDO = 5,
+	HASTEX_PARTTEX_BLINN = 6,
+	HASTEX_PARTTEX_PBR_3 = 7,
+	HASTEX_PARTTEX_PBR_4 = 8,
 };
 
 enum Anti_Alising
@@ -185,7 +184,7 @@ struct ModelStatics
 	unsigned int MeshCount = 0;
 	unsigned int VertexCount = 0;
 	unsigned int TriangleCount = 0;
-	Render_Mode RenderMode = NOTEX_NOCOLOR;
+	Render_Mode RenderMode = NOTEX;
 };
 
 struct SceneStatics

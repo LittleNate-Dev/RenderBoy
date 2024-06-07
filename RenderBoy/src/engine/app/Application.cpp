@@ -1096,9 +1096,9 @@ void Application::WindowResize(int width, int height)
 
 void Application::KeyboardInput()
 {    
-    //Camera Movement
     if (!core::IS_SETTINGS_OPENED)
     {
+        // Camera Movement
         glm::vec3 move = glm::vec4(0.0f);
         if (ImGui::IsKeyDown(ImGuiKey_W)) // Forward
         {
@@ -1144,12 +1144,9 @@ void Application::KeyboardInput()
             move += m_Scene.GetCamera().GetPosition();
             m_Scene.GetCamera().SetPosition(move);
         }
-    }
-    // Camera Movement
+        // Camera Movement
 
-    // Camera Rotation
-    if (!core::IS_SETTINGS_OPENED)
-    {
+        // Camera Rotation
         if (ImGui::IsKeyDown(ImGuiKey_Q)) // Roll left
         {
             glm::vec3 rotate = m_Scene.GetCamera().GetEulerAngle();
@@ -1160,6 +1157,12 @@ void Application::KeyboardInput()
         {
             glm::vec3 rotate = m_Scene.GetCamera().GetEulerAngle();
             rotate.z += m_Scene.GetCamera().GetRotateSpeed();
+            m_Scene.GetCamera().SetEulerAngle(rotate);
+        }
+        if (ImGui::IsKeyDown(ImGuiKey_Q) && ImGui::IsKeyDown(ImGuiKey_E))
+        {
+            glm::vec3 rotate = m_Scene.GetCamera().GetEulerAngle();
+            rotate.z = 0.0f;
             m_Scene.GetCamera().SetEulerAngle(rotate);
         }
         if (ImGui::IsKeyDown(ImGuiKey_UpArrow)) // Tilt up
@@ -1190,8 +1193,8 @@ void Application::KeyboardInput()
             rotate.y -= m_Scene.GetCamera().GetRotateSpeed();
             m_Scene.GetCamera().SetEulerAngle(rotate);
         }
+        // Camera Rotation
     }
-    // Camera Rotation
 
     // Save Screenshot
     if (ImGui::IsKeyReleased(ImGuiKey_F5) && m_Launched)
