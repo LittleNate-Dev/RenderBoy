@@ -14,6 +14,9 @@ class PointLight
 {
 private:
 	std::string m_Name;
+	glm::mat4 m_ProjMat;
+	glm::mat4 m_ViewMat[6];
+	glm::mat4 m_ModelMat;
 	glm::vec3 m_Position;
 	glm::vec3 m_Color;
 	// Parameters used for Bling-Fong shading
@@ -35,7 +38,11 @@ public:
 	PointLight();
 	~PointLight();
 
-	// Get spot light's matrices
+	// Update point light's matrices
+	void UpdateProjMat();
+	void UpdateViewMat();
+	void UpdateModelMat();
+	// Get point light's matrices
 	glm::mat4 GetViewMat(unsigned int face);
 	glm::mat4 GetProjMat();
 	glm::mat4 GetTranslateMat();

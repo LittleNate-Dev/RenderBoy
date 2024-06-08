@@ -18,6 +18,7 @@ void GLRenderer::Init(Scene& scene)
 	GLCall(glLineWidth(0.4f));
 	GLCall(glPointSize(1.5f));
 	// Initialize shaders
+	m_Shaders.Blank.Init(SHADER_OPENGL_BLANK);
 	m_Shaders.Wireframe.Init(SHADER_OPENGL_WIREFRAME);
 	m_Shaders.Pointcloud.Init(SHADER_OPENGL_POINTCLOUD);
 	m_Shaders.Depth.Init(SHADER_OPENGL_DEPTH);
@@ -79,7 +80,7 @@ void GLRenderer::Clear()
 void GLRenderer::Draw(Scene& scene)
 {
 	// Draw Shadow Depth map
-	if (core::SETTINGS.DrawMode == DEFAULT)
+	if (core::SETTINGS.DrawMode == DEFAULT || core::SETTINGS.DrawMode == BLANK)
 	{
 		DrawPointLightShadow(scene);
 		DrawSpotLightShadow(scene);
@@ -99,6 +100,9 @@ void GLRenderer::Draw(Scene& scene)
 	GLCall(glViewport(0, 0, (GLsizei)renderRes.x, (GLsizei)renderRes.y));
 	switch (core::SETTINGS.DrawMode)
 	{
+	case BLANK:
+		DrawBlank(scene);
+		break;
 	case WIREFRAME:
 		DrawWireFrame(scene);
 		break;
@@ -147,6 +151,29 @@ void GLRenderer::Draw(Scene& scene)
 	m_Shaders.Screen.Unbind();
 	m_Frame.FB.UnbindTex();
 	GLCall(glEnable(GL_DEPTH_TEST));
+}
+
+void GLRenderer::DrawBlank(Scene& scene)
+{
+	m_Shaders.Blank.Bind();
+	m_Shaders.Blank.SetUniformMat4f("u_ProjMat", scene.GetCamera().GetProjMat());
+	m_Shaders.Blank.SetUniformMat4f("u_ViewMat", scene.GetCamera().GetViewMat());
+	std::string model;
+	for (unsigned int i = 0; i < scene.GetModelList().size(); i++)
+	{
+		model = scene.GetModelList()[i];
+		scene.GetData().GetDataGL().GetModelData()[model].InstanceVB.UpdateVertexBuffer(
+			&scene.GetModels()[model].GetModelMats()[0],
+			(unsigned int)scene.GetModels()[model].GetModelMats().size() * sizeof(glm::mat4)
+		);
+		scene.GetData().GetDataGL().GetModelData()[model].VA.Bind();
+		scene.GetData().GetDataGL().GetModelData()[model].IB.Bind();
+		// Draw Model
+		GLCall(glDrawElementsInstanced(GL_TRIANGLES, scene.GetData().GetDataGL().GetModelData()[model].IB.GetCount(), GL_UNSIGNED_INT, nullptr, scene.GetModels()[model].GetInstance()));
+		scene.GetData().GetDataGL().GetModelData()[model].VA.Unbind();
+		scene.GetData().GetDataGL().GetModelData()[model].IB.Unbind();
+	}
+	m_Shaders.Blank.Unbind();
 }
 
 void GLRenderer::DrawWireFrame(Scene& scene)

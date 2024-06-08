@@ -24,6 +24,7 @@ struct Frame
 
 struct Shaders
 {
+	GLShader Blank;
 	GLShader Wireframe;
 	GLShader Pointcloud;
 	GLShader Depth;
@@ -45,6 +46,7 @@ private:
 	GLTexture m_CheckerMap;
 
 	void Clear();
+	void DrawBlank(Scene& scene);
 	void DrawWireFrame(Scene& scene);
 	void DrawPointCloud(Scene& scene);
 	void DrawDepth(Scene& scene);

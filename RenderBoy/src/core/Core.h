@@ -48,6 +48,7 @@
 #define SCREENSHOT_FILEPATH "saves/screenshot/"
 #define UV_MAP_FILEPATH "res/checkermap/CheckerMap.png"
 #define SHADER_OPENGL "data/shaders/opengl/"
+#define SHADER_OPENGL_BLANK "data/shaders/opengl/draw_mode/BLANK.glsl"
 #define SHADER_OPENGL_WIREFRAME "data/shaders/opengl/draw_mode/WIREFRAME.glsl"
 #define SHADER_OPENGL_DEPTH "data/shaders/opengl/draw_mode/DEPTH.glsl"
 #define SHADER_OPENGL_UVSET "data/shaders/opengl/draw_mode/UVSET.glsl"
@@ -58,6 +59,8 @@
 #define SHADER_OPENGL_SHADOW_POINT "data/shaders/opengl/shadow/POINTLIGHT.glsl"
 #define SHADER_OPENGL_SHADOW_SPOT "data/shaders/opengl/shadow/SPOTLIGHT.glsl"
 #define SHADER_OPENGL_SHADOW_DIR "data/shaders/opengl/shadow/DIRLIGHT.glsl"
+#define DRAW_MODE_COUNT 6
+#define POST_PROCESS_COUNT 5
 #define MAX_FOV 120
 #define MIN_FOV 40
 #define MIN_MOUSE_SEN 0.1f
@@ -104,10 +107,12 @@ enum Light_Type
 enum Draw_Mode
 {
 	DEFAULT = 0,
-	WIREFRAME = 1,
-	POINTCLOUD = 2,
-	UVSET = 3,
-	DEPTH = 4
+	BLANK = 1,
+	WIREFRAME = 2,
+	POINTCLOUD = 3,
+	UVSET = 4,
+	DEPTH = 5
+	
 };
 
 enum Render_Mode

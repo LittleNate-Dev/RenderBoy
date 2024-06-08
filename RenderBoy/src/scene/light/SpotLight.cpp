@@ -15,10 +15,37 @@ SpotLight::SpotLight()
 	m_ShowCube = false;
 	m_CastShadow = true;
 	m_ShadowRes = 1024;
+	m_ProjMat = glm::mat4(1.0f);
+	m_ViewMat = glm::mat4(1.0f);
+	m_ModelMat = glm::mat4(1.0f);
+	UpdateProjMat();
+	UpdateViewMat();
+	UpdateModelMat();
+
 }
 
 SpotLight::~SpotLight()
 {
+}
+
+void SpotLight::UpdateProjMat()
+{
+	m_ProjMat = glm::perspective(glm::radians(m_Angle + m_DimAngle), 1.0f, 0.01f, m_Range);
+}
+
+void SpotLight::UpdateViewMat()
+{
+	glm::mat4 translateMat = glm::translate(glm::mat4(1.0f), m_Position);
+	glm::mat4 rotateMat = glm::rotate(glm::mat4(1.0f), glm::radians(m_EulerAngle.y), glm::vec3(0, 1, 0)) * glm::rotate(glm::mat4(1.0f), glm::radians(m_EulerAngle.x), glm::vec3(1, 0, 0));
+	glm::mat4 viewMat = translateMat * rotateMat;
+	viewMat = glm::inverse(viewMat);
+	m_ViewMat = viewMat;
+}
+
+void SpotLight::UpdateModelMat()
+{
+	glm::mat4 modelMat = glm::scale(glm::mat4(1.0f), glm::vec3(sqrt(2.0f) * sin(glm::radians(m_Angle / 2.0f)), sqrt(2.0f) * sin(glm::radians(m_Angle / 2.0f)), sqrt(2.0f) * cos(glm::radians(m_Angle / 2.0f))));
+	m_ModelMat = GetTranslateMat() * GetRotateMat() * modelMat;
 }
 
 glm::vec3 SpotLight::GetDirection()
@@ -32,19 +59,13 @@ glm::vec3 SpotLight::GetDirection()
 
 glm::mat4 SpotLight::GetViewMat()
 {
-	glm::mat4 translateMat = glm::translate(glm::mat4(1.0f), m_Position);
-	glm::mat4 rotateMat = glm::rotate(glm::mat4(1.0f), glm::radians(m_EulerAngle.y), glm::vec3(0, 1, 0)) * glm::rotate(glm::mat4(1.0f), glm::radians(m_EulerAngle.x), glm::vec3(1, 0, 0));
-	glm::vec4 axis = rotateMat * glm::vec4(0.0f, 0.0f, 1.0f, 0.0f);
-	rotateMat = core::GetRodrigue(glm::normalize(axis), m_EulerAngle.z) * rotateMat;
-	glm::mat4 viewMat = translateMat * rotateMat;
-	viewMat = glm::inverse(viewMat);
-	return viewMat;
+	return m_ViewMat;
 }
 
 glm::mat4 SpotLight::GetProjMat()
 {
-	glm::mat4 projMat = glm::perspective(glm::radians(m_Angle + m_DimAngle), 1.0f, 0.01f, m_Range);
-	return projMat;
+	
+	return m_ProjMat;
 }
 
 glm::mat4 SpotLight::GetTranslateMat()
@@ -63,9 +84,7 @@ glm::mat4 SpotLight::GetRotateMat()
 
 glm::mat4 SpotLight::GetModelMat()
 {
-	glm::mat4 modelMat = glm::scale(glm::mat4(1.0f), glm::vec3(sqrt(2.0f) * sin(glm::radians(m_Angle / 2.0f)), sqrt(2.0f) * sin(glm::radians(m_Angle / 2.0f)), sqrt(2.0f) * cos(glm::radians(m_Angle / 2.0f))));
-	modelMat = GetTranslateMat() * GetRotateMat() * modelMat;
-	return modelMat;
+	return m_ModelMat;
 }
 
 void SpotLight::SetName(std::string name)
@@ -76,11 +95,15 @@ void SpotLight::SetName(std::string name)
 void SpotLight::SetPosition(float posX, float posY, float posZ)
 {
 	m_Position = glm::vec3(posX, posY, posZ);
+	UpdateViewMat();
+	UpdateModelMat();
 }
 
 void SpotLight::SetPosition(glm::vec3 position)
 {
 	m_Position = position;
+	UpdateViewMat();
+	UpdateModelMat();
 }
 
 void SpotLight::SetPitch(float pitch)
@@ -97,6 +120,8 @@ void SpotLight::SetPitch(float pitch)
 		}
 	}
 	m_EulerAngle.x = pitch;
+	UpdateViewMat();
+	UpdateModelMat();
 }
 
 void SpotLight::SetYaw(float yaw)
@@ -113,6 +138,8 @@ void SpotLight::SetYaw(float yaw)
 		}
 	}
 	m_EulerAngle.y = yaw;
+	UpdateViewMat();
+	UpdateModelMat();
 }
 
 void SpotLight::SetRoll(float roll)
@@ -129,6 +156,7 @@ void SpotLight::SetRoll(float roll)
 		}
 	}
 	m_EulerAngle.z = roll;
+	UpdateModelMat();
 }
 
 void SpotLight::SetEulerAngle(float pitch, float yaw, float roll)
@@ -167,6 +195,8 @@ void SpotLight::SetEulerAngle(float pitch, float yaw, float roll)
 		}
 	}
 	m_EulerAngle = glm::vec3(pitch, yaw, roll);
+	UpdateViewMat();
+	UpdateModelMat();
 }
 
 void SpotLight::SetEulerAngle(glm::vec3 eulerAngle)
@@ -205,6 +235,8 @@ void SpotLight::SetEulerAngle(glm::vec3 eulerAngle)
 		}
 	}
 	m_EulerAngle = eulerAngle;
+	UpdateViewMat();
+	UpdateModelMat();
 }
 
 void SpotLight::SetColor(glm::vec3 color)
@@ -220,6 +252,8 @@ void SpotLight::SetAngle(float angle)
 	angle = angle < 0.0f ? 0.0f : angle;
 	angle = angle + m_DimAngle > 180.0f ? 180.0f - m_DimAngle : angle;
 	m_Angle = angle;
+	UpdateProjMat();
+	UpdateModelMat();
 }
 
 void SpotLight::SetDimAngle(float dimAngle)
@@ -227,6 +261,8 @@ void SpotLight::SetDimAngle(float dimAngle)
 	dimAngle = dimAngle < 0.0f ? 0.0f : dimAngle;
 	dimAngle = m_Angle + dimAngle > 180.0f ? 180.0f - m_Angle : dimAngle;
 	m_DimAngle = dimAngle;
+	UpdateProjMat();
+	UpdateModelMat();
 }
 
 void SpotLight::SetAmbient(float ambient)
@@ -268,6 +304,7 @@ void SpotLight::SetRange(float range)
 	range = range < 0.0f ? 0.0f : range;
 	m_Range = range;
 	m_CLQ = core::GetAttenuationValues(m_Range);
+	UpdateProjMat();
 }
 
 void SpotLight::SetIntensity(float intensity)
@@ -342,10 +379,18 @@ void SpotLight::DrawUI()
 				ImGui::CenterAlignWidget("Angle", 150.0f * core::GetWidgetWidthCoefficient());
 				ImGui::LabelHighlighted("Angle");
 				ImGui::PushItemWidth(150.0f * core::GetWidgetWidthCoefficient());
-				ImGui::SliderFloat("##Angle", &m_Angle, 0.0f, 180.0f - m_DimAngle);
+				if (ImGui::SliderFloat("##Angle", &m_Angle, 0.0f, 180.0f - m_DimAngle))
+				{
+					UpdateProjMat();
+					UpdateModelMat();
+				}
 				ImGui::CenterAlignWidget("Dim Angle", 150.0f * core::GetWidgetWidthCoefficient());
 				ImGui::LabelHighlighted("Dim Angle");
-				ImGui::SliderFloat("##DimAngle", &m_DimAngle, 0.0f, 180.0f - m_Angle);
+				if (ImGui::SliderFloat("##DimAngle", &m_DimAngle, 0.0f, 180.0f - m_Angle))
+				{
+					UpdateProjMat();
+					UpdateModelMat();
+				}
 				ImGui::PopItemWidth();
 			}
 			else
@@ -388,11 +433,23 @@ void SpotLight::DrawUI()
 		{
 			ImGui::PushItemWidth(80.0f * core::GetWidgetWidthCoefficient());
 			ImGui::CenterAlignWidget(80.0f * core::GetWidgetWidthCoefficient());
-			ImGui::InputFloat("Pos X", &m_Position.x);
+			if (ImGui::InputFloat("X", &m_Position.x))
+			{
+				UpdateViewMat();
+				UpdateModelMat();
+			}
 			ImGui::CenterAlignWidget(80.0f * core::GetWidgetWidthCoefficient());
-			ImGui::InputFloat("Pos Y", &m_Position.y);
+			if (ImGui::InputFloat("Y", &m_Position.y))
+			{
+				UpdateViewMat();
+				UpdateModelMat();
+			}
 			ImGui::CenterAlignWidget(80.0f * core::GetWidgetWidthCoefficient());
-			ImGui::InputFloat("Pos Z", &m_Position.z);
+			if (ImGui::InputFloat("Z", &m_Position.z))
+			{
+				UpdateViewMat();
+				UpdateModelMat();
+			}
 			ImGui::PopItemWidth();
 			ImGui::TreePop();
 		}
@@ -404,8 +461,16 @@ void SpotLight::DrawUI()
 			if (slideRotate)
 			{
 				ImGui::PushItemWidth(280.0f * core::GetWidgetWidthCoefficient());
-				ImGui::SliderFloat("Pitch", &m_EulerAngle.x, -360.0f, 360.0f);
-				ImGui::SliderFloat("Yaw", &m_EulerAngle.y, -360.0f, 360.0f);
+				if (ImGui::SliderFloat("Pitch", &m_EulerAngle.x, -360.0f, 360.0f))
+				{
+					UpdateViewMat();
+					UpdateModelMat();
+				}
+				if (ImGui::SliderFloat("Yaw", &m_EulerAngle.y, -360.0f, 360.0f))
+				{
+					UpdateViewMat();
+					UpdateModelMat();
+				}
 				ImGui::PopItemWidth();
 			}
 			else
@@ -540,5 +605,8 @@ void SpotLight::DrawUI()
 		m_ShowCube = false;
 		m_CastShadow = true;
 		m_ShadowRes = 1024;
+		UpdateProjMat();
+		UpdateViewMat();
+		UpdateModelMat();
 	}
 }

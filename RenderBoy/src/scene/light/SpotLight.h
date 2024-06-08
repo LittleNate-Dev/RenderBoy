@@ -14,6 +14,9 @@ class SpotLight
 {
 private:
 	std::string m_Name;
+	glm::mat4 m_ProjMat;
+	glm::mat4 m_ViewMat;
+	glm::mat4 m_ModelMat;
 	glm::vec3 m_Position;
 	glm::vec3 m_EulerAngle;
 	glm::vec3 m_Color;
@@ -39,6 +42,10 @@ public:
 	SpotLight();
 	~SpotLight();
 
+	// Update spot light's matrices
+	void UpdateProjMat();
+	void UpdateViewMat();
+	void UpdateModelMat();
 	// Get spot light's matrices
 	glm::vec3 GetDirection();
 	glm::mat4 GetViewMat();

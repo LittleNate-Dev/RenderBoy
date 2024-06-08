@@ -12,46 +12,72 @@ PointLight::PointLight()
 	m_ShowCube = false;
 	m_CastShadow = true;
 	m_ShadowRes = 1024;
+	m_ProjMat = glm::mat4(1.0f);
+	for (unsigned int i = 0; i < 6; i++)
+	{
+		m_ViewMat[i] = glm::mat4(1.0f);
+	}
+	m_ModelMat = glm::mat4(1.0f);
+	UpdateProjMat();
+	UpdateViewMat();
+	UpdateModelMat();
 }
 
 PointLight::~PointLight()
 {
 }
 
+void PointLight::UpdateProjMat()
+{
+	m_ProjMat = glm::perspective(glm::radians(90.0f), 1.0f, 0.05f, m_Range);
+}
+
+void PointLight::UpdateViewMat()
+{
+	for (unsigned int i = 0; i < 6; i++)
+	{
+		glm::mat4 rotateMat = glm::mat4(1.0f);
+		glm::mat4 translateMat = glm::translate(glm::mat4(1.0f), m_Position);
+		switch (i)
+		{
+		case 0: // right
+			rotateMat = glm::rotate(glm::mat4(1.0f), glm::radians(-90.0f), glm::vec3(0, 1, 0)) * glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0, 0, 1));
+			break;
+		case 1: // left
+			rotateMat = glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(0, 1, 0)) * glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0, 0, 1));
+			break;
+		case 2: // top
+			rotateMat = glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(1, 0, 0));
+			break;
+		case 3: // bottom
+			rotateMat = glm::rotate(glm::mat4(1.0f), glm::radians(-90.0f), glm::vec3(1, 0, 0));
+			break;
+		case 4: // front
+			rotateMat = glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0, 1, 0)) * glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0, 0, 1));
+			break;
+		case 5: // back
+			rotateMat = glm::rotate(glm::mat4(1.0f), glm::radians(360.0f), glm::vec3(0, 1, 0)) * glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0, 0, 1));
+			break;
+		}
+		glm::mat4 viewMat = translateMat * rotateMat;
+		viewMat = glm::inverse(viewMat);
+		m_ViewMat[i] = viewMat;
+	}
+}
+
+void PointLight::UpdateModelMat()
+{
+	m_ModelMat = glm::translate(glm::mat4(1.0f), m_Position);
+}
+
 glm::mat4 PointLight::GetViewMat(unsigned int face)
 {
-	glm::mat4 rotateMat = glm::mat4(1.0f);
-	glm::mat4 translateMat = glm::translate(glm::mat4(1.0f), m_Position);
-	switch (face)
-	{
-	case 0: // right
-		rotateMat = glm::rotate(glm::mat4(1.0f), glm::radians(-90.0f), glm::vec3(0, 1, 0)) * glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0, 0, 1));
-		break;
-	case 1: // left
-		rotateMat = glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(0, 1, 0)) * glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0, 0, 1));
-		break;
-	case 2: // top
-		rotateMat = glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(1, 0, 0));
-		break;
-	case 3: // bottom
-		rotateMat = glm::rotate(glm::mat4(1.0f), glm::radians(-90.0f), glm::vec3(1, 0, 0));
-		break;
-	case 4: // front
-		rotateMat = glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0, 1, 0)) * glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0, 0, 1));
-		break;
-	case 5: // back
-		rotateMat = glm::rotate(glm::mat4(1.0f), glm::radians(360.0f), glm::vec3(0, 1, 0)) * glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0, 0, 1));
-		break;
-	}
-	glm::mat4 viewMat = translateMat * rotateMat;
-	viewMat = glm::inverse(viewMat);
-	return viewMat;
+	return m_ViewMat[face];
 }
 
 glm::mat4 PointLight::GetProjMat()
 {
-	glm::mat4 projMat = glm::perspective(glm::radians(90.0f), 1.0f, 0.05f, m_Range);
-	return projMat;
+	return m_ProjMat;
 }
 
 glm::mat4 PointLight::GetTranslateMat()
@@ -62,8 +88,7 @@ glm::mat4 PointLight::GetTranslateMat()
 
 glm::mat4 PointLight::GetModelMat()
 {
-	glm::mat4 modelMat = glm::translate(glm::mat4(1.0f), m_Position);
-	return modelMat;
+	return m_ModelMat;
 }
 
 void PointLight::SetName(std::string name)
@@ -74,11 +99,15 @@ void PointLight::SetName(std::string name)
 void PointLight::SetPosition(float posX, float posY, float posZ)
 {
 	m_Position = glm::vec3(posX, posY, posZ);
+	UpdateModelMat();
+	UpdateViewMat();
 }
 
 void PointLight::SetPosition(glm::vec3 position)
 {
 	m_Position = position;
+	UpdateModelMat();
+	UpdateViewMat();
 }
 
 void PointLight::SetColor(glm::vec3 color)
@@ -128,6 +157,7 @@ void PointLight::SetRange(float range)
 	range = range < 0.0f ? 0.0f : range;
 	m_Range = range;
 	m_CLQ = core::GetAttenuationValues(m_Range);
+	UpdateProjMat();
 }
 
 void PointLight::SetIntensity(float intensity)
@@ -218,11 +248,23 @@ void PointLight::DrawUI()
 		{
 			ImGui::PushItemWidth(80.0f * core::GetWidgetWidthCoefficient());
 			ImGui::CenterAlignWidget(80.0f * core::GetWidgetWidthCoefficient());
-			ImGui::InputFloat("Pos X", &m_Position.x);
+			if (ImGui::InputFloat("X", &m_Position.x))
+			{
+				UpdateViewMat();
+				UpdateModelMat();
+			}
 			ImGui::CenterAlignWidget(80.0f * core::GetWidgetWidthCoefficient());
-			ImGui::InputFloat("Pos Y", &m_Position.y);
+			if (ImGui::InputFloat("Y", &m_Position.y))
+			{
+				UpdateViewMat();
+				UpdateModelMat();
+			}
 			ImGui::CenterAlignWidget(80.0f * core::GetWidgetWidthCoefficient());
-			ImGui::InputFloat("Pos Z", &m_Position.z);
+			if (ImGui::InputFloat("Z", &m_Position.z))
+			{
+				UpdateViewMat();
+				UpdateModelMat();
+			}
 			ImGui::PopItemWidth();
 			ImGui::TreePop();
 		}
@@ -338,5 +380,8 @@ void PointLight::DrawUI()
 		m_ShowCube = false;
 		m_CastShadow = true;
 		m_ShadowRes = 1024;
+		UpdateProjMat();
+		UpdateViewMat();
+		UpdateModelMat();
 	}
 }
