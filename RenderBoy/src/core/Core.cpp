@@ -12,6 +12,7 @@ namespace core
 	float NORMAL_MAGNITUDE = 1.0f;
 	bool RELOAD_FONT = false;
 	void* SCENE_DATA = nullptr;
+	SceneStatics SCENE_STATICS;
 	const char* currentModelScene = nullptr;
 	const char* currentPointLight = nullptr;
 	const char* currentSpotLight = nullptr;

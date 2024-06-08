@@ -25,7 +25,6 @@ void Scene::Reset()
 	m_Camera.SetRotateSpeed(1.0f);
 	m_Camera.SetPosition(glm::vec3(0.0f));
 	m_Camera.SetEulerAngle(glm::vec3(0.0f));
-	m_Data.Reset();
 	m_Skybox.Type = PURE_COLOR;
 	m_Skybox.Color = glm::vec3(1.0f);
 	std::vector<std::string>().swap(m_Skybox.Filepath);
@@ -38,6 +37,10 @@ void Scene::Reset()
 	m_SpotLights.clear();
 	std::vector<std::string>().swap(m_DirLightList);
 	m_DirLights.clear();
+	core::SCENE_STATICS.PointLight = 0;
+	core::SCENE_STATICS.SpotLight = 0;
+	core::SCENE_STATICS.DirectionalLight = 0;
+	m_Data.Reset();
 	core::currentModelScene = nullptr;
 	core::currentPointLight = nullptr;
 	core::currentSpotLight = nullptr;
@@ -694,6 +697,7 @@ bool Scene::AddPointLight(std::string name)
 	m_PointLightList.push_back(name);
 	m_PointLights.insert(std::pair<std::string, PointLight>(name, light));
 	core::currentPointLight = nullptr;
+	core::SCENE_STATICS.PointLight++;
 	m_Data.AddLight(name, POINT_LIGHT);
 	return true;
 }
@@ -720,6 +724,7 @@ bool Scene::AddSpotLight(std::string name)
 	m_SpotLightList.push_back(name);
 	m_SpotLights.insert(std::pair<std::string, SpotLight>(name, light));
 	core::currentSpotLight = nullptr;
+	core::SCENE_STATICS.SpotLight++;
 	m_Data.AddLight(name, SPOT_LIGHT);
 	return true;
 }
@@ -746,6 +751,7 @@ bool Scene::AddDirectionalLight(std::string name)
 	m_DirLightList.push_back(name);
 	m_DirLights.insert(std::pair<std::string, DirectionalLight>(name, light));
 	core::currentDirLight = nullptr;
+	core::SCENE_STATICS.DirectionalLight++;
 	return true;
 }
 
@@ -783,6 +789,7 @@ bool Scene::DeletePointLight(std::string name)
 		m_PointLightList.shrink_to_fit();
 		m_PointLights.erase(name);
 		core::currentPointLight = nullptr;
+		core::SCENE_STATICS.PointLight--;
 		m_Data.DeleteLight(name, POINT_LIGHT);
 		return true;
 	}
@@ -797,6 +804,7 @@ bool Scene::DeleteSpotLight(std::string name)
 		m_SpotLightList.shrink_to_fit();
 		m_SpotLights.erase(name);
 		core::currentSpotLight = nullptr;
+		core::SCENE_STATICS.SpotLight--;
 		m_Data.DeleteLight(name, SPOT_LIGHT);
 		return true;
 	}
@@ -811,6 +819,7 @@ bool Scene::DeleteDirectionalLight(std::string name)
 		m_DirLightList.shrink_to_fit();
 		m_DirLights.erase(name);
 		core::currentDirLight = nullptr;
+		core::SCENE_STATICS.DirectionalLight--;
 		return true;
 	}
 	return false;

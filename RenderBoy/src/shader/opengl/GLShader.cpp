@@ -12,6 +12,7 @@ GLShader::~GLShader()
 
 bool GLShader::Init(std::string filepath)
 {
+    m_UniformLocationCache.clear();
     GLCall(glDeleteProgram(m_RendererID));
     m_FilePath = filepath;
     ShaderProgramSource source = ParseShader(filepath);
@@ -60,6 +61,29 @@ ShaderProgramSource GLShader::ParseShader(std::string filepath)
                 sps.HasFragment = true;
                 type = ShaderType::FRAGMENT;
             }
+        }
+        else if (line.find("#define POINT_LIGHT_COUNT") != std::string::npos)
+        {
+            line += " " + std::to_string(core::SCENE_STATICS.PointLight);
+            ss[(int)type] << line << '\n';
+        }
+        else if (line.find("#define SPOT_LIGHT_COUNT") != std::string::npos)
+        {
+            line += " " + std::to_string(core::SCENE_STATICS.SpotLight);
+            ss[(int)type] << line << '\n';
+        }
+        else if (line.find("#define DIR_LIGHT_COUNT") != std::string::npos)
+        {
+            line += " " + std::to_string(core::SCENE_STATICS.DirectionalLight);
+            ss[(int)type] << line << '\n';
+        }
+        else if (line.find("uniform PointLight u_PointLight[POINT_LIGHT_COUNT];") != std::string::npos)
+        {
+            if (core::SCENE_STATICS.PointLight == 0)
+            {
+                line = "uniform PointLight u_PointLight[1];";
+            }
+            ss[(int)type] << line << '\n';
         }
         else
         {

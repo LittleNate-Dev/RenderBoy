@@ -18,7 +18,6 @@ void GLRenderer::Init(Scene& scene)
 	GLCall(glLineWidth(0.4f));
 	GLCall(glPointSize(1.5f));
 	// Initialize shaders
-	m_Shaders.Blank.Init(SHADER_OPENGL_BLANK);
 	m_Shaders.Wireframe.Init(SHADER_OPENGL_WIREFRAME);
 	m_Shaders.Pointcloud.Init(SHADER_OPENGL_POINTCLOUD);
 	m_Shaders.Depth.Init(SHADER_OPENGL_DEPTH);
@@ -155,9 +154,27 @@ void GLRenderer::Draw(Scene& scene)
 
 void GLRenderer::DrawBlank(Scene& scene)
 {
-	m_Shaders.Blank.Bind();
-	m_Shaders.Blank.SetUniformMat4f("u_ProjMat", scene.GetCamera().GetProjMat());
-	m_Shaders.Blank.SetUniformMat4f("u_ViewMat", scene.GetCamera().GetViewMat());
+	scene.GetData().GetDataGL().GetBlankShader().Bind();
+	scene.GetData().GetDataGL().GetBlankShader().SetUniformMat4f("u_ProjMat", scene.GetCamera().GetProjMat());
+	scene.GetData().GetDataGL().GetBlankShader().SetUniformMat4f("u_ViewMat", scene.GetCamera().GetViewMat());
+	scene.GetData().GetDataGL().GetBlankShader().SetUniformVec3f("u_ViewPos", scene.GetCamera().GetPosition());
+	std::string light;
+	// Set point lights' uniforms
+	for (unsigned int i = 0; i < scene.GetPointLightList().size(); i++)
+	{
+		light = scene.GetPointLightList()[i];
+		std::string lightName = "u_PointLight[" + std::to_string(i) + "].";
+		scene.GetData().GetDataGL().GetBlankShader().SetUniformVec3f(lightName + "Position", scene.GetPointLights()[light].GetPosition());
+		scene.GetData().GetDataGL().GetBlankShader().SetUniformVec3f(lightName + "Color", scene.GetPointLights()[light].GetColor());
+		scene.GetData().GetDataGL().GetBlankShader().SetUniformVec3f(lightName + "ADS", scene.GetPointLights()[light].GetADS());
+		scene.GetData().GetDataGL().GetBlankShader().SetUniformVec3f(lightName + "CLQ", scene.GetPointLights()[light].GetCLQ());
+		scene.GetData().GetDataGL().GetBlankShader().SetUniform1f(lightName + "Range", scene.GetPointLights()[light].GetRange());
+		scene.GetData().GetDataGL().GetBlankShader().SetUniform1f(lightName + "Intensity", scene.GetPointLights()[light].GetIntensity());
+		scene.GetData().GetDataGL().GetBlankShader().SetUniform1i(lightName + "LightSwitch", scene.GetPointLights()[light].LightSwitch());
+		scene.GetData().GetDataGL().GetBlankShader().SetUniform1i(lightName + "CastShadow", scene.GetPointLights()[light].CastShadow());
+		scene.GetData().GetDataGL().GetBlankShader().SetUniformHandleARB(lightName + "ShadowMap", scene.GetData().GetDataGL().GetPointLightData().DepthMap[light].GetHandle());
+	}
+
 	std::string model;
 	for (unsigned int i = 0; i < scene.GetModelList().size(); i++)
 	{
@@ -173,7 +190,7 @@ void GLRenderer::DrawBlank(Scene& scene)
 		scene.GetData().GetDataGL().GetModelData()[model].VA.Unbind();
 		scene.GetData().GetDataGL().GetModelData()[model].IB.Unbind();
 	}
-	m_Shaders.Blank.Unbind();
+	scene.GetData().GetDataGL().GetBlankShader().Unbind();
 }
 
 void GLRenderer::DrawWireFrame(Scene& scene)
@@ -409,6 +426,7 @@ void GLRenderer::DrawPointLightShadow(Scene& scene)
 				scene.GetData().GetDataGL().GetModelData()[model].VA.Unbind();
 				scene.GetData().GetDataGL().GetModelData()[model].IB.Unbind();
 			}
+			scene.GetData().GetDataGL().GetPointLightData().DepthMap[light].Unbind();
 		}
 	}
 	m_Shaders.PointShadow.Unbind();

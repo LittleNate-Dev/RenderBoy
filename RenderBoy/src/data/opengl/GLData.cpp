@@ -10,6 +10,7 @@ GLData::~GLData()
 
 void GLData::Init()
 {
+	m_BlankShader.Init(SHADER_OPENGL_BLANK);
 	// Initialize VAO to draw skybox
 	{
 		float position[] = {
@@ -132,6 +133,7 @@ void GLData::Init()
 
 void GLData::Reset()
 {
+	m_BlankShader.Init(SHADER_OPENGL_BLANK);
 	m_ModelData.clear();
 	GLCubeMap newCubeMap;
 	m_SkyboxData.Skybox = newCubeMap;
@@ -284,6 +286,7 @@ void GLData::AddPointLight(std::string name)
 	GLFrameBuffer fb;
 	m_PointLightData.DepthMap.insert(std::pair<std::string, GLFrameBuffer>(name, fb));
 	m_PointLightData.DepthMap[name].Init(DEPTH_CUBE, 1024, 1024);
+	m_BlankShader.Init(SHADER_OPENGL_BLANK);
 }
 
 void GLData::AddSpotLight(std::string name)
@@ -291,6 +294,7 @@ void GLData::AddSpotLight(std::string name)
 	GLFrameBuffer fb;
 	m_SpotLightData.DepthMap.insert(std::pair<std::string, GLFrameBuffer>(name, fb));
 	m_SpotLightData.DepthMap[name].Init(DEPTH_MAP, 1024, 1024);
+	m_BlankShader.Init(SHADER_OPENGL_BLANK);
 }
 
 void GLData::AddDirLight(std::string name)
@@ -301,11 +305,13 @@ void GLData::AddDirLight(std::string name)
 void GLData::DeletePointLight(std::string name)
 {
 	m_PointLightData.DepthMap.erase(name);
+	m_BlankShader.Init(SHADER_OPENGL_BLANK);
 }
 
 void GLData::DeleteSpotLight(std::string name)
 {
 	m_SpotLightData.DepthMap.erase(name);
+	m_BlankShader.Init(SHADER_OPENGL_BLANK);
 }
 
 void GLData::DeleteDirLight(std::string name)

@@ -215,6 +215,7 @@ namespace core
 	extern bool RELOAD_FONT;
 	// A pointer point to scene data
 	extern void* SCENE_DATA;
+	extern SceneStatics SCENE_STATICS;
 	// used for combo widgets
 	extern const char* currentModelScene;
 	extern const char* currentPointLight;

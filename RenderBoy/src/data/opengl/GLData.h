@@ -75,6 +75,7 @@ struct GLSkyboxData
 class GLData
 {
 private:
+	GLShader m_BlankShader;
 	GLSkyboxData m_SkyboxData;
 	GLPointLightData m_PointLightData;
 	GLSpotLightData m_SpotLightData;
@@ -106,6 +107,10 @@ public:
 	void RenameLight(std::string oldName, std::string newName, Light_Type type);
 	bool LoadSkybox(std::vector<std::string> filepath);
 	// Get Data's members
+	inline GLShader& GetBlankShader()
+	{
+		return m_BlankShader;
+	};
 	inline GLSkyboxData& GetSkybox()
 	{
 		return m_SkyboxData;

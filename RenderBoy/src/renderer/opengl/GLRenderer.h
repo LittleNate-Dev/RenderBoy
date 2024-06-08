@@ -24,7 +24,6 @@ struct Frame
 
 struct Shaders
 {
-	GLShader Blank;
 	GLShader Wireframe;
 	GLShader Pointcloud;
 	GLShader Depth;
