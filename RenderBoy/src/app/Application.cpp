@@ -368,7 +368,6 @@ bool Application::LoadFile()
         case RESET_SCENE:
             if (m_Scene.Reset(core::FILEPATH_BUFFER))
             {
-                m_Renderer.ChangeSkybox(m_Scene);
                 m_Launched = true;
                 core::FILEPATH_BUFFER = "";
                 core::LOAD_TYPE = NO_FILE;
@@ -420,7 +419,6 @@ bool Application::LoadFile()
                     core::FILEPATH_BUFFER = "";
                     core::LOAD_TYPE = NO_FILE;
                     m_Scene.GetSkybox().Filepath = filepath;
-                    m_Renderer.ChangeSkybox(m_Scene);
                     return true;
                 }
             }
@@ -837,6 +835,7 @@ void Application::DrawSettingWindow()
                 if (ImGui::Combo("##Draw_Mode", &currentDrawMode, drawModeOps, IM_ARRAYSIZE(drawModeOps)))
                 {
                     core::SETTINGS.DrawMode = (Draw_Mode)currentDrawMode;
+                    m_Scene.GetData().ChangeDrawMode();
                 }
                 ImGui::PopItemWidth();
             }

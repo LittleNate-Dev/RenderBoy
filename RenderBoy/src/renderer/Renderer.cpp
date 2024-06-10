@@ -97,15 +97,3 @@ void Renderer::ChangePostProcess()
 		break;
 	}
 }
-
-void Renderer::ChangeSkybox(Scene& scene)
-{
-	switch (core::SETTINGS.GraphicsCore)
-	{
-	case OPENGL:
-		m_RendererGL.ChangeSkybox(scene);
-		break;
-	default:
-		break;
-	}
-}

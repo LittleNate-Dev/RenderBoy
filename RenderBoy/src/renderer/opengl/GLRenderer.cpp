@@ -18,23 +18,9 @@ void GLRenderer::Init(Scene& scene)
 	GLCall(glLineWidth(0.4f));
 	GLCall(glPointSize(1.5f));
 	// Initialize shaders
-	m_Shaders.Wireframe.Init(SHADER_OPENGL_WIREFRAME);
-	m_Shaders.Pointcloud.Init(SHADER_OPENGL_POINTCLOUD);
-	m_Shaders.Depth.Init(SHADER_OPENGL_DEPTH);
-	m_Shaders.UVset.Init(SHADER_OPENGL_UVSET);
 	m_Shaders.Normal.Init(SHADER_OPENGL_NORMAL);
 	m_Shaders.Lightcube.Init(SHADER_OPENGL_LIGHTCUBE);
-	m_Shaders.Skybox.Init(SHADER_OPENGL_SKYBOX);
-	m_Shaders.PointShadow.Init(SHADER_OPENGL_SHADOW_POINT);
-	m_Shaders.SpotShadow.Init(SHADER_OPENGL_SHADOW_SPOT);
-	// Initialize uv checker map texture
-	m_CheckerMap.GenTexture(UV_MAP_FILEPATH);
-	m_Shaders.UVset.Bind();
-	m_Shaders.UVset.SetUniformHandleARB("u_CheckerMap", m_CheckerMap.GetHandle());
-	m_Shaders.UVset.Unbind();
 	ChangePostProcess();
-	// Initialize skybox texture
-	ChangeSkybox(scene);
 	// Initialize frame buffers
 	m_Frame.FBMsaa.Init(FBType::MSAA);
 	if (!m_Frame.FBMsaa.IsInitialized())
@@ -154,25 +140,25 @@ void GLRenderer::Draw(Scene& scene)
 
 void GLRenderer::DrawBlank(Scene& scene)
 {
-	scene.GetData().GetDataGL().GetBlankShader().Bind();
-	scene.GetData().GetDataGL().GetBlankShader().SetUniformMat4f("u_ProjMat", scene.GetCamera().GetProjMat());
-	scene.GetData().GetDataGL().GetBlankShader().SetUniformMat4f("u_ViewMat", scene.GetCamera().GetViewMat());
-	scene.GetData().GetDataGL().GetBlankShader().SetUniformVec3f("u_ViewPos", scene.GetCamera().GetPosition());
+	scene.GetData().GetDataGL().GetShader().Bind();
+	scene.GetData().GetDataGL().GetShader().SetUniformMat4f("u_ProjMat", scene.GetCamera().GetProjMat());
+	scene.GetData().GetDataGL().GetShader().SetUniformMat4f("u_ViewMat", scene.GetCamera().GetViewMat());
+	scene.GetData().GetDataGL().GetShader().SetUniformVec3f("u_ViewPos", scene.GetCamera().GetPosition());
 	std::string light;
 	// Set point lights' uniforms
 	for (unsigned int i = 0; i < scene.GetPointLightList().size(); i++)
 	{
 		light = scene.GetPointLightList()[i];
 		std::string lightName = "u_PointLight[" + std::to_string(i) + "].";
-		scene.GetData().GetDataGL().GetBlankShader().SetUniformVec3f(lightName + "Position", scene.GetPointLights()[light].GetPosition());
-		scene.GetData().GetDataGL().GetBlankShader().SetUniformVec3f(lightName + "Color", scene.GetPointLights()[light].GetColor());
-		scene.GetData().GetDataGL().GetBlankShader().SetUniformVec3f(lightName + "ADS", scene.GetPointLights()[light].GetADS());
-		scene.GetData().GetDataGL().GetBlankShader().SetUniformVec3f(lightName + "CLQ", scene.GetPointLights()[light].GetCLQ());
-		scene.GetData().GetDataGL().GetBlankShader().SetUniform1f(lightName + "Range", scene.GetPointLights()[light].GetRange());
-		scene.GetData().GetDataGL().GetBlankShader().SetUniform1f(lightName + "Intensity", scene.GetPointLights()[light].GetIntensity());
-		scene.GetData().GetDataGL().GetBlankShader().SetUniform1i(lightName + "LightSwitch", scene.GetPointLights()[light].LightSwitch());
-		scene.GetData().GetDataGL().GetBlankShader().SetUniform1i(lightName + "CastShadow", scene.GetPointLights()[light].CastShadow());
-		scene.GetData().GetDataGL().GetBlankShader().SetUniformHandleARB(lightName + "ShadowMap", scene.GetData().GetDataGL().GetPointLightData().DepthMap[light].GetHandle());
+		scene.GetData().GetDataGL().GetShader().SetUniformVec3f(lightName + "Position", scene.GetPointLights()[light].GetPosition());
+		scene.GetData().GetDataGL().GetShader().SetUniformVec3f(lightName + "Color", scene.GetPointLights()[light].GetColor());
+		scene.GetData().GetDataGL().GetShader().SetUniformVec3f(lightName + "ADS", scene.GetPointLights()[light].GetADS());
+		scene.GetData().GetDataGL().GetShader().SetUniformVec3f(lightName + "CLQ", scene.GetPointLights()[light].GetCLQ());
+		scene.GetData().GetDataGL().GetShader().SetUniform1f(lightName + "Range", scene.GetPointLights()[light].GetRange());
+		scene.GetData().GetDataGL().GetShader().SetUniform1f(lightName + "Intensity", scene.GetPointLights()[light].GetIntensity());
+		scene.GetData().GetDataGL().GetShader().SetUniform1i(lightName + "LightSwitch", scene.GetPointLights()[light].LightSwitch());
+		scene.GetData().GetDataGL().GetShader().SetUniform1i(lightName + "CastShadow", scene.GetPointLights()[light].CastShadow());
+		scene.GetData().GetDataGL().GetShader().SetUniformHandleARB(lightName + "ShadowMap", scene.GetData().GetDataGL().GetPointLightData().DepthMap[light].GetHandle());
 	}
 
 	std::string model;
@@ -190,18 +176,18 @@ void GLRenderer::DrawBlank(Scene& scene)
 		scene.GetData().GetDataGL().GetModelData()[model].VA.Unbind();
 		scene.GetData().GetDataGL().GetModelData()[model].IB.Unbind();
 	}
-	scene.GetData().GetDataGL().GetBlankShader().Unbind();
+	scene.GetData().GetDataGL().GetShader().Unbind();
 }
 
 void GLRenderer::DrawWireFrame(Scene& scene)
 {
 	std::string model;
-	m_Shaders.Wireframe.Bind();
-	m_Shaders.Wireframe.SetUniformMat4f("u_ProjMat", scene.GetCamera().GetProjMat());
-	m_Shaders.Wireframe.SetUniformMat4f("u_ViewMat", scene.GetCamera().GetViewMat());
+	scene.GetData().GetDataGL().GetShader().Bind();
+	scene.GetData().GetDataGL().GetShader().SetUniformMat4f("u_ProjMat", scene.GetCamera().GetProjMat());
+	scene.GetData().GetDataGL().GetShader().SetUniformMat4f("u_ViewMat", scene.GetCamera().GetViewMat());
 	glm::vec2 renderRes = core::GetRenderResolution();
-	m_Shaders.Wireframe.SetUniformMat4f("u_ViewPortMat", core::GetViewPortMatrix((unsigned int)renderRes.x, (unsigned int)renderRes.y));
-	m_Shaders.Wireframe.SetUniformVec2f("u_RenderRes", renderRes);
+	scene.GetData().GetDataGL().GetShader().SetUniformMat4f("u_ViewPortMat", core::GetViewPortMatrix((unsigned int)renderRes.x, (unsigned int)renderRes.y));
+	scene.GetData().GetDataGL().GetShader().SetUniformVec2f("u_RenderRes", renderRes);
 	for (unsigned int i = 0; i < scene.GetModelList().size(); i++)
 	{
 		model = scene.GetModelList()[i];
@@ -216,15 +202,15 @@ void GLRenderer::DrawWireFrame(Scene& scene)
 		scene.GetData().GetDataGL().GetModelData()[model].VA.Unbind();
 		scene.GetData().GetDataGL().GetModelData()[model].IB.Unbind();
 	}
-	m_Shaders.Wireframe.Unbind();
+	scene.GetData().GetDataGL().GetShader().Unbind();
 }
 
 void GLRenderer::DrawPointCloud(Scene& scene)
 {
 	std::string model;
-	m_Shaders.Pointcloud.Bind();
-	m_Shaders.Pointcloud.SetUniformMat4f("u_ProjMat", scene.GetCamera().GetProjMat());
-	m_Shaders.Pointcloud.SetUniformMat4f("u_ViewMat", scene.GetCamera().GetViewMat());
+	scene.GetData().GetDataGL().GetShader().Bind();
+	scene.GetData().GetDataGL().GetShader().SetUniformMat4f("u_ProjMat", scene.GetCamera().GetProjMat());
+	scene.GetData().GetDataGL().GetShader().SetUniformMat4f("u_ViewMat", scene.GetCamera().GetViewMat());
 	for (unsigned int i = 0; i < scene.GetModelList().size(); i++)
 	{
 		model = scene.GetModelList()[i];
@@ -238,17 +224,17 @@ void GLRenderer::DrawPointCloud(Scene& scene)
 		scene.GetData().GetDataGL().GetModelData()[model].VA.Unbind();
 		scene.GetData().GetDataGL().GetModelData()[model].IB.Unbind();
 	}
-	m_Shaders.Pointcloud.Unbind();
+	scene.GetData().GetDataGL().GetShader().Unbind();
 }
 
 void GLRenderer::DrawDepth(Scene& scene)
 {
 	std::string model;
-	m_Shaders.Depth.Bind();
-	m_Shaders.Depth.SetUniformMat4f("u_ProjMat", scene.GetCamera().GetProjMat());
-	m_Shaders.Depth.SetUniformMat4f("u_ViewMat", scene.GetCamera().GetViewMat());
-	m_Shaders.Depth.SetUniform1f("u_NearPlane", scene.GetCamera().GetNearPlane());
-	m_Shaders.Depth.SetUniform1f("u_FarPlane", scene.GetCamera().GetFarPlane());
+	scene.GetData().GetDataGL().GetShader().Bind();
+	scene.GetData().GetDataGL().GetShader().SetUniformMat4f("u_ProjMat", scene.GetCamera().GetProjMat());
+	scene.GetData().GetDataGL().GetShader().SetUniformMat4f("u_ViewMat", scene.GetCamera().GetViewMat());
+	scene.GetData().GetDataGL().GetShader().SetUniform1f("u_NearPlane", scene.GetCamera().GetNearPlane());
+	scene.GetData().GetDataGL().GetShader().SetUniform1f("u_FarPlane", scene.GetCamera().GetFarPlane());
 	for (unsigned int i = 0; i < scene.GetModelList().size(); i++)
 	{
 		model = scene.GetModelList()[i];
@@ -262,15 +248,15 @@ void GLRenderer::DrawDepth(Scene& scene)
 		scene.GetData().GetDataGL().GetModelData()[model].VA.Unbind();
 		scene.GetData().GetDataGL().GetModelData()[model].IB.Unbind();
 	}
-	m_Shaders.Depth.Unbind();
+	scene.GetData().GetDataGL().GetShader().Unbind();
 }
 
 void GLRenderer::DrawUVSet(Scene& scene)
 {
 	std::string model;
-	m_Shaders.UVset.Bind();
-	m_Shaders.UVset.SetUniformMat4f("u_ProjMat", scene.GetCamera().GetProjMat());
-	m_Shaders.UVset.SetUniformMat4f("u_ViewMat", scene.GetCamera().GetViewMat());
+	scene.GetData().GetDataGL().GetShader().Bind();
+	scene.GetData().GetDataGL().GetShader().SetUniformMat4f("u_ProjMat", scene.GetCamera().GetProjMat());
+	scene.GetData().GetDataGL().GetShader().SetUniformMat4f("u_ViewMat", scene.GetCamera().GetViewMat());
 	for (unsigned int i = 0; i < scene.GetModelList().size(); i++)
 	{
 		model = scene.GetModelList()[i];
@@ -285,7 +271,7 @@ void GLRenderer::DrawUVSet(Scene& scene)
 		scene.GetData().GetDataGL().GetModelData()[model].VA.Unbind();
 		scene.GetData().GetDataGL().GetModelData()[model].IB.Unbind();
 	}
-	m_Shaders.UVset.Unbind();
+	scene.GetData().GetDataGL().GetShader().Unbind();
 }
 
 void GLRenderer::DrawNormal(Scene& scene)
@@ -372,25 +358,25 @@ void GLRenderer::DrawLightCube(Scene& scene)
 void GLRenderer::DrawSkybox(Scene& scene)
 {
 	GLCall(glDepthFunc(GL_LEQUAL));
-	m_Shaders.Skybox.Bind();
-	m_Shaders.Skybox.SetUniformMat4f("u_ProjMat", scene.GetCamera().GetProjMat());
+	scene.GetData().GetDataGL().GetSkybox().Shader.Bind();
+	scene.GetData().GetDataGL().GetSkybox().Shader.SetUniformMat4f("u_ProjMat", scene.GetCamera().GetProjMat());
 	// Remove translation from view matrix
-	m_Shaders.Skybox.SetUniformMat4f("u_ViewMat", glm::mat4(glm::mat3(scene.GetCamera().GetViewMat())));
-	m_Shaders.Skybox.SetUniform1i("u_UseTex", scene.GetSkybox().Type);
-	m_Shaders.Skybox.SetUniformVec3f("u_Color", scene.GetSkybox().Color);
+	scene.GetData().GetDataGL().GetSkybox().Shader.SetUniformMat4f("u_ViewMat", glm::mat4(glm::mat3(scene.GetCamera().GetViewMat())));
+	scene.GetData().GetDataGL().GetSkybox().Shader.SetUniform1i("u_UseTex", scene.GetSkybox().Type);
+	scene.GetData().GetDataGL().GetSkybox().Shader.SetUniformVec3f("u_Color", scene.GetSkybox().Color);
 	scene.GetData().GetDataGL().GetSkybox().VA.Bind();
 	scene.GetData().GetDataGL().GetSkybox().IB.Bind();
 	GLCall(glDrawElements(GL_TRIANGLES, scene.GetData().GetDataGL().GetSkybox().IB.GetCount(), GL_UNSIGNED_INT, nullptr));
 	scene.GetData().GetDataGL().GetSkybox().VA.Unbind();
 	scene.GetData().GetDataGL().GetSkybox().IB.Unbind();
-	m_Shaders.Skybox.Unbind();
+	scene.GetData().GetDataGL().GetSkybox().Shader.Unbind();
 	GLCall(glDepthFunc(GL_LESS)); // set depth function back to default
 }
 
 void GLRenderer::DrawPointLightShadow(Scene& scene)
 {
 	std::string light;
-	m_Shaders.PointShadow.Bind();
+	scene.GetData().GetDataGL().GetPointLightData().Shader.Bind();
 	for (unsigned int i = 0; i < scene.GetPointLightList().size(); i++)
 	{
 		light = scene.GetPointLightList()[i];
@@ -406,10 +392,10 @@ void GLRenderer::DrawPointLightShadow(Scene& scene)
 			for (unsigned int j = 0; j < 6; j++)
 			{
 				glm::mat4 shadowMat = scene.GetPointLights()[light].GetProjMat() * scene.GetPointLights()[light].GetViewMat(j);
-				m_Shaders.PointShadow.SetUniformMat4f("u_ShadowMat[" + std::to_string(j) + "]", shadowMat);
+				scene.GetData().GetDataGL().GetPointLightData().Shader.SetUniformMat4f("u_ShadowMat[" + std::to_string(j) + "]", shadowMat);
 			}
-			m_Shaders.PointShadow.SetUniformVec3f("u_LightPos", scene.GetPointLights()[light].GetPosition());
-			m_Shaders.PointShadow.SetUniform1f("u_FarPlane", scene.GetPointLights()[light].GetRange());
+			scene.GetData().GetDataGL().GetPointLightData().Shader.SetUniformVec3f("u_LightPos", scene.GetPointLights()[light].GetPosition());
+			scene.GetData().GetDataGL().GetPointLightData().Shader.SetUniform1f("u_FarPlane", scene.GetPointLights()[light].GetRange());
 			// Draw Scene
 			std::string model;
 			for (unsigned int j = 0; j < scene.GetModelList().size(); j++)
@@ -429,13 +415,13 @@ void GLRenderer::DrawPointLightShadow(Scene& scene)
 			scene.GetData().GetDataGL().GetPointLightData().DepthMap[light].Unbind();
 		}
 	}
-	m_Shaders.PointShadow.Unbind();
+	scene.GetData().GetDataGL().GetPointLightData().Shader.Unbind();
 }
 
 void GLRenderer::DrawSpotLightShadow(Scene& scene)
 {
 	std::string light;
-	m_Shaders.SpotShadow.Bind();
+	scene.GetData().GetDataGL().GetSpotLightData().Shader.Bind();
 	for (unsigned int i = 0; i < scene.GetSpotLightList().size(); i++)
 	{
 		light = scene.GetSpotLightList()[i];
@@ -448,8 +434,8 @@ void GLRenderer::DrawSpotLightShadow(Scene& scene)
 			GLCall(glViewport(0, 0, scene.GetSpotLights()[light].GetShadowRes(), scene.GetSpotLights()[light].GetShadowRes()));
 			scene.GetData().GetDataGL().GetSpotLightData().DepthMap[light].Bind();
 			GLCall(glClear(GL_DEPTH_BUFFER_BIT));
-			m_Shaders.SpotShadow.SetUniformMat4f("u_ProjMat", scene.GetSpotLights()[light].GetProjMat());
-			m_Shaders.SpotShadow.SetUniformMat4f("u_ViewMat", scene.GetSpotLights()[light].GetViewMat());
+			scene.GetData().GetDataGL().GetSpotLightData().Shader.SetUniformMat4f("u_ProjMat", scene.GetSpotLights()[light].GetProjMat());
+			scene.GetData().GetDataGL().GetSpotLightData().Shader.SetUniformMat4f("u_ViewMat", scene.GetSpotLights()[light].GetViewMat());
 			// Draw Scene
 			std::string model;
 			for (unsigned int j = 0; j < scene.GetModelList().size(); j++)
@@ -468,7 +454,7 @@ void GLRenderer::DrawSpotLightShadow(Scene& scene)
 			}
 		}
 	}
-	m_Shaders.SpotShadow.Unbind();
+	scene.GetData().GetDataGL().GetSpotLightData().Shader.Unbind();
 }
 
 bool GLRenderer::SaveScreenShot()
@@ -539,11 +525,4 @@ void GLRenderer::ChangePostProcess()
 		break;
 	}
 	m_Shaders.Screen.Unbind();
-}
-
-void GLRenderer::ChangeSkybox(Scene& scene)
-{
-	m_Shaders.Skybox.Bind();
-	m_Shaders.Skybox.SetUniformHandleARB("u_Skybox", scene.GetData().GetDataGL().GetSkybox().Skybox.GetHandle());
-	m_Shaders.Skybox.Unbind();
 }

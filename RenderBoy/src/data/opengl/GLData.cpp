@@ -10,7 +10,11 @@ GLData::~GLData()
 
 void GLData::Init()
 {
-	m_BlankShader.Init(SHADER_OPENGL_BLANK);
+	// Init shaders
+	m_PointLightData.Shader.Init(SHADER_OPENGL_SHADOW_POINT);
+	m_SpotLightData.Shader.Init(SHADER_OPENGL_SHADOW_SPOT);
+	m_SkyboxData.Shader.Init(SHADER_OPENGL_SKYBOX);
+	m_CheckerMap.GenTexture(UV_MAP_FILEPATH);
 	// Initialize VAO to draw skybox
 	{
 		float position[] = {
@@ -133,10 +137,35 @@ void GLData::Init()
 
 void GLData::Reset()
 {
-	m_BlankShader.Init(SHADER_OPENGL_BLANK);
+	ChangeDrawMode();
 	m_ModelData.clear();
 	GLCubeMap newCubeMap;
 	m_SkyboxData.Skybox = newCubeMap;
+}
+
+void GLData::ChangeDrawMode()
+{
+	switch (core::SETTINGS.DrawMode)
+	{
+	case BLANK:
+		m_Shader.Init(SHADER_OPENGL_BLANK);
+		break;
+	case WIREFRAME:
+		m_Shader.Init(SHADER_OPENGL_WIREFRAME);
+		break;
+	case POINTCLOUD:
+		m_Shader.Init(SHADER_OPENGL_POINTCLOUD);
+		break;
+	case UVSET:
+		m_Shader.Init(SHADER_OPENGL_UVSET);
+		m_Shader.Bind();
+		m_Shader.SetUniformHandleARB("u_CheckerMap", m_CheckerMap.GetHandle());
+		m_Shader.Unbind();
+		break;
+	case DEPTH:
+		m_Shader.Init(SHADER_OPENGL_DEPTH);
+		break;
+	}
 }
 
 void GLData::AddModel(std::string name, Model model)
@@ -276,6 +305,9 @@ bool GLData::LoadSkybox(std::vector<std::string> filepath)
 {
 	if (m_SkyboxData.Skybox.GenTexture(filepath))
 	{
+		m_SkyboxData.Shader.Bind();
+		m_SkyboxData.Shader.SetUniformHandleARB("u_Skybox", m_SkyboxData.Skybox.GetHandle());
+		m_SkyboxData.Shader.Unbind();
 		return true;
 	}
 	return false;
@@ -286,7 +318,10 @@ void GLData::AddPointLight(std::string name)
 	GLFrameBuffer fb;
 	m_PointLightData.DepthMap.insert(std::pair<std::string, GLFrameBuffer>(name, fb));
 	m_PointLightData.DepthMap[name].Init(DEPTH_CUBE, 1024, 1024);
-	m_BlankShader.Init(SHADER_OPENGL_BLANK);
+	if (core::SETTINGS.DrawMode == BLANK)
+	{
+		m_Shader.Init(SHADER_OPENGL_BLANK);
+	}
 }
 
 void GLData::AddSpotLight(std::string name)
@@ -294,7 +329,10 @@ void GLData::AddSpotLight(std::string name)
 	GLFrameBuffer fb;
 	m_SpotLightData.DepthMap.insert(std::pair<std::string, GLFrameBuffer>(name, fb));
 	m_SpotLightData.DepthMap[name].Init(DEPTH_MAP, 1024, 1024);
-	m_BlankShader.Init(SHADER_OPENGL_BLANK);
+	if (core::SETTINGS.DrawMode == BLANK)
+	{
+		m_Shader.Init(SHADER_OPENGL_BLANK);
+	}
 }
 
 void GLData::AddDirLight(std::string name)
@@ -305,13 +343,19 @@ void GLData::AddDirLight(std::string name)
 void GLData::DeletePointLight(std::string name)
 {
 	m_PointLightData.DepthMap.erase(name);
-	m_BlankShader.Init(SHADER_OPENGL_BLANK);
+	if (core::SETTINGS.DrawMode == BLANK)
+	{
+		m_Shader.Init(SHADER_OPENGL_BLANK);
+	}
 }
 
 void GLData::DeleteSpotLight(std::string name)
 {
 	m_SpotLightData.DepthMap.erase(name);
-	m_BlankShader.Init(SHADER_OPENGL_BLANK);
+	if (core::SETTINGS.DrawMode == BLANK)
+	{
+		m_Shader.Init(SHADER_OPENGL_BLANK);
+	}
 }
 
 void GLData::DeleteDirLight(std::string name)

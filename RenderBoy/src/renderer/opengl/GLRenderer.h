@@ -11,7 +11,6 @@
 #include "scene/Scene.h"
 #include "gl/opengl/GLFrameBuffer.h"
 #include "shader/opengl/GLShader.h"
-#include "data/opengl/texture/GLTexture.h"
 
 struct Frame
 {
@@ -24,17 +23,9 @@ struct Frame
 
 struct Shaders
 {
-	GLShader Wireframe;
-	GLShader Pointcloud;
-	GLShader Depth;
 	GLShader Normal;
-	GLShader UVset;
 	GLShader Lightcube;
 	GLShader Screen;
-	GLShader Skybox;
-	GLShader PointShadow;
-	GLShader SpotShadow;
-	GLShader DirShadow;
 };
 
 class GLRenderer
@@ -42,7 +33,6 @@ class GLRenderer
 private:
 	Frame m_Frame;
 	Shaders m_Shaders;
-	GLTexture m_CheckerMap;
 
 	void Clear();
 	void DrawBlank(Scene& scene);
@@ -67,5 +57,4 @@ public:
 	void ChangeResolution();
 	void ChangeMSAA();
 	void ChangePostProcess();
-	void ChangeSkybox(Scene& scene);
 };

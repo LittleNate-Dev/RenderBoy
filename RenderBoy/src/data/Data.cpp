@@ -32,6 +32,18 @@ void Data::Reset()
 	}
 }
 
+void Data::ChangeDrawMode()
+{
+	switch (core::SETTINGS.GraphicsCore)
+	{
+	case OPENGL:
+		m_DataGL.ChangeDrawMode();
+		break;
+	default:
+		break;
+	}
+}
+
 void Data::AddModel(std::string name, Model model)
 {
 	switch (core::SETTINGS.GraphicsCore)

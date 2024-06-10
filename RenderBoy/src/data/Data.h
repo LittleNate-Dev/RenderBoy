@@ -20,6 +20,8 @@ public:
 
 	void Init();
 	void Reset();
+	// Change draw mode
+	void ChangeDrawMode();
 	// Add, delete and rename model
 	void AddModel(std::string name, Model model);
 	void DeleteModel(std::string name);

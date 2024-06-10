@@ -23,6 +23,7 @@ struct GLPointLightData
 	GLVertexArray VA;
 	GLVertexBuffer VB;
 	GLIndexBuffer IB;
+	GLShader Shader;
 	std::map<std::string, GLFrameBuffer> DepthMap;
 };
 
@@ -31,6 +32,7 @@ struct GLSpotLightData
 	GLVertexArray VA;
 	GLVertexBuffer VB;
 	GLIndexBuffer IB;
+	GLShader Shader;
 	std::map<std::string, GLFrameBuffer> DepthMap;
 };
 
@@ -39,6 +41,15 @@ struct GLDirLightData
 	GLVertexArray VA;
 	GLVertexBuffer VB;
 	GLIndexBuffer IB;
+};
+
+struct GLSkyboxData
+{
+	GLVertexArray VA;
+	GLVertexBuffer VB;
+	GLIndexBuffer IB;
+	GLShader Shader;
+	GLCubeMap Skybox;
 };
 
 struct GLModelData
@@ -64,23 +75,16 @@ struct GLModelData
 	std::vector<float> TransparentValue;
 };
 
-struct GLSkyboxData
-{
-	GLVertexArray VA;
-	GLVertexBuffer VB;
-	GLIndexBuffer IB;
-	GLCubeMap Skybox;
-};
-
 class GLData
 {
 private:
-	GLShader m_BlankShader;
+	GLShader m_Shader; // Shader used for different draw mode (except default)
 	GLSkyboxData m_SkyboxData;
 	GLPointLightData m_PointLightData;
 	GLSpotLightData m_SpotLightData;
 	GLDirLightData m_DirLightData;
 	std::map<std::string, GLModelData> m_ModelData;
+	GLTexture m_CheckerMap;
 
 	void AddPointLight(std::string name);
 	void AddSpotLight(std::string name);
@@ -98,6 +102,8 @@ public:
 
 	void Init();
 	void Reset();
+	// Change draw mode
+	void ChangeDrawMode();
 	// Add, delete and rename model data
 	void AddModel(std::string name, Model model);
 	bool DeleteModel(std::string name);
@@ -107,9 +113,9 @@ public:
 	void RenameLight(std::string oldName, std::string newName, Light_Type type);
 	bool LoadSkybox(std::vector<std::string> filepath);
 	// Get Data's members
-	inline GLShader& GetBlankShader()
+	inline GLShader& GetShader()
 	{
-		return m_BlankShader;
+		return m_Shader;
 	};
 	inline GLSkyboxData& GetSkybox()
 	{
