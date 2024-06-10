@@ -352,6 +352,11 @@ bool Scene::LoadScene(std::string filepath)
 					values = core::GetSceneValue(line);
 					m_SpotLights[light].SetDimAngle((float)std::atof(values[0].c_str()));
 				}
+				if (line.find("#SPOT_LIGHT_" + light + "_BIAS") != std::string::npos)
+				{
+					values = core::GetSceneValue(line);
+					m_SpotLights[light].SetBias(glm::vec2((float)std::atof(values[0].c_str()), (float)std::atof(values[1].c_str())));
+				}
 				if (line.find("#SPOT_LIGHT_" + light + "_ADS") != std::string::npos)
 				{
 					values = core::GetSceneValue(line);
@@ -378,6 +383,11 @@ bool Scene::LoadScene(std::string filepath)
 				{
 					values = core::GetSceneValue(line);
 					m_SpotLights[light].SetShadowRes((int)std::atoi(values[0].c_str()));
+				}
+				if (line.find("#SPOT_LIGHT_" + light + "_SOFT_SHADOW") != std::string::npos)
+				{
+					values = core::GetSceneValue(line);
+					m_SpotLights[light].SetSoftShadow((bool)std::atoi(values[0].c_str()));
 				}
 			}
 			// Load directional light
@@ -555,6 +565,9 @@ void Scene::SaveScene()
 		stream << line;
 		line = "#SPOT_LIGHT_" + light + "_DIMANGLE " + std::to_string(m_SpotLights[light].GetDimAngle()) + "\n";
 		stream << line;
+		glm::vec2 bias = m_SpotLights[light].GetBias();
+		line = "#SPOT_LIGHT_" + light + "_BIAS " + std::to_string(bias.x) + " " + std::to_string(bias.y) + "\n";
+		stream << line;
 		glm::vec3 ads = m_SpotLights[light].GetADS();
 		line = "#SPOT_LIGHT_" + light + "_ADS " + std::to_string(ads.x) + " " + std::to_string(ads.y) + " " + std::to_string(ads.z) + "\n";
 		stream << line;
@@ -566,6 +579,8 @@ void Scene::SaveScene()
 		line = "#SPOT_LIGHT_" + light + "_SHADOW " + std::to_string(m_SpotLights[light].CastShadow()) + "\n";
 		stream << line;
 		line = "#SPOT_LIGHT_" + light + "_SHADOW_RES " + std::to_string(m_SpotLights[light].GetShadowRes()) + "\n";
+		stream << line;
+		line = "#SPOT_LIGHT_" + light + "_SOFT_SHADOW " + std::to_string(m_SpotLights[light].SoftShadow()) + "\n";
 		stream << line;
 	}
 	// Save Directional Lights

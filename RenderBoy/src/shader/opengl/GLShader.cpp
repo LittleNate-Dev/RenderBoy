@@ -85,6 +85,38 @@ ShaderProgramSource GLShader::ParseShader(std::string filepath)
             }
             ss[(int)type] << line << '\n';
         }
+        else if (line.find("in vec4 v_FragPosSpot[SPOT_LIGHT_COUNT];") != std::string::npos)
+        {
+            if (core::SCENE_STATICS.SpotLight == 0)
+            {
+                line = "in vec4 v_FragPosSpot[1];";
+            }
+            ss[(int)type] << line << '\n';
+        }
+        else if (line.find("out vec4 v_FragPosSpot[SPOT_LIGHT_COUNT];") != std::string::npos)
+        {
+            if (core::SCENE_STATICS.SpotLight == 0)
+            {
+                line = "out vec4 v_FragPosSpot[1];";
+            }
+            ss[(int)type] << line << '\n';
+        }
+        else if (line.find("uniform SpotMat u_SpotMat[SPOT_LIGHT_COUNT];") != std::string::npos)
+        {
+            if (core::SCENE_STATICS.SpotLight == 0)
+            {
+                line = "uniform SpotMat u_SpotMat[1];";
+            }
+            ss[(int)type] << line << '\n';
+        }
+        else if (line.find("uniform SpotLight u_SpotLight[SPOT_LIGHT_COUNT];") != std::string::npos)
+        {
+            if (core::SCENE_STATICS.SpotLight == 0)
+            {
+                line = "uniform SpotLight u_SpotLight[1];";
+            }
+            ss[(int)type] << line << '\n';
+        }
         else
         {
             ss[(int)type] << line << '\n';

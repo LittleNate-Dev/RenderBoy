@@ -31,12 +31,5 @@ const vec4 faceColor = vec4(0.78, 0.78, 0.78, 1.0);
 
 void main()
 {
-    if (v_TexCoord.x == 0.0 && v_TexCoord.y == 0.0)
-    {
-        v_FragColor = faceColor;
-    }
-    else
-    {
-        v_FragColor = texture(u_CheckerMap, v_TexCoord);    
-    }
+    v_FragColor = texture(u_CheckerMap, v_TexCoord);
 }

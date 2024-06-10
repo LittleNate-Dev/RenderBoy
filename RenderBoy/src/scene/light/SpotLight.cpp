@@ -5,6 +5,7 @@ SpotLight::SpotLight()
 	m_Position = glm::vec3(0.0f);
 	m_EulerAngle = glm::vec3(0.0f);
 	m_Color = glm::vec3(1.0f);
+	m_Direction = glm::vec3(0.0f, 0.0f, 1.0f);
 	m_Angle = 90.0f;
 	m_DimAngle = 2.0f;
 	m_ADS = glm::vec3(0.2f, 0.5f, 1.0f);
@@ -15,13 +16,15 @@ SpotLight::SpotLight()
 	m_ShowCube = false;
 	m_CastShadow = true;
 	m_ShadowRes = 1024;
+	m_SoftShadow = true;
+	m_Bias = glm::vec2(0.0f);
 	m_ProjMat = glm::mat4(1.0f);
 	m_ViewMat = glm::mat4(1.0f);
 	m_ModelMat = glm::mat4(1.0f);
+	UpdateDirection();
 	UpdateProjMat();
 	UpdateViewMat();
 	UpdateModelMat();
-
 }
 
 SpotLight::~SpotLight()
@@ -36,7 +39,9 @@ void SpotLight::UpdateProjMat()
 void SpotLight::UpdateViewMat()
 {
 	glm::mat4 translateMat = glm::translate(glm::mat4(1.0f), m_Position);
-	glm::mat4 rotateMat = glm::rotate(glm::mat4(1.0f), glm::radians(m_EulerAngle.y), glm::vec3(0, 1, 0)) * glm::rotate(glm::mat4(1.0f), glm::radians(m_EulerAngle.x), glm::vec3(1, 0, 0));
+	glm::mat4 rotateMat = glm::rotate(glm::mat4(1.0f), glm::radians(m_EulerAngle.y), glm::vec3(0, 1, 0)) * glm::rotate(glm::mat4(1.0f), glm::radians(m_EulerAngle.x + 180.0f), glm::vec3(1, 0, 0));
+	glm::vec4 axis = rotateMat * glm::vec4(0.0f, 0.0f, 1.0f, 0.0f);
+	rotateMat = core::GetRodrigue(glm::normalize(axis), m_EulerAngle.z + 180.0f) * rotateMat;
 	glm::mat4 viewMat = translateMat * rotateMat;
 	viewMat = glm::inverse(viewMat);
 	m_ViewMat = viewMat;
@@ -48,13 +53,17 @@ void SpotLight::UpdateModelMat()
 	m_ModelMat = GetTranslateMat() * GetRotateMat() * modelMat;
 }
 
-glm::vec3 SpotLight::GetDirection()
+void SpotLight::UpdateDirection()
 {
 	glm::vec3 direction = glm::vec3(0.0f, 0.0f, 1.0f);
 	glm::mat4 rotateMat = glm::rotate(glm::mat4(1.0f), glm::radians(m_EulerAngle.y), glm::vec3(0, 1, 0)) * glm::rotate(glm::mat4(1.0f), glm::radians(m_EulerAngle.x), glm::vec3(1, 0, 0));
 	direction = glm::vec3(rotateMat * glm::vec4(direction, 0.0f));
-	direction = glm::normalize(direction);
-	return direction;
+	m_Direction = glm::normalize(direction);
+}
+
+glm::vec3 SpotLight::GetDirection()
+{
+	return m_Direction;
 }
 
 glm::mat4 SpotLight::GetViewMat()
@@ -120,6 +129,7 @@ void SpotLight::SetPitch(float pitch)
 		}
 	}
 	m_EulerAngle.x = pitch;
+	UpdateDirection();
 	UpdateViewMat();
 	UpdateModelMat();
 }
@@ -138,6 +148,7 @@ void SpotLight::SetYaw(float yaw)
 		}
 	}
 	m_EulerAngle.y = yaw;
+	UpdateDirection();
 	UpdateViewMat();
 	UpdateModelMat();
 }
@@ -156,6 +167,8 @@ void SpotLight::SetRoll(float roll)
 		}
 	}
 	m_EulerAngle.z = roll;
+	UpdateDirection();
+	UpdateViewMat();
 	UpdateModelMat();
 }
 
@@ -195,6 +208,7 @@ void SpotLight::SetEulerAngle(float pitch, float yaw, float roll)
 		}
 	}
 	m_EulerAngle = glm::vec3(pitch, yaw, roll);
+	UpdateDirection();
 	UpdateViewMat();
 	UpdateModelMat();
 }
@@ -235,6 +249,7 @@ void SpotLight::SetEulerAngle(glm::vec3 eulerAngle)
 		}
 	}
 	m_EulerAngle = eulerAngle;
+	UpdateDirection();
 	UpdateViewMat();
 	UpdateModelMat();
 }
@@ -250,7 +265,7 @@ void SpotLight::SetColor(glm::vec3 color)
 void SpotLight::SetAngle(float angle)
 {
 	angle = angle < 0.0f ? 0.0f : angle;
-	angle = angle + m_DimAngle > 180.0f ? 180.0f - m_DimAngle : angle;
+	angle = angle + m_DimAngle * 2.0f > 180.0f ? 180.0f - m_DimAngle * 2.0f : angle;
 	m_Angle = angle;
 	UpdateProjMat();
 	UpdateModelMat();
@@ -259,7 +274,7 @@ void SpotLight::SetAngle(float angle)
 void SpotLight::SetDimAngle(float dimAngle)
 {
 	dimAngle = dimAngle < 0.0f ? 0.0f : dimAngle;
-	dimAngle = m_Angle + dimAngle > 180.0f ? 180.0f - m_Angle : dimAngle;
+	dimAngle = m_Angle + dimAngle * 2.0f > 180.0f ? (180.0f - m_Angle) * 0.5f : dimAngle;
 	m_DimAngle = dimAngle;
 	UpdateProjMat();
 	UpdateModelMat();
@@ -338,6 +353,11 @@ void SpotLight::SetCLQ(glm::vec3 clq)
 	m_CLQ = clq;
 }
 
+void SpotLight::SetBias(glm::vec2 bias)
+{
+	m_Bias = bias;
+}
+
 void SpotLight::SetShowCube(bool showCube)
 {
 	m_ShowCube = showCube;
@@ -360,6 +380,11 @@ void SpotLight::SetShadowRes(unsigned int res)
 	((Data*)core::SCENE_DATA)->GetDataGL().GetSpotLightData().DepthMap[m_Name].ChangeShadowRes(m_ShadowRes, m_ShadowRes);
 }
 
+void SpotLight::SetSoftShadow(bool softShadow)
+{
+	m_SoftShadow = softShadow;
+}
+
 void SpotLight::DrawUI()
 {
 	if (m_LightSwitch)
@@ -379,14 +404,14 @@ void SpotLight::DrawUI()
 				ImGui::CenterAlignWidget("Angle", 150.0f * core::GetWidgetWidthCoefficient());
 				ImGui::LabelHighlighted("Angle");
 				ImGui::PushItemWidth(150.0f * core::GetWidgetWidthCoefficient());
-				if (ImGui::SliderFloat("##Angle", &m_Angle, 0.0f, 180.0f - m_DimAngle))
+				if (ImGui::SliderFloat("##Angle", &m_Angle, 0.0f, 180.0f - m_DimAngle * 2.0f))
 				{
 					UpdateProjMat();
 					UpdateModelMat();
 				}
 				ImGui::CenterAlignWidget("Dim Angle", 150.0f * core::GetWidgetWidthCoefficient());
 				ImGui::LabelHighlighted("Dim Angle");
-				if (ImGui::SliderFloat("##DimAngle", &m_DimAngle, 0.0f, 180.0f - m_Angle))
+				if (ImGui::SliderFloat("##DimAngle", &m_DimAngle, 0.0f, (180.0f - m_Angle) * 0.5f))
 				{
 					UpdateProjMat();
 					UpdateModelMat();
@@ -463,11 +488,13 @@ void SpotLight::DrawUI()
 				ImGui::PushItemWidth(280.0f * core::GetWidgetWidthCoefficient());
 				if (ImGui::SliderFloat("Pitch", &m_EulerAngle.x, -360.0f, 360.0f))
 				{
+					UpdateDirection();
 					UpdateViewMat();
 					UpdateModelMat();
 				}
 				if (ImGui::SliderFloat("Yaw", &m_EulerAngle.y, -360.0f, 360.0f))
 				{
+					UpdateDirection();
 					UpdateViewMat();
 					UpdateModelMat();
 				}
@@ -551,6 +578,7 @@ void SpotLight::DrawUI()
 				((Data*)core::SCENE_DATA)->GetDataGL().GetSpotLightData().DepthMap[m_Name].ChangeShadowRes(m_ShadowRes, m_ShadowRes);
 			}
 			ImGui::PopItemWidth();
+			ImGui::Checkbox("Soft Shadow", &m_SoftShadow);
 		}
 		ImGui::TreePop();
 	}
@@ -560,6 +588,12 @@ void SpotLight::DrawUI()
 		// Advanced settings
 		if (ImGui::TreeNode("Advanced settings"))
 		{
+			ImGui::PushItemWidth(100.0f * core::GetWidgetWidthCoefficient());
+			ImGui::CenterAlignWidget(100.0f * core::GetWidgetWidthCoefficient());
+			ImGui::InputFloat("Min Bias", &m_Bias.x, 0.0f, 0.0f, "%.8f");
+			ImGui::CenterAlignWidget(100.0f * core::GetWidgetWidthCoefficient());
+			ImGui::InputFloat("Max Bias", &m_Bias.y, 0.0f, 0.0f, "%.8f");
+			ImGui::PopItemWidth();
 			ImGui::PushItemWidth(80.0f * core::GetWidgetWidthCoefficient());
 			ImGui::CenterAlignWidget(80.0f * core::GetWidgetWidthCoefficient());
 			if (ImGui::InputFloat("Ambient", &m_ADS.x, 0.0f, 0.0f, "%.6f"))
@@ -605,6 +639,8 @@ void SpotLight::DrawUI()
 		m_ShowCube = false;
 		m_CastShadow = true;
 		m_ShadowRes = 1024;
+		m_SoftShadow = true;
+		m_Bias = glm::vec2(0.0f);
 		UpdateProjMat();
 		UpdateViewMat();
 		UpdateModelMat();

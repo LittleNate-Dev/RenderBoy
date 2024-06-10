@@ -17,6 +17,7 @@ private:
 	glm::mat4 m_ProjMat;
 	glm::mat4 m_ViewMat;
 	glm::mat4 m_ModelMat;
+	glm::vec3 m_Direction;
 	glm::vec3 m_Position;
 	glm::vec3 m_EulerAngle;
 	glm::vec3 m_Color;
@@ -37,6 +38,8 @@ private:
 	bool m_CastShadow;
 	// Resolution of the shadow map
 	unsigned int m_ShadowRes;
+	bool m_SoftShadow;
+	glm::vec2 m_Bias;
 
 public:
 	SpotLight();
@@ -46,6 +49,7 @@ public:
 	void UpdateProjMat();
 	void UpdateViewMat();
 	void UpdateModelMat();
+	void UpdateDirection();
 	// Get spot light's matrices
 	glm::vec3 GetDirection();
 	glm::mat4 GetViewMat();
@@ -78,10 +82,12 @@ public:
 	void SetQuadratic(float quadratic);
 	void SetCLQ(float constant, float linear, float quadratic);
 	void SetCLQ(glm::vec3 clq);
+	void SetBias(glm::vec2 bias);
 	void SetShowCube(bool drawCube);
 	void SetLightSwitch(bool lightSwitch);
 	void SetCastShadow(bool castShadow);
 	void SetShadowRes(unsigned int res);
+	void SetSoftShadow(bool softShadow);
 	// Get spot light's members
 	inline std::string GetName() const
 	{
@@ -147,6 +153,10 @@ public:
 	{
 		return m_CLQ;
 	};
+	inline glm::vec2 GetBias() const
+	{
+		return m_Bias;
+	};
 	inline bool ShowCube() const
 	{
 		return m_ShowCube;
@@ -162,6 +172,10 @@ public:
 	inline unsigned int GetShadowRes() const
 	{
 		return m_ShadowRes;
+	};
+	inline bool SoftShadow() const
+	{
+		return m_SoftShadow;
 	};
 	// Draw UI
 	void DrawUI();
