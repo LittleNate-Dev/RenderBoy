@@ -5,6 +5,7 @@ PointLight::PointLight()
 	m_Position = glm::vec3(0.0f);
 	m_Color = glm::vec3(1.0f);
 	m_ADS = glm::vec3(0.2f, 0.5f, 1.0f);
+	m_Bias = 0.0;
 	m_Range = 10.0f;
 	m_Intensity = 1.0f;
 	m_CLQ = glm::vec3(1.0f, 0.35f, 0.44f);
@@ -12,6 +13,7 @@ PointLight::PointLight()
 	m_ShowCube = false;
 	m_CastShadow = true;
 	m_ShadowRes = 1024;
+	m_SoftShadow = true;
 	m_ProjMat = glm::mat4(1.0f);
 	for (unsigned int i = 0; i < 6; i++)
 	{
@@ -191,6 +193,11 @@ void PointLight::SetCLQ(glm::vec3 clq)
 	m_CLQ = clq;
 }
 
+void PointLight::SetBias(float bias)
+{
+	m_Bias = bias;
+}
+
 void PointLight::SetShowCube(bool drawCube)
 {
 	m_ShowCube = drawCube;
@@ -211,6 +218,11 @@ void PointLight::SetShadowRes(unsigned int res)
 	res = res == 0 ? m_ShadowRes : res;
 	m_ShadowRes = res;
 	((Data*)core::SCENE_DATA)->GetDataGL().GetPointLightData().DepthMap[m_Name].ChangeShadowRes(m_ShadowRes, m_ShadowRes);
+}
+
+void PointLight::SetSoftShadow(bool softShadow)
+{
+	m_SoftShadow = softShadow;
 }
 
 void PointLight::DrawUI()
@@ -329,6 +341,7 @@ void PointLight::DrawUI()
 				((Data*)core::SCENE_DATA)->GetDataGL().GetPointLightData().DepthMap[m_Name].ChangeShadowRes(m_ShadowRes, m_ShadowRes);
 			}
 			ImGui::PopItemWidth();
+			ImGui::Checkbox("Soft Shadow", &m_SoftShadow);
 		}
 		ImGui::TreePop();
 	}
@@ -338,6 +351,9 @@ void PointLight::DrawUI()
 		// Advanced settings
 		if (ImGui::TreeNode("Advanced settings"))
 		{
+			ImGui::PushItemWidth(100.0f * core::GetWidgetWidthCoefficient());
+			ImGui::CenterAlignWidget(100.0f * core::GetWidgetWidthCoefficient());
+			ImGui::InputFloat("Bias", &m_Bias, 0.0f, 0.0f, "%.8f");
 			ImGui::PushItemWidth(80.0f * core::GetWidgetWidthCoefficient());
 			ImGui::CenterAlignWidget(80.0f * core::GetWidgetWidthCoefficient());
 			if (ImGui::InputFloat("Ambient", &m_ADS.x, 0.0f, 0.0f, "%.6f"))
@@ -376,9 +392,11 @@ void PointLight::DrawUI()
 		m_Range = 10.0f;
 		m_Intensity = 1.0f;
 		m_CLQ = glm::vec3(1.0f, 0.35f, 0.44f);
+		m_Bias = 0.0f;
 		m_LightSwitch = true;
 		m_ShowCube = false;
 		m_CastShadow = true;
+		m_SoftShadow = true;
 		m_ShadowRes = 1024;
 		UpdateProjMat();
 		UpdateViewMat();

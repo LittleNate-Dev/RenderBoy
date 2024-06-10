@@ -21,6 +21,8 @@ private:
 	glm::vec3 m_Color;
 	// Parameters used for Bling-Fong shading
 	glm::vec3 m_ADS; // Ambient, Diffuse, Specular
+	// Parameter used for shadow mapping
+	float m_Bias;
 	// Parameters used for light attenuation
 	float m_Range;
 	float m_Intensity;
@@ -33,6 +35,7 @@ private:
 	bool m_CastShadow;
 	// Resolution of the shadow map
 	unsigned int m_ShadowRes;
+	bool m_SoftShadow;
 
 public:
 	PointLight();
@@ -64,10 +67,12 @@ public:
 	void SetQuadratic(float quadratic);
 	void SetCLQ(float constant, float linear, float quadratic);
 	void SetCLQ(glm::vec3 clq);
+	void SetBias(float bias);
 	void SetShowCube(bool drawCube);
 	void SetLightSwitch(bool lightSwitch);
 	void SetCastShadow(bool castShadow);
 	void SetShadowRes(unsigned int res);
+	void SetSoftShadow(bool softShadow);
 	// Get spot light's members
 	inline std::string GetName() const
 	{
@@ -121,6 +126,10 @@ public:
 	{
 		return m_CLQ;
 	};
+	inline float GetBias() const 
+	{
+		return m_Bias;
+	};
 	inline bool ShowCube() const
 	{
 		return m_ShowCube;
@@ -132,6 +141,10 @@ public:
 	inline bool CastShadow() const
 	{
 		return m_CastShadow;
+	};
+	inline bool SoftShadow() const
+	{
+		return m_SoftShadow;
 	};
 	inline unsigned int GetShadowRes() const
 	{

@@ -1371,7 +1371,7 @@ void Application::GamepadInput()
         {
             // Switch post process effect
             isGamepadDpadUpPressed = false;
-            core::SETTINGS.PP = (Post_Process)((core::SETTINGS.PP + 1) % DRAW_MODE_COUNT);
+            core::SETTINGS.PP = (Post_Process)((core::SETTINGS.PP + 1) % POST_PROCESS_COUNT);
             m_Renderer.ChangePostProcess();
         }
 
@@ -1397,7 +1397,8 @@ void Application::GamepadInput()
         {
             // Switch draw mode
             isGamepadDpadLeftPressed = false;
-            core::SETTINGS.DrawMode = (Draw_Mode)((core::SETTINGS.DrawMode - 1 < 0 ? POST_PROCESS_COUNT - 1 : core::SETTINGS.DrawMode - 1) % POST_PROCESS_COUNT);
+            core::SETTINGS.DrawMode = (Draw_Mode)((core::SETTINGS.DrawMode - 1 < 0 ? DRAW_MODE_COUNT - 1 : core::SETTINGS.DrawMode - 1) % DRAW_MODE_COUNT);
+            m_Scene.GetData().ChangeDrawMode();
         }
 
         static bool isGamepadDpadRightPressed;
@@ -1410,6 +1411,7 @@ void Application::GamepadInput()
             // Switch draw mode
             isGamepadDpadRightPressed = false;
             core::SETTINGS.DrawMode = (Draw_Mode)((core::SETTINGS.DrawMode + 1) % DRAW_MODE_COUNT);
+            m_Scene.GetData().ChangeDrawMode();
         }
 
         if (core::IS_WARNING_OPENED && state.buttons[GLFW_GAMEPAD_BUTTON_B])

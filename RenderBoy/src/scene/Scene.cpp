@@ -268,6 +268,11 @@ bool Scene::LoadScene(std::string filepath)
 					values = core::GetSceneValue(line);
 					m_PointLights[light].SetIntensity((float)std::atof(values[0].c_str()));
 				}
+				if (line.find("#POINT_LIGHT_" + light + "_BIAS") != std::string::npos)
+				{
+					values = core::GetSceneValue(line);
+					m_PointLights[light].SetBias((float)std::atof(values[0].c_str()));
+				}
 				if (line.find("#POINT_LIGHT_" + light + "_ADS") != std::string::npos)
 				{
 					values = core::GetSceneValue(line);
@@ -294,6 +299,11 @@ bool Scene::LoadScene(std::string filepath)
 				{
 					values = core::GetSceneValue(line);
 					m_PointLights[light].SetShadowRes((int)std::atoi(values[0].c_str()));
+				}
+				if (line.find("#POINT_LIGHT_" + light + "_SOFT_SHADOW") != std::string::npos)
+				{
+					values = core::GetSceneValue(line);
+					m_PointLights[light].SetSoftShadow((bool)std::atoi(values[0].c_str()));
 				}
 			}
 			// Load spot light
@@ -505,6 +515,8 @@ void Scene::SaveScene()
 		stream << line;
 		line = "#POINT_LIGHT_" + light + "_INTENSITY " + std::to_string(m_PointLights[light].GetIntensity()) + "\n";
 		stream << line;
+		line = "#POINT_LIGHT_" + light + "_BIAS " + std::to_string(m_PointLights[light].GetBias()) + "\n";
+		stream << line;
 		glm::vec3 ads = m_PointLights[light].GetADS();
 		line = "#POINT_LIGHT_" + light + "_ADS " + std::to_string(ads.x) + " " + std::to_string(ads.y) + " " + std::to_string(ads.z) + "\n";
 		stream << line;
@@ -516,6 +528,8 @@ void Scene::SaveScene()
 		line = "#POINT_LIGHT_" + light + "_SHADOW " + std::to_string(m_PointLights[light].CastShadow()) + "\n";
 		stream << line;
 		line = "#POINT_LIGHT_" + light + "_SHADOW_RES " + std::to_string(m_PointLights[light].GetShadowRes()) + "\n";
+		stream << line;
+		line = "#POINT_LIGHT_" + light + "_SOFT_SHADOW " + std::to_string(m_PointLights[light].SoftShadow()) + "\n";
 		stream << line;
 	}
 	// Save Spot Lights

@@ -150,15 +150,23 @@ void GLRenderer::DrawBlank(Scene& scene)
 	{
 		light = scene.GetPointLightList()[i];
 		std::string lightName = "u_PointLight[" + std::to_string(i) + "].";
-		scene.GetData().GetDataGL().GetShader().SetUniformVec3f(lightName + "Position", scene.GetPointLights()[light].GetPosition());
-		scene.GetData().GetDataGL().GetShader().SetUniformVec3f(lightName + "Color", scene.GetPointLights()[light].GetColor());
-		scene.GetData().GetDataGL().GetShader().SetUniformVec3f(lightName + "ADS", scene.GetPointLights()[light].GetADS());
-		scene.GetData().GetDataGL().GetShader().SetUniformVec3f(lightName + "CLQ", scene.GetPointLights()[light].GetCLQ());
-		scene.GetData().GetDataGL().GetShader().SetUniform1f(lightName + "Range", scene.GetPointLights()[light].GetRange());
-		scene.GetData().GetDataGL().GetShader().SetUniform1f(lightName + "Intensity", scene.GetPointLights()[light].GetIntensity());
 		scene.GetData().GetDataGL().GetShader().SetUniform1i(lightName + "LightSwitch", scene.GetPointLights()[light].LightSwitch());
-		scene.GetData().GetDataGL().GetShader().SetUniform1i(lightName + "CastShadow", scene.GetPointLights()[light].CastShadow());
-		scene.GetData().GetDataGL().GetShader().SetUniformHandleARB(lightName + "ShadowMap", scene.GetData().GetDataGL().GetPointLightData().DepthMap[light].GetHandle());
+		if (scene.GetPointLights()[light].LightSwitch())
+		{
+			scene.GetData().GetDataGL().GetShader().SetUniformVec3f(lightName + "Position", scene.GetPointLights()[light].GetPosition());
+			scene.GetData().GetDataGL().GetShader().SetUniformVec3f(lightName + "Color", scene.GetPointLights()[light].GetColor());
+			scene.GetData().GetDataGL().GetShader().SetUniformVec3f(lightName + "ADS", scene.GetPointLights()[light].GetADS());
+			scene.GetData().GetDataGL().GetShader().SetUniformVec3f(lightName + "CLQ", scene.GetPointLights()[light].GetCLQ());
+			scene.GetData().GetDataGL().GetShader().SetUniform1f(lightName + "Range", scene.GetPointLights()[light].GetRange());
+			scene.GetData().GetDataGL().GetShader().SetUniform1f(lightName + "Intensity", scene.GetPointLights()[light].GetIntensity());
+			scene.GetData().GetDataGL().GetShader().SetUniform1i(lightName + "CastShadow", scene.GetPointLights()[light].CastShadow());
+			if (scene.GetPointLights()[light].CastShadow())
+			{
+				scene.GetData().GetDataGL().GetShader().SetUniform1i(lightName + "SoftShadow", scene.GetPointLights()[light].SoftShadow());
+				scene.GetData().GetDataGL().GetShader().SetUniformHandleARB(lightName + "ShadowMap", scene.GetData().GetDataGL().GetPointLightData().DepthMap[light].GetHandle());
+				scene.GetData().GetDataGL().GetShader().SetUniform1f(lightName + "Bias", scene.GetPointLights()[light].GetBias());
+			}
+		}
 	}
 
 	std::string model;
@@ -384,7 +392,7 @@ void GLRenderer::DrawPointLightShadow(Scene& scene)
 		{
 			// TODO
 		}
-		if (scene.GetPointLights()[light].CastShadow())
+		if (scene.GetPointLights()[light].LightSwitch() && scene.GetPointLights()[light].CastShadow())
 		{
 			GLCall(glViewport(0, 0, scene.GetPointLights()[light].GetShadowRes() , scene.GetPointLights()[light].GetShadowRes()));
 			scene.GetData().GetDataGL().GetPointLightData().DepthMap[light].Bind();
@@ -429,7 +437,7 @@ void GLRenderer::DrawSpotLightShadow(Scene& scene)
 		{
 			// TODO
 		}
-		if (scene.GetSpotLights()[light].CastShadow())
+		if (scene.GetSpotLights()[light].LightSwitch() && scene.GetSpotLights()[light].CastShadow())
 		{
 			GLCall(glViewport(0, 0, scene.GetSpotLights()[light].GetShadowRes(), scene.GetSpotLights()[light].GetShadowRes()));
 			scene.GetData().GetDataGL().GetSpotLightData().DepthMap[light].Bind();
