@@ -17,7 +17,7 @@ SpotLight::SpotLight()
 	m_CastShadow = true;
 	m_ShadowRes = 1024;
 	m_SoftShadow = true;
-	m_SoftDegree = 0.1f;
+	m_SoftDegree = 2;
 	m_Bias = glm::vec2(0.0f);
 	m_ProjMat = glm::mat4(1.0f);
 	m_ViewMat = glm::mat4(1.0f);
@@ -656,6 +656,7 @@ void SpotLight::DrawUI()
 		m_CastShadow = true;
 		m_ShadowRes = 1024;
 		m_SoftShadow = true;
+		m_SoftDegree = 2;
 		m_Bias = glm::vec2(0.0f);
 		UpdateProjMat();
 		UpdateViewMat();

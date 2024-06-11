@@ -162,7 +162,8 @@ vec4 CalcPointLight(int i)
     if (u_PointLight[i].CastShadow)
     {   
         float currentDepth = distance;
-        if (currentDepth >= u_PointLight[i].FarPlane)
+        vec3 fragToLight = v_FragPos - u_PointLight[i].Position;
+        if (currentDepth >= u_PointLight[i].FarPlane && texture(u_PointLight[i].ShadowMap, fragToLight).r == 1.0)
         {
             lighting = ambient + diffuse + specular;
         }
@@ -170,7 +171,6 @@ vec4 CalcPointLight(int i)
         {
             // Calculate shadow
             float shadow  = 0.0;
-            vec3 fragToLight = v_FragPos - u_PointLight[i].Position;
             if (u_PointLight[i].SoftShadow)
             {
                 float samples = 4.0;
@@ -257,48 +257,59 @@ vec4 CalcSpotLight(int i)
     {
         float bias = max(u_SpotLight[i].Bias.y * (1.0 - dot(normal, lightDir)), u_SpotLight[i].Bias.x);
         vec3 ndc = v_FragPosSpot[i].xyz / v_FragPosSpot[i].w;
-        // Inside light's frustum
-        if (ndc.x < 1.0 && ndc.x > -1.0 && ndc.y < 1.0 && ndc.y > -1.0 && ndc.z < 1.0 && ndc.z > -1.0)
+        if (ndc.x < 1.0 && ndc.x > -1.0 && ndc.y < 1.0 && ndc.y > -1.0 && ndc.z > -1.0)
         {
+            // Inside light's frustum
             lighting = vec4(1.0);
             vec2 shadowTex = ndc.xy;
             shadowTex = shadowTex * 0.5 + 0.5;
             float closestDepth = texture(u_SpotLight[i].ShadowMap, shadowTex).r;
             float currentDepth = ndc.z * 0.5 + 0.5;
-            closestDepth *= u_SpotLight[i].FarPlane;
-            currentDepth *= u_SpotLight[i].FarPlane;
-            if (currentDepth - bias > closestDepth)
+            if (closestDepth == 1.0)
             {
-                if (u_SpotLight[i].SoftShadow)
-                {
-                    // PCF
-                    float shadow = 0.0;
-                    vec2 texelSize = 1.0 / textureSize(u_SpotLight[i].ShadowMap, 0);
-                    float offset = u_SpotLight[i].SoftDegree;
-                    for(float x = -offset; x <= offset; ++x)
-                    {
-                        for(float y = -offset; y <= offset; ++y)
-                        {
-                            float pcfDepth = texture(u_SpotLight[i].ShadowMap, shadowTex.xy + vec2(x, y) * texelSize).r; 
-                            pcfDepth *= u_SpotLight[i].FarPlane;
-                            shadow += currentDepth - bias > pcfDepth  ? 1.0 : 0.0;        
-                        }    
-                    }
-                    shadow /= pow(offset * 2.0 + 1.0, 2.0);
-                    lighting = ambient + (1.0 - shadow) * (diffuse + specular);
-                }
-                else
-                {
-                    lighting = ambient;
-                }
+                lighting = ambient + diffuse + specular;
             }
             else
             {
-                lighting = ambient + diffuse + specular;
+                closestDepth *= u_SpotLight[i].FarPlane;
+                currentDepth *= u_SpotLight[i].FarPlane;
+                if (currentDepth - bias > closestDepth)
+                {
+                    if (u_SpotLight[i].SoftShadow)
+                    {
+                        // PCF
+                        float shadow = 0.0;
+                        vec2 texelSize = 1.0 / textureSize(u_SpotLight[i].ShadowMap, 0);
+                        float offset = u_SpotLight[i].SoftDegree;
+                        for(float x = -offset; x <= offset; ++x)
+                        {
+                            for(float y = -offset; y <= offset; ++y)
+                            {
+                                float pcfDepth = texture(u_SpotLight[i].ShadowMap, shadowTex.xy + vec2(x, y) * texelSize).r; 
+                                pcfDepth *= u_SpotLight[i].FarPlane;
+                                shadow += currentDepth - bias > pcfDepth  ? 1.0 : 0.0;        
+                            }    
+                        }
+                        shadow /= pow(offset * 2.0 + 1.0, 2.0);
+                        lighting = ambient + (1.0 - shadow) * (diffuse + specular);
+                    }
+                    else
+                    {
+                        lighting = ambient;
+                    }
+                }
+                else
+                {
+                    lighting = ambient + diffuse + specular;
+                }
             }
         }
         else
         {
+            if (ndc.x < 1.0 && ndc.x > -1.0 && ndc.y < 1.0 && ndc.y > -1.0)
+            {
+
+            }
             lighting = ambient + diffuse + specular;
         }
     }
