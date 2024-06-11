@@ -7,7 +7,7 @@ DirectionalLight::DirectionalLight()
 	m_ADS = glm::vec3(0.2f, 0.5f, 1.0f);
 	m_Intensity = 1.0f;
 	m_LightSwitch = true;
-	m_ShowCube = false;
+	m_ShowCube = true;
 	m_CastShadow = true;
 	m_ShadowRes = 1024;
 }
@@ -396,7 +396,7 @@ void DirectionalLight::DrawUI()
 		m_ADS = glm::vec3(0.2f, 0.5f, 1.0f);
 		m_Intensity = 1.0f;
 		m_LightSwitch = true;
-		m_ShowCube = false;
+		m_ShowCube = true;
 		m_CastShadow = true;
 		m_ShadowRes = 1024;
 	}

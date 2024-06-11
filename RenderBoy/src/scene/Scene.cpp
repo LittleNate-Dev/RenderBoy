@@ -290,6 +290,11 @@ bool Scene::LoadScene(std::string filepath)
 					values = core::GetSceneValue(line);
 					m_PointLights[light].SetLightSwitch((bool)std::atoi(values[0].c_str()));
 				}
+				else if (line.find("#POINT_LIGHT_" + light + "_SHOW_CUBE") != std::string::npos)
+				{
+					values = core::GetSceneValue(line);
+					m_PointLights[light].SetShowCube((bool)std::atoi(values[0].c_str()));
+				}
 				else if (line.find("#POINT_LIGHT_" + light + "_CAST_SHADOW") != std::string::npos)
 				{
 					values = core::GetSceneValue(line);
@@ -378,6 +383,11 @@ bool Scene::LoadScene(std::string filepath)
 				{
 					values = core::GetSceneValue(line);
 					m_SpotLights[light].SetLightSwitch((bool)std::atoi(values[0].c_str()));
+				}
+				else if (line.find("#SPOT_LIGHT_" + light + "_SHOW_CUBE") != std::string::npos)
+				{
+					values = core::GetSceneValue(line);
+					m_SpotLights[light].SetShowCube((bool)std::atoi(values[0].c_str()));
 				}
 				else if (line.find("#SPOT_LIGHT_" + light + "_CAST_SHADOW") != std::string::npos)
 				{
@@ -545,6 +555,8 @@ void Scene::SaveScene()
 		stream << line;
 		line = "#POINT_LIGHT_" + light + "_SWITCH " + std::to_string(m_PointLights[light].LightSwitch()) + "\n";
 		stream << line;
+		line = "#POINT_LIGHT_" + light + "_SHOW_CUBE " + std::to_string(m_PointLights[light].ShowCube()) + "\n";
+		stream << line;
 		line = "#POINT_LIGHT_" + light + "_CAST_SHADOW " + std::to_string(m_PointLights[light].CastShadow()) + "\n";
 		stream << line;
 		line = "#POINT_LIGHT_" + light + "_SHADOW_RES " + std::to_string(m_PointLights[light].GetShadowRes()) + "\n";
@@ -587,6 +599,8 @@ void Scene::SaveScene()
 		line = "#SPOT_LIGHT_" + light + "_CLQ " + std::to_string(clq.x) + " " + std::to_string(clq.y) + " " + std::to_string(clq.z) + "\n";
 		stream << line;
 		line = "#SPOT_LIGHT_" + light + "_SWITCH " + std::to_string(m_SpotLights[light].LightSwitch()) + "\n";
+		stream << line;
+		line = "#SPOT_LIGHT_" + light + "_SHOW_CUBE " + std::to_string(m_SpotLights[light].ShowCube()) + "\n";
 		stream << line;
 		line = "#SPOT_LIGHT_" + light + "_CAST_SHADOW " + std::to_string(m_SpotLights[light].CastShadow()) + "\n";
 		stream << line;
@@ -766,6 +780,7 @@ bool Scene::AddSpotLight(std::string name)
 	SpotLight light;
 	light.SetName(name);
 	light.SetPosition(m_Camera.GetPosition());
+	light.SetEulerAngle(glm::vec3(glm::vec2(m_Camera.GetEulerAngle()), 0.0f) + glm::vec3(180.0f, 0.0f, 0.0f));
 	m_SpotLightList.push_back(name);
 	m_SpotLights.insert(std::pair<std::string, SpotLight>(name, light));
 	core::currentSpotLight = nullptr;

@@ -1096,7 +1096,7 @@ void Application::WindowResize(int width, int height)
 
 void Application::KeyboardInput()
 {    
-    if (!core::IS_SETTINGS_OPENED)
+    if (!core::IS_SETTINGS_OPENED && !ImGui::IsAnyItemActive())
     {
         // Camera Movement
         glm::vec3 move = glm::vec4(0.0f);

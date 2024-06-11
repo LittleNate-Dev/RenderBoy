@@ -10,7 +10,7 @@ PointLight::PointLight()
 	m_Intensity = 1.0f;
 	m_CLQ = glm::vec3(1.0f, 0.35f, 0.44f);
 	m_LightSwitch = true;
-	m_ShowCube = false;
+	m_ShowCube = true;
 	m_CastShadow = true;
 	m_ShadowRes = 1024;
 	m_SoftShadow = true;
@@ -412,7 +412,7 @@ void PointLight::DrawUI()
 		m_CLQ = glm::vec3(1.0f, 0.35f, 0.44f);
 		m_Bias = 0.0f;
 		m_LightSwitch = true;
-		m_ShowCube = false;
+		m_ShowCube = true;
 		m_CastShadow = true;
 		m_SoftShadow = true;
 		m_ShadowRes = 1024;
