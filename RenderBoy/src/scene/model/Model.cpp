@@ -164,7 +164,8 @@ Mesh Model::AssimpProcessMesh(aiMesh* mesh, aiNode* node, const aiScene* scene)
             vector.x = mesh->mNormals[i].x;
             vector.y = mesh->mNormals[i].y;
             vector.z = mesh->mNormals[i].z;
-            vertex.Normal = glm::vec3(transMat * glm::vec4(vector, 1.0f));
+            //vertex.Normal = glm::vec3(transMat * glm::vec4(vector, 1.0f));
+            vertex.Normal = vector;
         }
         else
         {
@@ -189,7 +190,8 @@ Mesh Model::AssimpProcessMesh(aiMesh* mesh, aiNode* node, const aiScene* scene)
             vector.x = mesh->mTangents[i].x;
             vector.y = mesh->mTangents[i].y;
             vector.z = mesh->mTangents[i].z;
-            vertex.Tangent = glm::vec3(transMat * glm::vec4(vector, 1.0f));
+            //vertex.Tangent = glm::vec3(transMat * glm::vec4(vector, 1.0f));
+            vertex.Tangent = vector;
         }
         else
         {
@@ -200,7 +202,8 @@ Mesh Model::AssimpProcessMesh(aiMesh* mesh, aiNode* node, const aiScene* scene)
             vector.x = mesh->mBitangents[i].x;
             vector.y = mesh->mBitangents[i].y;
             vector.z = mesh->mBitangents[i].z;
-            vertex.Bitangent = glm::vec3(transMat * glm::vec4(vector, 1.0f));
+            //vertex.Bitangent = glm::vec3(transMat * glm::vec4(vector, 1.0f));
+            vertex.Bitangent = vector;
         }
         else
         {
