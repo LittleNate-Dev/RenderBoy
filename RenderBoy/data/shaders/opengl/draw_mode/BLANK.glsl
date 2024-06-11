@@ -56,6 +56,8 @@ struct PointLight
     bool SoftShadow;
     samplerCube ShadowMap;
     float Bias;
+    float FarPlane;
+    float SoftDegree;
 };
 
 struct SpotLight
@@ -74,6 +76,8 @@ struct SpotLight
     bool SoftShadow;
     sampler2D ShadowMap;
     vec2 Bias;
+    float FarPlane;
+    float SoftDegree;
 };
 
 layout(location = 0) out vec4 v_FragColor;
@@ -158,7 +162,7 @@ vec4 CalcPointLight(int i)
     if (u_PointLight[i].CastShadow)
     {   
         float currentDepth = distance;
-        if (currentDepth >= u_PointLight[i].Range)
+        if (currentDepth >= u_PointLight[i].FarPlane)
         {
             lighting = ambient + diffuse + specular;
         }
@@ -170,7 +174,7 @@ vec4 CalcPointLight(int i)
             if (u_PointLight[i].SoftShadow)
             {
                 float samples = 4.0;
-                float offset  = 0.1;
+                float offset  = u_PointLight[i].SoftDegree;
                 for(float x = -offset; x < offset; x += offset / (samples * 0.5))
                 {
                     for(float y = -offset; y < offset; y += offset / (samples * 0.5))
@@ -178,7 +182,7 @@ vec4 CalcPointLight(int i)
                         for(float z = -offset; z < offset; z += offset / (samples * 0.5))
                         {
                             float closestDepth = texture(u_PointLight[i].ShadowMap, fragToLight + vec3(x, y, z)).r; 
-                            closestDepth *= u_PointLight[i].Range;
+                            closestDepth *= u_PointLight[i].FarPlane;
                             if(currentDepth - u_PointLight[i].Bias > closestDepth)
                             {
                                 shadow += 1.0;
@@ -191,7 +195,7 @@ vec4 CalcPointLight(int i)
             else
             {
                 float closestDepth = texture(u_PointLight[i].ShadowMap, fragToLight).r;
-                closestDepth *= u_PointLight[i].Range;
+                closestDepth *= u_PointLight[i].FarPlane;
                 float currentDepth = length(fragToLight);
                 shadow = currentDepth -  u_PointLight[i].Bias > closestDepth ? 1.0 : 0.0;        
             }
@@ -241,8 +245,6 @@ vec4 CalcSpotLight(int i)
     vec4 ambient, diffuse, specular;
     vec3 projCoords = v_FragPosSpot[i].xyz / v_FragPosSpot[i].w;
     projCoords = projCoords * 0.5 + 0.5;
-    //ambient  = u_SpotLight[i].ADS.x * vec4(texture(u_SpotLight[i].ShadowMap, projCoords.xy).r, 0.0, 0.0, 1.0) * matDiffuse;
-    //diffuse  = u_SpotLight[i].ADS.y * vec4(texture(u_SpotLight[i].ShadowMap, projCoords.xy).r, 0.0, 0.0, 1.0) * diff * matDiffuse;
     ambient  = u_SpotLight[i].ADS.x * vec4(u_SpotLight[i].Color, 1.0) * matDiffuse;
     diffuse  = u_SpotLight[i].ADS.y * vec4(u_SpotLight[i].Color, 1.0) * diff * matDiffuse;
     specular = u_SpotLight[i].ADS.z * spec * matSpecular;
@@ -263,8 +265,8 @@ vec4 CalcSpotLight(int i)
             shadowTex = shadowTex * 0.5 + 0.5;
             float closestDepth = texture(u_SpotLight[i].ShadowMap, shadowTex).r;
             float currentDepth = ndc.z * 0.5 + 0.5;
-            closestDepth *= u_SpotLight[i].Range;
-            currentDepth *= u_SpotLight[i].Range;
+            closestDepth *= u_SpotLight[i].FarPlane;
+            currentDepth *= u_SpotLight[i].FarPlane;
             if (currentDepth - bias > closestDepth)
             {
                 if (u_SpotLight[i].SoftShadow)
@@ -272,16 +274,17 @@ vec4 CalcSpotLight(int i)
                     // PCF
                     float shadow = 0.0;
                     vec2 texelSize = 1.0 / textureSize(u_SpotLight[i].ShadowMap, 0);
-                    for(int x = -3; x <= 3; ++x)
+                    float offset = u_SpotLight[i].SoftDegree;
+                    for(float x = -offset; x <= offset; ++x)
                     {
-                        for(int y = -3; y <= 3; ++y)
+                        for(float y = -offset; y <= offset; ++y)
                         {
                             float pcfDepth = texture(u_SpotLight[i].ShadowMap, shadowTex.xy + vec2(x, y) * texelSize).r; 
-                            pcfDepth *= u_SpotLight[i].Range;
+                            pcfDepth *= u_SpotLight[i].FarPlane;
                             shadow += currentDepth - bias > pcfDepth  ? 1.0 : 0.0;        
                         }    
                     }
-                    shadow /= 49.0;
+                    shadow /= pow(offset * 2.0 + 1.0, 2.0);
                     lighting = ambient + (1.0 - shadow) * (diffuse + specular);
                 }
                 else

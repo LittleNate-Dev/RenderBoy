@@ -40,6 +40,7 @@ private:
 	unsigned int m_ShadowRes;
 	bool m_SoftShadow;
 	glm::vec2 m_Bias;
+	int m_SoftDegree;
 
 public:
 	SpotLight();
@@ -88,6 +89,7 @@ public:
 	void SetCastShadow(bool castShadow);
 	void SetShadowRes(unsigned int res);
 	void SetSoftShadow(bool softShadow);
+	void SetSoftDegree(unsigned int degree);
 	// Get spot light's members
 	inline std::string GetName() const
 	{
@@ -176,6 +178,14 @@ public:
 	inline bool SoftShadow() const
 	{
 		return m_SoftShadow;
+	};
+	inline unsigned int GetSoftDegree() const
+	{
+		return m_SoftDegree;
+	};
+	inline float GetFarPlane() const
+	{
+		return m_Range * (m_Intensity > 1.0f ? m_Intensity : 1.0f);
 	};
 	// Draw UI
 	void DrawUI();

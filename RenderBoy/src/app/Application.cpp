@@ -41,71 +41,71 @@ bool Application::LoadSettings()
             {
                 core::SETTINGS.Width = std::atoi(core::GetSettingValue(line).c_str());
             }
-            if (line.find("#HEIGHT") != std::string::npos)
+            else if (line.find("#HEIGHT") != std::string::npos)
             {
                 core::SETTINGS.Height = std::atoi(core::GetSettingValue(line).c_str());
             }
-            if (line.find("#CORE") != std::string::npos)
+            else if (line.find("#CORE") != std::string::npos)
             {
                 core::SETTINGS.GraphicsCore = (Core)std::atoi(core::GetSettingValue(line).c_str());
             }
-            if (line.find("#MOUSE_SENSITIVITY") != std::string::npos)
+            else if (line.find("#MOUSE_SENSITIVITY") != std::string::npos)
             {
                 core::SETTINGS.Sensitivity = (float)std::atof(core::GetSettingValue(line).c_str());
             }
-            if (line.find("#CONTROLLER_SWITCH") != std::string::npos)
+            else if (line.find("#CONTROLLER_SWITCH") != std::string::npos)
             {
                 core::SETTINGS.EnableController = (bool)std::atoi(core::GetSettingValue(line).c_str());
             }
-            if (line.find("#CONTROLLER_DEADZONE_LEFT") != std::string::npos)
+            else if (line.find("#CONTROLLER_DEADZONE_LEFT") != std::string::npos)
             {
                 core::SETTINGS.DeadZone.x = (float)std::atof(core::GetSettingValue(line).c_str());
             }
-            if (line.find("#CONTROLLER_DEADZONE_RIGHT") != std::string::npos)
+            else if (line.find("#CONTROLLER_DEADZONE_RIGHT") != std::string::npos)
             {
                 core::SETTINGS.DeadZone.y = (float)std::atof(core::GetSettingValue(line).c_str());
             }
-            if (line.find("#FONT_STYLE") != std::string::npos)
+            else if (line.find("#FONT_STYLE") != std::string::npos)
             {
                 core::SETTINGS.FontStyle = core::FONT_STYLE[(int)std::atoi(core::GetSettingValue(line).c_str())];
             }
-            if (line.find("#FONT_SIZE") != std::string::npos)
+            else if (line.find("#FONT_SIZE") != std::string::npos)
             {
                 core::SETTINGS.FontSize = (int)std::atoi(core::GetSettingValue(line).c_str());
             }
-            if (line.find("#UI_STYLE") != std::string::npos)
+            else if (line.find("#UI_STYLE") != std::string::npos)
             {
                 core::SETTINGS.UIStyle = (UI_Style)std::atoi(core::GetSettingValue(line).c_str());
             }
-            if (line.find("#DRAWMODE") != std::string::npos)
+            else if (line.find("#DRAWMODE") != std::string::npos)
             {
                 core::SETTINGS.DrawMode = (Draw_Mode)std::atof(core::GetSettingValue(line).c_str());
             }
-            if (line.find("#SHOW_NORMAL") != std::string::npos)
+            else if (line.find("#SHOW_NORMAL") != std::string::npos)
             {
                 core::SETTINGS.ShowNormal = (bool)std::atoi(core::GetSettingValue(line).c_str());
             }
-            if (line.find("#GAMMA") != std::string::npos)
+            else if (line.find("#GAMMA") != std::string::npos)
             {
                 core::SETTINGS.Gamma = (float)std::atof(core::GetSettingValue(line).c_str());
             }
-            if (line.find("#RESOLUTION") != std::string::npos)
+            else if (line.find("#RESOLUTION") != std::string::npos)
             {
                 core::SETTINGS.Resolution = (float)std::atof(core::GetSettingValue(line).c_str());
             }
-            if (line.find("#ANTI_ALISING") != std::string::npos)
+            else if (line.find("#ANTI_ALISING") != std::string::npos)
             {
                 core::SETTINGS.AA = (Anti_Alising)std::atoi(core::GetSettingValue(line).c_str());
             }
-            if (line.find("#POST_PROCESS") != std::string::npos)
+            else if (line.find("#POST_PROCESS") != std::string::npos)
             {
                 core::SETTINGS.PP = (Post_Process)std::atoi(core::GetSettingValue(line).c_str());
             }
-            if (line.find("#CAMERA_TYPE") != std::string::npos)
+            else if (line.find("#CAMERA_TYPE") != std::string::npos)
             {
                 m_Scene.GetCamera().SetCameraType(std::atoi(core::GetSettingValue(line).c_str()));
             }
-            if (line.find("#FOV") != std::string::npos)
+            else if (line.find("#FOV") != std::string::npos)
             {
                 m_Scene.GetCamera().SetFOV((float)std::atof(core::GetSettingValue(line).c_str()));
             }

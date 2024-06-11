@@ -36,6 +36,7 @@ private:
 	// Resolution of the shadow map
 	unsigned int m_ShadowRes;
 	bool m_SoftShadow;
+	float m_SoftDegree; // Degree of soft shadow
 
 public:
 	PointLight();
@@ -73,6 +74,7 @@ public:
 	void SetCastShadow(bool castShadow);
 	void SetShadowRes(unsigned int res);
 	void SetSoftShadow(bool softShadow);
+	void SetSoftDegree(float degree);
 	// Get spot light's members
 	inline std::string GetName() const
 	{
@@ -109,6 +111,10 @@ public:
 	inline float GetIntensity() const
 	{
 		return m_Intensity;
+	};
+	inline float GetFarPlane() const
+	{
+		return m_Range * (m_Intensity > 1.0f ? m_Intensity : 1.0f);
 	};
 	inline float GetConstant() const
 	{
@@ -149,6 +155,10 @@ public:
 	inline unsigned int GetShadowRes() const
 	{
 		return m_ShadowRes;
+	};
+	inline float GetSoftDegree() const
+	{
+		return m_SoftDegree;
 	};
 	// Draw UI
 	void DrawUI();

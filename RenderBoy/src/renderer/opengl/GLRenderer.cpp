@@ -165,6 +165,8 @@ void GLRenderer::DrawBlank(Scene& scene)
 				scene.GetData().GetDataGL().GetShader().SetUniform1i(lightName + "SoftShadow", scene.GetPointLights()[light].SoftShadow());
 				scene.GetData().GetDataGL().GetShader().SetUniformHandleARB(lightName + "ShadowMap", scene.GetData().GetDataGL().GetPointLightData().DepthMap[light].GetHandle());
 				scene.GetData().GetDataGL().GetShader().SetUniform1f(lightName + "Bias", scene.GetPointLights()[light].GetBias());
+				scene.GetData().GetDataGL().GetShader().SetUniform1f(lightName + "FarPlane", scene.GetPointLights()[light].GetFarPlane());
+				scene.GetData().GetDataGL().GetShader().SetUniform1f(lightName + "SoftDegree", scene.GetPointLights()[light].GetSoftDegree());
 			}
 		}
 	}
@@ -193,6 +195,8 @@ void GLRenderer::DrawBlank(Scene& scene)
 				scene.GetData().GetDataGL().GetShader().SetUniform1i(lightName + "SoftShadow", scene.GetSpotLights()[light].SoftShadow());
 				scene.GetData().GetDataGL().GetShader().SetUniformHandleARB(lightName + "ShadowMap", scene.GetData().GetDataGL().GetSpotLightData().DepthMap[light].GetHandle());
 				scene.GetData().GetDataGL().GetShader().SetUniformVec2f(lightName + "Bias", scene.GetSpotLights()[light].GetBias());
+				scene.GetData().GetDataGL().GetShader().SetUniform1f(lightName + "FarPlane", scene.GetSpotLights()[light].GetFarPlane());
+				scene.GetData().GetDataGL().GetShader().SetUniform1f(lightName + "SoftDegree", scene.GetSpotLights()[light].GetSoftDegree());
 			}
 		}
 	}
@@ -431,7 +435,7 @@ void GLRenderer::DrawPointLightShadow(Scene& scene)
 				scene.GetData().GetDataGL().GetPointLightData().Shader.SetUniformMat4f("u_ShadowMat[" + std::to_string(j) + "]", shadowMat);
 			}
 			scene.GetData().GetDataGL().GetPointLightData().Shader.SetUniformVec3f("u_LightPos", scene.GetPointLights()[light].GetPosition());
-			scene.GetData().GetDataGL().GetPointLightData().Shader.SetUniform1f("u_FarPlane", scene.GetPointLights()[light].GetRange());
+			scene.GetData().GetDataGL().GetPointLightData().Shader.SetUniform1f("u_FarPlane", scene.GetPointLights()[light].GetFarPlane());
 			// Draw Scene
 			std::string model;
 			for (unsigned int j = 0; j < scene.GetModelList().size(); j++)

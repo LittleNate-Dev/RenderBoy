@@ -33,6 +33,10 @@ void GLTexture::GenTexture(const std::string filepath)
     }
     m_FilePath = filepath;
     // Generate texture id and handle
+    if (m_Handle)
+    {
+        glMakeTextureHandleNonResidentARB(m_Handle);
+    }
     GLCall(glDeleteTextures(1, &m_RendererID));
     GLCall(glGenTextures(1, &m_RendererID));
     GLCall(glBindTexture(GL_TEXTURE_2D, m_RendererID));

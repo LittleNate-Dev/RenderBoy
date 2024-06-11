@@ -15,6 +15,7 @@ void GLData::Init()
 	m_SpotLightData.Shader.Init(SHADER_OPENGL_SHADOW_SPOT);
 	m_SkyboxData.Shader.Init(SHADER_OPENGL_SKYBOX);
 	m_CheckerMap.GenTexture(UV_MAP_FILEPATH);
+	ChangeDrawMode();
 	// Initialize VAO to draw skybox
 	{
 		float position[] = {
@@ -145,6 +146,8 @@ void GLData::Reset()
 
 void GLData::ChangeDrawMode()
 {
+	GLShader newShader;
+	m_Shader = newShader;
 	switch (core::SETTINGS.DrawMode)
 	{
 	case BLANK:

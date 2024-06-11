@@ -14,6 +14,7 @@ PointLight::PointLight()
 	m_CastShadow = true;
 	m_ShadowRes = 1024;
 	m_SoftShadow = true;
+	m_SoftDegree = 0.1f;
 	m_ProjMat = glm::mat4(1.0f);
 	for (unsigned int i = 0; i < 6; i++)
 	{
@@ -31,7 +32,7 @@ PointLight::~PointLight()
 
 void PointLight::UpdateProjMat()
 {
-	m_ProjMat = glm::perspective(glm::radians(90.0f), 1.0f, 0.05f, m_Range);
+	m_ProjMat = glm::perspective(glm::radians(90.0f), 1.0f, 0.05f, GetFarPlane());
 }
 
 void PointLight::UpdateViewMat()
@@ -225,6 +226,12 @@ void PointLight::SetSoftShadow(bool softShadow)
 	m_SoftShadow = softShadow;
 }
 
+void PointLight::SetSoftDegree(float degree)
+{
+	degree = degree > 0.0f ? degree : 0.1f;
+	m_SoftDegree = degree;
+}
+
 void PointLight::DrawUI()
 {
 	if (m_LightSwitch)
@@ -342,6 +349,16 @@ void PointLight::DrawUI()
 			}
 			ImGui::PopItemWidth();
 			ImGui::Checkbox("Soft Shadow", &m_SoftShadow);
+			if (m_SoftShadow)
+			{
+				ImGui::PushItemWidth(60.0f * core::GetWidgetWidthCoefficient());
+				ImGui::CenterAlignWidget(60.0f * core::GetWidgetWidthCoefficient());
+				if (ImGui::InputFloat("Degree", &m_SoftDegree))
+				{
+					SetSoftDegree(m_SoftDegree);
+				}
+				ImGui::PopItemWidth();
+			}
 		}
 		ImGui::TreePop();
 	}
@@ -354,6 +371,7 @@ void PointLight::DrawUI()
 			ImGui::PushItemWidth(100.0f * core::GetWidgetWidthCoefficient());
 			ImGui::CenterAlignWidget(100.0f * core::GetWidgetWidthCoefficient());
 			ImGui::InputFloat("Bias", &m_Bias, 0.0f, 0.0f, "%.8f");
+			ImGui::PopItemWidth();
 			ImGui::PushItemWidth(80.0f * core::GetWidgetWidthCoefficient());
 			ImGui::CenterAlignWidget(80.0f * core::GetWidgetWidthCoefficient());
 			if (ImGui::InputFloat("Ambient", &m_ADS.x, 0.0f, 0.0f, "%.6f"))
@@ -398,6 +416,7 @@ void PointLight::DrawUI()
 		m_CastShadow = true;
 		m_SoftShadow = true;
 		m_ShadowRes = 1024;
+		m_SoftDegree = 0.1f;
 		UpdateProjMat();
 		UpdateViewMat();
 		UpdateModelMat();
