@@ -384,6 +384,7 @@ void GLData::RenameSpotLight(std::string oldName, std::string newName)
 	m_SpotLightData.DepthMap.erase(oldName);
 	m_SpotLightData.DepthMap.insert(std::pair<std::string, GLFrameBuffer>(newName, fb));
 	m_SpotLightData.DepthMap[newName].Init(DEPTH_MAP, width, height);
+	m_SpotLightData.DepthMap[newName].ChangeShadowRes(width, height);
 }
 
 void GLData::RenameDirLight(std::string oldName, std::string newName)

@@ -109,10 +109,6 @@ void GLFrameBuffer::Init(FBType type, unsigned int width, unsigned int height)
 	{
 		GLCall(glDeleteRenderbuffers(1, &m_RenderBufferID));
 	}
-	if (m_Handle)
-	{
-		GLCall(glMakeTextureHandleNonResidentARB(m_Handle));
-	}
 	if (m_TexID)
 	{
 		GLCall(glDeleteTextures(1, &m_TexID));
@@ -317,12 +313,14 @@ void GLFrameBuffer::ChangeShadowRes(unsigned int width, unsigned int height)
 	GLCall(glGenTextures(1, &m_TexID));
 	if (m_Type == DEPTH_MAP)
 	{
+		m_TexWidth = width;
+		m_TexHeight = height;
 		GLCall(glBindTexture(GL_TEXTURE_2D, m_TexID));
 		GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL));
 		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
 		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
-		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT));
-		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT));
+		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER));
+		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER));
 		GLCall(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_TexID, 0));
 		// Generate texture handle
 		m_Handle = glGetTextureHandleARB(m_TexID);

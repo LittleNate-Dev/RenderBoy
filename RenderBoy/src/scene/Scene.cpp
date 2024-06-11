@@ -397,7 +397,7 @@ bool Scene::LoadScene(std::string filepath)
 				else if (line.find("#SPOT_LIGHT_" + light + "_SOFT_DEGREE") != std::string::npos)
 				{
 					values = core::GetSceneValue(line);
-					m_SpotLights[light].SetSoftShadow((float)std::atof(values[0].c_str()));
+					m_SpotLights[light].SetSoftDegree((float)std::atof(values[0].c_str()));
 				}
 			}
 			// Load directional light
@@ -737,6 +737,7 @@ bool Scene::AddPointLight(std::string name)
 
 	PointLight light;
 	light.SetName(name);
+	light.SetPosition(m_Camera.GetPosition());
 	m_PointLightList.push_back(name);
 	m_PointLights.insert(std::pair<std::string, PointLight>(name, light));
 	core::currentPointLight = nullptr;
@@ -764,6 +765,7 @@ bool Scene::AddSpotLight(std::string name)
 
 	SpotLight light;
 	light.SetName(name);
+	light.SetPosition(m_Camera.GetPosition());
 	m_SpotLightList.push_back(name);
 	m_SpotLights.insert(std::pair<std::string, SpotLight>(name, light));
 	core::currentSpotLight = nullptr;

@@ -243,8 +243,6 @@ vec4 CalcSpotLight(int i)
     float intensity = clamp((theta - cos(u_SpotLight[i].Angle * 0.5 + u_SpotLight[i].DimAngle)) / epsilon, 0.0, 1.0);
     // combine results
     vec4 ambient, diffuse, specular;
-    vec3 projCoords = v_FragPosSpot[i].xyz / v_FragPosSpot[i].w;
-    projCoords = projCoords * 0.5 + 0.5;
     ambient  = u_SpotLight[i].ADS.x * vec4(u_SpotLight[i].Color, 1.0) * matDiffuse;
     diffuse  = u_SpotLight[i].ADS.y * vec4(u_SpotLight[i].Color, 1.0) * diff * matDiffuse;
     specular = u_SpotLight[i].ADS.z * spec * matSpecular;
@@ -255,7 +253,7 @@ vec4 CalcSpotLight(int i)
     vec4 lighting = vec4(1.0);
     if (u_SpotLight[i].CastShadow)
     {
-        float bias = max(u_SpotLight[i].Bias.y * (1.0 - dot(normal, lightDir)), u_SpotLight[i].Bias.x);
+        float bias = max(u_SpotLight[i].Bias.x * (1.0 - dot(normal, lightDir)), u_SpotLight[i].Bias.y);
         vec3 ndc = v_FragPosSpot[i].xyz / v_FragPosSpot[i].w;
         if (ndc.x < 1.0 && ndc.x > -1.0 && ndc.y < 1.0 && ndc.y > -1.0 && ndc.z > -1.0)
         {

@@ -492,6 +492,7 @@ void GLRenderer::DrawSpotLightShadow(Scene& scene)
 				scene.GetData().GetDataGL().GetModelData()[model].VA.Unbind();
 				scene.GetData().GetDataGL().GetModelData()[model].IB.Unbind();
 			}
+			scene.GetData().GetDataGL().GetSpotLightData().DepthMap[light].Unbind();
 		}
 	}
 	scene.GetData().GetDataGL().GetSpotLightData().Shader.Unbind();
