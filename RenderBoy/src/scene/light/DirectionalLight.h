@@ -13,6 +13,8 @@ class DirectionalLight
 {
 private:
 	std::string m_Name;
+	glm::mat4 m_ProjMat[3];
+	glm::mat4 m_ViewMat[3];
 	glm::vec3 m_EulerAngle;
 	glm::vec3 m_Color;
 	// Parameters used for Bling-Fong shading
@@ -26,6 +28,7 @@ private:
 	bool m_CastShadow;
 	// Resolution of the shadow map
 	unsigned int m_ShadowRes;
+	glm::vec2 m_CSMRatio;
 
 public:
 	DirectionalLight();
@@ -33,8 +36,8 @@ public:
 
 	// Get spot light's matrices
 	glm::vec3 GetDirection();
-	glm::mat4 GetViewMat();
-	glm::mat4 GetProjMat();
+	glm::mat4 GetViewMat(unsigned int i = 0);
+	glm::mat4 GetProjMat(unsigned int i = 0);
 	glm::mat4 GetRotateMat();
 	glm::mat4 GetModelMat();
 	// Set spot light's attributes
@@ -55,6 +58,7 @@ public:
 	void SetLightSwitch(bool lightSwitch);
 	void SetCastShadow(bool castShadow);
 	void SetShadowRes(unsigned int res);
+	void SetCSMRatio(glm::vec2 ratio);
 	// Get spot light's members
 	inline std::string GetName() const
 	{
@@ -103,6 +107,10 @@ public:
 	inline unsigned int GetShadowRes() const
 	{
 		return m_CastShadow;
+	};
+	inline glm::vec2 GetCSMRatio() const
+	{
+		return m_CSMRatio;
 	};
 	// Draw UI
 	void DrawUI();

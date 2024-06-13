@@ -8,8 +8,6 @@ namespace core
 	ImGui::FileBrowser FILE_BROWSER;
 	Load_Type LOAD_TYPE = NO_FILE;
 	std::string FILEPATH_BUFFER = "";
-	glm::vec3 NORMAL_COLOR = glm::vec3(1.0f);
-	float NORMAL_MAGNITUDE = 1.0f;
 	bool RELOAD_FONT = false;
 	void* SCENE_DATA = nullptr;
 	SceneStatics SCENE_STATICS;
@@ -102,27 +100,10 @@ namespace core
 		return false;
 	}
 
-	std::string GetSettingValue(std::string setting)
-	{
-		std::string value;
-		int endIndex = 0;
-		char separator = ' ';
-		for (unsigned int i = 0; i < setting.size(); i++)
-		{
-			if (setting[i] == separator || i == setting.size())
-			{
-				endIndex = i + 1;
-				value.append(setting, endIndex, setting.size() - endIndex);
-				break;
-			}
-		}
-		return value;
-	}
-
-	std::vector<std::string> GetSceneValue(std::string scene)
+	std::vector<std::string> GetFileValue(std::string line)
 	{
 		std::vector<std::string> values;
-		std::istringstream stream(scene);
+		std::istringstream stream(line);
 		std::string value;
 		int skip = 0;
 		while (std::getline(stream, value, ' '))

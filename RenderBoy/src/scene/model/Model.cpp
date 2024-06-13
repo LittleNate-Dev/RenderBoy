@@ -635,7 +635,9 @@ glm::mat4 Model::GetRotateMat(unsigned int current)
 
 void Model::DrawUI()
 {
-    if (ImGui::Checkbox("Set All Instance", &m_SetInstance))
+    ImGui::CenterAlignWidget("Set All Instance");
+    ImGui::LabelHighlighted("Set All Instance");
+    if (ImGui::Checkbox("##SetAllInstance", &m_SetInstance))
     {
         m_Current = !m_SetInstance;
     }
@@ -646,18 +648,21 @@ void Model::DrawUI()
         if (ImGui::TreeNode("Position"))
         {
             ImGui::PushItemWidth(80.0f * core::GetWidgetWidthCoefficient());
-            ImGui::CenterAlignWidget(80.0f * core::GetWidgetWidthCoefficient());
-            if (ImGui::InputFloat("X", &m_Position.x))
+            ImGui::CenterAlignWidget("X", 80.0f * core::GetWidgetWidthCoefficient());
+            ImGui::LabelHighlighted("X");
+            if (ImGui::InputFloat("##X", &m_Position.x))
             {
                 UpdateModelMat();
             }
-            ImGui::CenterAlignWidget(80.0f * core::GetWidgetWidthCoefficient());
-            if (ImGui::InputFloat("Y", &m_Position.y))
+            ImGui::CenterAlignWidget("Y", 80.0f * core::GetWidgetWidthCoefficient());
+            ImGui::LabelHighlighted("Y");
+            if (ImGui::InputFloat("##Y", &m_Position.y))
             {
                 UpdateModelMat();
             }
-            ImGui::CenterAlignWidget(80.0f * core::GetWidgetWidthCoefficient());
-            if (ImGui::InputFloat("Z", &m_Position.z))
+            ImGui::CenterAlignWidget("Z", 80.0f * core::GetWidgetWidthCoefficient());
+            ImGui::LabelHighlighted("Z");
+            if (ImGui::InputFloat("##Z", &m_Position.z))
             {
                 UpdateModelMat();
             }
@@ -672,15 +677,21 @@ void Model::DrawUI()
             if (slideRotate)
             {
                 ImGui::PushItemWidth(280.0f * core::GetWidgetWidthCoefficient());
-                if (ImGui::SliderFloat("Pitch", &m_EulerAngle.x, -360.0f, 360.0f))
+                ImGui::CenterAlignWidget("Pitch", 280.0f * core::GetWidgetWidthCoefficient());
+                ImGui::LabelHighlighted("Pitch");
+                if (ImGui::SliderFloat("##Pitch", &m_EulerAngle.x, -360.0f, 360.0f))
                 {
                     UpdateModelMat();
                 }
-                if (ImGui::SliderFloat("Yaw", &m_EulerAngle.y, -360.0f, 360.0f))
+                ImGui::CenterAlignWidget("Yaw", 280.0f * core::GetWidgetWidthCoefficient());
+                ImGui::LabelHighlighted("Yaw");
+                if (ImGui::SliderFloat("##Yaw", &m_EulerAngle.y, -360.0f, 360.0f))
                 {
                     UpdateModelMat();
                 }
-                if (ImGui::SliderFloat("Roll", &m_EulerAngle.z, -360.0f, 360.0f))
+                ImGui::CenterAlignWidget("Roll", 280.0f * core::GetWidgetWidthCoefficient());
+                ImGui::LabelHighlighted("Roll");
+                if (ImGui::SliderFloat("##Roll", &m_EulerAngle.z, -360.0f, 360.0f))
                 {
                     UpdateModelMat();
                 }
@@ -689,18 +700,21 @@ void Model::DrawUI()
             else
             {
                 ImGui::PushItemWidth(80.0f * core::GetWidgetWidthCoefficient());
-                ImGui::CenterAlignWidget(80.0f * core::GetWidgetWidthCoefficient());
-                if (ImGui::InputFloat("Pitch", &m_EulerAngle.x))
+                ImGui::CenterAlignWidget("Pitch", 80.0f * core::GetWidgetWidthCoefficient());
+                ImGui::LabelHighlighted("Pitch");
+                if (ImGui::InputFloat("##Pitch", &m_EulerAngle.x))
                 {
                     SetPitch(m_EulerAngle.x);
                 }
-                ImGui::CenterAlignWidget(80.0f * core::GetWidgetWidthCoefficient());
-                if (ImGui::InputFloat("Yaw", &m_EulerAngle.y))
+                ImGui::CenterAlignWidget("Yaw", 80.0f * core::GetWidgetWidthCoefficient());
+                ImGui::LabelHighlighted("Yaw");
+                if (ImGui::InputFloat("##Yaw", &m_EulerAngle.y))
                 {
                     SetYaw(m_EulerAngle.y);
                 }
-                ImGui::CenterAlignWidget(80.0f * core::GetWidgetWidthCoefficient());
-                if (ImGui::InputFloat("Roll", &m_EulerAngle.z))
+                ImGui::CenterAlignWidget("Roll", 80.0f * core::GetWidgetWidthCoefficient());
+                ImGui::LabelHighlighted("Roll");
+                if (ImGui::InputFloat("##Roll", &m_EulerAngle.z))
                 {
                     SetRoll(m_EulerAngle.z);
                 }
@@ -712,29 +726,36 @@ void Model::DrawUI()
         static bool keepScale = false;
         if (ImGui::TreeNode("Scale"))
         {
-            ImGui::Checkbox("Keep Scale", &keepScale);
+            ImGui::CenterAlignWidget("Keep Scale");
+            ImGui::LabelHighlighted("Keep Scale");
+            ImGui::Checkbox("##KeepScale", &keepScale);
             ImGui::PushItemWidth(80.0f * core::GetWidgetWidthCoefficient());
-            ImGui::CenterAlignWidget(80.0f * core::GetWidgetWidthCoefficient());
             if (keepScale)
             {
-                if (ImGui::InputFloat("Scale", &m_Scale.x))
+                ImGui::CenterAlignWidget("Scale", 80.0f * core::GetWidgetWidthCoefficient());
+                ImGui::LabelHighlighted("Scale");
+                if (ImGui::InputFloat("##Scale", &m_Scale.x))
                 {
                     SetScale(glm::vec3(m_Scale.x));
                 }
             }
             else
             {
-                if (ImGui::InputFloat("X", &m_Scale.x))
+                ImGui::CenterAlignWidget("X", 80.0f * core::GetWidgetWidthCoefficient());
+                ImGui::LabelHighlighted("X");
+                if (ImGui::InputFloat("##X", &m_Scale.x))
                 {
                     SetScale(m_Scale);
                 }
-                ImGui::CenterAlignWidget(80.0f * core::GetWidgetWidthCoefficient());
-                if (ImGui::InputFloat("Y", &m_Scale.y))
+                ImGui::CenterAlignWidget("Y", 80.0f * core::GetWidgetWidthCoefficient());
+                ImGui::LabelHighlighted("Y");
+                if (ImGui::InputFloat("##Y", &m_Scale.y))
                 {
                     SetScale(m_Scale);
                 }
-                ImGui::CenterAlignWidget(80.0f * core::GetWidgetWidthCoefficient());
-                if (ImGui::InputFloat("Z", &m_Scale.z))
+                ImGui::CenterAlignWidget("Z", 80.0f * core::GetWidgetWidthCoefficient());
+                ImGui::LabelHighlighted("Z");
+                if (ImGui::InputFloat("##Z", &m_Scale.z))
                 {
                     SetScale(m_Scale);
                 }
@@ -747,15 +768,17 @@ void Model::DrawUI()
     else
     {
         int instance = m_Instance;
-        ImGui::CenterAlignWidget(120.0f * core::GetWidgetWidthCoefficient());
         ImGui::PushItemWidth(120.0f * core::GetWidgetWidthCoefficient());
-        if (ImGui::InputInt("Instance", &instance))
+        ImGui::CenterAlignWidget("Instance", 120.0f * core::GetWidgetWidthCoefficient());
+        ImGui::LabelHighlighted("Instance");
+        if (ImGui::InputInt("##Instance", &instance))
         {
             SetInstance(instance);
         }
         int current = m_Current;
-        ImGui::CenterAlignWidget(120.0f * core::GetWidgetWidthCoefficient());
-        if (ImGui::InputInt("Current", &current))
+        ImGui::CenterAlignWidget("Current", 120.0f * core::GetWidgetWidthCoefficient());
+        ImGui::LabelHighlighted("Current");
+        if (ImGui::InputInt("##Current", &current))
         {
             SetCurrent(current);
         }
@@ -764,18 +787,21 @@ void Model::DrawUI()
         if (ImGui::TreeNode("Position"))
         {
             ImGui::PushItemWidth(80.0f * core::GetWidgetWidthCoefficient());
-            ImGui::CenterAlignWidget(80.0f * core::GetWidgetWidthCoefficient());
-            if (ImGui::InputFloat("X", &m_InstancePosition[m_Current - 1].x))
+            ImGui::CenterAlignWidget("X", 80.0f * core::GetWidgetWidthCoefficient());
+            ImGui::LabelHighlighted("X");
+            if (ImGui::InputFloat("##X", &m_InstancePosition[m_Current - 1].x))
             {
                 UpdateModelMat(m_Current);
             }
-            ImGui::CenterAlignWidget(80.0f * core::GetWidgetWidthCoefficient());
-            if (ImGui::InputFloat("Y", &m_InstancePosition[m_Current - 1].y))
+            ImGui::CenterAlignWidget("Y", 80.0f * core::GetWidgetWidthCoefficient());
+            ImGui::LabelHighlighted("Y");
+            if (ImGui::InputFloat("##Y", &m_InstancePosition[m_Current - 1].y))
             {
                 UpdateModelMat(m_Current);
             }
-            ImGui::CenterAlignWidget(80.0f * core::GetWidgetWidthCoefficient());
-            if (ImGui::InputFloat("Z", &m_InstancePosition[m_Current - 1].z))
+            ImGui::CenterAlignWidget("Z", 80.0f * core::GetWidgetWidthCoefficient());
+            ImGui::LabelHighlighted("Z");
+            if (ImGui::InputFloat("##Z", &m_InstancePosition[m_Current - 1].z))
             {
                 UpdateModelMat(m_Current);
             }
@@ -790,15 +816,21 @@ void Model::DrawUI()
             if (slideRotate)
             {
                 ImGui::PushItemWidth(280.0f * core::GetWidgetWidthCoefficient());
-                if (ImGui::SliderFloat("Pitch", &m_InstanceEulerAngle[m_Current - 1].x, -360.0f, 360.0f))
+                ImGui::CenterAlignWidget("Pitch", 280.0f * core::GetWidgetWidthCoefficient());
+                ImGui::LabelHighlighted("Pitch");
+                if (ImGui::SliderFloat("##Pitch", &m_InstanceEulerAngle[m_Current - 1].x, -360.0f, 360.0f))
                 {
                     UpdateModelMat(m_Current);
                 }
-                if (ImGui::SliderFloat("Yaw", &m_InstanceEulerAngle[m_Current - 1].y, -360.0f, 360.0f))
+                ImGui::CenterAlignWidget("Yaw", 280.0f * core::GetWidgetWidthCoefficient());
+                ImGui::LabelHighlighted("Yaw");
+                if (ImGui::SliderFloat("##Yaw", &m_InstanceEulerAngle[m_Current - 1].y, -360.0f, 360.0f))
                 {
                     UpdateModelMat(m_Current);
                 }
-                if (ImGui::SliderFloat("Roll", &m_InstanceEulerAngle[m_Current - 1].z, -360.0f, 360.0f))
+                ImGui::CenterAlignWidget("Roll", 280.0f * core::GetWidgetWidthCoefficient());
+                ImGui::LabelHighlighted("Roll");
+                if (ImGui::SliderFloat("##Roll", &m_InstanceEulerAngle[m_Current - 1].z, -360.0f, 360.0f))
                 {
                     UpdateModelMat(m_Current);
                 }
@@ -807,18 +839,21 @@ void Model::DrawUI()
             else
             {
                 ImGui::PushItemWidth(80.0f * core::GetWidgetWidthCoefficient());
-                ImGui::CenterAlignWidget(80.0f * core::GetWidgetWidthCoefficient());
-                if (ImGui::InputFloat("Pitch", &m_InstanceEulerAngle[m_Current - 1].x))
+                ImGui::CenterAlignWidget("Pitch", 80.0f * core::GetWidgetWidthCoefficient());
+                ImGui::LabelHighlighted("Pitch");
+                if (ImGui::InputFloat("##Pitch", &m_InstanceEulerAngle[m_Current - 1].x))
                 {
                     SetPitch(m_InstanceEulerAngle[m_Current - 1].x, m_Current);
                 }
-                ImGui::CenterAlignWidget(80.0f * core::GetWidgetWidthCoefficient());
-                if (ImGui::InputFloat("Yaw", &m_InstanceEulerAngle[m_Current - 1].y))
+                ImGui::CenterAlignWidget("Yaw", 80.0f * core::GetWidgetWidthCoefficient());
+                ImGui::LabelHighlighted("Yaw");
+                if (ImGui::InputFloat("##Yaw", &m_InstanceEulerAngle[m_Current - 1].y))
                 {
                     SetYaw(m_InstanceEulerAngle[m_Current - 1].y, m_Current);
                 }
-                ImGui::CenterAlignWidget(80.0f * core::GetWidgetWidthCoefficient());
-                if (ImGui::InputFloat("Roll", &m_InstanceEulerAngle[m_Current - 1].z))
+                ImGui::CenterAlignWidget("Roll", 80.0f * core::GetWidgetWidthCoefficient());
+                ImGui::LabelHighlighted("Roll");
+                if (ImGui::InputFloat("##Roll", &m_InstanceEulerAngle[m_Current - 1].z))
                 {
                     SetRoll(m_InstanceEulerAngle[m_Current - 1].z, m_Current);
                 }
@@ -830,29 +865,36 @@ void Model::DrawUI()
         static bool keepScale = false;
         if (ImGui::TreeNode("Scale"))
         {
-            ImGui::Checkbox("Keep Scale", &keepScale);
+            ImGui::CenterAlignWidget("Keep Scale");
+            ImGui::LabelHighlighted("Keep Scale");
+            ImGui::Checkbox("##KeepScale", &keepScale);
             ImGui::PushItemWidth(80.0f * core::GetWidgetWidthCoefficient());
-            ImGui::CenterAlignWidget(80.0f * core::GetWidgetWidthCoefficient());
             if (keepScale)
             {
-                if (ImGui::InputFloat("Scale", &m_InstanceScale[m_Current - 1].x))
+                ImGui::CenterAlignWidget("Scale", 80.0f * core::GetWidgetWidthCoefficient());
+                ImGui::LabelHighlighted("Scale");
+                if (ImGui::InputFloat("##Scale", &m_InstanceScale[m_Current - 1].x))
                 {
                     SetScale(glm::vec3(m_InstanceScale[m_Current - 1].x), m_Current);
                 }
             }
             else
             {
-                if (ImGui::InputFloat("X", &m_InstanceScale[m_Current - 1].x))
+                ImGui::CenterAlignWidget("X", 80.0f * core::GetWidgetWidthCoefficient());
+                ImGui::LabelHighlighted("X");
+                if (ImGui::InputFloat("##X", &m_InstanceScale[m_Current - 1].x))
                 {
                     SetScale(m_InstanceScale[m_Current - 1], m_Current);
                 }
-                ImGui::CenterAlignWidget(80.0f * core::GetWidgetWidthCoefficient());
-                if (ImGui::InputFloat("Y", &m_InstanceScale[m_Current - 1].y))
+                ImGui::CenterAlignWidget("Y", 80.0f * core::GetWidgetWidthCoefficient());
+                ImGui::LabelHighlighted("Y");
+                if (ImGui::InputFloat("##Y", &m_InstanceScale[m_Current - 1].y))
                 {
                     SetScale(m_InstanceScale[m_Current - 1], m_Current);
                 }
-                ImGui::CenterAlignWidget(80.0f * core::GetWidgetWidthCoefficient());
-                if (ImGui::InputFloat("Z", &m_InstanceScale[m_Current - 1].z))
+                ImGui::CenterAlignWidget("Z", 80.0f * core::GetWidgetWidthCoefficient());
+                ImGui::LabelHighlighted("Z");
+                if (ImGui::InputFloat("##Z", &m_InstanceScale[m_Current - 1].z))
                 {
                     SetScale(m_InstanceScale[m_Current - 1], m_Current);
                 }

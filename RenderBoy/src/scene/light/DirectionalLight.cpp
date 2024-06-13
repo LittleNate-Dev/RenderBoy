@@ -10,6 +10,12 @@ DirectionalLight::DirectionalLight()
 	m_ShowCube = true;
 	m_CastShadow = true;
 	m_ShadowRes = 1024;
+	m_CSMRatio = glm::vec2(0.3f, 0.7f);
+	for (unsigned int i = 0; i < 3; i++)
+	{
+		m_ProjMat[i] = glm::mat4(1.0f);
+		m_ViewMat[i] = glm::mat4(1.0f);
+	}
 }
 
 DirectionalLight::~DirectionalLight()
@@ -25,16 +31,22 @@ glm::vec3 DirectionalLight::GetDirection()
 	return direction;
 }
 
-glm::mat4 DirectionalLight::GetViewMat()
+glm::mat4 DirectionalLight::GetViewMat(unsigned int i)
 {
-	// TODO
-	return glm::mat4(1.0f);
+	if (i > 2)
+	{
+		return glm::mat4(1.0f);
+	}
+	return m_ViewMat[i];
 }
 
-glm::mat4 DirectionalLight::GetProjMat()
+glm::mat4 DirectionalLight::GetProjMat(unsigned int i)
 {
-	// TODO
-	return glm::mat4(1.0f);
+	if (i > 2)
+	{
+		return glm::mat4(1.0f);
+	}
+	return m_ProjMat[i];
 }
 
 glm::mat4 DirectionalLight::GetRotateMat()
@@ -262,26 +274,127 @@ void DirectionalLight::SetShadowRes(unsigned int res)
 	}
 }
 
+void DirectionalLight::SetCSMRatio(glm::vec2 ratio)
+{
+	if (ratio.x <= 0.0f || ratio.x >= 1.0f)
+	{
+		return;
+	}
+	if (ratio.y <= 0.0f || ratio.y >= 1.0f)
+	{
+		return;
+	}
+	if (ratio.x >= ratio.y)
+	{
+		return;
+	}
+	m_CSMRatio = ratio;
+}
+
 void DirectionalLight::DrawUI()
 {
+	// Settings
+	if (ImGui::TreeNode("Settings"))
+	{
+		ImGui::CenterAlignWidget("Switch");
+		ImGui::LabelHighlighted("Switch");
+		ImGui::Checkbox("##Switch", &m_LightSwitch);
+		if (m_LightSwitch)
+		{
+			ImGui::CenterAlignWidget("Show Light Cube");
+			ImGui::LabelHighlighted("Show Light Cube");
+			ImGui::Checkbox("##ShowLightCube", &m_ShowCube);
+			ImGui::CenterAlignWidget("Cast Shadow");
+			ImGui::LabelHighlighted("Cast Shadow");
+			ImGui::Checkbox("##CastShadow", &m_CastShadow);
+		}
+		ImGui::TreePop();
+	}
 	if (m_LightSwitch)
 	{
 		// Attributes
 		if (ImGui::TreeNode("Attributes"))
 		{
-			ImGui::CenterAlignWidget("Color", 200.0f * core::GetWidgetWidthCoefficient());
-			ImGui::LabelHighlighted("Color");
-			ImGui::PushItemWidth(200.0f * core::GetWidgetWidthCoefficient());
-			ImGui::ColorEdit3("##DirColor", &m_Color[0]);
-			ImGui::PopItemWidth();
-			ImGui::CenterAlignWidget("Intensity", 80.0f * core::GetWidgetWidthCoefficient());
-			ImGui::LabelHighlighted("Intensity");
-			ImGui::PushItemWidth(80.0f * core::GetWidgetWidthCoefficient());
-			if (ImGui::InputFloat("##SpotIntensity", &m_Intensity, 0.0f, 0.0f, "%.6f"))
+			// Basic attributes
+			if (ImGui::TreeNode("Basic"))
 			{
-				SetIntensity(m_Intensity);
+				ImGui::CenterAlignWidget("Color", 200.0f * core::GetWidgetWidthCoefficient());
+				ImGui::LabelHighlighted("Color");
+				ImGui::PushItemWidth(200.0f * core::GetWidgetWidthCoefficient());
+				ImGui::ColorEdit3("##DirColor", &m_Color[0]);
+				ImGui::PopItemWidth();
+				ImGui::CenterAlignWidget("Intensity", 80.0f * core::GetWidgetWidthCoefficient());
+				ImGui::LabelHighlighted("Intensity");
+				ImGui::PushItemWidth(80.0f * core::GetWidgetWidthCoefficient());
+				if (ImGui::InputFloat("##DirIntensity", &m_Intensity, 0.0f, 0.0f, "%.6f"))
+				{
+					SetIntensity(m_Intensity);
+				}
+				ImGui::PopItemWidth();
+				ImGui::TreePop();
 			}
-			ImGui::PopItemWidth();
+			// Shadow resolution
+			if (m_CastShadow && ImGui::TreeNode("Shadow"))
+			{
+				ImGui::CenterAlignWidget("Shadow Resolution", 60.0f * core::GetWidgetWidthCoefficient());
+				ImGui::LabelHighlighted("Shadow Resolution");
+				ImGui::PushItemWidth(60.0f * core::GetWidgetWidthCoefficient());
+				const char* shadowResOps[] = {
+					"1X",
+					"2X",
+					"3X",
+					"4X"
+				};
+				static int currentRes = 0;
+				if (ImGui::Combo("##ShadowRes", &currentRes, shadowResOps, IM_ARRAYSIZE(shadowResOps)))
+				{
+					switch (currentRes)
+					{
+					case 0:
+						m_ShadowRes = 1024;
+						break;
+					case 1:
+						m_ShadowRes = 2048;
+						break;
+					case 2:
+						m_ShadowRes = 3072;
+						break;
+					case 3:
+						m_ShadowRes = 4096;
+						break;
+					default:
+						m_ShadowRes = 1024;
+						break;
+					}
+				}
+				ImGui::PopItemWidth();
+				ImGui::TreePop();
+			}
+			// Advanced settings
+			if (ImGui::TreeNode("Advanced"))
+			{
+				ImGui::PushItemWidth(80.0f * core::GetWidgetWidthCoefficient());
+				ImGui::CenterAlignWidget("Ambient", 80.0f * core::GetWidgetWidthCoefficient());
+				ImGui::LabelHighlighted("Ambient");
+				if (ImGui::InputFloat("##Ambient", &m_ADS.x, 0.0f, 0.0f, "%.6f"))
+				{
+					SetAmbient(m_ADS.x);
+				}
+				ImGui::CenterAlignWidget("Diffuse", 80.0f * core::GetWidgetWidthCoefficient());
+				ImGui::LabelHighlighted("Diffuse");
+				if (ImGui::InputFloat("##Diffuse", &m_ADS.y, 0.0f, 0.0f, "%.6f"))
+				{
+					SetDiffuse(m_ADS.y);
+				}
+				ImGui::CenterAlignWidget("Specular", 80.0f * core::GetWidgetWidthCoefficient());
+				ImGui::LabelHighlighted("Specular");
+				if (ImGui::InputFloat("##Specular", &m_ADS.z, 0.0f, 0.0f, "%.6f"))
+				{
+					SetSpecular(m_ADS.z);
+				}
+				ImGui::PopItemWidth();
+				ImGui::TreePop();
+			}
 			ImGui::TreePop();
 		}
 		// Rotation
@@ -292,98 +405,31 @@ void DirectionalLight::DrawUI()
 			if (slideRotate)
 			{
 				ImGui::PushItemWidth(280.0f * core::GetWidgetWidthCoefficient());
-				ImGui::SliderFloat("Pitch", &m_EulerAngle.x, -360.0f, 360.0f);
-				ImGui::SliderFloat("Yaw", &m_EulerAngle.y, -360.0f, 360.0f);
+				ImGui::CenterAlignWidget("Pitch", 280.0f * core::GetWidgetWidthCoefficient());
+				ImGui::LabelHighlighted("Pitch");
+				ImGui::SliderFloat("##Pitch", &m_EulerAngle.x, -360.0f, 360.0f);
+				ImGui::CenterAlignWidget("Yaw", 280.0f * core::GetWidgetWidthCoefficient());
+				ImGui::LabelHighlighted("Yaw");
+				ImGui::SliderFloat("##Yaw", &m_EulerAngle.y, -360.0f, 360.0f);
 				ImGui::PopItemWidth();
 			}
 			else
 			{
 				ImGui::PushItemWidth(80.0f * core::GetWidgetWidthCoefficient());
-				ImGui::CenterAlignWidget(80.0f * core::GetWidgetWidthCoefficient());
-				if (ImGui::InputFloat("Pitch", &m_EulerAngle.x))
+				ImGui::CenterAlignWidget("Pitch", 80.0f * core::GetWidgetWidthCoefficient());
+				ImGui::LabelHighlighted("Pitch");
+				if (ImGui::InputFloat("##Pitch", &m_EulerAngle.x))
 				{
 					SetPitch(m_EulerAngle.x);
 				}
-				ImGui::CenterAlignWidget(80.0f * core::GetWidgetWidthCoefficient());
-				if (ImGui::InputFloat("Yaw", &m_EulerAngle.y))
+				ImGui::CenterAlignWidget("Yaw", 80.0f * core::GetWidgetWidthCoefficient());
+				ImGui::LabelHighlighted("Yaw");
+				if (ImGui::InputFloat("##Yaw", &m_EulerAngle.y))
 				{
 					SetYaw(m_EulerAngle.y);
 				}
 				ImGui::PopItemWidth();
 			}
-			ImGui::TreePop();
-		}
-	}
-	// Settings
-	if (ImGui::TreeNode("Settings"))
-	{
-		ImGui::Checkbox("Switch", &m_LightSwitch);
-		if (m_LightSwitch)
-		{
-			ImGui::Checkbox("Show Light Cube", &m_ShowCube);
-			ImGui::Checkbox("Cast Shadow", &m_CastShadow);
-		}
-		// Shadow resolution
-		if (m_CastShadow && m_LightSwitch)
-		{
-			ImGui::CenterAlignWidget("Shadow Resolution", 60.0f * core::GetWidgetWidthCoefficient());
-			ImGui::LabelHighlighted("Shadow Resolution");
-			ImGui::PushItemWidth(60.0f * core::GetWidgetWidthCoefficient());
-			const char* shadowResOps[] = {
-				"1X",
-				"2X",
-				"3X",
-				"4X"
-			};
-			static int currentRes = 0;
-			if (ImGui::Combo("##ShadowRes", &currentRes, shadowResOps, IM_ARRAYSIZE(shadowResOps)))
-			{
-				switch (currentRes)
-				{
-				case 0:
-					m_ShadowRes = 1024;
-					break;
-				case 1:
-					m_ShadowRes = 2048;
-					break;
-				case 2:
-					m_ShadowRes = 3072;
-					break;
-				case 3:
-					m_ShadowRes = 4096;
-					break;
-				default:
-					m_ShadowRes = 1024;
-					break;
-				}
-			}
-			ImGui::PopItemWidth();
-		}
-		ImGui::TreePop();
-	}
-	// Advanced settings
-	if (m_LightSwitch)
-	{
-		// Advanced settings
-		if (ImGui::TreeNode("Advanced settings"))
-		{
-			ImGui::PushItemWidth(80.0f * core::GetWidgetWidthCoefficient());
-			ImGui::CenterAlignWidget(80.0f * core::GetWidgetWidthCoefficient());
-			if (ImGui::InputFloat("Ambient", &m_ADS.x, 0.0f, 0.0f, "%.6f"))
-			{
-				SetAmbient(m_ADS.x);
-			}
-			ImGui::CenterAlignWidget(80.0f * core::GetWidgetWidthCoefficient());
-			if (ImGui::InputFloat("Diffuse", &m_ADS.y, 0.0f, 0.0f, "%.6f"))
-			{
-				SetDiffuse(m_ADS.y);
-			}
-			ImGui::CenterAlignWidget(80.0f * core::GetWidgetWidthCoefficient());
-			if (ImGui::InputFloat("Specular", &m_ADS.z, 0.0f, 0.0f, "%.6f"))
-			{
-				SetSpecular(m_ADS.z);
-			}
-			ImGui::PopItemWidth();
 			ImGui::TreePop();
 		}
 	}

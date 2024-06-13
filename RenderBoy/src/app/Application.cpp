@@ -39,75 +39,82 @@ bool Application::LoadSettings()
         {
             if (line.find("#WIDTH") != std::string::npos)
             {
-                core::SETTINGS.Width = std::atoi(core::GetSettingValue(line).c_str());
+                core::SETTINGS.Width = std::atoi(core::GetFileValue(line)[0].c_str());
             }
             else if (line.find("#HEIGHT") != std::string::npos)
             {
-                core::SETTINGS.Height = std::atoi(core::GetSettingValue(line).c_str());
+                core::SETTINGS.Height = std::atoi(core::GetFileValue(line)[0].c_str());
             }
             else if (line.find("#CORE") != std::string::npos)
             {
-                core::SETTINGS.GraphicsCore = (Core)std::atoi(core::GetSettingValue(line).c_str());
+                core::SETTINGS.GraphicsCore = (Core)std::atoi(core::GetFileValue(line)[0].c_str());
             }
             else if (line.find("#MOUSE_SENSITIVITY") != std::string::npos)
             {
-                core::SETTINGS.Sensitivity = (float)std::atof(core::GetSettingValue(line).c_str());
+                core::SETTINGS.Sensitivity = (float)std::atof(core::GetFileValue(line)[0].c_str());
             }
             else if (line.find("#CONTROLLER_SWITCH") != std::string::npos)
             {
-                core::SETTINGS.EnableController = (bool)std::atoi(core::GetSettingValue(line).c_str());
+                core::SETTINGS.EnableController = (bool)std::atoi(core::GetFileValue(line)[0].c_str());
             }
-            else if (line.find("#CONTROLLER_DEADZONE_LEFT") != std::string::npos)
+            else if (line.find("#CONTROLLER_DEADZONE") != std::string::npos)
             {
-                core::SETTINGS.DeadZone.x = (float)std::atof(core::GetSettingValue(line).c_str());
-            }
-            else if (line.find("#CONTROLLER_DEADZONE_RIGHT") != std::string::npos)
-            {
-                core::SETTINGS.DeadZone.y = (float)std::atof(core::GetSettingValue(line).c_str());
+                core::SETTINGS.DeadZone.x = (float)std::atof(core::GetFileValue(line)[0].c_str());
+                core::SETTINGS.DeadZone.y = (float)std::atof(core::GetFileValue(line)[1].c_str());
             }
             else if (line.find("#FONT_STYLE") != std::string::npos)
             {
-                core::SETTINGS.FontStyle = core::FONT_STYLE[(int)std::atoi(core::GetSettingValue(line).c_str())];
+                core::SETTINGS.FontStyle = core::FONT_STYLE[(int)std::atoi(core::GetFileValue(line)[0].c_str())];
             }
             else if (line.find("#FONT_SIZE") != std::string::npos)
             {
-                core::SETTINGS.FontSize = (int)std::atoi(core::GetSettingValue(line).c_str());
+                core::SETTINGS.FontSize = (int)std::atoi(core::GetFileValue(line)[0].c_str());
             }
             else if (line.find("#UI_STYLE") != std::string::npos)
             {
-                core::SETTINGS.UIStyle = (UI_Style)std::atoi(core::GetSettingValue(line).c_str());
+                core::SETTINGS.UIStyle = (UI_Style)std::atoi(core::GetFileValue(line)[0].c_str());
             }
             else if (line.find("#DRAWMODE") != std::string::npos)
             {
-                core::SETTINGS.DrawMode = (Draw_Mode)std::atof(core::GetSettingValue(line).c_str());
+                core::SETTINGS.DrawMode = (Draw_Mode)std::atof(core::GetFileValue(line)[0].c_str());
             }
             else if (line.find("#SHOW_NORMAL") != std::string::npos)
             {
-                core::SETTINGS.ShowNormal = (bool)std::atoi(core::GetSettingValue(line).c_str());
+                core::SETTINGS.ShowNormal = (bool)std::atoi(core::GetFileValue(line)[0].c_str());
+            }
+            else if (line.find("#NORMAL_COLOR") != std::string::npos)
+            {
+                core::SETTINGS.NormalColor.x = (float)std::atof(core::GetFileValue(line)[0].c_str());
+                core::SETTINGS.NormalColor.y = (float)std::atof(core::GetFileValue(line)[1].c_str());
+                core::SETTINGS.NormalColor.z = (float)std::atof(core::GetFileValue(line)[2].c_str());
+            }
+            else if (line.find("#NORMAL_MAGNITUDE") != std::string::npos)
+            {
+                core::SETTINGS.NormalMagnitude = (float)std::atof(core::GetFileValue(line)[0].c_str());
             }
             else if (line.find("#GAMMA") != std::string::npos)
             {
-                core::SETTINGS.Gamma = (float)std::atof(core::GetSettingValue(line).c_str());
+                core::SETTINGS.Gamma = (float)std::atof(core::GetFileValue(line)[0].c_str());
             }
             else if (line.find("#RESOLUTION") != std::string::npos)
             {
-                core::SETTINGS.Resolution = (float)std::atof(core::GetSettingValue(line).c_str());
+                core::SETTINGS.Resolution = (float)std::atof(core::GetFileValue(line)[0].c_str());
             }
             else if (line.find("#ANTI_ALISING") != std::string::npos)
             {
-                core::SETTINGS.AA = (Anti_Alising)std::atoi(core::GetSettingValue(line).c_str());
+                core::SETTINGS.AA = (Anti_Alising)std::atoi(core::GetFileValue(line)[0].c_str());
             }
             else if (line.find("#POST_PROCESS") != std::string::npos)
             {
-                core::SETTINGS.PP = (Post_Process)std::atoi(core::GetSettingValue(line).c_str());
+                core::SETTINGS.PP = (Post_Process)std::atoi(core::GetFileValue(line)[0].c_str());
             }
             else if (line.find("#CAMERA_TYPE") != std::string::npos)
             {
-                m_Scene.GetCamera().SetCameraType(std::atoi(core::GetSettingValue(line).c_str()));
+                m_Scene.GetCamera().SetCameraType(std::atoi(core::GetFileValue(line)[0].c_str()));
             }
             else if (line.find("#FOV") != std::string::npos)
             {
-                m_Scene.GetCamera().SetFOV((float)std::atof(core::GetSettingValue(line).c_str()));
+                m_Scene.GetCamera().SetFOV((float)std::atof(core::GetFileValue(line)[0].c_str()));
             }
         }
         return true;
@@ -154,9 +161,7 @@ void Application::SaveSettings()
     stream << line;
     line = "#CONTROLLER_SWITCH " + std::to_string(core::SETTINGS.EnableController) + "\n";
     stream << line;
-    line = "#CONTROLLER_DEADZONE_LEFT " + std::to_string(core::SETTINGS.DeadZone.x) + "\n";
-    stream << line;
-    line = "#CONTROLLER_DEADZONE_RIGHT " + std::to_string(core::SETTINGS.DeadZone.y) + "\n";
+    line = "#CONTROLLER_DEADZONE " + std::to_string(core::SETTINGS.DeadZone.x) + " " + std::to_string(core::SETTINGS.DeadZone.y) + "\n";
     stream << line;
     line = "#FONT_STYLE " + std::to_string(core::GetFontStyleIndex(core::SETTINGS.FontStyle)) + "\n";
     stream << line;
@@ -167,6 +172,12 @@ void Application::SaveSettings()
     line = "#DRAWMODE " + std::to_string(core::SETTINGS.DrawMode) + "\n";
     stream << line;
     line = "#SHOW_NORMAL " + std::to_string(core::SETTINGS.ShowNormal) + "\n";
+    stream << line;
+    line = "#NORMAL_COLOR " + std::to_string(core::SETTINGS.NormalColor.x) 
+        + " " + std::to_string(core::SETTINGS.NormalColor.y) 
+        + " " + std::to_string(core::SETTINGS.NormalColor.z) + "\n";
+    stream << line;
+    line = "#NORMAL_MAGNITUDE " + std::to_string(core::SETTINGS.NormalMagnitude) + "\n";
     stream << line;
     line = "#GAMMA " + std::to_string(core::SETTINGS.Gamma) + "\n";
     stream << line;
@@ -792,7 +803,8 @@ void Application::DrawSettingWindow()
                 // Enable controller
                 {
                     ImGui::CenterAlignWidget("Enable Controller");
-                    ImGui::Checkbox("Enable Controller", &core::SETTINGS.EnableController);
+                    ImGui::LabelHighlighted("Enable Controller");
+                    ImGui::Checkbox("##EnableController", &core::SETTINGS.EnableController);
                 }
                 // Dead zone
                 if (core::SETTINGS.EnableController)
@@ -842,18 +854,22 @@ void Application::DrawSettingWindow()
             // Show normal
             {
                 ImGui::CenterAlignWidget("Show Normal");
-                ImGui::Checkbox("Show Normal", &core::SETTINGS.ShowNormal);
+                ImGui::LabelHighlighted("Show Normal");
+                ImGui::Checkbox("##ShowNormal", &core::SETTINGS.ShowNormal);
                 if (core::SETTINGS.ShowNormal)
                 {
                     ImGui::CenterAlignWidget("Normal Color", 200.0f * core::GetWidgetWidthCoefficient());
                     ImGui::LabelHighlighted("Normal Color");
                     ImGui::PushItemWidth(200.0f * core::GetWidgetWidthCoefficient());
-                    ImGui::ColorEdit3("##NormalColor", &core::NORMAL_COLOR[0]);
+                    ImGui::ColorEdit3("##NormalColor", &core::SETTINGS.NormalColor[0]);
                     ImGui::PopItemWidth();
                     ImGui::CenterAlignWidget("Magnitude", 60.0f * core::GetWidgetWidthCoefficient());
                     ImGui::LabelHighlighted("Magnitude");
                     ImGui::PushItemWidth(60.0f * core::GetWidgetWidthCoefficient());
-                    ImGui::InputFloat("##NormalMagnitude", &core::NORMAL_MAGNITUDE);
+                    if (ImGui::InputFloat("##NormalMagnitude", &core::SETTINGS.NormalMagnitude))
+                    {
+                        core::SETTINGS.NormalMagnitude = core::SETTINGS.NormalMagnitude > 0.0f ? core::SETTINGS.NormalMagnitude : 0.1f;
+                    }
                     ImGui::PopItemWidth();
                 }
             }
@@ -986,8 +1002,8 @@ void Application::DrawSettingWindow()
             core::SETTINGS.DeadZone = glm::vec2(0.05f, 0.05f);
             core::SETTINGS.DrawMode = WIREFRAME;
             core::SETTINGS.ShowNormal = false;
-            core::NORMAL_COLOR = glm::vec3(1.0f);
-            core::NORMAL_MAGNITUDE = 1.0f;
+            core::SETTINGS.NormalColor = glm::vec3(1.0f);
+            core::SETTINGS.NormalMagnitude = 1.0f;
             core::SETTINGS.PP = NO_PP;
             m_Renderer.ChangePostProcess();
             m_Scene.GetCamera().SetCameraType(true);

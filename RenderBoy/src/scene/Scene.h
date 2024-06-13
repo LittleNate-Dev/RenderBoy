@@ -18,7 +18,7 @@
 struct Skybox
 {
 	Skybox_Type Type = PURE_COLOR;
-	glm::vec3 Color = glm::vec3(1.0f);
+	glm::vec3 Color = glm::vec3(0.0f);
 	std::vector<std::string> Filepath;
 };
 

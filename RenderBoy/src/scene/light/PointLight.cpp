@@ -234,168 +234,189 @@ void PointLight::SetSoftDegree(float degree)
 
 void PointLight::DrawUI()
 {
+	// Settings
+	if (ImGui::TreeNode("Settings"))
+	{
+		ImGui::CenterAlignWidget("Switch");
+		ImGui::LabelHighlighted("Swtich");
+		ImGui::Checkbox("##Switch", &m_LightSwitch);
+		if (m_LightSwitch)
+		{
+			ImGui::CenterAlignWidget("Show Light Cube");
+			ImGui::LabelHighlighted("Show Light Cube");
+			ImGui::Checkbox("##ShowLightCube", &m_ShowCube);
+			ImGui::CenterAlignWidget("Cast Shadow");
+			ImGui::LabelHighlighted("Cast Shadow");
+			ImGui::Checkbox("##CastShadow", &m_CastShadow);
+		}
+		ImGui::TreePop();
+	}
 	if (m_LightSwitch)
 	{
 		// Attributes
 		if (ImGui::TreeNode("Attributes"))
 		{
-			ImGui::CenterAlignWidget("Color", 200.0f * core::GetWidgetWidthCoefficient());
-			ImGui::LabelHighlighted("Color");
-			ImGui::PushItemWidth(200.0f * core::GetWidgetWidthCoefficient());
-			ImGui::ColorEdit3("##PointColor", &m_Color[0]);
-			ImGui::PopItemWidth();			
-			ImGui::CenterAlignWidget("Range", 120.0f * core::GetWidgetWidthCoefficient());
-			ImGui::LabelHighlighted("Range");
-			ImGui::PushItemWidth(120.0f * core::GetWidgetWidthCoefficient());
-			if (ImGui::InputFloat("##PointRange", &m_Range))
+			// Basic attributes
+			if (ImGui::TreeNode("Basic"))
 			{
-				SetRange(m_Range);
+				ImGui::CenterAlignWidget("Color", 200.0f * core::GetWidgetWidthCoefficient());
+				ImGui::LabelHighlighted("Color");
+				ImGui::PushItemWidth(200.0f * core::GetWidgetWidthCoefficient());
+				ImGui::ColorEdit3("##PointColor", &m_Color[0]);
+				ImGui::PopItemWidth();
+				ImGui::CenterAlignWidget("Range", 120.0f * core::GetWidgetWidthCoefficient());
+				ImGui::LabelHighlighted("Range");
+				ImGui::PushItemWidth(120.0f * core::GetWidgetWidthCoefficient());
+				if (ImGui::InputFloat("##PointRange", &m_Range))
+				{
+					SetRange(m_Range);
+				}
+				ImGui::PopItemWidth();
+				ImGui::CenterAlignWidget("Intensity", 80.0f * core::GetWidgetWidthCoefficient());
+				ImGui::LabelHighlighted("Intensity");
+				ImGui::PushItemWidth(80.0f * core::GetWidgetWidthCoefficient());
+				if (ImGui::InputFloat("##PointIntensity", &m_Intensity, 0.0f, 0.0f, "%.6f"))
+				{
+					SetIntensity(m_Intensity);
+				}
+				ImGui::PopItemWidth();
+				ImGui::TreePop();
 			}
-			ImGui::PopItemWidth();
-			ImGui::CenterAlignWidget("Intensity", 80.0f * core::GetWidgetWidthCoefficient());
-			ImGui::LabelHighlighted("Intensity");
-			ImGui::PushItemWidth(80.0f * core::GetWidgetWidthCoefficient());
-			if (ImGui::InputFloat("##PointIntensity", &m_Intensity, 0.0f, 0.0f, "%.6f"))
+			// Shadow settings
+			if (m_CastShadow && ImGui::TreeNode("Shadow"))
 			{
-				SetIntensity(m_Intensity);
+				ImGui::CenterAlignWidget("Shadow Resolution", 60.0f * core::GetWidgetWidthCoefficient());
+				ImGui::LabelHighlighted("Shadow Resolution");
+				ImGui::PushItemWidth(60.0f * core::GetWidgetWidthCoefficient());
+				const char* shadowResOps[] = {
+					"1X",
+					"2X",
+					"3X",
+					"4X"
+				};
+				static int currentRes;
+				switch (m_ShadowRes)
+				{
+				case 1024:
+					currentRes = 0;
+					break;
+				case 2048:
+					currentRes = 1;
+					break;
+				case 3072:
+					currentRes = 2;
+					break;
+				case 4096:
+					currentRes = 3;
+					break;
+				}
+				if (ImGui::Combo("##ShadowRes", &currentRes, shadowResOps, IM_ARRAYSIZE(shadowResOps)))
+				{
+					switch (currentRes)
+					{
+					case 0:
+						m_ShadowRes = 1024;
+						break;
+					case 1:
+						m_ShadowRes = 2048;
+						break;
+					case 2:
+						m_ShadowRes = 3072;
+						break;
+					case 3:
+						m_ShadowRes = 4096;
+						break;
+					default:
+						m_ShadowRes = 1024;
+						break;
+					}
+					((Data*)core::SCENE_DATA)->GetDataGL().GetPointLightData().DepthMap[m_Name].ChangeShadowRes(m_ShadowRes, m_ShadowRes);
+				}
+				ImGui::PopItemWidth();
+				ImGui::PushItemWidth(100.0f * core::GetWidgetWidthCoefficient());
+				ImGui::CenterAlignWidget("Bias", 100.0f * core::GetWidgetWidthCoefficient());
+				ImGui::LabelHighlighted("Bias");
+				ImGui::InputFloat("##Bias", &m_Bias, 0.0f, 0.0f, "%.8f");
+				ImGui::PopItemWidth();
+				ImGui::CenterAlignWidget("Soft Shadow");
+				ImGui::LabelHighlighted("Soft Shadow");
+				ImGui::Checkbox("##SoftShadow", &m_SoftShadow);
+				if (m_SoftShadow)
+				{
+					ImGui::PushItemWidth(60.0f * core::GetWidgetWidthCoefficient());
+					ImGui::CenterAlignWidget("Degree", 60.0f * core::GetWidgetWidthCoefficient());
+					ImGui::LabelHighlighted("Degree");
+					if (ImGui::InputFloat("##Degree", &m_SoftDegree))
+					{
+						SetSoftDegree(m_SoftDegree);
+					}
+					ImGui::PopItemWidth();
+				}
+				ImGui::TreePop();
 			}
-			ImGui::PopItemWidth();
+			// Advanced settings
+			if (ImGui::TreeNode("Advanced"))
+			{
+				ImGui::PushItemWidth(80.0f * core::GetWidgetWidthCoefficient());
+				ImGui::CenterAlignWidget("Ambient", 80.0f * core::GetWidgetWidthCoefficient());
+				ImGui::LabelHighlighted("Ambient");
+				if (ImGui::InputFloat("##Ambient", &m_ADS.x, 0.0f, 0.0f, "%.6f"))
+				{
+					SetAmbient(m_ADS.x);
+				}
+				ImGui::CenterAlignWidget("Diffuse", 80.0f * core::GetWidgetWidthCoefficient());
+				ImGui::LabelHighlighted("Diffuse");
+				if (ImGui::InputFloat("##Diffuse", &m_ADS.y, 0.0f, 0.0f, "%.6f"))
+				{
+					SetDiffuse(m_ADS.y);
+				}
+				ImGui::CenterAlignWidget("Specular", 80.0f * core::GetWidgetWidthCoefficient());
+				ImGui::LabelHighlighted("Specular");
+				if (ImGui::InputFloat("##Specular", &m_ADS.z, 0.0f, 0.0f, "%.6f"))
+				{
+					SetSpecular(m_ADS.z);
+				}
+				ImGui::PopItemWidth();
+				ImGui::PushItemWidth(100.0f * core::GetWidgetWidthCoefficient());
+				ImGui::CenterAlignWidget("Constant", 100.0f * core::GetWidgetWidthCoefficient());
+				ImGui::LabelHighlighted("Constant");
+				ImGui::InputFloat("##Constant", &m_CLQ.x, 0.0f, 0.0f, "%.8f");
+				ImGui::CenterAlignWidget("Linear", 100.0f * core::GetWidgetWidthCoefficient());
+				ImGui::LabelHighlighted("Linear");
+				ImGui::InputFloat("##Linear", &m_CLQ.y, 0.0f, 0.0f, "%.8f");
+				ImGui::CenterAlignWidget("Quadratic", 100.0f * core::GetWidgetWidthCoefficient());
+				ImGui::LabelHighlighted("Quadratic");
+				ImGui::InputFloat("##Quadratic", &m_CLQ.z, 0.0f, 0.0f, "%.8f");
+				ImGui::PopItemWidth();
+				ImGui::TreePop();
+			}
 			ImGui::TreePop();
 		}
 		// Position
 		if (ImGui::TreeNode("Position"))
 		{
 			ImGui::PushItemWidth(80.0f * core::GetWidgetWidthCoefficient());
-			ImGui::CenterAlignWidget(80.0f * core::GetWidgetWidthCoefficient());
-			if (ImGui::InputFloat("X", &m_Position.x))
+			ImGui::CenterAlignWidget("X", 80.0f * core::GetWidgetWidthCoefficient());
+			ImGui::LabelHighlighted("X");
+			if (ImGui::InputFloat("##X", &m_Position.x))
 			{
 				UpdateViewMat();
 				UpdateModelMat();
 			}
-			ImGui::CenterAlignWidget(80.0f * core::GetWidgetWidthCoefficient());
-			if (ImGui::InputFloat("Y", &m_Position.y))
+			ImGui::CenterAlignWidget("Y", 80.0f * core::GetWidgetWidthCoefficient());
+			ImGui::LabelHighlighted("Y");
+			if (ImGui::InputFloat("##Y", &m_Position.y))
 			{
 				UpdateViewMat();
 				UpdateModelMat();
 			}
-			ImGui::CenterAlignWidget(80.0f * core::GetWidgetWidthCoefficient());
-			if (ImGui::InputFloat("Z", &m_Position.z))
+			ImGui::CenterAlignWidget("Z", 80.0f * core::GetWidgetWidthCoefficient());
+			ImGui::LabelHighlighted("Z");
+			if (ImGui::InputFloat("##Z", &m_Position.z))
 			{
 				UpdateViewMat();
 				UpdateModelMat();
 			}
-			ImGui::PopItemWidth();
-			ImGui::TreePop();
-		}
-	}
-	// Settings
-	if (ImGui::TreeNode("Settings"))
-	{
-		ImGui::Checkbox("Switch", &m_LightSwitch);
-		if (m_LightSwitch)
-		{
-			ImGui::Checkbox("Show Light Cube", &m_ShowCube);
-			ImGui::Checkbox("Cast Shadow", &m_CastShadow);
-		}
-		// Shadow resolution
-		if (m_CastShadow && m_LightSwitch)
-		{
-			ImGui::CenterAlignWidget("Shadow Resolution", 60.0f * core::GetWidgetWidthCoefficient());
-			ImGui::LabelHighlighted("Shadow Resolution");
-			ImGui::PushItemWidth(60.0f * core::GetWidgetWidthCoefficient());
-			const char* shadowResOps[] = {
-				"1X",
-				"2X",
-				"3X",
-				"4X"
-			};
-			static int currentRes;
-			switch (m_ShadowRes)
-			{
-			case 1024:
-				currentRes = 0;
-				break;
-			case 2048:
-				currentRes = 1;
-				break;
-			case 3072:
-				currentRes = 2;
-				break;
-			case 4096:
-				currentRes = 3;
-				break;
-			}
-			if (ImGui::Combo("##ShadowRes", &currentRes, shadowResOps, IM_ARRAYSIZE(shadowResOps)))
-			{
-				switch (currentRes)
-				{
-				case 0:
-					m_ShadowRes = 1024;
-					break;
-				case 1:
-					m_ShadowRes = 2048;
-					break;
-				case 2:
-					m_ShadowRes = 3072;
-					break;
-				case 3:
-					m_ShadowRes = 4096;
-					break;
-				default:
-					m_ShadowRes = 1024;
-					break;
-				}
-				((Data*)core::SCENE_DATA)->GetDataGL().GetPointLightData().DepthMap[m_Name].ChangeShadowRes(m_ShadowRes, m_ShadowRes);
-			}
-			ImGui::PopItemWidth();
-			ImGui::Checkbox("Soft Shadow", &m_SoftShadow);
-			if (m_SoftShadow)
-			{
-				ImGui::PushItemWidth(60.0f * core::GetWidgetWidthCoefficient());
-				ImGui::CenterAlignWidget(60.0f * core::GetWidgetWidthCoefficient());
-				if (ImGui::InputFloat("Degree", &m_SoftDegree))
-				{
-					SetSoftDegree(m_SoftDegree);
-				}
-				ImGui::PopItemWidth();
-			}
-		}
-		ImGui::TreePop();
-	}
-	// Advanced settings
-	if (m_LightSwitch)
-	{
-		// Advanced settings
-		if (ImGui::TreeNode("Advanced settings"))
-		{
-			ImGui::PushItemWidth(100.0f * core::GetWidgetWidthCoefficient());
-			ImGui::CenterAlignWidget(100.0f * core::GetWidgetWidthCoefficient());
-			ImGui::InputFloat("Bias", &m_Bias, 0.0f, 0.0f, "%.8f");
-			ImGui::PopItemWidth();
-			ImGui::PushItemWidth(80.0f * core::GetWidgetWidthCoefficient());
-			ImGui::CenterAlignWidget(80.0f * core::GetWidgetWidthCoefficient());
-			if (ImGui::InputFloat("Ambient", &m_ADS.x, 0.0f, 0.0f, "%.6f"))
-			{
-				SetAmbient(m_ADS.x);
-			}
-			ImGui::CenterAlignWidget(80.0f * core::GetWidgetWidthCoefficient());
-			if (ImGui::InputFloat("Diffuse", &m_ADS.y, 0.0f, 0.0f, "%.6f"))
-			{
-				SetDiffuse(m_ADS.y);
-			}
-			ImGui::CenterAlignWidget(80.0f * core::GetWidgetWidthCoefficient());
-			if (ImGui::InputFloat("Specular", &m_ADS.z, 0.0f, 0.0f, "%.6f"))
-			{
-				SetSpecular(m_ADS.z);
-			}
-			ImGui::PopItemWidth();
-			ImGui::PushItemWidth(100.0f * core::GetWidgetWidthCoefficient());
-			ImGui::CenterAlignWidget(100.0f * core::GetWidgetWidthCoefficient());
-			ImGui::InputFloat("Constant", &m_CLQ.x, 0.0f, 0.0f, "%.8f");
-			ImGui::CenterAlignWidget(100.0f * core::GetWidgetWidthCoefficient());
-			ImGui::InputFloat("Linear", &m_CLQ.y, 0.0f, 0.0f, "%.8f");
-			ImGui::CenterAlignWidget(100.0f * core::GetWidgetWidthCoefficient());
-			ImGui::InputFloat("Quadratic", &m_CLQ.z, 0.0f, 0.0f, "%.8f");
 			ImGui::PopItemWidth();
 			ImGui::TreePop();
 		}

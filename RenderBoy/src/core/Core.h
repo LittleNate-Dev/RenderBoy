@@ -167,6 +167,8 @@ struct Settings
 	Anti_Alising AA = NO_AA;
 	Post_Process PP = NO_PP;
 	bool ShowNormal = false;
+	glm::vec3 NormalColor = glm::vec3(1.0f);
+	float NormalMagnitude = 1.0f;
 	float Sensitivity = 1.0f;
 	bool EnableController = false;
 	glm::vec2 DeadZone = glm::vec2(0.05f, 0.05f);
@@ -209,8 +211,6 @@ namespace core
 	extern ImGui::FileBrowser FILE_BROWSER;
 	extern Load_Type LOAD_TYPE;
 	extern std::string FILEPATH_BUFFER;
-	extern glm::vec3 NORMAL_COLOR;
-	extern float NORMAL_MAGNITUDE;
 	// Reload font flag
 	extern bool RELOAD_FONT;
 	// A pointer point to scene data
@@ -256,10 +256,8 @@ namespace core
 	// Do selected file format is supported
 	bool CheckFileFormat(std::string fileType);
 	bool CheckFileFormatAssimp(std::string fileType);
-	// Get setting value from setting file
-	std::string GetSettingValue(std::string setting);
 	// Get scene value from scene file
-	std::vector<std::string> GetSceneValue(std::string scene);
+	std::vector<std::string> GetFileValue(std::string line);
 	// Get file info
 	std::string GetFileDirectory(std::string filepath);
 	std::string GetFileFormat(std::string filepath);

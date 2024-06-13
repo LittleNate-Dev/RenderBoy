@@ -293,12 +293,15 @@ void Camera::DrawUI()
 	if (ImGui::TreeNode("Position"))
 	{
 		ImGui::PushItemWidth(80.0f * core::GetWidgetWidthCoefficient());
-		ImGui::CenterAlignWidget(80.0f * core::GetWidgetWidthCoefficient());
-		ImGui::InputFloat("Pos X", &m_Position.x);
-		ImGui::CenterAlignWidget(80.0f * core::GetWidgetWidthCoefficient());
-		ImGui::InputFloat("Pos Y", &m_Position.y);
-		ImGui::CenterAlignWidget(80.0f * core::GetWidgetWidthCoefficient());
-		ImGui::InputFloat("Pos Z", &m_Position.z);
+		ImGui::CenterAlignWidget("X", 80.0f * core::GetWidgetWidthCoefficient());
+		ImGui::LabelHighlighted("X");
+		ImGui::InputFloat("##X", &m_Position.x);
+		ImGui::CenterAlignWidget("Y", 80.0f * core::GetWidgetWidthCoefficient());
+		ImGui::LabelHighlighted("Y");
+		ImGui::InputFloat("##Y", &m_Position.y);
+		ImGui::CenterAlignWidget("Z", 80.0f * core::GetWidgetWidthCoefficient());
+		ImGui::LabelHighlighted("Z");
+		ImGui::InputFloat("##Z", &m_Position.z);
 		ImGui::PopItemWidth();
 		ImGui::TreePop();
 	}
@@ -310,26 +313,35 @@ void Camera::DrawUI()
 		if (slideRotate)
 		{
 			ImGui::PushItemWidth(280.0f * core::GetWidgetWidthCoefficient());
-			ImGui::SliderFloat("Pitch", &m_EulerAngle.x, -360.0f, 360.0f);
-			ImGui::SliderFloat("Yaw", &m_EulerAngle.y, -360.0f, 360.0f);
-			ImGui::SliderFloat("Roll", &m_EulerAngle.z, -360.0f, 360.0f);
+			ImGui::CenterAlignWidget("Pitch", 280.0f * core::GetWidgetWidthCoefficient());
+			ImGui::LabelHighlighted("Pitch");
+			ImGui::SliderFloat("##Pitch", &m_EulerAngle.x, -360.0f, 360.0f);
+			ImGui::CenterAlignWidget("Yaw", 280.0f * core::GetWidgetWidthCoefficient());
+			ImGui::LabelHighlighted("Yaw");
+			ImGui::SliderFloat("##Yaw", &m_EulerAngle.y, -360.0f, 360.0f);
+			ImGui::CenterAlignWidget("Roll", 280.0f * core::GetWidgetWidthCoefficient());
+			ImGui::LabelHighlighted("Roll");
+			ImGui::SliderFloat("##Roll", &m_EulerAngle.z, -360.0f, 360.0f);
 			ImGui::PopItemWidth();
 		}
 		else
 		{
 			ImGui::PushItemWidth(80.0f * core::GetWidgetWidthCoefficient());
-			ImGui::CenterAlignWidget(80.0f * core::GetWidgetWidthCoefficient());
-			if (ImGui::InputFloat("Pitch", &m_EulerAngle.x))
+			ImGui::CenterAlignWidget("Pitch", 80.0f * core::GetWidgetWidthCoefficient());
+			ImGui::LabelHighlighted("Pitch");
+			if (ImGui::InputFloat("##Pitch", &m_EulerAngle.x))
 			{
 				SetPitch(m_EulerAngle.x);
 			}
-			ImGui::CenterAlignWidget(80.0f * core::GetWidgetWidthCoefficient());
-			if (ImGui::InputFloat("Yaw", &m_EulerAngle.y))
+			ImGui::CenterAlignWidget("Yaw", 80.0f * core::GetWidgetWidthCoefficient());
+			ImGui::LabelHighlighted("Yaw");
+			if (ImGui::InputFloat("##Yaw", &m_EulerAngle.y))
 			{
 				SetYaw(m_EulerAngle.y);
 			}
-			ImGui::CenterAlignWidget(80.0f * core::GetWidgetWidthCoefficient());
-			if (ImGui::InputFloat("Roll", &m_EulerAngle.z))
+			ImGui::CenterAlignWidget("Roll", 80.0f * core::GetWidgetWidthCoefficient());
+			ImGui::LabelHighlighted("Roll");
+			if (ImGui::InputFloat("##Roll", &m_EulerAngle.z))
 			{
 				SetRoll(m_EulerAngle.z);
 			}
@@ -340,8 +352,9 @@ void Camera::DrawUI()
 	ImGui::CenterAlignWidget("Reset");
 	if (ImGui::Button("Reset"))
 	{
-		m_Plane = glm::vec2(0.1f, m_Plane.y);
 		m_Position = glm::vec3(0.0f);
 		m_EulerAngle = glm::vec3(0.0f);
+		m_MoveSpeed = 1.0f;
+		m_RotateSpeed = 1.0f;
 	}
 }

@@ -26,7 +26,7 @@ void Scene::Reset()
 	m_Camera.SetPosition(glm::vec3(0.0f));
 	m_Camera.SetEulerAngle(glm::vec3(0.0f));
 	m_Skybox.Type = PURE_COLOR;
-	m_Skybox.Color = glm::vec3(1.0f);
+	m_Skybox.Color = glm::vec3(0.0f);
 	std::vector<std::string>().swap(m_Skybox.Filepath);
 	m_Skybox.Filepath.clear();
 	std::vector<std::string>().swap(m_ModelList);
@@ -90,36 +90,36 @@ bool Scene::LoadScene(std::string filepath)
 			// Load scene info
 			if (line.find("#SCENE_NAME") != std::string::npos)
 			{
-				values = core::GetSceneValue(line);
+				values = core::GetFileValue(line);
 				m_Name = values[0];
 			}
 			// Load Camera
 			{
 				if (line.find("#CAMERA_NEAR_PLANE") != std::string::npos)
 				{
-					m_Camera.SetNearPlane((float)std::atof(core::GetSettingValue(line).c_str()));
+					m_Camera.SetNearPlane((float)std::atof(core::GetFileValue(line)[0].c_str()));
 				}
 				else if (line.find("#CAMERA_FAR_PLANE") != std::string::npos)
 				{
-					m_Camera.SetFarPlane((float)std::atof(core::GetSettingValue(line).c_str()));
+					m_Camera.SetFarPlane((float)std::atof(core::GetFileValue(line)[0].c_str()));
 				}
 				else if (line.find("#CAMERA_MOVE_SPEED") != std::string::npos)
 				{
-					m_Camera.SetMoveSpeed((float)std::atof(core::GetSettingValue(line).c_str()));
+					m_Camera.SetMoveSpeed((float)std::atof(core::GetFileValue(line)[0].c_str()));
 				}
 				else if (line.find("#CAMERA_ROTATE_SPEED") != std::string::npos)
 				{
-					m_Camera.SetRotateSpeed((float)std::atof(core::GetSettingValue(line).c_str()));
+					m_Camera.SetRotateSpeed((float)std::atof(core::GetFileValue(line)[0].c_str()));
 				}
 				else if (line.find("#CAMERA_POSITION") != std::string::npos)
 				{
-					values = core::GetSceneValue(line);
+					values = core::GetFileValue(line);
 					glm::vec3 pos = glm::vec3((float)std::atof(values[0].c_str()), (float)std::atof(values[1].c_str()), (float)std::atof(values[2].c_str()));
 					m_Camera.SetPosition(pos);
 				}
 				else if (line.find("#CAMERA_EULERANGLE") != std::string::npos)
 				{
-					values = core::GetSceneValue(line);
+					values = core::GetFileValue(line);
 					glm::vec3 euler = glm::vec3((float)std::atof(values[0].c_str()), (float)std::atof(values[1].c_str()), (float)std::atof(values[2].c_str()));
 					m_Camera.SetEulerAngle(euler);
 				}
@@ -128,18 +128,18 @@ bool Scene::LoadScene(std::string filepath)
 			{
 				if (line.find("#SKYBOX_TYPE") != std::string::npos)
 				{
-					values = core::GetSceneValue(line);
+					values = core::GetFileValue(line);
 					m_Skybox.Type = (Skybox_Type)std::atoi(values[0].c_str());
 				}
 				else if (line.find("#SKYBOX_COLOR") != std::string::npos)
 				{
-					values = core::GetSceneValue(line);
+					values = core::GetFileValue(line);
 					glm::vec3 color = glm::vec3((float)std::atof(values[0].c_str()), (float)std::atof(values[1].c_str()), (float)std::atof(values[2].c_str()));
 					m_Skybox.Color = color;
 				}
 				else if (line.find("#SKYBOX_FILEPATH") != std::string::npos)
 				{
-					values = core::GetSceneValue(line);
+					values = core::GetFileValue(line);
 					std::string filepath;
 					for (unsigned int i = 0; i < values.size(); i++)
 					{
@@ -167,12 +167,12 @@ bool Scene::LoadScene(std::string filepath)
 			{
 				if (line.find("#MODEL_NAME") != std::string::npos)
 				{
-					values = core::GetSceneValue(line);
+					values = core::GetFileValue(line);
 					model = values[0];
 				}
 				else if (line.find("#" + model + "_FILEPATH") != std::string::npos)
 				{
-					values = core::GetSceneValue(line);
+					values = core::GetFileValue(line);
 					std::string modelPath;
 					for (unsigned int i = 0; i < values.size(); i++)
 					{
@@ -190,49 +190,49 @@ bool Scene::LoadScene(std::string filepath)
 				}
 				else if (line.find("#" + model + "_POSITION") != std::string::npos)
 				{
-					values = core::GetSceneValue(line);
+					values = core::GetFileValue(line);
 					glm::vec3 pos = glm::vec3((float)std::atof(values[0].c_str()), (float)std::atof(values[1].c_str()), (float)std::atof(values[2].c_str()));
 					m_Models[model].SetPosition(pos);
 				}
 				else if (line.find("#" + model + "_SCALE") != std::string::npos)
 				{
-					values = core::GetSceneValue(line);
+					values = core::GetFileValue(line);
 					glm::vec3 scale = glm::vec3((float)std::atof(values[0].c_str()), (float)std::atof(values[1].c_str()), (float)std::atof(values[2].c_str()));
 					m_Models[model].SetScale(scale);
 				}
 				else if (line.find("#" + model + "_EULERANGLE") != std::string::npos)
 				{
-					values = core::GetSceneValue(line);
+					values = core::GetFileValue(line);
 					glm::vec3 euler = glm::vec3((float)std::atof(values[0].c_str()), (float)std::atof(values[1].c_str()), (float)std::atof(values[2].c_str()));
 					m_Models[model].SetEulerAngle(euler);
 				}
 				else if (line.find("#" + model + "_INSTANCE_NUM") != std::string::npos)
 				{
-					values = core::GetSceneValue(line);
+					values = core::GetFileValue(line);
 					m_Models[model].SetInstance(std::atoi(values[0].c_str()));
 				}
 				else if (line.find("#" + model + "_CURRENT") != std::string::npos)
 				{
-					values = core::GetSceneValue(line);
+					values = core::GetFileValue(line);
 					m_Models[model].SetCurrent(std::atoi(values[0].c_str()));
 				}
 				else if (line.find("#" + model + "_INSTANCE_POSITION") != std::string::npos)
 				{
-					values = core::GetSceneValue(line);
+					values = core::GetFileValue(line);
 					int current = std::atoi(values[0].c_str());
 					glm::vec3 pos = glm::vec3((float)std::atof(values[1].c_str()), (float)std::atof(values[2].c_str()), (float)std::atof(values[3].c_str()));
 					m_Models[model].SetPosition(pos, current);
 				}
 				else if (line.find("#" + model + "_INSTANCE_SCALE") != std::string::npos)
 				{
-					values = core::GetSceneValue(line);
+					values = core::GetFileValue(line);
 					int current = std::atoi(values[0].c_str());
 					glm::vec3 scale = glm::vec3((float)std::atof(values[1].c_str()), (float)std::atof(values[2].c_str()), (float)std::atof(values[3].c_str()));
 					m_Models[model].SetScale(scale, current);
 				}
 				else if (line.find("#" + model + "_INSTANCE_EULERANGLE") != std::string::npos)
 				{
-					values = core::GetSceneValue(line);
+					values = core::GetFileValue(line);
 					int current = std::atoi(values[0].c_str());
 					glm::vec3 euler = glm::vec3((float)std::atof(values[1].c_str()), (float)std::atof(values[2].c_str()), (float)std::atof(values[3].c_str()));
 					m_Models[model].SetEulerAngle(euler, current);
@@ -242,77 +242,77 @@ bool Scene::LoadScene(std::string filepath)
 			{
 				if (line.find("#POINT_LIGHT_NAME") != std::string::npos)
 				{
-					values = core::GetSceneValue(line);
+					values = core::GetFileValue(line);
 					light = values[0];
 					AddLight(light, POINT_LIGHT);
 				}
 				else if (line.find("#POINT_LIGHT_" + light + "_POSITION") != std::string::npos)
 				{
-					values = core::GetSceneValue(line);
+					values = core::GetFileValue(line);
 					glm::vec3 pos = glm::vec3((float)std::atof(values[0].c_str()), (float)std::atof(values[1].c_str()), (float)std::atof(values[2].c_str()));
 					m_PointLights[light].SetPosition(pos);
 				}
 				else if (line.find("#POINT_LIGHT_" + light + "_COLOR") != std::string::npos)
 				{
-					values = core::GetSceneValue(line);
+					values = core::GetFileValue(line);
 					glm::vec3 color = glm::vec3((float)std::atof(values[0].c_str()), (float)std::atof(values[1].c_str()), (float)std::atof(values[2].c_str()));
 					m_PointLights[light].SetColor(color);
 				}
 				else if (line.find("#POINT_LIGHT_" + light + "_RANGE") != std::string::npos)
 				{
-					values = core::GetSceneValue(line);
+					values = core::GetFileValue(line);
 					m_PointLights[light].SetRange((float)std::atof(values[0].c_str()));
 				}
 				else if (line.find("#POINT_LIGHT_" + light + "_INTENSITY") != std::string::npos)
 				{
-					values = core::GetSceneValue(line);
+					values = core::GetFileValue(line);
 					m_PointLights[light].SetIntensity((float)std::atof(values[0].c_str()));
 				}
 				else if (line.find("#POINT_LIGHT_" + light + "_BIAS") != std::string::npos)
 				{
-					values = core::GetSceneValue(line);
+					values = core::GetFileValue(line);
 					m_PointLights[light].SetBias((float)std::atof(values[0].c_str()));
 				}
 				else if (line.find("#POINT_LIGHT_" + light + "_ADS") != std::string::npos)
 				{
-					values = core::GetSceneValue(line);
+					values = core::GetFileValue(line);
 					glm::vec3 ads = glm::vec3((float)std::atof(values[0].c_str()), (float)std::atof(values[1].c_str()), (float)std::atof(values[2].c_str()));
 					m_PointLights[light].SetADS(ads);
 				}
 				else if (line.find("#POINT_LIGHT_" + light + "_CLQ") != std::string::npos)
 				{
-					values = core::GetSceneValue(line);
+					values = core::GetFileValue(line);
 					glm::vec3 clq = glm::vec3((float)std::atof(values[0].c_str()), (float)std::atof(values[1].c_str()), (float)std::atof(values[2].c_str()));
 					m_PointLights[light].SetCLQ(clq);
 				}
 				else if (line.find("#POINT_LIGHT_" + light + "_SWITCH") != std::string::npos)
 				{
-					values = core::GetSceneValue(line);
+					values = core::GetFileValue(line);
 					m_PointLights[light].SetLightSwitch((bool)std::atoi(values[0].c_str()));
 				}
 				else if (line.find("#POINT_LIGHT_" + light + "_SHOW_CUBE") != std::string::npos)
 				{
-					values = core::GetSceneValue(line);
+					values = core::GetFileValue(line);
 					m_PointLights[light].SetShowCube((bool)std::atoi(values[0].c_str()));
 				}
 				else if (line.find("#POINT_LIGHT_" + light + "_CAST_SHADOW") != std::string::npos)
 				{
-					values = core::GetSceneValue(line);
+					values = core::GetFileValue(line);
 					m_PointLights[light].SetCastShadow((bool)std::atoi(values[0].c_str()));
 				}
 				else if (line.find("#POINT_LIGHT_" + light + "_SHADOW_RES") != std::string::npos)
 				{
-					values = core::GetSceneValue(line);
+					values = core::GetFileValue(line);
 					m_PointLights[light].SetShadowRes((int)std::atoi(values[0].c_str()));
 				}
 				else if (line.find("#POINT_LIGHT_" + light + "_SOFT_SHADOW") != std::string::npos)
 				{
-					values = core::GetSceneValue(line);
+					values = core::GetFileValue(line);
 					m_PointLights[light].SetSoftShadow((bool)std::atoi(values[0].c_str()));
 				}
 				else if (line.find("#POINT_LIGHT_" + light + "_SOFT_DEGREE") != std::string::npos)
 				{
-					values = core::GetSceneValue(line);
+					values = core::GetFileValue(line);
 					m_PointLights[light].SetSoftDegree((float)std::atof(values[0].c_str()));
 				}
 			}
@@ -320,93 +320,93 @@ bool Scene::LoadScene(std::string filepath)
 			{
 				if (line.find("#SPOT_LIGHT_NAME") != std::string::npos)
 				{
-					values = core::GetSceneValue(line);
+					values = core::GetFileValue(line);
 					light = values[0];
 					AddLight(light, SPOT_LIGHT);
 				}
 				else if (line.find("#SPOT_LIGHT_" + light + "_POSITION") != std::string::npos)
 				{
-					values = core::GetSceneValue(line);
+					values = core::GetFileValue(line);
 					glm::vec3 pos = glm::vec3((float)std::atof(values[0].c_str()), (float)std::atof(values[1].c_str()), (float)std::atof(values[2].c_str()));
 					m_SpotLights[light].SetPosition(pos);
 				}
 				else if (line.find("#SPOT_LIGHT_" + light + "_EULERANGLE") != std::string::npos)
 				{
-					values = core::GetSceneValue(line);
+					values = core::GetFileValue(line);
 					glm::vec3 euler = glm::vec3((float)std::atof(values[0].c_str()), (float)std::atof(values[1].c_str()), (float)std::atof(values[2].c_str()));
 					m_SpotLights[light].SetEulerAngle(euler);
 				}
 				else if (line.find("#SPOT_LIGHT_" + light + "_COLOR") != std::string::npos)
 				{
-					values = core::GetSceneValue(line);
+					values = core::GetFileValue(line);
 					glm::vec3 color = glm::vec3((float)std::atof(values[0].c_str()), (float)std::atof(values[1].c_str()), (float)std::atof(values[2].c_str()));
 					m_SpotLights[light].SetColor(color);
 				}
 				else if (line.find("#SPOT_LIGHT_" + light + "_RANGE") != std::string::npos)
 				{
-					values = core::GetSceneValue(line);
+					values = core::GetFileValue(line);
 					m_SpotLights[light].SetRange((float)std::atof(values[0].c_str()));
 				}
 				else if (line.find("#SPOT_LIGHT_" + light + "_INTENSITY") != std::string::npos)
 				{
-					values = core::GetSceneValue(line);
+					values = core::GetFileValue(line);
 					m_SpotLights[light].SetIntensity((float)std::atof(values[0].c_str()));
 				}
 				else if (line.find("#SPOT_LIGHT_" + light + "_ANGLE") != std::string::npos)
 				{
-					values = core::GetSceneValue(line);
+					values = core::GetFileValue(line);
 					m_SpotLights[light].SetAngle((float)std::atof(values[0].c_str()));
 				}
 				else if (line.find("#SPOT_LIGHT_" + light + "_DIMANGLE") != std::string::npos)
 				{
-					values = core::GetSceneValue(line);
+					values = core::GetFileValue(line);
 					m_SpotLights[light].SetDimAngle((float)std::atof(values[0].c_str()));
 				}
 				else if (line.find("#SPOT_LIGHT_" + light + "_BIAS") != std::string::npos)
 				{
-					values = core::GetSceneValue(line);
+					values = core::GetFileValue(line);
 					m_SpotLights[light].SetBias(glm::vec2((float)std::atof(values[0].c_str()), (float)std::atof(values[1].c_str())));
 				}
 				else if (line.find("#SPOT_LIGHT_" + light + "_ADS") != std::string::npos)
 				{
-					values = core::GetSceneValue(line);
+					values = core::GetFileValue(line);
 					glm::vec3 ads = glm::vec3((float)std::atof(values[0].c_str()), (float)std::atof(values[1].c_str()), (float)std::atof(values[2].c_str()));
 					m_SpotLights[light].SetADS(ads);
 				}
 				else if (line.find("#SPOT_LIGHT_" + light + "_CLQ") != std::string::npos)
 				{
-					values = core::GetSceneValue(line);
+					values = core::GetFileValue(line);
 					glm::vec3 clq = glm::vec3((float)std::atof(values[0].c_str()), (float)std::atof(values[1].c_str()), (float)std::atof(values[2].c_str()));
 					m_SpotLights[light].SetCLQ(clq);
 				}
 				else if (line.find("#SPOT_LIGHT_" + light + "_SWITCH") != std::string::npos)
 				{
-					values = core::GetSceneValue(line);
+					values = core::GetFileValue(line);
 					m_SpotLights[light].SetLightSwitch((bool)std::atoi(values[0].c_str()));
 				}
 				else if (line.find("#SPOT_LIGHT_" + light + "_SHOW_CUBE") != std::string::npos)
 				{
-					values = core::GetSceneValue(line);
+					values = core::GetFileValue(line);
 					m_SpotLights[light].SetShowCube((bool)std::atoi(values[0].c_str()));
 				}
 				else if (line.find("#SPOT_LIGHT_" + light + "_CAST_SHADOW") != std::string::npos)
 				{
-					values = core::GetSceneValue(line);
+					values = core::GetFileValue(line);
 					m_SpotLights[light].SetCastShadow((bool)std::atoi(values[0].c_str()));
 				}
 				else if (line.find("#SPOT_LIGHT_" + light + "_SHADOW_RES") != std::string::npos)
 				{
-					values = core::GetSceneValue(line);
+					values = core::GetFileValue(line);
 					m_SpotLights[light].SetShadowRes((int)std::atoi(values[0].c_str()));
 				}
 				else if (line.find("#SPOT_LIGHT_" + light + "_SOFT_SHADOW") != std::string::npos)
 				{
-					values = core::GetSceneValue(line);
+					values = core::GetFileValue(line);
 					m_SpotLights[light].SetSoftShadow((bool)std::atoi(values[0].c_str()));
 				}
 				else if (line.find("#SPOT_LIGHT_" + light + "_SOFT_DEGREE") != std::string::npos)
 				{
-					values = core::GetSceneValue(line);
+					values = core::GetFileValue(line);
 					m_SpotLights[light].SetSoftDegree((float)std::atof(values[0].c_str()));
 				}
 			}
@@ -414,30 +414,30 @@ bool Scene::LoadScene(std::string filepath)
 			{
 				if (line.find("#DIR_LIGHT_NAME") != std::string::npos)
 				{
-					values = core::GetSceneValue(line);
+					values = core::GetFileValue(line);
 					light = values[0];
 					AddLight(light, DIRECTIONAL_LIGHT);
 				}
 				else if (line.find("#DIR_LIGHT_" + light + "_EULERANGLE") != std::string::npos)
 				{
-					values = core::GetSceneValue(line);
+					values = core::GetFileValue(line);
 					glm::vec3 euler = glm::vec3((float)std::atof(values[0].c_str()), (float)std::atof(values[1].c_str()), (float)std::atof(values[2].c_str()));
 					m_DirLights[light].SetEulerAngle(euler);
 				}
 				else if (line.find("#DIR_LIGHT_" + light + "_COLOR") != std::string::npos)
 				{
-					values = core::GetSceneValue(line);
+					values = core::GetFileValue(line);
 					glm::vec3 color = glm::vec3((float)std::atof(values[0].c_str()), (float)std::atof(values[1].c_str()), (float)std::atof(values[2].c_str()));
 					m_DirLights[light].SetColor(color);
 				}
 				else if (line.find("#DIR_LIGHT_" + light + "_INTENSITY") != std::string::npos)
 				{
-					values = core::GetSceneValue(line);
+					values = core::GetFileValue(line);
 					m_DirLights[light].SetIntensity((float)std::atof(values[0].c_str()));
 				}
 				else if (line.find("#DIR_LIGHT_" + light + "_ADS") != std::string::npos)
 				{
-					values = core::GetSceneValue(line);
+					values = core::GetFileValue(line);
 					glm::vec3 ads = glm::vec3((float)std::atof(values[0].c_str()), (float)std::atof(values[1].c_str()), (float)std::atof(values[2].c_str()));
 					m_DirLights[light].SetADS(ads);
 				}

@@ -320,8 +320,8 @@ void GLRenderer::DrawNormal(Scene& scene)
 	m_Shaders.Normal.Bind();
 	m_Shaders.Normal.SetUniformMat4f("u_ProjMat", scene.GetCamera().GetProjMat());
 	m_Shaders.Normal.SetUniformMat4f("u_ViewMat", scene.GetCamera().GetViewMat());
-	m_Shaders.Normal.SetUniform1f("u_Magnitude", core::NORMAL_MAGNITUDE);
-	m_Shaders.Normal.SetUniformVec3f("u_Color", core::NORMAL_COLOR);
+	m_Shaders.Normal.SetUniform1f("u_Magnitude", core::SETTINGS.NormalMagnitude);
+	m_Shaders.Normal.SetUniformVec3f("u_Color", core::SETTINGS.NormalColor);
 	for (unsigned int i = 0; i < scene.GetModelList().size(); i++)
 	{
 		model = scene.GetModelList()[i];
