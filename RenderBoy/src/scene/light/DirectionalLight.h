@@ -8,6 +8,7 @@
 #pragma once
 
 #include "core/Core.h"
+#include "data/Data.h"
 
 class DirectionalLight
 {
@@ -29,12 +30,17 @@ private:
 	// Resolution of the shadow map
 	unsigned int m_ShadowRes;
 	glm::vec2 m_CSMRatio;
+	float m_ShadowEnlarge;
+	glm::vec3 m_Bias;
+	bool m_SoftShadow;
+	int m_SoftDegree;
 
 public:
 	DirectionalLight();
 	~DirectionalLight();
 
 	// Get spot light's matrices
+	void UpdateShadowMat(std::vector<glm::mat4> cameraProj, glm::mat4 cameraView);
 	glm::vec3 GetDirection();
 	glm::mat4 GetViewMat(unsigned int i = 0);
 	glm::mat4 GetProjMat(unsigned int i = 0);
@@ -59,6 +65,10 @@ public:
 	void SetCastShadow(bool castShadow);
 	void SetShadowRes(unsigned int res);
 	void SetCSMRatio(glm::vec2 ratio);
+	void SetShadowEnlarge(float enlarge);
+	void SetBias(glm::vec3 bias);
+	void SetSoftDegree(unsigned int degree);
+	void SetSoftShadow(bool softShadow);
 	// Get spot light's members
 	inline std::string GetName() const
 	{
@@ -106,11 +116,27 @@ public:
 	};
 	inline unsigned int GetShadowRes() const
 	{
-		return m_CastShadow;
+		return m_ShadowRes;
 	};
 	inline glm::vec2 GetCSMRatio() const
 	{
 		return m_CSMRatio;
+	};
+	inline float GetShadowEnlarge() const
+	{
+		return m_ShadowEnlarge;
+	};
+	inline glm::vec3 GetBias() const
+	{
+		return m_Bias;
+	};
+	inline bool SoftShadow() const
+	{
+		return m_SoftShadow;
+	};
+	inline int GetSoftDegree() const
+	{
+		return m_SoftDegree;
 	};
 	// Draw UI
 	void DrawUI();

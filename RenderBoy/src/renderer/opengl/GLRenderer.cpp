@@ -69,6 +69,7 @@ void GLRenderer::Draw(Scene& scene)
 	{
 		DrawPointLightShadow(scene);
 		DrawSpotLightShadow(scene);
+		DrawDirLightShadow(scene);
 	}
 	// MSAA
 	if ((int)core::SETTINGS.AA >= 1 && (int)core::SETTINGS.AA <= 4)
@@ -190,7 +191,7 @@ void GLRenderer::DrawBlank(Scene& scene)
 			scene.GetData().GetDataGL().GetShader().SetUniform1f(lightName + "Range", scene.GetSpotLights()[light].GetRange());
 			scene.GetData().GetDataGL().GetShader().SetUniform1f(lightName + "Intensity", scene.GetSpotLights()[light].GetIntensity());
 			scene.GetData().GetDataGL().GetShader().SetUniform1i(lightName + "CastShadow", scene.GetSpotLights()[light].CastShadow());
-			if (scene.GetPointLights()[light].CastShadow())
+			if (scene.GetSpotLights()[light].CastShadow())
 			{
 				scene.GetData().GetDataGL().GetShader().SetUniform1i(lightName + "SoftShadow", scene.GetSpotLights()[light].SoftShadow());
 				scene.GetData().GetDataGL().GetShader().SetUniformHandleARB(lightName + "ShadowMap", scene.GetData().GetDataGL().GetSpotLightData().DepthMap[light].GetHandle());
@@ -200,7 +201,36 @@ void GLRenderer::DrawBlank(Scene& scene)
 			}
 		}
 	}
-
+	// Set dir lights' uniforms
+	for (unsigned int i = 0; i < scene.GetDirLightList().size(); i++)
+	{
+		light = scene.GetDirLightList()[i];
+		std::string lightName = "u_DirLight[" + std::to_string(i) + "].";
+		scene.GetData().GetDataGL().GetShader().SetUniform1i(lightName + "LightSwitch", scene.GetDirLights()[light].LightSwitch());
+		if (scene.GetDirLights()[light].LightSwitch())
+		{
+			for (unsigned int j = 0; j < 3; j++)
+			{
+				scene.GetData().GetDataGL().GetShader().SetUniformMat4f("u_DirMat[" + std::to_string(i) + "].ProjMat[" + std::to_string(j) + "]", scene.GetDirLights()[light].GetProjMat(j));
+				scene.GetData().GetDataGL().GetShader().SetUniformMat4f("u_DirMat[" + std::to_string(i) + "].ViewMat[" + std::to_string(j) + "]", scene.GetDirLights()[light].GetViewMat(j));
+			}
+			scene.GetData().GetDataGL().GetShader().SetUniformVec3f(lightName + "Direction", scene.GetDirLights()[light].GetDirection());
+			scene.GetData().GetDataGL().GetShader().SetUniformVec3f(lightName + "Color", scene.GetDirLights()[light].GetColor());
+			scene.GetData().GetDataGL().GetShader().SetUniformVec3f(lightName + "ADS", scene.GetDirLights()[light].GetADS());
+			scene.GetData().GetDataGL().GetShader().SetUniform1f(lightName + "Intensity", scene.GetDirLights()[light].GetIntensity());
+			scene.GetData().GetDataGL().GetShader().SetUniform1i(lightName + "CastShadow", scene.GetDirLights()[light].CastShadow());
+			if (scene.GetDirLights()[light].CastShadow())
+			{
+				for (unsigned int j = 0; j < 3; j++)
+				{
+					scene.GetData().GetDataGL().GetShader().SetUniformHandleARB(lightName + "ShadowMap[" + std::to_string(j) + "]", scene.GetData().GetDataGL().GetDirLightData().DepthMap[light][j].GetHandle());
+					scene.GetData().GetDataGL().GetShader().SetUniformVec3f(lightName + "Bias", scene.GetDirLights()[light].GetBias());
+				}
+				scene.GetData().GetDataGL().GetShader().SetUniform1i(lightName + "SoftShadow", scene.GetDirLights()[light].SoftShadow());
+				scene.GetData().GetDataGL().GetShader().SetUniform1f(lightName + "SoftDegree", scene.GetDirLights()[light].GetSoftDegree());
+			}
+		}
+	}
 	std::string model;
 	for (unsigned int i = 0; i < scene.GetModelList().size(); i++)
 	{
@@ -377,21 +407,21 @@ void GLRenderer::DrawLightCube(Scene& scene)
 	// Draw Directional light's cube
 	scene.GetData().GetDataGL().GetDirLightData().VA.Bind();
 	scene.GetData().GetDataGL().GetDirLightData().IB.Bind();
-	GLCall(glDisable(GL_DEPTH_TEST));
-	for (unsigned int i = 0; i < scene.GetDirectionalLightList().size(); i++)
+	GLCall(glDepthFunc(GL_ALWAYS));
+	for (unsigned int i = 0; i < scene.GetDirLightList().size(); i++)
 	{
-		if (scene.GetDirectionalLights()[scene.GetDirectionalLightList()[i]].ShowCube())
+		if (scene.GetDirLights()[scene.GetDirLightList()[i]].ShowCube())
 		{
-			glm::mat4 modelMat = scene.GetDirectionalLights()[scene.GetDirectionalLightList()[i]].GetModelMat()
+			glm::mat4 modelMat = scene.GetDirLights()[scene.GetDirLightList()[i]].GetModelMat()
 								* glm::scale(glm::mat4(1.0f), glm::vec3(glm::length(scene.GetCamera().GetPosition()) / 20.0f));
 			m_Shaders.Lightcube.SetUniformMat4f("u_ModelMat", modelMat);
-			m_Shaders.Lightcube.SetUniformVec3f("u_Color", scene.GetDirectionalLights()[scene.GetDirectionalLightList()[i]].GetColor());
+			m_Shaders.Lightcube.SetUniformVec3f("u_Color", scene.GetDirLights()[scene.GetDirLightList()[i]].GetColor());
 			GLCall(glDrawElements(GL_TRIANGLES, scene.GetData().GetDataGL().GetDirLightData().IB.GetCount(), GL_UNSIGNED_INT, nullptr));
 		}
 	}
+	GLCall(glDepthFunc(GL_LESS));
 	scene.GetData().GetDataGL().GetDirLightData().VA.Unbind();
 	scene.GetData().GetDataGL().GetDirLightData().IB.Unbind();
-	GLCall(glEnable(GL_DEPTH_TEST));
 	m_Shaders.Lightcube.Unbind();
 }
 
@@ -496,6 +526,52 @@ void GLRenderer::DrawSpotLightShadow(Scene& scene)
 		}
 	}
 	scene.GetData().GetDataGL().GetSpotLightData().Shader.Unbind();
+}
+
+void GLRenderer::DrawDirLightShadow(Scene& scene)
+{
+	std::string light;
+	scene.GetData().GetDataGL().GetDirLightData().Shader.Bind();
+	for (unsigned int i = 0; i < scene.GetDirLightList().size(); i++)
+	{
+		light = scene.GetDirLightList()[i];
+		if (scene.GetDirLights()[light].LightSwitch() && scene.GetDirLights()[light].CastShadow())
+		{
+			std::vector<glm::mat4> cameraProj;
+			cameraProj.push_back(scene.GetCamera().GetProjMat(0.0f, scene.GetDirLights()[light].GetCSMRatio().x));
+			cameraProj.push_back(scene.GetCamera().GetProjMat(scene.GetDirLights()[light].GetCSMRatio().x, scene.GetDirLights()[light].GetCSMRatio().y));
+			cameraProj.push_back(scene.GetCamera().GetProjMat(scene.GetDirLights()[light].GetCSMRatio().y, 1.0f));
+			scene.GetDirLights()[light].UpdateShadowMat(cameraProj, scene.GetCamera().GetViewMat());
+			for (unsigned int j = 0; j < 3; j++)
+			{
+				unsigned int width = scene.GetData().GetDataGL().GetDirLightData().DepthMap[light][j].GetTexWidth();
+				unsigned int height = scene.GetData().GetDataGL().GetDirLightData().DepthMap[light][j].GetTexHeight();
+				GLCall(glViewport(0, 0, width, height));
+				scene.GetData().GetDataGL().GetDirLightData().DepthMap[light][j].Bind();
+				GLCall(glClear(GL_DEPTH_BUFFER_BIT));
+				scene.GetData().GetDataGL().GetDirLightData().Shader.SetUniformMat4f("u_ProjMat", scene.GetDirLights()[light].GetProjMat(j));
+				scene.GetData().GetDataGL().GetDirLightData().Shader.SetUniformMat4f("u_ViewMat", scene.GetDirLights()[light].GetViewMat(j));
+				// Draw Scene
+				std::string model;
+				for (unsigned int k = 0; k < scene.GetModelList().size(); k++)
+				{
+					model = scene.GetModelList()[k];
+					scene.GetData().GetDataGL().GetModelData()[model].InstanceVB.UpdateVertexBuffer(
+						&scene.GetModels()[model].GetModelMats()[0],
+						(unsigned int)scene.GetModels()[model].GetModelMats().size() * sizeof(glm::mat4)
+					);
+					scene.GetData().GetDataGL().GetModelData()[model].VA.Bind();
+					scene.GetData().GetDataGL().GetModelData()[model].IB.Bind();
+					// Draw Model
+					GLCall(glDrawElementsInstanced(GL_TRIANGLES, scene.GetData().GetDataGL().GetModelData()[model].IB.GetCount(), GL_UNSIGNED_INT, nullptr, scene.GetModels()[model].GetInstance()));
+					scene.GetData().GetDataGL().GetModelData()[model].VA.Unbind();
+					scene.GetData().GetDataGL().GetModelData()[model].IB.Unbind();
+				}
+				scene.GetData().GetDataGL().GetDirLightData().DepthMap[light][j].Unbind();
+			}
+		}
+	}
+	scene.GetData().GetDataGL().GetDirLightData().Shader.Unbind();
 }
 
 bool GLRenderer::SaveScreenShot()

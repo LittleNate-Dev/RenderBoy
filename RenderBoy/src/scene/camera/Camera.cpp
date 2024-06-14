@@ -46,7 +46,24 @@ glm::mat4 Camera::GetProjMat()
 	// Orthographic
 	else
 	{
-		projMat = glm::ortho(-(float)m_WindowSize.x / 2, (float)m_WindowSize.x / 2, -(float)m_WindowSize.y / 2, (float)m_WindowSize.y / 2, -m_Plane.x, m_Plane.y);
+		projMat = glm::ortho(-(float)m_WindowSize.x / 2, (float)m_WindowSize.x / 2, -(float)m_WindowSize.y / 2, (float)m_WindowSize.y / 2, m_Plane.x, m_Plane.y);
+	}
+	return projMat;
+}
+
+glm::mat4 Camera::GetProjMat(float start, float end)
+{
+	glm::mat4 projMat;
+	float planeRange = m_Plane.y - m_Plane.x;
+	// Perspective
+	if (m_Type)
+	{
+		projMat = glm::perspective(glm::radians(m_FOV), (float)m_WindowSize.x / (float)m_WindowSize.y, m_Plane.x + planeRange * start, m_Plane.x + planeRange * end);
+	}
+	// Orthographic
+	else
+	{
+		projMat = glm::ortho(-(float)m_WindowSize.x / 2, (float)m_WindowSize.x / 2, -(float)m_WindowSize.y / 2, (float)m_WindowSize.y / 2, m_Plane.x + planeRange * start, m_Plane.x + planeRange * end);
 	}
 	return projMat;
 }
@@ -254,6 +271,36 @@ void Camera::DrawUI()
 	// Attributes
 	if (ImGui::TreeNode("Attributes"))
 	{
+		// Projection Type
+		{
+			ImGui::CenterAlignWidget("Projection Type", 120.0f * core::GetWidgetWidthCoefficient());
+			ImGui::LabelHighlighted("Projection Type");
+			ImGui::PushItemWidth(120.0f * core::GetWidgetWidthCoefficient());
+			const char* projOps[] = {
+				"Orthographic",
+				"Persepctive"
+			};
+			static int currentProj;
+			currentProj = GetCameraType();
+			if (ImGui::Combo("##Projection", &currentProj, projOps, IM_ARRAYSIZE(projOps)))
+			{
+				SetCameraType(currentProj);
+			}
+			ImGui::PopItemWidth();
+		}
+		// Camera FOV
+		{
+			ImGui::CenterAlignWidget("FOV", 220.0f * core::GetWidgetWidthCoefficient());
+			ImGui::LabelHighlighted("FOV");
+			static int fov;
+			fov = (int)GetFOV();
+			ImGui::PushItemWidth(220.0f * core::GetWidgetWidthCoefficient());
+			if (ImGui::SliderInt("##FOV", &fov, MIN_FOV, MAX_FOV))
+			{
+				SetFOV(fov);
+			}
+			ImGui::PopItemWidth();
+		}
 		ImGui::CenterAlignWidget("Near Plane", 120.0f * core::GetWidgetWidthCoefficient());
 		ImGui::LabelHighlighted("Near Plane");
 		ImGui::PushItemWidth(120.0f * core::GetWidgetWidthCoefficient());

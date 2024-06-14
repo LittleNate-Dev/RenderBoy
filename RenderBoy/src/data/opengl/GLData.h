@@ -41,6 +41,8 @@ struct GLDirLightData
 	GLVertexArray VA;
 	GLVertexBuffer VB;
 	GLIndexBuffer IB;
+	GLShader Shader;
+	std::map<std::string, std::vector<GLFrameBuffer>> DepthMap;
 };
 
 struct GLSkyboxData
@@ -112,6 +114,7 @@ public:
 	void DeleteLight(std::string name, Light_Type type);
 	void RenameLight(std::string oldName, std::string newName, Light_Type type);
 	bool LoadSkybox(std::vector<std::string> filepath);
+	void SetShadowRes(std::string name, unsigned int width, unsigned int height, Light_Type type);
 	// Get Data's members
 	inline GLShader& GetShader()
 	{

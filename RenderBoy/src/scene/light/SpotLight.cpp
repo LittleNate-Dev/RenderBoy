@@ -43,9 +43,7 @@ void SpotLight::UpdateViewMat()
 	glm::mat4 rotateMat = glm::rotate(glm::mat4(1.0f), glm::radians(m_EulerAngle.y), glm::vec3(0, 1, 0)) * glm::rotate(glm::mat4(1.0f), glm::radians(m_EulerAngle.x + 180.0f), glm::vec3(1, 0, 0));
 	glm::vec4 axis = rotateMat * glm::vec4(0.0f, 0.0f, 1.0f, 0.0f);
 	rotateMat = core::GetRodrigue(glm::normalize(axis), m_EulerAngle.z + 180.0f) * rotateMat;
-	glm::mat4 viewMat = translateMat * rotateMat;
-	viewMat = glm::inverse(viewMat);
-	m_ViewMat = viewMat;
+	m_ViewMat = glm::inverse(translateMat * rotateMat);
 }
 
 void SpotLight::UpdateModelMat()
@@ -378,7 +376,7 @@ void SpotLight::SetShadowRes(unsigned int res)
 {
 	res = res == 0 ? m_ShadowRes : res;
 	m_ShadowRes = res;
-	((Data*)core::SCENE_DATA)->GetDataGL().GetSpotLightData().DepthMap[m_Name].ChangeShadowRes(m_ShadowRes, m_ShadowRes);
+	((Data*)core::SCENE_DATA)->SetShadowRes(m_Name, m_ShadowRes, m_ShadowRes, SPOT_LIGHT);
 }
 
 void SpotLight::SetSoftShadow(bool softShadow)
@@ -527,7 +525,7 @@ void SpotLight::DrawUI()
 						m_ShadowRes = 1024;
 						break;
 					}
-					((Data*)core::SCENE_DATA)->GetDataGL().GetSpotLightData().DepthMap[m_Name].ChangeShadowRes(m_ShadowRes, m_ShadowRes);
+					((Data*)core::SCENE_DATA)->SetShadowRes(m_Name, m_ShadowRes, m_ShadowRes, SPOT_LIGHT);
 				}
 				ImGui::PopItemWidth();
 				ImGui::PushItemWidth(100.0f * core::GetWidgetWidthCoefficient());

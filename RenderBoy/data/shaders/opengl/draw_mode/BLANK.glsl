@@ -11,6 +11,17 @@ struct SpotMat
     mat4 ViewMat;
 };
 
+struct DirMat
+{
+    mat4 ProjMat[3];
+    mat4 ViewMat[3];
+};
+
+struct FragPosDir
+{
+    vec4 FragPos[3];
+};
+
 layout (location = 0) in vec4 a_Position;
 layout (location = 1) in vec3 a_Normal;
 layout (location = 7) in mat4 a_ModelMat;
@@ -18,10 +29,12 @@ layout (location = 7) in mat4 a_ModelMat;
 out vec3 v_FragPos;
 out vec3 v_Normal;
 out vec4 v_FragPosSpot[SPOT_LIGHT_COUNT];
+out FragPosDir v_FragPosDir[DIR_LIGHT_COUNT];
 
 uniform mat4 u_ProjMat;
 uniform mat4 u_ViewMat;
 uniform SpotMat u_SpotMat[SPOT_LIGHT_COUNT];
+uniform DirMat u_DirMat[DIR_LIGHT_COUNT];
 
 void main()
 {
@@ -30,6 +43,12 @@ void main()
     for (int i = 0; i < SPOT_LIGHT_COUNT; i++)
     {
         v_FragPosSpot[i] = u_SpotMat[i].ProjMat * u_SpotMat[i].ViewMat * vec4(v_FragPos, 1.0);
+    }
+    for (int i = 0; i < DIR_LIGHT_COUNT; i++)
+    {
+        v_FragPosDir[i].FragPos[0] = u_DirMat[i].ProjMat[0] * u_DirMat[i].ViewMat[0] * vec4(v_FragPos, 1.0);
+        v_FragPosDir[i].FragPos[1] = u_DirMat[i].ProjMat[1] * u_DirMat[i].ViewMat[1] * vec4(v_FragPos, 1.0);
+        v_FragPosDir[i].FragPos[2] = u_DirMat[i].ProjMat[2] * u_DirMat[i].ViewMat[2] * vec4(v_FragPos, 1.0);
     }
     gl_Position = u_ProjMat * u_ViewMat * a_ModelMat * a_Position;
 }
@@ -42,6 +61,11 @@ void main()
 #define POINT_LIGHT_COUNT
 #define SPOT_LIGHT_COUNT
 #define DIR_LIGHT_COUNT
+
+struct FragPosDir
+{
+    vec4 FragPos[3];
+};
 
 struct PointLight
 {
@@ -80,15 +104,31 @@ struct SpotLight
     float SoftDegree;
 };
 
+struct DirLight
+{
+    float Intensity;
+    vec3 Direction;
+    vec3 Color;
+    sampler2D ShadowMap[3];
+    vec3 ADS;
+    bool LightSwitch;
+    bool CastShadow;
+    vec3 Bias;
+    bool SoftShadow;
+    float SoftDegree;
+};
+
 layout(location = 0) out vec4 v_FragColor;
 
 in vec3 v_FragPos;
 in vec3 v_Normal;
 in vec4 v_FragPosSpot[SPOT_LIGHT_COUNT];
+in FragPosDir v_FragPosDir[DIR_LIGHT_COUNT];
 
 uniform vec3 u_ViewPos;
 uniform PointLight u_PointLight[POINT_LIGHT_COUNT];
 uniform SpotLight u_SpotLight[SPOT_LIGHT_COUNT];
+uniform DirLight u_DirLight[DIR_LIGHT_COUNT];
 
 const vec4 matDiffuse = vec4(0.78, 0.78, 0.78, 1.0);
 const float matShininess = 16.0;
@@ -98,6 +138,7 @@ vec3 normal = vec3(0.0);
 
 vec4 CalcPointLight(int i);
 vec4 CalcSpotLight(int i);
+vec4 CalcDirLight(int i);
 
 void main()
 {
@@ -117,6 +158,13 @@ void main()
         if (u_SpotLight[i].LightSwitch)
         {
             result += CalcSpotLight(i);
+        }
+    }
+    for (int i = 0; i < DIR_LIGHT_COUNT; i++)
+    {
+        if (u_DirLight[i].LightSwitch)
+        {
+            result += CalcDirLight(i);
         }
     }
     v_FragColor = vec4(vec3(result), 1.0);
@@ -304,11 +352,102 @@ vec4 CalcSpotLight(int i)
         }
         else
         {
-            if (ndc.x < 1.0 && ndc.x > -1.0 && ndc.y < 1.0 && ndc.y > -1.0)
-            {
-
-            }
             lighting = ambient + diffuse + specular;
+        }
+    }
+    else
+    {
+        lighting = ambient + diffuse + specular;
+    }
+    return lighting;
+}
+
+vec4 CalcDirLight(int i)
+{
+    vec3 lightDir = u_DirLight[i].Direction;
+    // Diffuse shading
+    float diff;
+    if (normal == vec3(0.0))
+    {
+        diff = 1.0;
+    }
+    else
+    {
+        diff = max(dot(normal, lightDir), 0.0);
+    }
+    // Specular shading
+    vec3 halfwayDir = normalize(lightDir + viewDir);
+    float spec;
+    if (normal == vec3(0.0))
+    {
+        spec = 1.0;
+    }
+    else
+    {
+        spec = pow(max(dot(normal, halfwayDir), 0.0), matShininess);
+    }
+    // attenuation
+    float attenuation = u_DirLight[i].Intensity;    
+    // combine results
+    vec4 ambient, diffuse, specular;
+    ambient  = u_DirLight[i].ADS.x * vec4(u_DirLight[i].Color, 1.0) * matDiffuse;
+    diffuse  = u_DirLight[i].ADS.y * vec4(u_DirLight[i].Color, 1.0) * diff * matDiffuse;
+    specular = u_DirLight[i].ADS.z * vec4(u_DirLight[i].Color, 1.0) * spec * matSpecular;
+    ambient *= attenuation;
+    diffuse *= attenuation;
+    specular *= attenuation;
+
+    vec4 lighting = vec4(0.0);
+    if (u_DirLight[i].CastShadow)
+    {
+        int level = 0;
+        vec3 ndc = vec3(0.0);
+        for (level = 0; level < 3; level++)
+        {
+            ndc = v_FragPosDir[i].FragPos[level].xyz / v_FragPosDir[i].FragPos[level].w;
+            if (ndc.x < 1.0 && ndc.x > -1.0 && ndc.y < 1.0 && ndc.y > -1.0 && ndc.z > -1.0 && ndc.z < 1.0)
+            {
+                break;
+            }
+        }
+        vec2 shadowTex = ndc.xy;
+        shadowTex = shadowTex * 0.5 + 0.5;
+        float closestDepth = texture(u_DirLight[i].ShadowMap[level], shadowTex).r;
+        float currentDepth = ndc.z * 0.5 + 0.5;
+        if (closestDepth == 1.0)
+        {
+            lighting = ambient + diffuse + specular;
+        }
+        else
+        {
+            if (currentDepth - u_DirLight[i].Bias[level] > closestDepth)
+            {
+                if (u_DirLight[i].SoftShadow)
+                {
+                    // PCF
+                    float shadow = 0.0;
+                    vec2 texelSize = 1.0 / textureSize(u_DirLight[i].ShadowMap[level], 0);
+                    float offset = u_DirLight[i].SoftDegree;
+                    for(float x = -offset; x <= offset; ++x)
+                    {
+                        for(float y = -offset; y <= offset; ++y)
+                        {
+                            float pcfDepth = texture(u_DirLight[i].ShadowMap[level], shadowTex.xy + vec2(x, y) * texelSize).r; 
+                            shadow += currentDepth - u_DirLight[i].Bias[level] > pcfDepth  ? 1.0 : 0.0;        
+                        }    
+                    }
+                    shadow /= pow(offset * 2.0 + 1.0, 2.0);
+                    lighting = ambient + (1.0 - shadow) * (diffuse + specular);
+                }
+                else
+                {
+                    lighting = ambient;
+                }
+            }
+            else
+            {
+                lighting = ambient + diffuse + specular;
+            }
         }
     }
     else

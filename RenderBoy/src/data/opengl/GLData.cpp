@@ -13,6 +13,7 @@ void GLData::Init()
 	// Init shaders
 	m_PointLightData.Shader.Init(SHADER_OPENGL_SHADOW_POINT);
 	m_SpotLightData.Shader.Init(SHADER_OPENGL_SHADOW_SPOT);
+	m_DirLightData.Shader.Init(SHADER_OPENGL_SHADOW_DIR);
 	m_SkyboxData.Shader.Init(SHADER_OPENGL_SKYBOX);
 	m_CheckerMap.GenTexture(UV_MAP_FILEPATH);
 	ChangeDrawMode();
@@ -140,6 +141,9 @@ void GLData::Reset()
 {
 	ChangeDrawMode();
 	m_ModelData.clear();
+	m_PointLightData.DepthMap.clear();
+	m_SpotLightData.DepthMap.clear();
+	m_DirLightData.DepthMap.clear();
 	GLCubeMap newCubeMap;
 	m_SkyboxData.Skybox = newCubeMap;
 }
@@ -316,6 +320,27 @@ bool GLData::LoadSkybox(std::vector<std::string> filepath)
 	return false;
 }
 
+void GLData::SetShadowRes(std::string name, unsigned int width, unsigned int height, Light_Type type)
+{
+	switch (type)
+	{
+	case POINT_LIGHT:
+		m_PointLightData.DepthMap[name].ChangeShadowRes(width, height);
+		break;
+	case SPOT_LIGHT:
+		m_SpotLightData.DepthMap[name].ChangeShadowRes(width, height);
+		break;
+	case DIRECTIONAL_LIGHT:
+		for (unsigned int i = 0; i < 3; i++)
+		{
+			m_DirLightData.DepthMap[name][i].ChangeShadowRes(width * (3 - i) / 3, height * (3 - i) / 3);
+		}
+		break;
+	default:
+		break;
+	}
+}
+
 void GLData::AddPointLight(std::string name)
 {
 	GLFrameBuffer fb;
@@ -340,7 +365,20 @@ void GLData::AddSpotLight(std::string name)
 
 void GLData::AddDirLight(std::string name)
 {
-	// TODO
+	GLFrameBuffer fb;
+	std::vector<GLFrameBuffer> fbs;
+	fbs.push_back(fb);
+	fbs.push_back(fb);
+	fbs.push_back(fb);
+	m_DirLightData.DepthMap.insert(std::pair<std::string, std::vector<GLFrameBuffer>>(name, fbs));
+	for (unsigned int i = 0; i < 3; i++)
+	{
+		m_DirLightData.DepthMap[name][i].Init(DEPTH_MAP, 1024 * (3 - i) / 3, 1024 * (3 - i) / 3);
+	}
+	if (core::SETTINGS.DrawMode == BLANK)
+	{
+		m_Shader.Init(SHADER_OPENGL_BLANK);
+	}
 }
 
 void GLData::DeletePointLight(std::string name)
@@ -363,7 +401,11 @@ void GLData::DeleteSpotLight(std::string name)
 
 void GLData::DeleteDirLight(std::string name)
 {
-	// TODO
+	m_DirLightData.DepthMap.erase(name);
+	if (core::SETTINGS.DrawMode == BLANK)
+	{
+		m_Shader.Init(SHADER_OPENGL_BLANK);
+	}
 }
 
 void GLData::RenamePointLight(std::string oldName, std::string newName)
@@ -384,10 +426,24 @@ void GLData::RenameSpotLight(std::string oldName, std::string newName)
 	m_SpotLightData.DepthMap.erase(oldName);
 	m_SpotLightData.DepthMap.insert(std::pair<std::string, GLFrameBuffer>(newName, fb));
 	m_SpotLightData.DepthMap[newName].Init(DEPTH_MAP, width, height);
-	m_SpotLightData.DepthMap[newName].ChangeShadowRes(width, height);
 }
 
 void GLData::RenameDirLight(std::string oldName, std::string newName)
 {
-	// TODO
+	unsigned int width[3], height[3];
+	for (unsigned int i = 0; i < 3; i++)
+	{
+		width[i] = m_DirLightData.DepthMap[oldName][i].GetTexWidth();
+		height[i] = m_DirLightData.DepthMap[oldName][i].GetTexHeight();
+	}
+	GLFrameBuffer fb;
+	std::vector<GLFrameBuffer> fbs;
+	fbs.push_back(fb);
+	fbs.push_back(fb);
+	fbs.push_back(fb);
+	m_DirLightData.DepthMap.insert(std::pair<std::string, std::vector<GLFrameBuffer>>(newName, fbs));
+	for (unsigned int i = 0; i < 3; i++)
+	{
+		m_DirLightData.DepthMap[newName][i].Init(DEPTH_MAP, width[i], height[i]);
+	}
 }

@@ -10,7 +10,11 @@ DirectionalLight::DirectionalLight()
 	m_ShowCube = true;
 	m_CastShadow = true;
 	m_ShadowRes = 1024;
-	m_CSMRatio = glm::vec2(0.3f, 0.7f);
+	m_ShadowEnlarge = 10.0f;
+	m_CSMRatio = glm::vec2(0.15f, 0.4f);
+	m_Bias = glm::vec3(0.0f);
+	m_SoftShadow = true;
+	m_SoftDegree = 1;
 	for (unsigned int i = 0; i < 3; i++)
 	{
 		m_ProjMat[i] = glm::mat4(1.0f);
@@ -20,6 +24,73 @@ DirectionalLight::DirectionalLight()
 
 DirectionalLight::~DirectionalLight()
 {
+}
+
+void DirectionalLight::UpdateShadowMat(std::vector<glm::mat4> cameraProj, glm::mat4 cameraView)
+{
+	for (unsigned int i = 0; i < 3; i++)
+	{
+		glm::mat4 inv = glm::inverse(cameraProj[i] * cameraView);
+
+		std::vector<glm::vec4> frustumCorners;
+		for (unsigned int x = 0; x < 2; ++x)
+		{
+			for (unsigned int y = 0; y < 2; ++y)
+			{
+				for (unsigned int z = 0; z < 2; ++z)
+				{
+					const glm::vec4 pt =
+						inv * glm::vec4(
+							2.0f * x - 1.0f,
+							2.0f * y - 1.0f,
+							2.0f * z - 1.0f,
+							1.0f);
+					frustumCorners.push_back(pt / pt.w);
+				}
+			}
+		}
+		glm::vec3 center = glm::vec3(0, 0, 0);
+		for (unsigned int j = 0; j < frustumCorners.size(); j++)
+		{
+			center += glm::vec3(frustumCorners[j]);
+		}
+		center /= frustumCorners.size();
+		m_ViewMat[i] = glm::lookAt(center + GetDirection(), center, glm::vec3(0.0f, 1.0f, 0.0f));
+		float minX = std::numeric_limits<float>::max();
+		float maxX = std::numeric_limits<float>::lowest();
+		float minY = std::numeric_limits<float>::max();
+		float maxY = std::numeric_limits<float>::lowest();
+		float minZ = std::numeric_limits<float>::max();
+		float maxZ = std::numeric_limits<float>::lowest();
+		for (unsigned int j = 0; j < frustumCorners.size(); j++)
+		{
+			glm::vec4 trf = m_ViewMat[i] * frustumCorners[j];
+			minX = std::min(minX, trf.x);
+			maxX = std::max(maxX, trf.x);
+			minY = std::min(minY, trf.y);
+			maxY = std::max(maxY, trf.y);
+			minZ = std::min(minZ, trf.z);
+			maxZ = std::max(maxZ, trf.z);
+		}
+		if (minZ < 0)
+		{
+			minZ *= m_ShadowEnlarge;
+		}
+		else
+		{
+			minZ /= m_ShadowEnlarge;
+		}
+		if (maxZ < 0)
+		{
+			maxZ /= m_ShadowEnlarge;
+		}
+		else
+		{
+			maxZ *= m_ShadowEnlarge;
+		}
+
+		m_ProjMat[i] = glm::ortho(minX, maxX, minY, maxY, minZ, maxZ);
+	}
 }
 
 glm::vec3 DirectionalLight::GetDirection()
@@ -256,22 +327,9 @@ void DirectionalLight::SetCastShadow(bool castShadow)
 
 void DirectionalLight::SetShadowRes(unsigned int res)
 {
-	if (res <= 1024)
-	{
-		res = 1024;
-	}
-	else if (res <= 2048)
-	{
-		res = 2048;
-	}
-	else if (res <= 3072)
-	{
-		res = 3072;
-	}
-	else
-	{
-		res = 4096;
-	}
+	res = res == 0 ? m_ShadowRes : res;
+	m_ShadowRes = res;
+	((Data*)core::SCENE_DATA)->SetShadowRes(m_Name, m_ShadowRes, m_ShadowRes, DIRECTIONAL_LIGHT);
 }
 
 void DirectionalLight::SetCSMRatio(glm::vec2 ratio)
@@ -289,6 +347,27 @@ void DirectionalLight::SetCSMRatio(glm::vec2 ratio)
 		return;
 	}
 	m_CSMRatio = ratio;
+}
+
+void DirectionalLight::SetShadowEnlarge(float enlarge)
+{
+	enlarge = enlarge >= 1.0f ? enlarge : 1.0f;
+	m_ShadowEnlarge = enlarge;
+}
+
+void DirectionalLight::SetBias(glm::vec3 bias)
+{
+	m_Bias = bias;
+}
+
+void DirectionalLight::SetSoftDegree(unsigned int degree)
+{
+	m_SoftDegree = degree;
+}
+
+void DirectionalLight::SetSoftShadow(bool softShadow)
+{
+	m_SoftShadow = softShadow;
 }
 
 void DirectionalLight::DrawUI()
@@ -333,7 +412,7 @@ void DirectionalLight::DrawUI()
 				ImGui::PopItemWidth();
 				ImGui::TreePop();
 			}
-			// Shadow resolution
+			// Shadow
 			if (m_CastShadow && ImGui::TreeNode("Shadow"))
 			{
 				ImGui::CenterAlignWidget("Shadow Resolution", 60.0f * core::GetWidgetWidthCoefficient());
@@ -343,9 +422,12 @@ void DirectionalLight::DrawUI()
 					"1X",
 					"2X",
 					"3X",
-					"4X"
+					"4X",
+					"5X",
+					"6X"
 				};
-				static int currentRes = 0;
+				static int currentRes;
+				currentRes = m_ShadowRes / 1024 - 1;
 				if (ImGui::Combo("##ShadowRes", &currentRes, shadowResOps, IM_ARRAYSIZE(shadowResOps)))
 				{
 					switch (currentRes)
@@ -362,12 +444,80 @@ void DirectionalLight::DrawUI()
 					case 3:
 						m_ShadowRes = 4096;
 						break;
+					case 4:
+						m_ShadowRes = 5120;
+						break;
+					case 5:
+						m_ShadowRes = 6144;
+						break;
 					default:
 						m_ShadowRes = 1024;
 						break;
 					}
+					((Data*)core::SCENE_DATA)->SetShadowRes(m_Name, m_ShadowRes, m_ShadowRes, DIRECTIONAL_LIGHT);
 				}
 				ImGui::PopItemWidth();
+				ImGui::CenterAlignWidget("Soft Shadow");
+				ImGui::LabelHighlighted("Soft Shadow");
+				ImGui::Checkbox("##SoftShadow", &m_SoftShadow);
+				if (m_SoftShadow)
+				{
+					ImGui::PushItemWidth(90.0f * core::GetWidgetWidthCoefficient());
+					ImGui::CenterAlignWidget("Degree", 90.0f * core::GetWidgetWidthCoefficient());
+					ImGui::LabelHighlighted("Degree");
+					if (ImGui::InputInt("##Degree", &m_SoftDegree))
+					{
+						SetSoftDegree(m_SoftDegree);
+					}
+					ImGui::PopItemWidth();
+				}
+				if (ImGui::TreeNode("Bias"))
+				{
+					ImGui::PushItemWidth(100.0f * core::GetWidgetWidthCoefficient());
+					ImGui::CenterAlignWidget("Level 1", 100.0f * core::GetWidgetWidthCoefficient());
+					ImGui::LabelHighlighted("Level 1");
+					ImGui::InputFloat("##Level1", &m_Bias.x, 0.0f, 0.0f, "%.8f");
+					ImGui::CenterAlignWidget("Level 2", 100.0f * core::GetWidgetWidthCoefficient());
+					ImGui::LabelHighlighted("Level 2");
+					ImGui::InputFloat("##Level2", &m_Bias.y, 0.0f, 0.0f, "%.8f");
+					ImGui::CenterAlignWidget("Level 3", 100.0f * core::GetWidgetWidthCoefficient());
+					ImGui::LabelHighlighted("Level 3");
+					ImGui::InputFloat("##Level3", &m_Bias.z, 0.0f, 0.0f, "%.8f");
+					ImGui::PopItemWidth();
+					ImGui::TreePop();
+				}
+				if (ImGui::TreeNode("CSM"))
+				{
+					ImGui::CenterAlignWidget("CSM Ratio");
+					ImGui::TextHighlighted("CSM Ratio");
+					ImGui::PushItemWidth(80.0f * core::GetWidgetWidthCoefficient());
+					ImGui::CenterAlignWidget("Close", 80.0f * core::GetWidgetWidthCoefficient());
+					ImGui::LabelHighlighted("Close");
+					static glm::vec2 ratio;
+					ratio = m_CSMRatio;
+					if (ImGui::InputFloat("##CSMRatioClose", &ratio.x, 0.0f, 0.0f, "%.6f"))
+					{
+						SetCSMRatio(ratio);
+						ratio = m_CSMRatio;
+					}
+					ImGui::CenterAlignWidget("Far", 80.0f * core::GetWidgetWidthCoefficient());
+					ImGui::LabelHighlighted("Far");
+					if (ImGui::InputFloat("##CSMRatioFar", &ratio.y, 0.0f, 0.0f, "%.6f"))
+					{
+						SetCSMRatio(ratio);
+						ratio = m_CSMRatio;
+					}
+					ImGui::PopItemWidth();
+					ImGui::PushItemWidth(60.0f * core::GetWidgetWidthCoefficient());
+					ImGui::CenterAlignWidget("Shadow Enlarge Factor", 60.0f * core::GetWidgetWidthCoefficient());
+					ImGui::LabelHighlighted("Shadow Enlarge Factor");
+					if (ImGui::InputFloat("##ShadowEnlargeFactor", &m_ShadowEnlarge))
+					{
+						SetShadowEnlarge(m_ShadowEnlarge);
+					}
+					ImGui::PopItemWidth();
+					ImGui::TreePop();
+				}
 				ImGui::TreePop();
 			}
 			// Advanced settings
@@ -445,5 +595,8 @@ void DirectionalLight::DrawUI()
 		m_ShowCube = true;
 		m_CastShadow = true;
 		m_ShadowRes = 1024;
+		SetShadowRes(m_ShadowRes);
+		m_ShadowEnlarge = 10.0f;
+		m_CSMRatio = glm::vec2(0.3f, 0.7f);
 	}
 }

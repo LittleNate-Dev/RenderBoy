@@ -53,6 +53,7 @@ public:
 	glm::vec3 GetDirection(glm::vec3 direction);
 	glm::mat4 GetViewMat();
 	glm::mat4 GetProjMat();
+	glm::mat4 GetProjMat(float start, float end); // To get part of the camera's view frustum
 	// Get Camera's members
 	inline bool GetCameraType() const
 	{

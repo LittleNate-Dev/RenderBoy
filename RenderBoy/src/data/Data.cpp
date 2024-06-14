@@ -132,6 +132,18 @@ bool Data::LoadSkybox(std::vector<std::string> filepath)
 	return false;
 }
 
+void Data::SetShadowRes(std::string name, unsigned int width, unsigned int height, Light_Type type)
+{
+	switch (core::SETTINGS.GraphicsCore)
+	{
+	case OPENGL:
+		m_DataGL.SetShadowRes(name, width, height, type);
+		break;
+	default:
+		break;
+	}
+}
+
 GLData& Data::GetDataGL()
 {
 	return m_DataGL;

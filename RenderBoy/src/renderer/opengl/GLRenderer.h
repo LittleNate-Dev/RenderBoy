@@ -45,6 +45,7 @@ private:
 	void DrawSkybox(Scene& scene);
 	void DrawPointLightShadow(Scene& scene);
 	void DrawSpotLightShadow(Scene& scene);
+	void DrawDirLightShadow(Scene& scene);
 
 public:
 	GLRenderer();

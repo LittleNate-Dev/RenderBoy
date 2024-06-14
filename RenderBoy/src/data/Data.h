@@ -30,6 +30,7 @@ public:
 	void DeleteLight(std::string name, Light_Type type);
 	void RenameLight(std::string oldName, std::string newName, Light_Type type);
 	bool LoadSkybox(std::vector<std::string> filepath);
+	void SetShadowRes(std::string name, unsigned int width, unsigned int height, Light_Type type);
 	// Get Data's members
 	GLData& GetDataGL();
 };

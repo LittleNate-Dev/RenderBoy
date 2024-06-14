@@ -122,11 +122,11 @@ public:
 	{
 		return m_SpotLights;
 	};
-	inline std::vector<std::string>& GetDirectionalLightList()
+	inline std::vector<std::string>& GetDirLightList()
 	{
 		return m_DirLightList;
 	};
-	inline std::map<std::string, DirectionalLight>& GetDirectionalLights()
+	inline std::map<std::string, DirectionalLight>& GetDirLights()
 	{
 		return m_DirLights;
 	};

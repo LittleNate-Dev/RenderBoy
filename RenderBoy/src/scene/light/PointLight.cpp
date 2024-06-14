@@ -218,7 +218,7 @@ void PointLight::SetShadowRes(unsigned int res)
 {
 	res = res == 0 ? m_ShadowRes : res;
 	m_ShadowRes = res;
-	((Data*)core::SCENE_DATA)->GetDataGL().GetPointLightData().DepthMap[m_Name].ChangeShadowRes(m_ShadowRes, m_ShadowRes);
+	((Data*)core::SCENE_DATA)->SetShadowRes(m_Name, m_ShadowRes, m_ShadowRes, POINT_LIGHT);
 }
 
 void PointLight::SetSoftShadow(bool softShadow)
@@ -330,7 +330,7 @@ void PointLight::DrawUI()
 						m_ShadowRes = 1024;
 						break;
 					}
-					((Data*)core::SCENE_DATA)->GetDataGL().GetPointLightData().DepthMap[m_Name].ChangeShadowRes(m_ShadowRes, m_ShadowRes);
+					((Data*)core::SCENE_DATA)->SetShadowRes(m_Name, m_ShadowRes, m_ShadowRes, POINT_LIGHT);
 				}
 				ImGui::PopItemWidth();
 				ImGui::PushItemWidth(100.0f * core::GetWidgetWidthCoefficient());

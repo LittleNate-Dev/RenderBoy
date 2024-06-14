@@ -85,6 +85,22 @@ ShaderProgramSource GLShader::ParseShader(std::string filepath)
             }
             ss[(int)type] << line << '\n';
         }
+        else if (line.find("uniform SpotLight u_SpotLight[SPOT_LIGHT_COUNT];") != std::string::npos)
+        {
+            if (core::SCENE_STATICS.SpotLight == 0)
+            {
+                line = "uniform SpotLight u_SpotLight[1];";
+            }
+            ss[(int)type] << line << '\n';
+        }
+        else if (line.find("uniform DirLight u_DirLight[DIR_LIGHT_COUNT];") != std::string::npos)
+        {
+            if (core::SCENE_STATICS.DirectionalLight == 0)
+            {
+                line = "uniform DirLight u_DirLight[1];";
+            }
+            ss[(int)type] << line << '\n';
+        }
         else if (line.find("in vec4 v_FragPosSpot[SPOT_LIGHT_COUNT];") != std::string::npos)
         {
             if (core::SCENE_STATICS.SpotLight == 0)
@@ -101,6 +117,22 @@ ShaderProgramSource GLShader::ParseShader(std::string filepath)
             }
             ss[(int)type] << line << '\n';
         }
+        else if (line.find("in FragPosDir v_FragPosDir[DIR_LIGHT_COUNT];") != std::string::npos)
+        {
+            if (core::SCENE_STATICS.DirectionalLight == 0)
+            {
+                line = "in FragPosDir v_FragPosDir[1];";
+            }
+            ss[(int)type] << line << '\n';
+        }
+        else if (line.find("out FragPosDir v_FragPosDir[DIR_LIGHT_COUNT];") != std::string::npos)
+        {
+            if (core::SCENE_STATICS.DirectionalLight == 0)
+            {
+                line = "out FragPosDir v_FragPosDir[1];";
+            }
+            ss[(int)type] << line << '\n';
+        }
         else if (line.find("uniform SpotMat u_SpotMat[SPOT_LIGHT_COUNT];") != std::string::npos)
         {
             if (core::SCENE_STATICS.SpotLight == 0)
@@ -109,11 +141,11 @@ ShaderProgramSource GLShader::ParseShader(std::string filepath)
             }
             ss[(int)type] << line << '\n';
         }
-        else if (line.find("uniform SpotLight u_SpotLight[SPOT_LIGHT_COUNT];") != std::string::npos)
+        else if (line.find("uniform DirMat u_DirMat[DIR_LIGHT_COUNT];") != std::string::npos)
         {
-            if (core::SCENE_STATICS.SpotLight == 0)
+            if (core::SCENE_STATICS.DirectionalLight == 0)
             {
-                line = "uniform SpotLight u_SpotLight[1];";
+                line = "uniform DirMat u_DirMat[1];";
             }
             ss[(int)type] << line << '\n';
         }

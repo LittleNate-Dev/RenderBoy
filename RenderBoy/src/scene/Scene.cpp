@@ -20,6 +20,8 @@ void Scene::Reset()
 {
 	m_Name = "Default";
 	m_FilePath = "";
+	m_Camera.SetFOV(80.0f);
+	m_Camera.SetCameraType(true);
 	m_Camera.SetPlane(glm::vec2(0.1f, 500.0f));
 	m_Camera.SetMoveSpeed(1.0f);
 	m_Camera.SetRotateSpeed(1.0f);
@@ -95,7 +97,15 @@ bool Scene::LoadScene(std::string filepath)
 			}
 			// Load Camera
 			{
-				if (line.find("#CAMERA_NEAR_PLANE") != std::string::npos)
+				if (line.find("#CAMERA_TYPE") != std::string::npos)
+				{
+					m_Camera.SetCameraType(std::atoi(core::GetFileValue(line)[0].c_str()));
+				}
+				else if (line.find("#CAMERA_FOV") != std::string::npos)
+				{
+					m_Camera.SetFOV((float)std::atof(core::GetFileValue(line)[0].c_str()));
+				}
+				else if (line.find("#CAMERA_NEAR_PLANE") != std::string::npos)
 				{
 					m_Camera.SetNearPlane((float)std::atof(core::GetFileValue(line)[0].c_str()));
 				}
@@ -441,6 +451,55 @@ bool Scene::LoadScene(std::string filepath)
 					glm::vec3 ads = glm::vec3((float)std::atof(values[0].c_str()), (float)std::atof(values[1].c_str()), (float)std::atof(values[2].c_str()));
 					m_DirLights[light].SetADS(ads);
 				}
+				else if (line.find("#DIR_LIGHT_" + light + "_SWITCH") != std::string::npos)
+				{
+					values = core::GetFileValue(line);
+					m_DirLights[light].SetLightSwitch((bool)std::atoi(values[0].c_str()));
+				}
+				else if (line.find("#DIR_LIGHT_" + light + "_SHOW_CUBE") != std::string::npos)
+				{
+					values = core::GetFileValue(line);
+					m_DirLights[light].SetShowCube((bool)std::atoi(values[0].c_str()));
+				}
+				else if (line.find("#DIR_LIGHT_" + light + "_CAST_SHADOW") != std::string::npos)
+				{
+					values = core::GetFileValue(line);
+					m_DirLights[light].SetCastShadow((bool)std::atoi(values[0].c_str()));
+				}
+				else if (line.find("#DIR_LIGHT_" + light + "_SHADOW_RES") != std::string::npos)
+				{
+					values = core::GetFileValue(line);
+					m_DirLights[light].SetShadowRes((int)std::atoi(values[0].c_str()));
+				}
+				else if (line.find("#DIR_LIGHT_" + light + "_CSM_RATIO") != std::string::npos)
+				{
+					values = core::GetFileValue(line);
+					m_DirLights[light].SetCSMRatio(glm::vec2((float)std::atof(values[0].c_str()), (float)std::atof(values[1].c_str())));
+				}
+				else if (line.find("#DIR_LIGHT_" + light + "_SHADOW_BIAS") != std::string::npos)
+				{
+					values = core::GetFileValue(line);
+					glm::vec3 bias = glm::vec3(
+						(float)std::atof(values[0].c_str()),
+						(float)std::atof(values[1].c_str()),
+						(float)std::atof(values[2].c_str()));
+					m_DirLights[light].SetBias(bias);
+				}
+				else if (line.find("#DIR_LIGHT_" + light + "_SHADOW_ENLARGE") != std::string::npos)
+				{
+					values = core::GetFileValue(line);
+					m_DirLights[light].SetShadowEnlarge((float)std::atof(values[0].c_str()));
+				}
+				else if (line.find("#DIR_LIGHT_" + light + "_SOFT_SHADOW") != std::string::npos)
+				{
+					values = core::GetFileValue(line);
+					m_DirLights[light].SetSoftShadow((bool)std::atoi(values[0].c_str()));
+				}
+				else if (line.find("#DIR_LIGHT_" + light + "_SOFT_DEGREE") != std::string::npos)
+				{
+					values = core::GetFileValue(line);
+					m_DirLights[light].SetSoftDegree((int)std::atoi(values[0].c_str()));
+				}
 			}
 		}
 		return true;
@@ -465,6 +524,10 @@ void Scene::SaveScene()
 	stream << line;
 	// Save Camera
 	{
+		line = "#CAMERA_TYPE " + std::to_string(m_Camera.GetCameraType()) + "\n";
+		stream << line;
+		line = "#CAMERA_FOV " + std::to_string(m_Camera.GetFOV()) + "\n";
+		stream << line;
 		line = "#CAMERA_NEAR_PLANE " + std::to_string(m_Camera.GetNearPlane()) + "\n";
 		stream << line;
 		line = "#CAMERA_FAR_PLANE " + std::to_string(m_Camera.GetFarPlane()) + "\n";
@@ -627,6 +690,29 @@ void Scene::SaveScene()
 		stream << line;
 		glm::vec3 ads = m_DirLights[light].GetADS();
 		line = "#DIR_LIGHT_" + light + "_ADS " + std::to_string(ads.x) + " " + std::to_string(ads.y) + " " + std::to_string(ads.z) + "\n";
+		stream << line;
+		line = "#DIR_LIGHT_" + light + "_SWITCH " + std::to_string(m_DirLights[light].LightSwitch()) + "\n";
+		stream << line;
+		line = "#DIR_LIGHT_" + light + "_SHOW_CUBE " + std::to_string(m_DirLights[light].ShowCube()) + "\n";
+		stream << line;
+		line = "#DIR_LIGHT_" + light + "_CAST_SHADOW " + std::to_string(m_DirLights[light].CastShadow()) + "\n";
+		stream << line;
+		line = "#DIR_LIGHT_" + light + "_SHADOW_RES " + std::to_string(m_DirLights[light].GetShadowRes()) + "\n";
+		stream << line;
+		glm::vec2 ratio = m_DirLights[light].GetCSMRatio();
+		line = "#DIR_LIGHT_" + light + "_CSM_RATIO " + std::to_string(ratio.x) + " " + std::to_string(ratio.y) + "\n";
+		stream << line;
+		glm::vec3 bias = m_DirLights[light].GetBias();
+		line = "#DIR_LIGHT_" + light + "_SHADOW_BIAS " 
+			+ std::to_string(bias.x) + " " 
+			+ std::to_string(bias.y) + " "
+			+ std::to_string(bias.z) + "\n";
+		stream << line;
+		line = "#DIR_LIGHT_" + light + "_SHADOW_ENLARGE " + std::to_string(m_DirLights[light].GetShadowEnlarge()) + "\n";
+		stream << line;
+		line = "#DIR_LIGHT_" + light + "_SOFT_SHADOW " + std::to_string(m_DirLights[light].SoftShadow()) + "\n";
+		stream << line;
+		line = "#DIR_LIGHT_" + light + "_SOFT_DEGREE " + std::to_string(m_DirLights[light].GetSoftDegree()) + "\n";
 		stream << line;
 	}
 	stream.close();
@@ -812,6 +898,7 @@ bool Scene::AddDirectionalLight(std::string name)
 	m_DirLights.insert(std::pair<std::string, DirectionalLight>(name, light));
 	core::currentDirLight = nullptr;
 	core::SCENE_STATICS.DirectionalLight++;
+	m_Data.AddLight(name, DIRECTIONAL_LIGHT);
 	return true;
 }
 
@@ -880,6 +967,7 @@ bool Scene::DeleteDirectionalLight(std::string name)
 		m_DirLights.erase(name);
 		core::currentDirLight = nullptr;
 		core::SCENE_STATICS.DirectionalLight--;
+		m_Data.DeleteLight(name, DIRECTIONAL_LIGHT);
 		return true;
 	}
 	return false;
@@ -1049,6 +1137,7 @@ bool Scene::RenameDirectionalLight(std::string oldName, std::string newName)
 				break;
 			}
 		}
+		m_Data.RenameLight(oldName, newName, DIRECTIONAL_LIGHT);
 		return true;
 	}
 	return false;

@@ -108,13 +108,25 @@ bool Application::LoadSettings()
             {
                 core::SETTINGS.PP = (Post_Process)std::atoi(core::GetFileValue(line)[0].c_str());
             }
-            else if (line.find("#CAMERA_TYPE") != std::string::npos)
+            else if (line.find("#PERF_OPENED") != std::string::npos)
             {
-                m_Scene.GetCamera().SetCameraType(std::atoi(core::GetFileValue(line)[0].c_str()));
+                core::IS_PERF_OPENED = (bool)std::atoi(core::GetFileValue(line)[0].c_str());
             }
-            else if (line.find("#FOV") != std::string::npos)
+            else if (line.find("#SCENE_OPENED") != std::string::npos)
             {
-                m_Scene.GetCamera().SetFOV((float)std::atof(core::GetFileValue(line)[0].c_str()));
+                core::IS_SCENE_OPENED = (bool)std::atoi(core::GetFileValue(line)[0].c_str());
+            }
+            else if (line.find("#MODELS_OPENED") != std::string::npos)
+            {
+                core::IS_MODELS_OPENED = (bool)std::atoi(core::GetFileValue(line)[0].c_str());
+            }
+            else if (line.find("#CAMERA_OPENED") != std::string::npos)
+            {
+                core::IS_CAMERA_OPENED = (bool)std::atoi(core::GetFileValue(line)[0].c_str());
+            }
+            else if (line.find("#LIGHTS_OPENED") != std::string::npos)
+            {
+                core::IS_LIGHTS_OPENED = (bool)std::atoi(core::GetFileValue(line)[0].c_str());
             }
         }
         return true;
@@ -187,9 +199,15 @@ void Application::SaveSettings()
     stream << line;
     line = "#POST_PROCESS " + std::to_string(core::SETTINGS.PP) + "\n";
     stream << line;
-    line = "#CAMERA_TYPE " + std::to_string(m_Scene.GetCamera().GetCameraType()) + "\n";
+    line = "#PERF_OPENED " + std::to_string(core::IS_PERF_OPENED) + "\n";
     stream << line;
-    line = "#FOV " + std::to_string(m_Scene.GetCamera().GetFOV()) + "\n";
+    line = "#SCENE_OPENED " + std::to_string(core::IS_SCENE_OPENED) + "\n";
+    stream << line;
+    line = "#MODELS_OPENED " + std::to_string(core::IS_MODELS_OPENED) + "\n";
+    stream << line;
+    line = "#CAMERA_OPENED " + std::to_string(core::IS_CAMERA_OPENED) + "\n";
+    stream << line;
+    line = "#LIGHTS_OPENED " + std::to_string(core::IS_LIGHTS_OPENED) + "\n";
     stream << line;
     stream.close();
 }
@@ -620,7 +638,6 @@ void Application::DrawPerfWindow()
     {
         ImGuiIO& io = ImGui::GetIO(); (void)io;
         ImGuiWindowFlags windowFlags = 0;
-        windowFlags |= ImGuiWindowFlags_NoSavedSettings;
         windowFlags |= ImGuiWindowFlags_AlwaysAutoResize;
         ImGui::Begin("Performance", &core::IS_PERF_OPENED, windowFlags);
         // FPS
@@ -903,36 +920,6 @@ void Application::DrawSettingWindow()
             {
                 // TODO
             }
-            // Projection Type
-            {
-                ImGui::CenterAlignWidget("Projection Type", 120.0f * core::GetWidgetWidthCoefficient());
-                ImGui::LabelHighlighted("Projection Type");
-                ImGui::PushItemWidth(120.0f * core::GetWidgetWidthCoefficient());
-                const char* projOps[] = {
-                    "Orthographic",
-                    "Persepctive"
-                };
-                static int currentProj;
-                currentProj = m_Scene.GetCamera().GetCameraType();
-                if (ImGui::Combo("##Projection", &currentProj, projOps, IM_ARRAYSIZE(projOps)))
-                {
-                    m_Scene.GetCamera().SetCameraType(currentProj);
-                }
-                ImGui::PopItemWidth();
-            }
-            // Camera FOV
-            {
-                ImGui::CenterAlignWidget("FOV", 220.0f * core::GetWidgetWidthCoefficient());
-                ImGui::LabelHighlighted("FOV");
-                static int fov;
-                fov = (int)m_Scene.GetCamera().GetFOV();
-                ImGui::PushItemWidth(220.0f * core::GetWidgetWidthCoefficient());
-                if (ImGui::SliderInt("##FOV", &fov, MIN_FOV, MAX_FOV))
-                {
-                    m_Scene.GetCamera().SetFOV(fov);
-                }
-                ImGui::PopItemWidth();
-            }
             // Gamma
             {
                 ImGui::CenterAlignWidget("Gamma", 150.0f * core::GetWidgetWidthCoefficient());
@@ -1006,8 +993,6 @@ void Application::DrawSettingWindow()
             core::SETTINGS.NormalMagnitude = 1.0f;
             core::SETTINGS.PP = NO_PP;
             m_Renderer.ChangePostProcess();
-            m_Scene.GetCamera().SetCameraType(true);
-            m_Scene.GetCamera().SetFOV(80);
             core::SETTINGS.Gamma = 2.2f;
             core::SETTINGS.Resolution = 1.0f;
             m_Renderer.ChangeResolution();
