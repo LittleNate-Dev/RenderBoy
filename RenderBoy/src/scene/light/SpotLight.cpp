@@ -531,10 +531,10 @@ void SpotLight::DrawUI()
 				ImGui::PushItemWidth(100.0f * core::GetWidgetWidthCoefficient());
 				ImGui::CenterAlignWidget("Min Bias",100.0f * core::GetWidgetWidthCoefficient());
 				ImGui::LabelHighlighted("Min Bias");
-				ImGui::InputFloat("Min Bias", &m_Bias.x, 0.0f, 0.0f, "%.8f");
+				ImGui::InputFloat("##MinBias", &m_Bias.x, 0.0f, 0.0f, "%.8f");
 				ImGui::CenterAlignWidget("Max Bias", 100.0f * core::GetWidgetWidthCoefficient());
 				ImGui::LabelHighlighted("Max Bias");
-				ImGui::InputFloat("Max Bias", &m_Bias.y, 0.0f, 0.0f, "%.8f");
+				ImGui::InputFloat("##MaxBias", &m_Bias.y, 0.0f, 0.0f, "%.8f");
 				ImGui::PopItemWidth();
 				ImGui::CenterAlignWidget("Soft Shadow");
 				ImGui::LabelHighlighted("Soft Shadow");

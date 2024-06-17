@@ -39,7 +39,14 @@ uniform DirMat u_DirMat[DIR_LIGHT_COUNT];
 void main()
 {
     v_FragPos = vec3(a_ModelMat * a_Position);
-    v_Normal = mat3(transpose(inverse(a_ModelMat))) * a_Normal;
+    if (a_Normal == vec3(0.0))
+    {
+        v_Normal = vec3(0.0);
+    }
+    else
+    {
+        v_Normal = mat3(transpose(inverse(a_ModelMat))) * a_Normal;
+    }
     for (int i = 0; i < SPOT_LIGHT_COUNT; i++)
     {
         v_FragPosSpot[i] = u_SpotMat[i].ProjMat * u_SpotMat[i].ViewMat * vec4(v_FragPos, 1.0);
@@ -172,36 +179,27 @@ void main()
 
 vec4 CalcPointLight(int i)
 {
-    vec3 lightDir = normalize(u_PointLight[i].Position - v_FragPos);
-    // Diffuse shading
-    float diff;
-    if (normal == vec3(0.0))
-    {
-        diff = 1.0;
-    }
-    else
-    {
-        diff = max(dot(normal, lightDir), 0.0);
-    }
-    // Specular shading
-    vec3 halfwayDir = normalize(lightDir + viewDir);
-    float spec;
-    if (normal == vec3(0.0))
-    {
-        spec = 1.0;
-    }
-    else
-    {
-        spec = pow(max(dot(normal, halfwayDir), 0.0), matShininess);
-    }
-    // attenuation
-    float distance = length(u_PointLight[i].Position - v_FragPos);
-    float attenuation = u_PointLight[i].Intensity / (u_PointLight[i].CLQ.x + u_PointLight[i].CLQ.y * distance + u_PointLight[i].CLQ.z * distance * distance);    
-    // combine results
     vec4 ambient, diffuse, specular;
-    ambient  = u_PointLight[i].ADS.x * vec4(u_PointLight[i].Color, 1.0) * matDiffuse;
-    diffuse  = u_PointLight[i].ADS.y * vec4(u_PointLight[i].Color, 1.0) * diff * matDiffuse;
-    specular = u_PointLight[i].ADS.z * vec4(u_PointLight[i].Color, 1.0) * spec * matSpecular;
+    vec3 lightDir = normalize(u_PointLight[i].Position - v_FragPos);
+    // Attenuation
+    float distance = length(u_PointLight[i].Position - v_FragPos);
+    float attenuation = u_PointLight[i].Intensity / (u_PointLight[i].CLQ.x + u_PointLight[i].CLQ.y * distance + u_PointLight[i].CLQ.z * distance * distance); 
+    if (v_Normal == vec3(0.0))
+    {
+        ambient  = u_PointLight[i].ADS.x * vec4(u_PointLight[i].Color, 1.0) * matDiffuse;
+        diffuse  = u_PointLight[i].ADS.y * vec4(u_PointLight[i].Color, 1.0) * matDiffuse;
+        specular = vec4(0.0);
+    }
+    else
+    {
+        float diff = max(dot(normal, lightDir), 0.0);
+        vec3 halfwayDir = normalize(lightDir + viewDir);
+        float spec = pow(max(dot(normal, halfwayDir), 0.0), matShininess);
+        ambient  = u_PointLight[i].ADS.x * vec4(u_PointLight[i].Color, 1.0) * matDiffuse;
+        diffuse  = u_PointLight[i].ADS.y * vec4(u_PointLight[i].Color, 1.0) * diff * matDiffuse;
+        specular = u_PointLight[i].ADS.z * vec4(u_PointLight[i].Color, 1.0) * spec * matSpecular;
+    }
+    // combine results
     ambient *= attenuation;
     diffuse *= attenuation;
     specular *= attenuation;
@@ -260,40 +258,30 @@ vec4 CalcPointLight(int i)
 
 vec4 CalcSpotLight(int i)
 {
+    vec4 ambient, diffuse, specular;
     vec3 lightDir = normalize(u_SpotLight[i].Position - v_FragPos);
-    // diffuse shading
-    float diff;
-    if (normal == vec3(0.0))
-    {
-        diff = 1.0;
-    }
-    else
-    {
-        diff = max(dot(normal, lightDir), 0.0);
-    }
-    // specular shading
-    vec3 halfwayDir = normalize(lightDir + viewDir);
-    float spec;
-    if (normal == vec3(0.0))
-    {
-        spec = 1.0;
-    }
-    else
-    {
-        spec = pow(max(dot(normal, halfwayDir), 0.0), matShininess);
-    }
-    // attenuation
+    // Attenuation
     float distance = length(u_SpotLight[i].Position - v_FragPos);
     float attenuation = u_SpotLight[i].Intensity / (u_SpotLight[i].CLQ.x + u_SpotLight[i].CLQ.y * distance + u_SpotLight[i].CLQ.z * (distance * distance)); 
     // dim out the light
     float theta = dot(-lightDir, normalize(u_SpotLight[i].Direction));
     float epsilon = cos(u_SpotLight[i].Angle * 0.5) - cos(u_SpotLight[i].Angle * 0.5 + u_SpotLight[i].DimAngle);
     float intensity = clamp((theta - cos(u_SpotLight[i].Angle * 0.5 + u_SpotLight[i].DimAngle)) / epsilon, 0.0, 1.0);
-    // combine results
-    vec4 ambient, diffuse, specular;
-    ambient  = u_SpotLight[i].ADS.x * vec4(u_SpotLight[i].Color, 1.0) * matDiffuse;
-    diffuse  = u_SpotLight[i].ADS.y * vec4(u_SpotLight[i].Color, 1.0) * diff * matDiffuse;
-    specular = u_SpotLight[i].ADS.z * spec * matSpecular;
+    if (v_Normal == vec3(0.0))
+    {
+        ambient  = u_SpotLight[i].ADS.x * vec4(u_SpotLight[i].Color, 1.0) * matDiffuse;
+        diffuse  = u_SpotLight[i].ADS.y * vec4(u_SpotLight[i].Color, 1.0) * matDiffuse;
+        specular = vec4(0.0);
+    }
+    else
+    {
+        float diff = max(dot(normal, lightDir), 0.0);
+        vec3 halfwayDir = normalize(lightDir + viewDir);
+        float spec = pow(max(dot(normal, halfwayDir), 0.0), matShininess);
+        ambient  = u_SpotLight[i].ADS.x * vec4(u_SpotLight[i].Color, 1.0) * matDiffuse;
+        diffuse  = u_SpotLight[i].ADS.y * vec4(u_SpotLight[i].Color, 1.0) * diff * matDiffuse;
+        specular = u_SpotLight[i].ADS.z * spec * matSpecular;
+    }
     ambient *= attenuation;
     diffuse *= intensity * attenuation;
     specular *= intensity * attenuation;
@@ -364,35 +352,25 @@ vec4 CalcSpotLight(int i)
 
 vec4 CalcDirLight(int i)
 {
-    vec3 lightDir = u_DirLight[i].Direction;
-    // Diffuse shading
-    float diff;
-    if (normal == vec3(0.0))
-    {
-        diff = 1.0;
-    }
-    else
-    {
-        diff = max(dot(normal, lightDir), 0.0);
-    }
-    // Specular shading
-    vec3 halfwayDir = normalize(lightDir + viewDir);
-    float spec;
-    if (normal == vec3(0.0))
-    {
-        spec = 1.0;
-    }
-    else
-    {
-        spec = pow(max(dot(normal, halfwayDir), 0.0), matShininess);
-    }
-    // attenuation
-    float attenuation = u_DirLight[i].Intensity;    
-    // combine results
     vec4 ambient, diffuse, specular;
-    ambient  = u_DirLight[i].ADS.x * vec4(u_DirLight[i].Color, 1.0) * matDiffuse;
-    diffuse  = u_DirLight[i].ADS.y * vec4(u_DirLight[i].Color, 1.0) * diff * matDiffuse;
-    specular = u_DirLight[i].ADS.z * vec4(u_DirLight[i].Color, 1.0) * spec * matSpecular;
+    vec3 lightDir = u_DirLight[i].Direction;
+    // Attenuation
+    float attenuation = u_DirLight[i].Intensity;  
+    if (v_Normal == vec3(0.0))
+    {
+        ambient  = u_DirLight[i].ADS.x * vec4(u_DirLight[i].Color, 1.0) * matDiffuse;
+        diffuse  = u_DirLight[i].ADS.y * vec4(u_DirLight[i].Color, 1.0) * matDiffuse;
+        specular = vec4(0.0);
+    }
+    else
+    {
+        float diff = max(dot(normal, lightDir), 0.0);
+        vec3 halfwayDir = normalize(lightDir + viewDir);
+        float spec = pow(max(dot(normal, halfwayDir), 0.0), matShininess);
+        ambient  = u_DirLight[i].ADS.x * vec4(u_DirLight[i].Color, 1.0) * matDiffuse;
+        diffuse  = u_DirLight[i].ADS.y * vec4(u_DirLight[i].Color, 1.0) * diff * matDiffuse;
+        specular = u_DirLight[i].ADS.z * vec4(u_DirLight[i].Color, 1.0) * spec * matSpecular;
+    }
     ambient *= attenuation;
     diffuse *= attenuation;
     specular *= attenuation;

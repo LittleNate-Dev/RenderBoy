@@ -182,7 +182,6 @@ Mesh Model::AssimpProcessMesh(aiMesh* mesh, aiNode* node, const aiScene* scene)
         else
         {
             vertex.TexCoord = glm::vec2(0.0f, 0.0f);
-
         }
         // Vertex tangent and bitangent
         if (mesh->mTangents != nullptr)
