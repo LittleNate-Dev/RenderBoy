@@ -16,6 +16,7 @@ struct Frame
 {
 	GLFrameBuffer FB;
 	GLFrameBuffer FBMsaa;
+	GLFrameBuffer Bloom[4];
 	GLVertexArray VA;
 	GLVertexBuffer VB;
 	GLIndexBuffer IB;
@@ -26,6 +27,7 @@ struct Shaders
 	GLShader Normal;
 	GLShader Lightcube;
 	GLShader Screen;
+	GLShader Bloom[4];
 };
 
 class GLRenderer
@@ -43,6 +45,7 @@ private:
 	void DrawNormal(Scene& scene);
 	void DrawLightCube(Scene& scene);
 	void DrawSkybox(Scene& scene);
+	void DrawBloom();
 	void DrawPointLightShadow(Scene& scene);
 	void DrawSpotLightShadow(Scene& scene);
 	void DrawDirLightShadow(Scene& scene);

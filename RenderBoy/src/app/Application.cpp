@@ -92,6 +92,10 @@ bool Application::LoadSettings()
             {
                 core::SETTINGS.NormalMagnitude = (float)std::atof(core::GetFileValue(line)[0].c_str());
             }
+            else if (line.find("#BLOOM") != std::string::npos)
+            {
+                core::SETTINGS.Bloom = (bool)std::atoi(core::GetFileValue(line)[0].c_str());
+            }
             else if (line.find("#GAMMA") != std::string::npos)
             {
                 core::SETTINGS.Gamma = (float)std::atof(core::GetFileValue(line)[0].c_str());
@@ -198,6 +202,8 @@ void Application::SaveSettings()
     line = "#ANTI_ALISING " + std::to_string(core::SETTINGS.AA) + "\n";
     stream << line;
     line = "#POST_PROCESS " + std::to_string(core::SETTINGS.PP) + "\n";
+    stream << line;
+    line = "#BLOOM " + std::to_string(core::SETTINGS.Bloom) + "\n";
     stream << line;
     line = "#PERF_OPENED " + std::to_string(core::IS_PERF_OPENED) + "\n";
     stream << line;
@@ -868,28 +874,6 @@ void Application::DrawSettingWindow()
                 }
                 ImGui::PopItemWidth();
             }
-            // Show normal
-            {
-                ImGui::CenterAlignWidget("Show Normal");
-                ImGui::LabelHighlighted("Show Normal");
-                ImGui::Checkbox("##ShowNormal", &core::SETTINGS.ShowNormal);
-                if (core::SETTINGS.ShowNormal)
-                {
-                    ImGui::CenterAlignWidget("Normal Color", 200.0f * core::GetWidgetWidthCoefficient());
-                    ImGui::LabelHighlighted("Normal Color");
-                    ImGui::PushItemWidth(200.0f * core::GetWidgetWidthCoefficient());
-                    ImGui::ColorEdit3("##NormalColor", &core::SETTINGS.NormalColor[0]);
-                    ImGui::PopItemWidth();
-                    ImGui::CenterAlignWidget("Magnitude", 60.0f * core::GetWidgetWidthCoefficient());
-                    ImGui::LabelHighlighted("Magnitude");
-                    ImGui::PushItemWidth(60.0f * core::GetWidgetWidthCoefficient());
-                    if (ImGui::InputFloat("##NormalMagnitude", &core::SETTINGS.NormalMagnitude))
-                    {
-                        core::SETTINGS.NormalMagnitude = core::SETTINGS.NormalMagnitude > 0.0f ? core::SETTINGS.NormalMagnitude : 0.1f;
-                    }
-                    ImGui::PopItemWidth();
-                }
-            }
             // Post-Process
             {
                 ImGui::CenterAlignWidget("Post-Processing", 105.0f * core::GetWidgetWidthCoefficient());
@@ -910,6 +894,36 @@ void Application::DrawSettingWindow()
                     m_Renderer.ChangePostProcess();
                 }
                 ImGui::PopItemWidth();
+            }
+            // Show normal
+            if (ImGui::TreeNode("Normal"))
+            {
+                ImGui::CenterAlignWidget("Show Normal");
+                ImGui::LabelHighlighted("Show Normal");
+                ImGui::Checkbox("##ShowNormal", &core::SETTINGS.ShowNormal);
+                if (core::SETTINGS.ShowNormal)
+                {
+                    ImGui::CenterAlignWidget("Normal Color", 200.0f * core::GetWidgetWidthCoefficient());
+                    ImGui::LabelHighlighted("Normal Color");
+                    ImGui::PushItemWidth(200.0f * core::GetWidgetWidthCoefficient());
+                    ImGui::ColorEdit3("##NormalColor", &core::SETTINGS.NormalColor[0]);
+                    ImGui::PopItemWidth();
+                    ImGui::CenterAlignWidget("Magnitude", 60.0f * core::GetWidgetWidthCoefficient());
+                    ImGui::LabelHighlighted("Magnitude");
+                    ImGui::PushItemWidth(60.0f * core::GetWidgetWidthCoefficient());
+                    if (ImGui::InputFloat("##NormalMagnitude", &core::SETTINGS.NormalMagnitude))
+                    {
+                        core::SETTINGS.NormalMagnitude = core::SETTINGS.NormalMagnitude > 0.0f ? core::SETTINGS.NormalMagnitude : 0.1f;
+                    }
+                    ImGui::PopItemWidth();
+                }
+                ImGui::TreePop();
+            }
+            // Bloom
+            {
+                ImGui::CenterAlignWidget("Bloom");
+                ImGui::LabelHighlighted("Bloom");
+                ImGui::Checkbox("##Bloom", &core::SETTINGS.Bloom);
             }
             ImGui::TreePop();
         }

@@ -20,6 +20,10 @@ void GLRenderer::Init(Scene& scene)
 	// Initialize shaders
 	m_Shaders.Normal.Init(SHADER_OPENGL_NORMAL);
 	m_Shaders.Lightcube.Init(SHADER_OPENGL_LIGHTCUBE);
+	m_Shaders.Bloom[0].Init(SHADER_OPENGL_BLOOM_COPY);
+	m_Shaders.Bloom[1].Init(SHADER_OPENGL_BLOOM_BRIGHT); 
+	m_Shaders.Bloom[2].Init(SHADER_OPENGL_BLOOM_BLUR);
+	m_Shaders.Bloom[3].Init(SHADER_OPENGL_BLOOM_BLEND);
 	ChangePostProcess();
 	// Initialize frame buffers
 	m_Frame.FBMsaa.Init(FBType::MSAA);
@@ -28,6 +32,11 @@ void GLRenderer::Init(Scene& scene)
 		core::ShowWarningMsg("Failed to initialize OpenGL renderer!");
 	}
 	m_Frame.FB.Init(FBType::FRAME);
+	// Initialize framebuffers used for bloom effect
+	for (unsigned int i = 0; i < 4; i++)
+	{
+		m_Frame.Bloom[i].Init(FBType::FRAME);
+	}
 	if (m_Frame.FB.IsInitialized())
 	{
 		// Draw a quad on the screen and put framebuffer on it
@@ -121,11 +130,16 @@ void GLRenderer::Draw(Scene& scene)
 		GLCall(glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST));
 	}
 	m_Frame.FB.Unbind();
+	if (core::SETTINGS.Bloom)
+	{
+		DrawBloom();
+	}
 	Clear();
-	GLCall(glViewport(0, 0, core::SETTINGS.Width, core::SETTINGS.Height));
 	// Draw frame buffer's content on the screen;
+	GLCall(glViewport(0, 0, core::SETTINGS.Width, core::SETTINGS.Height));
 	GLCall(glDisable(GL_DEPTH_TEST));
 	m_Shaders.Screen.Bind();
+	//m_Frame.Bloom[3].BindTex();
 	m_Frame.FB.BindTex();
 	m_Shaders.Screen.SetUniform1i("u_ScreenTex", 0);
 	m_Shaders.Screen.SetUniform1f("u_Gamma", core::SETTINGS.Gamma);
@@ -385,6 +399,7 @@ void GLRenderer::DrawLightCube(Scene& scene)
 		{
 			m_Shaders.Lightcube.SetUniformMat4f("u_ModelMat", scene.GetPointLights()[scene.GetPointLightList()[i]].GetModelMat());
 			m_Shaders.Lightcube.SetUniformVec3f("u_Color", scene.GetPointLights()[scene.GetPointLightList()[i]].GetColor());
+			m_Shaders.Lightcube.SetUniform1f("u_Intensity", scene.GetPointLights()[scene.GetPointLightList()[i]].GetIntensity());
 			GLCall(glDrawElements(GL_TRIANGLES, scene.GetData().GetDataGL().GetPointLightData().IB.GetCount(), GL_UNSIGNED_INT, nullptr));
 		}
 	}
@@ -399,6 +414,7 @@ void GLRenderer::DrawLightCube(Scene& scene)
 		{
 			m_Shaders.Lightcube.SetUniformMat4f("u_ModelMat", scene.GetSpotLights()[scene.GetSpotLightList()[i]].GetModelMat());
 			m_Shaders.Lightcube.SetUniformVec3f("u_Color", scene.GetSpotLights()[scene.GetSpotLightList()[i]].GetColor());
+			m_Shaders.Lightcube.SetUniform1f("u_Intensity", scene.GetSpotLights()[scene.GetSpotLightList()[i]].GetIntensity());
 			GLCall(glDrawElements(GL_TRIANGLES, scene.GetData().GetDataGL().GetSpotLightData().IB.GetCount(), GL_UNSIGNED_INT, nullptr));
 		}
 	}
@@ -416,6 +432,7 @@ void GLRenderer::DrawLightCube(Scene& scene)
 								* glm::scale(glm::mat4(1.0f), glm::vec3(glm::length(scene.GetCamera().GetPosition()) / 20.0f));
 			m_Shaders.Lightcube.SetUniformMat4f("u_ModelMat", modelMat);
 			m_Shaders.Lightcube.SetUniformVec3f("u_Color", scene.GetDirLights()[scene.GetDirLightList()[i]].GetColor());
+			m_Shaders.Lightcube.SetUniform1f("u_Intensity", scene.GetDirLights()[scene.GetDirLightList()[i]].GetIntensity());
 			GLCall(glDrawElements(GL_TRIANGLES, scene.GetData().GetDataGL().GetDirLightData().IB.GetCount(), GL_UNSIGNED_INT, nullptr));
 		}
 	}
@@ -441,6 +458,79 @@ void GLRenderer::DrawSkybox(Scene& scene)
 	scene.GetData().GetDataGL().GetSkybox().IB.Unbind();
 	scene.GetData().GetDataGL().GetSkybox().Shader.Unbind();
 	GLCall(glDepthFunc(GL_LESS)); // set depth function back to default
+}
+
+void GLRenderer::DrawBloom()
+{
+	GLCall(glViewport(0, 0, core::SETTINGS.Width, core::SETTINGS.Height));
+	GLCall(glDisable(GL_DEPTH_TEST));
+	// Copy current screen buffer content to a new fb
+	m_Frame.Bloom[0].Bind();
+	Clear();
+	m_Shaders.Bloom[0].Bind();
+	m_Frame.FB.BindTex();
+	m_Shaders.Bloom[0].SetUniform1i("u_ScreenTex", 0);
+	m_Frame.VA.Bind();
+	m_Frame.IB.Bind();
+	GLCall(glDrawElements(GL_TRIANGLES, m_Frame.IB.GetCount(), GL_UNSIGNED_INT, nullptr));
+	m_Shaders.Bloom[0].Unbind();
+	m_Frame.Bloom[0].UnbindTex();
+	m_Frame.Bloom[0].Unbind();
+	// Extract the bright part of the fb
+	m_Frame.Bloom[1].Bind();
+	Clear();
+	m_Shaders.Bloom[1].Bind();
+	m_Frame.Bloom[0].BindTex();
+	m_Shaders.Bloom[1].SetUniform1i("u_ScreenTex", 0);
+	m_Frame.VA.Bind();
+	m_Frame.IB.Bind();
+	GLCall(glDrawElements(GL_TRIANGLES, m_Frame.IB.GetCount(), GL_UNSIGNED_INT, nullptr));
+	m_Frame.Bloom[0].UnbindTex();
+	m_Shaders.Bloom[1].Unbind();
+	m_Frame.Bloom[1].Unbind();
+	// Horizontally blur the bright part
+	m_Frame.Bloom[2].Bind();
+	Clear();
+	m_Shaders.Bloom[2].Bind();
+	m_Frame.Bloom[1].BindTex();
+	m_Shaders.Bloom[2].SetUniform1i("u_ScreenTex", 0);
+	m_Shaders.Bloom[2].SetUniform1i("u_Horizontal", 1);
+	m_Frame.VA.Bind();
+	m_Frame.IB.Bind();
+	GLCall(glDrawElements(GL_TRIANGLES, m_Frame.IB.GetCount(), GL_UNSIGNED_INT, nullptr));
+	m_Frame.Bloom[1].UnbindTex();
+	m_Frame.Bloom[2].Unbind();
+	// Vertically blur the bright part
+	m_Frame.Bloom[3].Bind();
+	Clear();
+	m_Shaders.Bloom[2].Bind();
+	m_Frame.Bloom[2].BindTex();
+	m_Shaders.Bloom[2].SetUniform1i("u_ScreenTex", 0);
+	m_Shaders.Bloom[2].SetUniform1i("u_Horizontal", 0);
+	m_Frame.VA.Bind();
+	m_Frame.IB.Bind();
+	GLCall(glDrawElements(GL_TRIANGLES, m_Frame.IB.GetCount(), GL_UNSIGNED_INT, nullptr));
+	m_Frame.Bloom[2].UnbindTex();
+	m_Shaders.Bloom[2].Unbind();
+	m_Frame.Bloom[3].Unbind();
+	// Blend the result
+	m_Frame.FB.Bind();
+	Clear();
+	m_Shaders.Bloom[3].Bind();
+	m_Frame.Bloom[0].BindTex();
+	m_Frame.Bloom[3].BindTex(1);
+	m_Shaders.Bloom[3].SetUniform1i("u_ScreenTex", 0);
+	m_Shaders.Bloom[3].SetUniform1i("u_BloomTex", 1);
+	m_Frame.VA.Bind();
+	m_Frame.IB.Bind();
+	GLCall(glDrawElements(GL_TRIANGLES, m_Frame.IB.GetCount(), GL_UNSIGNED_INT, nullptr));
+	m_Frame.VA.Unbind();
+	m_Frame.IB.Unbind();
+	m_Frame.Bloom[0].UnbindTex();
+	m_Frame.Bloom[3].UnbindTex();
+	m_Shaders.Bloom[3].Unbind();
+	m_Frame.FB.Unbind();
+	GLCall(glEnable(GL_DEPTH_TEST));
 }
 
 void GLRenderer::DrawPointLightShadow(Scene& scene)
@@ -609,6 +699,10 @@ void GLRenderer::ChangeResolution()
 	if ((int)core::SETTINGS.AA >= 1 && (int)core::SETTINGS.AA <= 4)
 	{
 		m_Frame.FBMsaa.ChangeResolution();
+	}
+	for (unsigned int i = 0; i < 4; i++)
+	{
+		m_Frame.Bloom[i].ChangeResolution();
 	}
 }
 

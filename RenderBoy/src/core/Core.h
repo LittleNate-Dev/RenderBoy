@@ -56,6 +56,10 @@
 #define SHADER_OPENGL_SKYBOX "data/shaders/opengl/others/SKYBOX.glsl"
 #define SHADER_OPENGL_NORMAL "data/shaders/opengl/others/NORMAL.glsl"
 #define SHADER_OPENGL_LIGHTCUBE "data/shaders/opengl/others/LIGHTCUBE.glsl"
+#define SHADER_OPENGL_BLOOM_COPY "data/shaders/opengl/others/bloom/COPY.glsl"
+#define SHADER_OPENGL_BLOOM_BRIGHT "data/shaders/opengl/others/bloom/BRIGHT.glsl"
+#define SHADER_OPENGL_BLOOM_BLUR "data/shaders/opengl/others/bloom/BLUR.glsl"
+#define SHADER_OPENGL_BLOOM_BLEND "data/shaders/opengl/others/bloom/BLEND.glsl"
 #define SHADER_OPENGL_SHADOW_POINT "data/shaders/opengl/shadow/POINTLIGHT.glsl"
 #define SHADER_OPENGL_SHADOW_SPOT "data/shaders/opengl/shadow/SPOTLIGHT.glsl"
 #define SHADER_OPENGL_SHADOW_DIR "data/shaders/opengl/shadow/DIRLIGHT.glsl"
@@ -173,6 +177,7 @@ struct Settings
 	bool EnableController = false;
 	glm::vec2 DeadZone = glm::vec2(0.05f, 0.05f);
 	bool FullScreen = true;
+	bool Bloom = true;
 };
 
 struct Vertex
