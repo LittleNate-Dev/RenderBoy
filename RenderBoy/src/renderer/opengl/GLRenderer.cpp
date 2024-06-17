@@ -139,7 +139,6 @@ void GLRenderer::Draw(Scene& scene)
 	GLCall(glViewport(0, 0, core::SETTINGS.Width, core::SETTINGS.Height));
 	GLCall(glDisable(GL_DEPTH_TEST));
 	m_Shaders.Screen.Bind();
-	//m_Frame.Bloom[3].BindTex();
 	m_Frame.FB.BindTex();
 	m_Shaders.Screen.SetUniform1i("u_ScreenTex", 0);
 	m_Shaders.Screen.SetUniform1f("u_Gamma", core::SETTINGS.Gamma);
@@ -395,7 +394,7 @@ void GLRenderer::DrawLightCube(Scene& scene)
 	scene.GetData().GetDataGL().GetPointLightData().IB.Bind();
 	for (unsigned int i = 0; i < scene.GetPointLightList().size(); i++)
 	{
-		if (scene.GetPointLights()[scene.GetPointLightList()[i]].ShowCube())
+		if (scene.GetPointLights()[scene.GetPointLightList()[i]].LightSwitch() && scene.GetPointLights()[scene.GetPointLightList()[i]].ShowCube())
 		{
 			m_Shaders.Lightcube.SetUniformMat4f("u_ModelMat", scene.GetPointLights()[scene.GetPointLightList()[i]].GetModelMat());
 			m_Shaders.Lightcube.SetUniformVec3f("u_Color", scene.GetPointLights()[scene.GetPointLightList()[i]].GetColor());
@@ -410,7 +409,7 @@ void GLRenderer::DrawLightCube(Scene& scene)
 	scene.GetData().GetDataGL().GetSpotLightData().IB.Bind();
 	for (unsigned int i = 0; i < scene.GetSpotLightList().size(); i++)
 	{
-		if (scene.GetSpotLights()[scene.GetSpotLightList()[i]].ShowCube())
+		if (scene.GetSpotLights()[scene.GetSpotLightList()[i]].LightSwitch() && scene.GetSpotLights()[scene.GetSpotLightList()[i]].ShowCube())
 		{
 			m_Shaders.Lightcube.SetUniformMat4f("u_ModelMat", scene.GetSpotLights()[scene.GetSpotLightList()[i]].GetModelMat());
 			m_Shaders.Lightcube.SetUniformVec3f("u_Color", scene.GetSpotLights()[scene.GetSpotLightList()[i]].GetColor());
@@ -426,7 +425,7 @@ void GLRenderer::DrawLightCube(Scene& scene)
 	GLCall(glDepthFunc(GL_ALWAYS));
 	for (unsigned int i = 0; i < scene.GetDirLightList().size(); i++)
 	{
-		if (scene.GetDirLights()[scene.GetDirLightList()[i]].ShowCube())
+		if (scene.GetDirLights()[scene.GetDirLightList()[i]].LightSwitch() && scene.GetDirLights()[scene.GetDirLightList()[i]].ShowCube())
 		{
 			glm::mat4 modelMat = scene.GetDirLights()[scene.GetDirLightList()[i]].GetModelMat()
 								* glm::scale(glm::mat4(1.0f), glm::vec3(glm::length(scene.GetCamera().GetPosition()) / 20.0f));
@@ -482,8 +481,6 @@ void GLRenderer::DrawBloom()
 	m_Shaders.Bloom[1].Bind();
 	m_Frame.Bloom[0].BindTex();
 	m_Shaders.Bloom[1].SetUniform1i("u_ScreenTex", 0);
-	m_Frame.VA.Bind();
-	m_Frame.IB.Bind();
 	GLCall(glDrawElements(GL_TRIANGLES, m_Frame.IB.GetCount(), GL_UNSIGNED_INT, nullptr));
 	m_Frame.Bloom[0].UnbindTex();
 	m_Shaders.Bloom[1].Unbind();
@@ -495,8 +492,6 @@ void GLRenderer::DrawBloom()
 	m_Frame.Bloom[1].BindTex();
 	m_Shaders.Bloom[2].SetUniform1i("u_ScreenTex", 0);
 	m_Shaders.Bloom[2].SetUniform1i("u_Horizontal", 1);
-	m_Frame.VA.Bind();
-	m_Frame.IB.Bind();
 	GLCall(glDrawElements(GL_TRIANGLES, m_Frame.IB.GetCount(), GL_UNSIGNED_INT, nullptr));
 	m_Frame.Bloom[1].UnbindTex();
 	m_Frame.Bloom[2].Unbind();
@@ -507,8 +502,6 @@ void GLRenderer::DrawBloom()
 	m_Frame.Bloom[2].BindTex();
 	m_Shaders.Bloom[2].SetUniform1i("u_ScreenTex", 0);
 	m_Shaders.Bloom[2].SetUniform1i("u_Horizontal", 0);
-	m_Frame.VA.Bind();
-	m_Frame.IB.Bind();
 	GLCall(glDrawElements(GL_TRIANGLES, m_Frame.IB.GetCount(), GL_UNSIGNED_INT, nullptr));
 	m_Frame.Bloom[2].UnbindTex();
 	m_Shaders.Bloom[2].Unbind();
@@ -521,8 +514,6 @@ void GLRenderer::DrawBloom()
 	m_Frame.Bloom[3].BindTex(1);
 	m_Shaders.Bloom[3].SetUniform1i("u_ScreenTex", 0);
 	m_Shaders.Bloom[3].SetUniform1i("u_BloomTex", 1);
-	m_Frame.VA.Bind();
-	m_Frame.IB.Bind();
 	GLCall(glDrawElements(GL_TRIANGLES, m_Frame.IB.GetCount(), GL_UNSIGNED_INT, nullptr));
 	m_Frame.VA.Unbind();
 	m_Frame.IB.Unbind();
@@ -696,10 +687,7 @@ bool GLRenderer::SaveScreenShot()
 void GLRenderer::ChangeResolution()
 {
 	m_Frame.FB.ChangeResolution();
-	if ((int)core::SETTINGS.AA >= 1 && (int)core::SETTINGS.AA <= 4)
-	{
-		m_Frame.FBMsaa.ChangeResolution();
-	}
+	m_Frame.FBMsaa.ChangeResolution();
 	for (unsigned int i = 0; i < 4; i++)
 	{
 		m_Frame.Bloom[i].ChangeResolution();

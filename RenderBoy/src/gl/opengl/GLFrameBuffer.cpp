@@ -297,11 +297,11 @@ void GLFrameBuffer::ChangeMSAA()
 		}
 		// Render buffer
 		GLCall(glBindRenderbuffer(GL_RENDERBUFFER, m_RenderBufferID));
-		GLCall(glRenderbufferStorageMultisample(GL_RENDERBUFFER, msaa, GL_DEPTH24_STENCIL8, width, height));
+		GLCall(glRenderbufferStorageMultisample(GL_RENDERBUFFER, msaa, GL_DEPTH32F_STENCIL8, width, height));
 		GLCall(glBindRenderbuffer(GL_RENDERBUFFER, 0));
 		// Color buffer
 		GLCall(glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, m_TexID));
-		GLCall(glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, msaa, GL_RGBA, width, height, GL_TRUE));
+		GLCall(glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, msaa, GL_RGBA16F, width, height, GL_TRUE));
 		GLCall(glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0));
 	}
 }
