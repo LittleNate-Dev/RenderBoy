@@ -96,7 +96,17 @@ void DirectionalLight::UpdateShadowMat(std::vector<glm::mat4> cameraProj, glm::m
 glm::vec3 DirectionalLight::GetDirection()
 {
 	glm::vec3 direction = glm::vec3(0.0f, 0.0f, 1.0f);
-	glm::mat4 rotateMat = glm::rotate(glm::mat4(1.0f), glm::radians(m_EulerAngle.y), glm::vec3(0, 1, 0)) * glm::rotate(glm::mat4(1.0f), glm::radians(m_EulerAngle.x), glm::vec3(1, 0, 0));
+	glm::mat4 rotateMat = glm::mat4(1.0f);
+	// When pitch is -90 degree, shadow would disappear. I duno how to fix this, so i have to add an offset
+	// If you know how to fix this, your help is welcomed! Thanks
+	if (m_EulerAngle.x == -90.0f)
+	{
+		rotateMat = glm::rotate(glm::mat4(1.0f), glm::radians(m_EulerAngle.y), glm::vec3(0, 1, 0)) * glm::rotate(glm::mat4(1.0f), glm::radians(m_EulerAngle.x + 0.001f), glm::vec3(1, 0, 0));
+	}
+	else
+	{
+		rotateMat = glm::rotate(glm::mat4(1.0f), glm::radians(m_EulerAngle.y), glm::vec3(0, 1, 0)) * glm::rotate(glm::mat4(1.0f), glm::radians(m_EulerAngle.x), glm::vec3(1, 0, 0));
+	}
 	direction = glm::vec3(rotateMat * glm::vec4(direction, 0.0f));
 	direction = glm::normalize(direction);
 	return direction;
