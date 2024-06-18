@@ -19,6 +19,12 @@ GLFrameBuffer::~GLFrameBuffer()
 		glMakeTextureHandleNonResidentARB(m_Handle);
 	}
 	glDeleteTextures(1, &m_TexID);
+	m_RendererID = 0;
+	m_RenderBufferID = 0;
+	m_TexID = 0;
+	m_Handle = 0;
+	m_TexWidth = 0;
+	m_TexHeight = 0;
 }
 
 void GLFrameBuffer::Init(FBType type)
@@ -57,15 +63,14 @@ void GLFrameBuffer::Init(FBType type)
 	{
 		GLCall(glDeleteTextures(1, &m_TexID));
 	}
-
+	m_TexWidth = width;
+	m_TexHeight = height;
 	m_Type = type;
 	GLCall(glGenFramebuffers(1, &m_RendererID));
 	GLCall(glBindFramebuffer(GL_FRAMEBUFFER, m_RendererID));
 	GLCall(glGenTextures(1, &m_TexID));
 	if (m_Type == FRAME)
 	{
-		m_TexWidth = width;
-		m_TexHeight = height;
 		// Render buffer
 		GLCall(glGenRenderbuffers(1, &m_RenderBufferID));
 		GLCall(glBindRenderbuffer(GL_RENDERBUFFER, m_RenderBufferID));
@@ -76,14 +81,14 @@ void GLFrameBuffer::Init(FBType type)
 		GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, width, height, 0, GL_RGBA, GL_FLOAT, NULL));
 		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
 		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
+		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
 		GLCall(glBindTexture(GL_TEXTURE_2D, 0));
 		GLCall(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, m_RenderBufferID));
 		GLCall(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_TexID, 0));
 	}
 	else if (m_Type == MSAA)
 	{
-		m_TexWidth = width;
-		m_TexHeight = height;
 		// Render buffer
 		GLCall(glGenRenderbuffers(1, &m_RenderBufferID));
 		GLCall(glBindRenderbuffer(GL_RENDERBUFFER, m_RenderBufferID));
@@ -120,7 +125,25 @@ void GLFrameBuffer::Init(FBType type, unsigned int width, unsigned int height)
 	GLCall(glGenFramebuffers(1, &m_RendererID));
 	GLCall(glBindFramebuffer(GL_FRAMEBUFFER, m_RendererID));
 	GLCall(glGenTextures(1, &m_TexID));
-	if (m_Type == DEPTH_MAP)
+	if (m_Type == FRAME)
+	{
+		// Render buffer
+		GLCall(glGenRenderbuffers(1, &m_RenderBufferID));
+		GLCall(glBindRenderbuffer(GL_RENDERBUFFER, m_RenderBufferID));
+		GLCall(glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH32F_STENCIL8, width, height));
+		GLCall(glBindRenderbuffer(GL_RENDERBUFFER, 0));
+		// Color buffer
+		GLCall(glBindTexture(GL_TEXTURE_2D, m_TexID));
+		GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, width, height, 0, GL_RGBA, GL_FLOAT, NULL));
+		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
+		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
+		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
+		GLCall(glBindTexture(GL_TEXTURE_2D, 0));
+		GLCall(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, m_RenderBufferID));
+		GLCall(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_TexID, 0));
+	}
+	else if (m_Type == DEPTH_MAP)
 	{
 		GLCall(glBindTexture(GL_TEXTURE_2D, m_TexID));
 		GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL));
@@ -264,7 +287,7 @@ void GLFrameBuffer::ChangeResolution()
 		GLCall(glBindRenderbuffer(GL_RENDERBUFFER, 0));
 		// Color buffer
 		GLCall(glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, m_TexID));
-		GLCall(glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, msaa, GL_RGBA, width, height, GL_TRUE));
+		GLCall(glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, msaa, GL_RGBA16F, width, height, GL_TRUE));
 		GLCall(glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0));
 		break;
 	}

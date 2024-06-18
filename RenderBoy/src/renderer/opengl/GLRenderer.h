@@ -16,7 +16,7 @@ struct Frame
 {
 	GLFrameBuffer FB;
 	GLFrameBuffer FBMsaa;
-	GLFrameBuffer Bloom[4];
+	GLFrameBuffer Bloom[7];
 	GLVertexArray VA;
 	GLVertexBuffer VB;
 	GLIndexBuffer IB;
@@ -27,7 +27,7 @@ struct Shaders
 	GLShader Normal;
 	GLShader Lightcube;
 	GLShader Screen;
-	GLShader Bloom[4];
+	GLShader Bloom[3];
 };
 
 class GLRenderer

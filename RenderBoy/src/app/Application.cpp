@@ -92,9 +92,13 @@ bool Application::LoadSettings()
             {
                 core::SETTINGS.NormalMagnitude = (float)std::atof(core::GetFileValue(line)[0].c_str());
             }
-            else if (line.find("#BLOOM") != std::string::npos)
+            else if (line.find("#BLOOM_SWITCH") != std::string::npos)
             {
                 core::SETTINGS.Bloom = (bool)std::atoi(core::GetFileValue(line)[0].c_str());
+            }
+            else if (line.find("#BLOOM_STRENGTH") != std::string::npos)
+            {
+                core::SETTINGS.BloomStrength = (float)std::atof(core::GetFileValue(line)[0].c_str());
             }
             else if (line.find("#GAMMA") != std::string::npos)
             {
@@ -203,7 +207,9 @@ void Application::SaveSettings()
     stream << line;
     line = "#POST_PROCESS " + std::to_string(core::SETTINGS.PP) + "\n";
     stream << line;
-    line = "#BLOOM " + std::to_string(core::SETTINGS.Bloom) + "\n";
+    line = "#BLOOM_SWITCH " + std::to_string(core::SETTINGS.Bloom) + "\n";
+    stream << line;
+    line = "#BLOOM_STRENGTH " + std::to_string(core::SETTINGS.BloomStrength) + "\n";
     stream << line;
     line = "#PERF_OPENED " + std::to_string(core::IS_PERF_OPENED) + "\n";
     stream << line;
@@ -919,11 +925,25 @@ void Application::DrawSettingWindow()
                 }
                 ImGui::TreePop();
             }
-            // Bloom
+            // Lens effects
+            if (ImGui::TreeNode("Lens Effects"))
             {
-                ImGui::CenterAlignWidget("Bloom");
-                ImGui::LabelHighlighted("Bloom");
-                ImGui::Checkbox("##Bloom", &core::SETTINGS.Bloom);
+                // Bloom
+                if (ImGui::TreeNode("Bloom")) 
+                {
+                    ImGui::CenterAlignWidget("Bloom");
+                    ImGui::LabelHighlighted("Bloom");
+                    ImGui::Checkbox("##Bloom", &core::SETTINGS.Bloom);
+                    if (core::SETTINGS.Bloom)
+                    {
+                        ImGui::PushItemWidth(60.0f * core::GetWidgetWidthCoefficient());
+                        ImGui::CenterAlignWidget("Strength", 60.0f * core::GetWidgetWidthCoefficient());
+                        ImGui::LabelHighlighted("Strength");
+                        ImGui::InputFloat("##BloomStrength", &core::SETTINGS.BloomStrength, 0.0f, 0.0f, "%.4f");
+                    }
+                    ImGui::TreePop();
+                }
+                ImGui::TreePop();
             }
             ImGui::TreePop();
         }

@@ -20,10 +20,9 @@ void GLRenderer::Init(Scene& scene)
 	// Initialize shaders
 	m_Shaders.Normal.Init(SHADER_OPENGL_NORMAL);
 	m_Shaders.Lightcube.Init(SHADER_OPENGL_LIGHTCUBE);
-	m_Shaders.Bloom[0].Init(SHADER_OPENGL_BLOOM_COPY);
-	m_Shaders.Bloom[1].Init(SHADER_OPENGL_BLOOM_BRIGHT); 
-	m_Shaders.Bloom[2].Init(SHADER_OPENGL_BLOOM_BLUR);
-	m_Shaders.Bloom[3].Init(SHADER_OPENGL_BLOOM_BLEND);
+	m_Shaders.Bloom[0].Init(SHADER_OPENGL_BLOOM_DOWNSAMPLE); 
+	m_Shaders.Bloom[1].Init(SHADER_OPENGL_BLOOM_UPSAMPLE);
+	m_Shaders.Bloom[2].Init(SHADER_OPENGL_BLOOM_BLEND);
 	ChangePostProcess();
 	// Initialize frame buffers
 	m_Frame.FBMsaa.Init(FBType::MSAA);
@@ -33,9 +32,21 @@ void GLRenderer::Init(Scene& scene)
 	}
 	m_Frame.FB.Init(FBType::FRAME);
 	// Initialize framebuffers used for bloom effect
-	for (unsigned int i = 0; i < 4; i++)
+	int bloomWidth = (int)(core::SETTINGS.Width * core::SETTINGS.Resolution);
+	int bloomHeight = (int)(core::SETTINGS.Height * core::SETTINGS.Resolution);
+	m_Frame.Bloom[6].Init(FBType::FRAME, bloomWidth, bloomHeight);
+	for (unsigned int i = 0; i < 6; i++)
 	{
-		m_Frame.Bloom[i].Init(FBType::FRAME);
+		if (bloomWidth > 6 && bloomHeight > 6)
+		{
+			m_Frame.Bloom[i].Init(FBType::FRAME, bloomWidth, bloomHeight);
+			bloomWidth /= 2;
+			bloomHeight /= 2;
+		}
+		else
+		{
+			break;
+		}
 	}
 	if (m_Frame.FB.IsInitialized())
 	{
@@ -130,7 +141,7 @@ void GLRenderer::Draw(Scene& scene)
 		GLCall(glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST));
 	}
 	m_Frame.FB.Unbind();
-	if (core::SETTINGS.Bloom)
+	if (core::SETTINGS.Bloom && (core::SETTINGS.DrawMode == BLANK || core::SETTINGS.DrawMode == DEFAULT))
 	{
 		DrawBloom();
 	}
@@ -139,6 +150,7 @@ void GLRenderer::Draw(Scene& scene)
 	GLCall(glViewport(0, 0, core::SETTINGS.Width, core::SETTINGS.Height));
 	GLCall(glDisable(GL_DEPTH_TEST));
 	m_Shaders.Screen.Bind();
+	//m_Frame.Bloom[0].BindTex();
 	m_Frame.FB.BindTex();
 	m_Shaders.Screen.SetUniform1i("u_ScreenTex", 0);
 	m_Shaders.Screen.SetUniform1f("u_Gamma", core::SETTINGS.Gamma);
@@ -461,66 +473,93 @@ void GLRenderer::DrawSkybox(Scene& scene)
 
 void GLRenderer::DrawBloom()
 {
-	GLCall(glViewport(0, 0, core::SETTINGS.Width, core::SETTINGS.Height));
-	GLCall(glDisable(GL_DEPTH_TEST));
 	// Copy current screen buffer content to a new fb
+	int width = (int)(core::SETTINGS.Width * core::SETTINGS.Resolution);
+	int height = (int)(core::SETTINGS.Height * core::SETTINGS.Resolution);
 	m_Frame.Bloom[0].Bind();
 	Clear();
+	GLCall(glBindFramebuffer(GL_READ_FRAMEBUFFER, m_Frame.FB.GetID()));
+	GLCall(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_Frame.Bloom[0].GetID()));
+	GLCall(glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST));
+	m_Frame.Bloom[0].Unbind();
+	m_Frame.Bloom[6].Bind();
+	Clear();
+	GLCall(glBindFramebuffer(GL_READ_FRAMEBUFFER, m_Frame.FB.GetID()));
+	GLCall(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_Frame.Bloom[6].GetID()));
+	GLCall(glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST));
+	m_Frame.Bloom[6].Unbind();
+	// Downsample
+	GLCall(glDisable(GL_BLEND));
 	m_Shaders.Bloom[0].Bind();
-	m_Frame.FB.BindTex();
-	m_Shaders.Bloom[0].SetUniform1i("u_ScreenTex", 0);
 	m_Frame.VA.Bind();
 	m_Frame.IB.Bind();
-	GLCall(glDrawElements(GL_TRIANGLES, m_Frame.IB.GetCount(), GL_UNSIGNED_INT, nullptr));
+	GLCall(glDisable(GL_DEPTH_TEST));
+	for (unsigned int i = 0; i < 5; i++)
+	{
+		if (m_Frame.Bloom[i].GetID() == 0)
+		{
+			break;
+		}
+		int width = m_Frame.Bloom[i + 1].GetTexWidth();
+		int height = m_Frame.Bloom[i + 1].GetTexHeight();
+		GLCall(glViewport(0, 0, width, height));
+		int srcWidth = m_Frame.Bloom[i].GetTexWidth();
+		int srcHeight = m_Frame.Bloom[i].GetTexHeight();
+		m_Frame.Bloom[i + 1].Bind();
+		Clear();
+		m_Frame.Bloom[i].BindTex(0);
+		m_Shaders.Bloom[0].SetUniform1i("u_SrcTex", 0);
+		m_Shaders.Bloom[0].SetUniformVec2f("u_SrcTexelSize", 1.0f / glm::vec2(srcWidth, srcHeight));
+		GLCall(glDrawElements(GL_TRIANGLES, m_Frame.IB.GetCount(), GL_UNSIGNED_INT, nullptr));
+		m_Frame.Bloom[i].UnbindTex();
+		m_Frame.Bloom[i + 1].Unbind();
+	}
 	m_Shaders.Bloom[0].Unbind();
-	m_Frame.Bloom[0].UnbindTex();
-	m_Frame.Bloom[0].Unbind();
-	// Extract the bright part of the fb
-	m_Frame.Bloom[1].Bind();
-	Clear();
+	GLCall(glEnable(GL_BLEND));
+	// Upsample
 	m_Shaders.Bloom[1].Bind();
-	m_Frame.Bloom[0].BindTex();
-	m_Shaders.Bloom[1].SetUniform1i("u_ScreenTex", 0);
-	GLCall(glDrawElements(GL_TRIANGLES, m_Frame.IB.GetCount(), GL_UNSIGNED_INT, nullptr));
-	m_Frame.Bloom[0].UnbindTex();
+	GLCall(glEnable(GL_BLEND));
+	GLCall(glBlendFunc(GL_ONE, GL_ONE));
+	GLCall(glBlendEquation(GL_FUNC_ADD));
+	for (unsigned int i = 5; i > 0; i--)
+	{
+		if (m_Frame.Bloom[i].GetID() == 0)
+		{
+			continue;
+		}
+		int width = m_Frame.Bloom[i - 1].GetTexWidth();
+		int height = m_Frame.Bloom[i - 1].GetTexHeight();
+		GLCall(glViewport(0, 0, width, height));
+		m_Frame.Bloom[i - 1].Bind();
+		Clear();
+		m_Frame.Bloom[i].BindTex(0);
+		m_Shaders.Bloom[1].SetUniform1i("u_SrcTex", 0);
+		m_Shaders.Bloom[1].SetUniform1f("u_FilterRadius", 0.005f);
+		GLCall(glDrawElements(GL_TRIANGLES, m_Frame.IB.GetCount(), GL_UNSIGNED_INT, nullptr));
+		m_Frame.Bloom[i].UnbindTex();
+		m_Frame.Bloom[i - 1].Unbind();
+	}
 	m_Shaders.Bloom[1].Unbind();
-	m_Frame.Bloom[1].Unbind();
-	// Horizontally blur the bright part
-	m_Frame.Bloom[2].Bind();
-	Clear();
+	GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+	// Blend result
 	m_Shaders.Bloom[2].Bind();
-	m_Frame.Bloom[1].BindTex();
-	m_Shaders.Bloom[2].SetUniform1i("u_ScreenTex", 0);
-	m_Shaders.Bloom[2].SetUniform1i("u_Horizontal", 1);
-	GLCall(glDrawElements(GL_TRIANGLES, m_Frame.IB.GetCount(), GL_UNSIGNED_INT, nullptr));
-	m_Frame.Bloom[1].UnbindTex();
-	m_Frame.Bloom[2].Unbind();
-	// Vertically blur the bright part
-	m_Frame.Bloom[3].Bind();
-	Clear();
-	m_Shaders.Bloom[2].Bind();
-	m_Frame.Bloom[2].BindTex();
-	m_Shaders.Bloom[2].SetUniform1i("u_ScreenTex", 0);
-	m_Shaders.Bloom[2].SetUniform1i("u_Horizontal", 0);
-	GLCall(glDrawElements(GL_TRIANGLES, m_Frame.IB.GetCount(), GL_UNSIGNED_INT, nullptr));
-	m_Frame.Bloom[2].UnbindTex();
-	m_Shaders.Bloom[2].Unbind();
-	m_Frame.Bloom[3].Unbind();
-	// Blend the result
+	width = m_Frame.FB.GetTexWidth();
+	height = m_Frame.FB.GetTexHeight();
+	GLCall(glViewport(0, 0, width, height));
 	m_Frame.FB.Bind();
 	Clear();
-	m_Shaders.Bloom[3].Bind();
 	m_Frame.Bloom[0].BindTex();
-	m_Frame.Bloom[3].BindTex(1);
-	m_Shaders.Bloom[3].SetUniform1i("u_ScreenTex", 0);
-	m_Shaders.Bloom[3].SetUniform1i("u_BloomTex", 1);
+	m_Frame.Bloom[6].BindTex(1);
+	m_Shaders.Bloom[2].SetUniform1i("u_ScreenTex", 1);
+	m_Shaders.Bloom[2].SetUniform1i("u_BloomTex", 0);
+	m_Shaders.Bloom[2].SetUniform1f("u_BloomStrength", core::SETTINGS.BloomStrength);
 	GLCall(glDrawElements(GL_TRIANGLES, m_Frame.IB.GetCount(), GL_UNSIGNED_INT, nullptr));
+	m_Frame.Bloom[0].UnbindTex();
+	m_Frame.Bloom[6].UnbindTex();
+	m_Frame.FB.Unbind();
+	m_Shaders.Bloom[2].Unbind();
 	m_Frame.VA.Unbind();
 	m_Frame.IB.Unbind();
-	m_Frame.Bloom[0].UnbindTex();
-	m_Frame.Bloom[3].UnbindTex();
-	m_Shaders.Bloom[3].Unbind();
-	m_Frame.FB.Unbind();
 	GLCall(glEnable(GL_DEPTH_TEST));
 }
 
@@ -688,9 +727,26 @@ void GLRenderer::ChangeResolution()
 {
 	m_Frame.FB.ChangeResolution();
 	m_Frame.FBMsaa.ChangeResolution();
-	for (unsigned int i = 0; i < 4; i++)
+	// Initialize framebuffers used for bloom effect
+	for (unsigned int i = 0; i < 7; i++)
 	{
-		m_Frame.Bloom[i].ChangeResolution();
+		m_Frame.Bloom[i].~GLFrameBuffer();
+	}
+	int bloomWidth = (int)(core::SETTINGS.Width * core::SETTINGS.Resolution);
+	int bloomHeight = (int)(core::SETTINGS.Height * core::SETTINGS.Resolution);
+	m_Frame.Bloom[6].Init(FBType::FRAME, bloomWidth, bloomHeight);
+	for (unsigned int i = 0; i < 6; i++)
+	{
+		if (bloomWidth > 6 && bloomHeight > 6)
+		{
+			m_Frame.Bloom[i].Init(FRAME, bloomWidth, bloomHeight);
+			bloomWidth /= 2;
+			bloomHeight /= 2;
+		}
+		else
+		{
+			break;
+		}
 	}
 }
 
