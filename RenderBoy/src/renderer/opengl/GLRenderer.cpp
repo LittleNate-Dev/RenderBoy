@@ -141,9 +141,9 @@ void GLRenderer::Draw(Scene& scene)
 		GLCall(glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST));
 	}
 	m_Frame.FB.Unbind();
-	if (core::SETTINGS.Bloom && (core::SETTINGS.DrawMode == BLANK || core::SETTINGS.DrawMode == DEFAULT))
+	if (scene.GetVFX().Bloom && (core::SETTINGS.DrawMode == BLANK || core::SETTINGS.DrawMode == DEFAULT))
 	{
-		DrawBloom();
+		DrawBloom(scene);
 	}
 	Clear();
 	// Draw frame buffer's content on the screen;
@@ -471,7 +471,7 @@ void GLRenderer::DrawSkybox(Scene& scene)
 	GLCall(glDepthFunc(GL_LESS)); // set depth function back to default
 }
 
-void GLRenderer::DrawBloom()
+void GLRenderer::DrawBloom(Scene& scene)
 {
 	// Copy current screen buffer content to a new fb
 	int width = (int)(core::SETTINGS.Width * core::SETTINGS.Resolution);
@@ -534,7 +534,7 @@ void GLRenderer::DrawBloom()
 		Clear();
 		m_Frame.Bloom[i].BindTex(0);
 		m_Shaders.Bloom[1].SetUniform1i("u_SrcTex", 0);
-		m_Shaders.Bloom[1].SetUniform1f("u_FilterRadius", 0.005f);
+		m_Shaders.Bloom[1].SetUniform1f("u_FilterRadius", scene.GetVFX().BloomFilterRadius);
 		GLCall(glDrawElements(GL_TRIANGLES, m_Frame.IB.GetCount(), GL_UNSIGNED_INT, nullptr));
 		m_Frame.Bloom[i].UnbindTex();
 		m_Frame.Bloom[i - 1].Unbind();
@@ -552,7 +552,7 @@ void GLRenderer::DrawBloom()
 	m_Frame.Bloom[6].BindTex(1);
 	m_Shaders.Bloom[2].SetUniform1i("u_ScreenTex", 1);
 	m_Shaders.Bloom[2].SetUniform1i("u_BloomTex", 0);
-	m_Shaders.Bloom[2].SetUniform1f("u_BloomStrength", core::SETTINGS.BloomStrength);
+	m_Shaders.Bloom[2].SetUniform1f("u_BloomStrength", scene.GetVFX().BloomStrength);
 	GLCall(glDrawElements(GL_TRIANGLES, m_Frame.IB.GetCount(), GL_UNSIGNED_INT, nullptr));
 	m_Frame.Bloom[0].UnbindTex();
 	m_Frame.Bloom[6].UnbindTex();

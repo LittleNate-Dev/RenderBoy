@@ -45,7 +45,7 @@ private:
 	void DrawNormal(Scene& scene);
 	void DrawLightCube(Scene& scene);
 	void DrawSkybox(Scene& scene);
-	void DrawBloom();
+	void DrawBloom(Scene& scene);
 	void DrawPointLightShadow(Scene& scene);
 	void DrawSpotLightShadow(Scene& scene);
 	void DrawDirLightShadow(Scene& scene);

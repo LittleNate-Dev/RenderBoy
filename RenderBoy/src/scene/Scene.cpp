@@ -27,10 +27,14 @@ void Scene::Reset()
 	m_Camera.SetRotateSpeed(1.0f);
 	m_Camera.SetPosition(glm::vec3(0.0f));
 	m_Camera.SetEulerAngle(glm::vec3(0.0f));
-	m_Skybox.Type = PURE_COLOR;
+	Skybox newSkybox;
+	m_Skybox = newSkybox;
+	VisualEffects newVFX;
+	m_VFX = newVFX;
+	/*m_Skybox.Type = PURE_COLOR;
 	m_Skybox.Color = glm::vec3(0.0f);
 	std::vector<std::string>().swap(m_Skybox.Filepath);
-	m_Skybox.Filepath.clear();
+	m_Skybox.Filepath.clear();*/
 	std::vector<std::string>().swap(m_ModelList);
 	m_Models.clear();
 	std::vector<std::string>().swap(m_PointLightList);
@@ -171,6 +175,24 @@ bool Scene::LoadScene(std::string filepath)
 					{
 						return false;
 					}
+				}
+			}
+			// Load VFX
+			{
+				if (line.find("#BLOOM_SWITCH") != std::string::npos)
+				{
+					values = core::GetFileValue(line);
+					m_VFX.Bloom = (bool)std::atoi(values[0].c_str());
+				}
+				else if (line.find("#BLOOM_STRENGTH") != std::string::npos)
+				{
+					values = core::GetFileValue(line);
+					m_VFX.BloomStrength = (float)std::atof(values[0].c_str());;
+				}
+				else if (line.find("#BLOOM_FILTER_RADIUS") != std::string::npos)
+				{
+					values = core::GetFileValue(line);
+					m_VFX.BloomFilterRadius = (float)std::atof(values[0].c_str());;
 				}
 			}
 			// Load models
@@ -557,6 +579,15 @@ void Scene::SaveScene()
 			line = "#SKYBOX_FILEPATH " + m_Skybox.Filepath[0] + "\n";
 			stream << line;
 		}
+	}
+	// SaveVFX
+	{
+		line = "#BLOOM_SWITCH " + std::to_string(m_VFX.Bloom) + "\n";
+		stream << line;
+		line = "#BLOOM_STRENGTH " + std::to_string(m_VFX.BloomStrength) + "\n";
+		stream << line;
+		line = "#BLOOM_FILTER_RADIUS " + std::to_string(m_VFX.BloomFilterRadius) + "\n";
+		stream << line;
 	}
 	// Save models
 	for (unsigned int i = 0; i < m_ModelList.size(); i++)
@@ -1215,7 +1246,36 @@ void Scene::DrawSceneWindow()
 			}
 			ImGui::TreePop();
 		}
-		// Scene
+		// Lens effects
+		if (ImGui::TreeNode("Visual Effects"))
+		{
+			// Bloom
+			if (ImGui::TreeNode("Bloom"))
+			{
+				ImGui::CenterAlignWidget("Bloom");
+				ImGui::LabelHighlighted("Bloom");
+				ImGui::Checkbox("##Bloom", &m_VFX.Bloom);
+				if (m_VFX.Bloom)
+				{
+					// Bloom Strength
+					ImGui::PushItemWidth(60.0f * core::GetWidgetWidthCoefficient());
+					ImGui::CenterAlignWidget("Strength", 60.0f * core::GetWidgetWidthCoefficient());
+					ImGui::LabelHighlighted("Strength");
+					ImGui::InputFloat("##BloomStrength", &m_VFX.BloomStrength, 0.0f, 0.0f, "%.4f");
+					// Bloom Filter Radius
+					ImGui::PushItemWidth(80.0f * core::GetWidgetWidthCoefficient());
+					ImGui::CenterAlignWidget("Filter Radius", 80.0f * core::GetWidgetWidthCoefficient());
+					ImGui::LabelHighlighted("Filter Radius");
+					if (ImGui::InputFloat("##BloomFilterRadius", &m_VFX.BloomFilterRadius, 0.0f, 0.0f, "%.6f"))
+					{
+						m_VFX.BloomFilterRadius = m_VFX.BloomFilterRadius > 0.0f ? m_VFX.BloomFilterRadius : 0.005f;
+					}
+				}
+				ImGui::TreePop();
+			}
+			ImGui::TreePop();
+		}
+		// Info
 		if (ImGui::TreeNode("Info"))
 		{
 			// Scene

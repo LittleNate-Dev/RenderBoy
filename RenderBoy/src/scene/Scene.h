@@ -22,6 +22,13 @@ struct Skybox
 	std::vector<std::string> Filepath;
 };
 
+struct VisualEffects
+{
+	bool Bloom = true;
+	float BloomStrength = 0.04f;
+	float BloomFilterRadius = 0.005f;
+};
+
 class Scene
 {
 private:
@@ -30,6 +37,7 @@ private:
 	Data m_Data;
 	Camera m_Camera;
 	Skybox m_Skybox;
+	VisualEffects m_VFX;
 	std::vector<std::string> m_ModelList;
 	std::map<std::string, Model> m_Models;
 	std::vector<std::string> m_PointLightList;
@@ -97,6 +105,10 @@ public:
 	inline Skybox& GetSkybox()
 	{
 		return m_Skybox;
+	};
+	inline VisualEffects& GetVFX()
+	{
+		return m_VFX;
 	};
 	inline std::vector<std::string>& GetModelList()
 	{

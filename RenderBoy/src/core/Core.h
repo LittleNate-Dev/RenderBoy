@@ -176,8 +176,6 @@ struct Settings
 	bool EnableController = false;
 	glm::vec2 DeadZone = glm::vec2(0.05f, 0.05f);
 	bool FullScreen = true;
-	bool Bloom = true;
-	float BloomStrength = 0.04f;
 };
 
 struct Vertex
