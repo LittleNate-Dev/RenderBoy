@@ -38,7 +38,8 @@ uniform DirMat u_DirMat[DIR_LIGHT_COUNT];
 
 void main()
 {
-    v_FragPos = vec3(a_ModelMat * a_Position);
+    vec4 modelPos = a_ModelMat * a_Position;
+    v_FragPos = modelPos.xyz;
     if (a_Normal == vec3(0.0))
     {
         v_Normal = vec3(0.0);
@@ -49,15 +50,15 @@ void main()
     }
     for (int i = 0; i < SPOT_LIGHT_COUNT; i++)
     {
-        v_FragPosSpot[i] = u_SpotMat[i].ProjMat * u_SpotMat[i].ViewMat * vec4(v_FragPos, 1.0);
+        v_FragPosSpot[i] = u_SpotMat[i].ProjMat * u_SpotMat[i].ViewMat * modelPos;
     }
     for (int i = 0; i < DIR_LIGHT_COUNT; i++)
     {
-        v_FragPosDir[i].FragPos[0] = u_DirMat[i].ProjMat[0] * u_DirMat[i].ViewMat[0] * vec4(v_FragPos, 1.0);
-        v_FragPosDir[i].FragPos[1] = u_DirMat[i].ProjMat[1] * u_DirMat[i].ViewMat[1] * vec4(v_FragPos, 1.0);
-        v_FragPosDir[i].FragPos[2] = u_DirMat[i].ProjMat[2] * u_DirMat[i].ViewMat[2] * vec4(v_FragPos, 1.0);
+        v_FragPosDir[i].FragPos[0] = u_DirMat[i].ProjMat[0] * u_DirMat[i].ViewMat[0] * modelPos;
+        v_FragPosDir[i].FragPos[1] = u_DirMat[i].ProjMat[1] * u_DirMat[i].ViewMat[1] * modelPos;
+        v_FragPosDir[i].FragPos[2] = u_DirMat[i].ProjMat[2] * u_DirMat[i].ViewMat[2] * modelPos;
     }
-    gl_Position = u_ProjMat * u_ViewMat * a_ModelMat * a_Position;
+    gl_Position = u_ProjMat * u_ViewMat * modelPos;
 }
 
 
@@ -132,16 +133,21 @@ in vec3 v_Normal;
 in vec4 v_FragPosSpot[SPOT_LIGHT_COUNT];
 in FragPosDir v_FragPosDir[DIR_LIGHT_COUNT];
 
+uniform mat4 u_ProjMat;
+uniform mat4 u_ViewMat;
 uniform vec3 u_ViewPos;
 uniform PointLight u_PointLight[POINT_LIGHT_COUNT];
 uniform SpotLight u_SpotLight[SPOT_LIGHT_COUNT];
 uniform DirLight u_DirLight[DIR_LIGHT_COUNT];
+uniform bool u_SSAO;
+uniform sampler2D u_SSAOTex;
 
 const vec4 matDiffuse = vec4(0.78, 0.78, 0.78, 1.0);
 const float matShininess = 16.0;
 const vec4 matSpecular = vec4(1.0);
 vec3 viewDir = vec3(1.0);
 vec3 normal = vec3(0.0);
+float ambientOcclusion = 1.0;
 
 vec4 CalcPointLight(int i);
 vec4 CalcSpotLight(int i);
@@ -152,6 +158,14 @@ void main()
     vec4 result = vec4(0.0);
     viewDir = normalize(u_ViewPos - v_FragPos);
     normal = normalize(v_Normal);
+    // SSAO
+    if (u_SSAO)
+    {
+        vec4 screenCoord = u_ProjMat * u_ViewMat * vec4(v_FragPos, 1.0);
+        vec2 aoCoord = screenCoord.xy / screenCoord.w;
+        aoCoord = aoCoord * 0.5 + 0.5;
+        ambientOcclusion = texture(u_SSAOTex, aoCoord).r;
+    }
     // Calculate all lights
     for (int i = 0; i < POINT_LIGHT_COUNT; i++)
     {
@@ -175,6 +189,7 @@ void main()
         }
     }
     v_FragColor = vec4(vec3(result), 1.0);
+    //v_FragColor = vec4(vec3(ambientOcclusion), 1.0);
 }
 
 vec4 CalcPointLight(int i)
@@ -186,7 +201,7 @@ vec4 CalcPointLight(int i)
     float attenuation = u_PointLight[i].Intensity / (u_PointLight[i].CLQ.x + u_PointLight[i].CLQ.y * distance + u_PointLight[i].CLQ.z * distance * distance); 
     if (v_Normal == vec3(0.0))
     {
-        ambient  = u_PointLight[i].ADS.x * vec4(u_PointLight[i].Color, 1.0) * matDiffuse;
+        ambient  = u_PointLight[i].ADS.x * vec4(u_PointLight[i].Color, 1.0) * matDiffuse * ambientOcclusion;
         diffuse  = u_PointLight[i].ADS.y * vec4(u_PointLight[i].Color, 1.0) * matDiffuse;
         specular = vec4(0.0);
     }
@@ -195,7 +210,7 @@ vec4 CalcPointLight(int i)
         float diff = max(dot(normal, lightDir), 0.0);
         vec3 halfwayDir = normalize(lightDir + viewDir);
         float spec = pow(max(dot(normal, halfwayDir), 0.0), matShininess);
-        ambient  = u_PointLight[i].ADS.x * vec4(u_PointLight[i].Color, 1.0) * matDiffuse;
+        ambient  = u_PointLight[i].ADS.x * vec4(u_PointLight[i].Color, 1.0) * matDiffuse * ambientOcclusion;
         diffuse  = u_PointLight[i].ADS.y * vec4(u_PointLight[i].Color, 1.0) * diff * matDiffuse;
         specular = u_PointLight[i].ADS.z * vec4(u_PointLight[i].Color, 1.0) * spec * matSpecular;
     }
@@ -269,7 +284,7 @@ vec4 CalcSpotLight(int i)
     float intensity = clamp((theta - cos(u_SpotLight[i].Angle * 0.5 + u_SpotLight[i].DimAngle)) / epsilon, 0.0, 1.0);
     if (v_Normal == vec3(0.0))
     {
-        ambient  = u_SpotLight[i].ADS.x * vec4(u_SpotLight[i].Color, 1.0) * matDiffuse;
+        ambient  = u_SpotLight[i].ADS.x * vec4(u_SpotLight[i].Color, 1.0) * matDiffuse * ambientOcclusion;
         diffuse  = u_SpotLight[i].ADS.y * vec4(u_SpotLight[i].Color, 1.0) * matDiffuse;
         specular = vec4(0.0);
     }
@@ -278,7 +293,7 @@ vec4 CalcSpotLight(int i)
         float diff = max(dot(normal, lightDir), 0.0);
         vec3 halfwayDir = normalize(lightDir + viewDir);
         float spec = pow(max(dot(normal, halfwayDir), 0.0), matShininess);
-        ambient  = u_SpotLight[i].ADS.x * vec4(u_SpotLight[i].Color, 1.0) * matDiffuse;
+        ambient  = u_SpotLight[i].ADS.x * vec4(u_SpotLight[i].Color, 1.0) * matDiffuse * ambientOcclusion;
         diffuse  = u_SpotLight[i].ADS.y * vec4(u_SpotLight[i].Color, 1.0) * diff * matDiffuse;
         specular = u_SpotLight[i].ADS.z * spec * matSpecular;
     }
@@ -358,7 +373,7 @@ vec4 CalcDirLight(int i)
     float attenuation = u_DirLight[i].Intensity;  
     if (v_Normal == vec3(0.0))
     {
-        ambient  = u_DirLight[i].ADS.x * vec4(u_DirLight[i].Color, 1.0) * matDiffuse;
+        ambient  = u_DirLight[i].ADS.x * vec4(u_DirLight[i].Color, 1.0) * matDiffuse * ambientOcclusion;
         diffuse  = u_DirLight[i].ADS.y * vec4(u_DirLight[i].Color, 1.0) * matDiffuse;
         specular = vec4(0.0);
     }
@@ -367,7 +382,7 @@ vec4 CalcDirLight(int i)
         float diff = max(dot(normal, lightDir), 0.0);
         vec3 halfwayDir = normalize(lightDir + viewDir);
         float spec = pow(max(dot(normal, halfwayDir), 0.0), matShininess);
-        ambient  = u_DirLight[i].ADS.x * vec4(u_DirLight[i].Color, 1.0) * matDiffuse;
+        ambient  = u_DirLight[i].ADS.x * vec4(u_DirLight[i].Color, 1.0) * matDiffuse * ambientOcclusion;
         diffuse  = u_DirLight[i].ADS.y * vec4(u_DirLight[i].Color, 1.0) * diff * matDiffuse;
         specular = u_DirLight[i].ADS.z * vec4(u_DirLight[i].Color, 1.0) * spec * matSpecular;
     }

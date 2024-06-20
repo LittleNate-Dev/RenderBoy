@@ -16,7 +16,9 @@ struct Frame
 {
 	GLFrameBuffer FB;
 	GLFrameBuffer FBMsaa;
+	GLFrameBuffer GBuffer;
 	GLFrameBuffer Bloom[7];
+	GLFrameBuffer SSAO[2];
 	GLVertexArray VA;
 	GLVertexBuffer VB;
 	GLIndexBuffer IB;
@@ -24,10 +26,12 @@ struct Frame
 
 struct Shaders
 {
+	GLShader GBuffer;
 	GLShader Normal;
 	GLShader Lightcube;
 	GLShader Screen;
 	GLShader Bloom[3];
+	GLShader SSAO[2];
 };
 
 class GLRenderer
@@ -36,7 +40,9 @@ private:
 	Frame m_Frame;
 	Shaders m_Shaders;
 
+	void UpdateModelMat(Scene& scene);
 	void Clear();
+	void DrawGBuffer(Scene& scene);
 	void DrawBlank(Scene& scene);
 	void DrawWireFrame(Scene& scene);
 	void DrawPointCloud(Scene& scene);
@@ -45,10 +51,11 @@ private:
 	void DrawNormal(Scene& scene);
 	void DrawLightCube(Scene& scene);
 	void DrawSkybox(Scene& scene);
-	void DrawBloom(Scene& scene);
 	void DrawPointLightShadow(Scene& scene);
 	void DrawSpotLightShadow(Scene& scene);
 	void DrawDirLightShadow(Scene& scene);
+	void DrawBloom(Scene& scene);
+	void DrawSSAO(Scene& scene);
 
 public:
 	GLRenderer();

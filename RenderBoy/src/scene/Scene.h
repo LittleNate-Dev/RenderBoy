@@ -24,9 +24,10 @@ struct Skybox
 
 struct VisualEffects
 {
-	bool Bloom = true;
+	bool Bloom = false;
 	float BloomStrength = 0.04f;
 	float BloomFilterRadius = 0.005f;
+	bool SSAO = false;
 };
 
 class Scene

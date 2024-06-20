@@ -13,8 +13,10 @@ enum FBType
 {
 	FRAME = 0,
 	MSAA = 1,
-	DEPTH_MAP = 2,
-	DEPTH_CUBE = 3
+	G_BUFFER = 2,
+	DEPTH_MAP = 3,
+	DEPTH_CUBE = 4,
+	SSAO = 5
 };
 
 class GLFrameBuffer
@@ -22,11 +24,12 @@ class GLFrameBuffer
 private:
 	unsigned int m_RendererID;
 	unsigned int m_RenderBufferID;
-	unsigned int m_TexID;
-	GLuint64 m_Handle;
+	std::vector<unsigned int> m_TexIDs;
+	std::vector<GLuint64> m_Handles;
 	FBType m_Type;
-	unsigned int m_TexWidth;
-	unsigned int m_TexHeight;
+	glm::vec2 m_TexSize;
+
+	void Destroy();
 
 public:
 	GLFrameBuffer();
@@ -55,24 +58,36 @@ public:
 	{
 		return m_RenderBufferID;
 	};
-	inline unsigned int GetTexID() const
+	inline unsigned int GetTexID(unsigned int slot = 0) const
 	{
-		return m_TexID;
+		return m_TexIDs[slot];
+	};
+	inline std::vector<unsigned int> GetTexIDs() const
+	{
+		return m_TexIDs;
 	};
 	inline FBType GetType() const
 	{
 		return m_Type;
 	};
-	inline GLuint64 GetHandle() const
+	inline GLuint64 GetHandle(unsigned int slot = 0) const
 	{
-		return m_Handle;
+		return m_Handles[slot];
+	};
+	inline std::vector<GLuint64> GetHandles() const
+	{
+		return m_Handles;
 	};
 	inline unsigned int GetTexWidth() const
 	{
-		return m_TexWidth;
+		return (unsigned int)m_TexSize.x;
 	};
 	inline unsigned int GetTexHeight() const
 	{
-		return m_TexHeight;
+		return (unsigned int)m_TexSize.y;
+	};
+	inline glm::vec2 GetTexSize() const
+	{
+		return m_TexSize;
 	};
 };

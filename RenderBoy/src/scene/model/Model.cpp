@@ -34,22 +34,13 @@ void Model::UpdateStatics()
 
     // Analysing model's data and decide it's render mode
     bool hasTexture = false;
-    bool allHasTexture = true;
     for (unsigned int i = 0; i < m_Meshes.size(); i++)
     {
-        hasTexture |= m_Meshes[i].HasTexture();
-        allHasTexture &= m_Meshes[i].HasTexture();
+        hasTexture &= m_Meshes[i].HasTexture();
     }
     if (hasTexture)
     {
-        if (allHasTexture)
-        {
-            spdlog::warn("All has texture");
-        }
-        else
-        {
-            spdlog::warn("partly textured");
-        }
+
     }
     else
     {

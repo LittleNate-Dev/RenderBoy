@@ -17,6 +17,7 @@
 #include <map>
 #include <unordered_map>
 #include <utility>
+#include <random>
 #include <Windows.h>
 
 #include <glew/glew.h>
@@ -48,6 +49,7 @@
 #define SCREENSHOT_FILEPATH "saves/screenshot/"
 #define UV_MAP_FILEPATH "res/checkermap/CheckerMap.png"
 #define SHADER_OPENGL "data/shaders/opengl/"
+#define SHADER_OPENGL_GBUFFER "data/shaders/opengl/others/GBUFFER.glsl"
 #define SHADER_OPENGL_BLANK "data/shaders/opengl/draw_mode/BLANK.glsl"
 #define SHADER_OPENGL_WIREFRAME "data/shaders/opengl/draw_mode/WIREFRAME.glsl"
 #define SHADER_OPENGL_DEPTH "data/shaders/opengl/draw_mode/DEPTH.glsl"
@@ -59,6 +61,8 @@
 #define SHADER_OPENGL_BLOOM_DOWNSAMPLE "data/shaders/opengl/others/bloom/DOWNSAMPLE.glsl"
 #define SHADER_OPENGL_BLOOM_UPSAMPLE "data/shaders/opengl/others/bloom/UPSAMPLE.glsl"
 #define SHADER_OPENGL_BLOOM_BLEND "data/shaders/opengl/others/bloom/BLEND.glsl"
+#define SHADER_OPENGL_SSAO_GEN "data/shaders/opengl/others/ssao/GEN.glsl"
+#define SHADER_OPENGL_SSAO_BLUR "data/shaders/opengl/others/ssao/BLUR.glsl"
 #define SHADER_OPENGL_SHADOW_POINT "data/shaders/opengl/shadow/POINTLIGHT.glsl"
 #define SHADER_OPENGL_SHADOW_SPOT "data/shaders/opengl/shadow/SPOTLIGHT.glsl"
 #define SHADER_OPENGL_SHADOW_DIR "data/shaders/opengl/shadow/DIRLIGHT.glsl"
@@ -121,14 +125,10 @@ enum Draw_Mode
 enum Render_Mode
 {
 	NOTEX = 0,
-	HASRTEX_ALLTEX_ALBEDO = 1,
-	HASTEX_ALLTEX_BLINN = 2,
-	HASTEX_ALLTEX_PBR_3 = 3,
-	HASTEX_ALLTEX_PBR_4 = 4,
-	HASTEX_PARTTEX_ALBEDO = 5,
-	HASTEX_PARTTEX_BLINN = 6,
-	HASTEX_PARTTEX_PBR_3 = 7,
-	HASTEX_PARTTEX_PBR_4 = 8,
+	HASRTEX_ALBEDO = 1,
+	HASTEX_BLINN = 2,
+	HASTEX_PBR_3 = 3,
+	HASTEX_PBR_4 = 4
 };
 
 enum Anti_Alising
@@ -153,6 +153,11 @@ enum Skybox_Type
 {
 	PURE_COLOR = 0,
 	PICTURE = 1
+};
+
+enum Noise_Tex_Type 
+{
+	NOISE_SSAO = 0
 };
 
 // Structures

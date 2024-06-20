@@ -51,6 +51,27 @@ void GLData::Init()
 		layout.Push<float>(3);
 		m_SkyboxData.VA.AddBuffer(m_SkyboxData.VB, layout);
 	}
+	// Initialize data used for vfxs
+	{
+		// SSAO
+		{
+			// generates random floats between 0.0 and 1.0
+			std::uniform_real_distribution<float> randomFloats(0.0, 1.0); 
+			std::default_random_engine generator;
+			for (unsigned int i = 0; i < 64; ++i)
+			{
+				glm::vec3 sample(randomFloats(generator) * 2.0 - 1.0, randomFloats(generator) * 2.0 - 1.0, randomFloats(generator));
+				sample = glm::normalize(sample);
+				sample *= randomFloats(generator);
+				float scale = float(i) / 64.0f;
+				// scale samples s.t. they're more aligned to center of kernel
+				scale = 0.1f + (scale * scale) * (1.0f - 0.1f);
+				sample *= scale;
+				m_VFXData.SSAOSamples.push_back(sample);
+			}
+		}
+		m_VFXData.SSAONoiseTex.GenTexture(Noise_Tex_Type::NOISE_SSAO);
+	}
 	// Initialize point light's cube
 	{
 		float position[] = {

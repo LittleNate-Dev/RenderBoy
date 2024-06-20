@@ -17,6 +17,7 @@
 #include "shader/opengl/GLShader.h"
 #include "data/opengl/texture/GLTexture.h"
 #include "data/opengl/texture/GLCubeMap.h"
+#include "data/opengl/texture/GLNoiseTexture.h"
 
 struct GLPointLightData
 {
@@ -54,6 +55,12 @@ struct GLSkyboxData
 	GLCubeMap Skybox;
 };
 
+struct GLVFXData
+{
+	std::vector<glm::vec3> SSAOSamples;
+	GLNoiseTexture SSAONoiseTex;
+};
+
 struct GLModelData
 {
 	GLVertexArray VA;
@@ -82,6 +89,7 @@ class GLData
 private:
 	GLShader m_Shader; // Shader used for different draw mode (except default)
 	GLSkyboxData m_SkyboxData;
+	GLVFXData m_VFXData;
 	GLPointLightData m_PointLightData;
 	GLSpotLightData m_SpotLightData;
 	GLDirLightData m_DirLightData;
@@ -139,5 +147,9 @@ public:
 	inline std::map<std::string, GLModelData>& GetModelData()
 	{
 		return m_ModelData;
+	};
+	inline GLVFXData& GetVFXData()
+	{
+		return m_VFXData;
 	};
 };
