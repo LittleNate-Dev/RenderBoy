@@ -733,10 +733,6 @@ void GLRenderer::DrawSSAO(Scene& scene)
 	m_Shaders.SSAO[0].SetUniformMat4f("u_ProjMat", scene.GetCamera().GetProjMat());
 	m_Shaders.SSAO[0].SetUniformHandleARB("u_Position", m_Frame.GBuffer.GetHandle(0));
 	m_Shaders.SSAO[0].SetUniformHandleARB("u_Normal", m_Frame.GBuffer.GetHandle(1));
-	/*for (unsigned int i = 0; i < 64; i++)
-	{
-		m_Shaders.SSAO[0].SetUniformVec3f("u_Samples[" + std::to_string(i) + "]", scene.GetData().GetDataGL().GetVFXData().SSAOSamples[i]);
-	}*/
 	glm::vec2 noiseSize = glm::vec2(scene.GetData().GetDataGL().GetVFXData().SSAONoiseTex.GetWidth(),
 									scene.GetData().GetDataGL().GetVFXData().SSAONoiseTex.GetHeight());
 	glm::vec2 noiseScale = glm::vec2(m_Frame.SSAO[0].GetTexWidth() / noiseSize.x, m_Frame.SSAO[0].GetTexHeight() / noiseSize.y);

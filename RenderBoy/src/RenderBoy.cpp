@@ -7,7 +7,7 @@
 *State:
 *	In Development
 *Version:
-*	0.6.6
+*	0.6.7
 *
 * -- Dev --
 * Name:
