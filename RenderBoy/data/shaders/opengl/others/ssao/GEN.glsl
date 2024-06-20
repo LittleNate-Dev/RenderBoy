@@ -28,9 +28,9 @@ uniform sampler2D u_NoiseTex;
 uniform vec3 u_Samples[64];
 
 // parameters (you'd probably want to use them as uniforms to more easily tweak the effect)
-uniform int u_KernelSize = 64;
-uniform float u_Radius = 0.5;
-uniform float u_Bias = 0.025;
+uniform int u_KernelSize;
+uniform float u_Radius;
+uniform float u_Bias;
 
 // tile noise texture over screen based on screen dimensions divided by noise size
 uniform vec2 u_NoiseScale; 

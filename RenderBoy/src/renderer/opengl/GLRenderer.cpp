@@ -737,6 +737,9 @@ void GLRenderer::DrawSSAO(Scene& scene)
 									scene.GetData().GetDataGL().GetVFXData().SSAONoiseTex.GetHeight());
 	glm::vec2 noiseScale = glm::vec2(m_Frame.SSAO[0].GetTexWidth() / noiseSize.x, m_Frame.SSAO[0].GetTexHeight() / noiseSize.y);
 	m_Shaders.SSAO[0].SetUniformVec2f("u_NoiseScale", noiseScale);
+	m_Shaders.SSAO[0].SetUniform1i("u_KernelSize", scene.GetVFX().SSAOKernelSize);
+	m_Shaders.SSAO[0].SetUniform1f("u_Radius", scene.GetVFX().SSAORadius);
+	m_Shaders.SSAO[0].SetUniform1f("u_Bias", scene.GetVFX().SSAOBias);
 	GLCall(glDrawElements(GL_TRIANGLES, m_Frame.IB.GetCount(), GL_UNSIGNED_INT, nullptr));
 	m_Shaders.SSAO[0].Unbind();
 	m_Frame.SSAO[0].Unbind();

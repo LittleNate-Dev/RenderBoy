@@ -195,6 +195,21 @@ bool Scene::LoadScene(std::string filepath)
 					values = core::GetFileValue(line);
 					m_VFX.SSAO = (bool)std::atoi(values[0].c_str());
 				}
+				else if (line.find("#SSAO_KERNEL_SIZE") != std::string::npos)
+				{
+					values = core::GetFileValue(line);
+					m_VFX.SSAOKernelSize = (int)std::atoi(values[0].c_str());
+				}
+				else if (line.find("#SSAO_RADIUS") != std::string::npos)
+				{
+					values = core::GetFileValue(line);
+					m_VFX.SSAORadius = (float)std::atof(values[0].c_str());
+				}
+				else if (line.find("#SSAO_BIAS") != std::string::npos)
+				{
+					values = core::GetFileValue(line);
+					m_VFX.SSAOBias = (float)std::atof(values[0].c_str());
+				}
 			}
 			// Load models
 			{
@@ -590,6 +605,12 @@ void Scene::SaveScene()
 		line = "#BLOOM_FILTER_RADIUS " + std::to_string(m_VFX.BloomFilterRadius) + "\n";
 		stream << line;
 		line = "#SSAO_SWITCH " + std::to_string(m_VFX.SSAO) + "\n";
+		stream << line;
+		line = "#SSAO_KERNEL_SIZE " + std::to_string(m_VFX.SSAOKernelSize) + "\n";
+		stream << line;
+		line = "#SSAO_RADIUS " + std::to_string(m_VFX.SSAORadius) + "\n";
+		stream << line;
+		line = "#SSAO_BIAS " + std::to_string(m_VFX.SSAOBias) + "\n";
 		stream << line;
 	}
 	// Save models
@@ -1276,29 +1297,40 @@ void Scene::DrawSceneWindow()
 				}
 				ImGui::TreePop();
 			}
-			// Bloom
+			// SSAO
 			if (ImGui::TreeNode("SSAO"))
 			{
 				ImGui::CenterAlignWidget("SSAO");
 				ImGui::LabelHighlighted("SSAO");
 				ImGui::Checkbox("##SSAO", &m_VFX.SSAO);
-				//if (m_VFX.Bloom)
-				//{
-				//	// Bloom Strength
-				//	ImGui::PushItemWidth(60.0f * core::GetWidgetWidthCoefficient());
-				//	ImGui::CenterAlignWidget("Strength", 60.0f * core::GetWidgetWidthCoefficient());
-				//	ImGui::LabelHighlighted("Strength");
-				//	ImGui::InputFloat("##BloomStrength", &m_VFX.BloomStrength, 0.0f, 0.0f, "%.4f");
-				//	// Bloom Filter Radius
-				//	ImGui::PushItemWidth(80.0f * core::GetWidgetWidthCoefficient());
-				//	ImGui::CenterAlignWidget("Filter Radius", 80.0f * core::GetWidgetWidthCoefficient());
-				//	ImGui::LabelHighlighted("Filter Radius");
-				//	if (ImGui::InputFloat("##BloomFilterRadius", &m_VFX.BloomFilterRadius, 0.0f, 0.0f, "%.6f"))
-				//	{
-				//		m_VFX.BloomFilterRadius = m_VFX.BloomFilterRadius > 0.0f ? m_VFX.BloomFilterRadius : 0.005f;
-				//	}
-				//}
+				if (m_VFX.SSAO)
+				{
+					// SSAO kernal size
+					ImGui::PushItemWidth(120.0f * core::GetWidgetWidthCoefficient());
+					ImGui::CenterAlignWidget("Kernel Size", 120.0f * core::GetWidgetWidthCoefficient());
+					ImGui::LabelHighlighted("Kernel Size");
+					ImGui::SliderInt("##SSAOKernalSize", &m_VFX.SSAOKernelSize, 1, 64);
+					// SSAO Radius
+					ImGui::PushItemWidth(80.0f * core::GetWidgetWidthCoefficient());
+					ImGui::CenterAlignWidget("Radius", 80.0f * core::GetWidgetWidthCoefficient());
+					ImGui::LabelHighlighted("Radius");
+					if (ImGui::InputFloat("##SSAORadius", &m_VFX.SSAORadius, 0.0f, 0.0f, "%.6f"))
+					{
+						m_VFX.SSAORadius = m_VFX.SSAORadius > 0.0f ? m_VFX.SSAORadius : 0.005f;
+					}
+					// SSAO Bias
+					ImGui::PushItemWidth(80.0f * core::GetWidgetWidthCoefficient());
+					ImGui::CenterAlignWidget("Bias", 80.0f * core::GetWidgetWidthCoefficient());
+					ImGui::LabelHighlighted("Bias");
+					ImGui::InputFloat("##SSAOBias", &m_VFX.SSAOBias, 0.0f, 0.0f, "%.6f");
+				}
 				ImGui::TreePop();
+			}
+			ImGui::CenterAlignWidget("Reset");
+			if (ImGui::Button("Reset"))
+			{
+				VisualEffects newVFX;
+				m_VFX = newVFX;
 			}
 			ImGui::TreePop();
 		}
