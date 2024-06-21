@@ -42,6 +42,7 @@ private:
 
 	void UpdateModelMat(Scene& scene);
 	void Clear();
+	void DrawDefault(Scene& scene);
 	void DrawGBuffer(Scene& scene);
 	void DrawBlank(Scene& scene);
 	void DrawWireFrame(Scene& scene);

@@ -797,7 +797,7 @@ bool Scene::AddModel(std::string filepath)
 	{
 		m_ModelList.push_back(name);
 		m_Models.insert(std::pair<std::string, Model>(name, model));
-		m_Data.AddModel(name, model);
+		m_Data.AddModel(name, m_Models[name]);
 		core::currentModelScene = nullptr;
 		return true;
 	}
@@ -826,7 +826,7 @@ bool Scene::AddModel(std::string name, std::string filepath)
 	{
 		m_ModelList.push_back(name);
 		m_Models.insert(std::pair<std::string, Model>(name, model));
-		m_Data.AddModel(name, model);
+		m_Data.AddModel(name, m_Models[name]);
 		core::currentModelScene = nullptr;
 		return true;
 	}

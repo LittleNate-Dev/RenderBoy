@@ -36,11 +36,11 @@ void Model::UpdateStatics()
     bool hasTexture = false;
     for (unsigned int i = 0; i < m_Meshes.size(); i++)
     {
-        hasTexture &= m_Meshes[i].HasTexture();
+        hasTexture |= m_Meshes[i].HasTexture();
     }
     if (hasTexture)
     {
-
+        m_Statics.RenderMode = HASTEX_ALBEDO;
     }
     else
     {

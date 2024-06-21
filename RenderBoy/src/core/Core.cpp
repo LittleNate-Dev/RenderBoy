@@ -28,12 +28,13 @@ namespace core
 	bool IS_LIGHTS_OPENED = false;
 	std::string POPUP_MSG = "";
 	const std::vector<std::string> FILE_TYPE({
-		"gltf", "obj", "jpg", "png", "scene"
+		"gltf", "obj", "jpg", "png", "scene",
+		"ply", "glb"
 		});
 	const std::vector<std::string> FILE_TYPE_ASSIMP({
 		"3mf", "blend", "3ds", "ase", "gltf", "fbx",
 		"ply", "smd", "vta", "x", "raw", "dxf", "stl",
-		"obj"
+		"obj", "glb"
 		});
 	const std::vector<std::string> FONT_STYLE({
 		"Open Sans",

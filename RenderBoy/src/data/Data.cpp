@@ -44,7 +44,7 @@ void Data::ChangeDrawMode()
 	}
 }
 
-void Data::AddModel(std::string name, Model model)
+void Data::AddModel(std::string name, Model& model)
 {
 	switch (core::SETTINGS.GraphicsCore)
 	{

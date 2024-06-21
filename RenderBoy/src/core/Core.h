@@ -40,7 +40,7 @@
 
 #include <freeimage/FreeImage.h>
 
-#define APP_VERSION "ver 0.6.7"
+#define APP_VERSION "ver 0.6.8"
 #define GIT_REPO "https://github.com/LittleNate-Dev/RenderBoy"
 #define SCENE_FILEPATH "saves/scene/"
 #define SETTING_FILEPATH "data/config/settings.config"
@@ -49,6 +49,7 @@
 #define SCREENSHOT_FILEPATH "saves/screenshot/"
 #define UV_MAP_FILEPATH "res/checkermap/CheckerMap.png"
 #define SHADER_OPENGL "data/shaders/opengl/"
+#define SHADER_OPENGL_RENDER_NOTEX "data/shaders/opengl/render_mode/NOTEX.glsl"
 #define SHADER_OPENGL_GBUFFER "data/shaders/opengl/others/GBUFFER.glsl"
 #define SHADER_OPENGL_BLANK "data/shaders/opengl/draw_mode/BLANK.glsl"
 #define SHADER_OPENGL_WIREFRAME "data/shaders/opengl/draw_mode/WIREFRAME.glsl"
@@ -125,7 +126,7 @@ enum Draw_Mode
 enum Render_Mode
 {
 	NOTEX = 0,
-	HASRTEX_ALBEDO = 1,
+	HASTEX_ALBEDO = 1,
 	HASTEX_BLINN = 2,
 	HASTEX_PBR_3 = 3,
 	HASTEX_PBR_4 = 4
@@ -188,10 +189,12 @@ struct Vertex
 	glm::vec3 Position = glm::vec3(0.0f);
 	glm::vec3 Normal = glm::vec3(0.0f);
 	glm::vec2 TexCoord = glm::vec2(0.0f);
-	glm::vec4 MaterialIndex = glm::vec4(-1.0f);
-	glm::vec3 NBDIndex = glm::vec3(-1.0f); // NBD stands for normal, bump and displacement
 	glm::vec3 Tangent = glm::vec3(0.0f);
 	glm::vec3 Bitangent = glm::vec3(0.0f);
+	glm::vec4 TexIndex = glm::vec4(-1.0f);
+	glm::vec3 ColorIndex = glm::vec3(-1.0f);
+	glm::vec4 AttributeIndex = glm::vec4(-1.0f); // Ns, Ni, Tr, Tf
+	glm::vec3 NBDIndex = glm::vec3(-1.0f); // NBD stands for normal, bump and displacement
 };
 
 struct ModelStatics
@@ -200,6 +203,20 @@ struct ModelStatics
 	unsigned int VertexCount = 0;
 	unsigned int TriangleCount = 0;
 	Render_Mode RenderMode = NOTEX;
+	unsigned int AlbedoTexCount = 0;
+	unsigned int SpecularTexCount = 0;
+	unsigned int MetallicTexCount = 0;
+	unsigned int RoughnessTexCount = 0;
+	unsigned int AoTexCount = 0;
+	unsigned int NormalTexCount = 0;
+	unsigned int BumpTexCount = 0;
+	unsigned int DisplacementTexCount = 0;
+	unsigned int AmbientValueCount = 0;
+	unsigned int DiffuseValueCount = 0;
+	unsigned int SpecularValueCount = 0;
+	unsigned int EmissiveValueCount = 0;
+	unsigned int ReflectiveCount = 0;
+	unsigned int TransparentCount = 0;
 };
 
 struct SceneStatics

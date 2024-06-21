@@ -72,7 +72,7 @@ public:
 	{
 		return m_Name;
 	};
-	inline ModelStatics GetStatics() const
+	inline ModelStatics& GetStatics()
 	{
 		return m_Statics;
 	};

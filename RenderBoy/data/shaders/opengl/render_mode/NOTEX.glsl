@@ -24,10 +24,14 @@ struct FragPosDir
 
 layout (location = 0) in vec4 a_Position;
 layout (location = 1) in vec3 a_Normal;
+layout (location = 6) in vec3 a_ColorIndex;
+layout (location = 6) in vec4 a_AttributeIndex;
 layout (location = 9) in mat4 a_ModelMat;
 
 out vec3 v_FragPos;
 out vec3 v_Normal;
+out vec3 v_ColorIndex;
+out vec4 v_AttributeIndex;
 out vec4 v_FragPosSpot[SPOT_LIGHT_COUNT];
 out FragPosDir v_FragPosDir[DIR_LIGHT_COUNT];
 
@@ -40,6 +44,8 @@ void main()
 {
     vec4 modelPos = a_ModelMat * a_Position;
     v_FragPos = modelPos.xyz;
+    v_ColorIndex = a_ColorIndex;
+    v_AttributeIndex = a_AttributeIndex;
     if (a_Normal == vec3(0.0))
     {
         v_Normal = vec3(0.0);
@@ -130,6 +136,8 @@ layout(location = 0) out vec4 v_FragColor;
 
 in vec3 v_FragPos;
 in vec3 v_Normal;
+in vec3 v_ColorIndex;
+in vec4 v_AttributeIndex;
 in vec4 v_FragPosSpot[SPOT_LIGHT_COUNT];
 in FragPosDir v_FragPosDir[DIR_LIGHT_COUNT];
 
@@ -142,20 +150,27 @@ uniform DirLight u_DirLight[DIR_LIGHT_COUNT];
 uniform bool u_SSAO;
 uniform sampler2D u_SSAOTex;
 
-const vec4 matDiffuse = vec4(0.78, 0.78, 0.78, 1.0);
-const float matShininess = 16.0;
-const vec4 matSpecular = vec4(1.0);
+// Material
+uniform vec3 u_Diffuse[];
+uniform vec3 u_Specular[];
+
+const float c_Shininess = 32.0f;
+
 vec3 viewDir = vec3(1.0);
 vec3 normal = vec3(0.0);
-float ambientOcclusion = 1.0;
+float ssao = 1.0;
+vec3 colorIndex = vec3(-1.0);
+vec4 attributeIndex = vec4(-1.0);
 
-vec4 CalcPointLight(int i);
-vec4 CalcSpotLight(int i);
-vec4 CalcDirLight(int i);
+vec3 CalcPointLight(int i);
+vec3 CalcSpotLight(int i);
+vec3 CalcDirLight(int i);
 
 void main()
 {
-    vec4 result = vec4(0.0);
+    colorIndex = v_ColorIndex + vec3(0.5);
+    attributeIndex = v_AttributeIndex + vec4(0.5);
+    vec3 result = vec3(0.0);
     viewDir = normalize(u_ViewPos - v_FragPos);
     normal = normalize(v_Normal);
     // SSAO
@@ -164,7 +179,7 @@ void main()
         vec4 screenCoord = u_ProjMat * u_ViewMat * vec4(v_FragPos, 1.0);
         vec2 aoCoord = screenCoord.xy / screenCoord.w;
         aoCoord = aoCoord * 0.5 + 0.5;
-        ambientOcclusion = texture(u_SSAOTex, aoCoord).r;
+        ssao = texture(u_SSAOTex, aoCoord).r;
     }
     // Calculate all lights
     for (int i = 0; i < POINT_LIGHT_COUNT; i++)
@@ -188,37 +203,38 @@ void main()
             result += CalcDirLight(i);
         }
     }
-    v_FragColor = vec4(vec3(result), 1.0);
+    //v_FragColor = vec4(result, u_Transparent[int(attributeIndex.y)]);
+    v_FragColor = vec4(result, 1.0);
 }
 
-vec4 CalcPointLight(int i)
+vec3 CalcPointLight(int i)
 {
-    vec4 ambient, diffuse, specular;
+    vec3 ambient, diffuse, specular;
     vec3 lightDir = normalize(u_PointLight[i].Position - v_FragPos);
     // Attenuation
     float distance = length(u_PointLight[i].Position - v_FragPos);
     float attenuation = u_PointLight[i].Intensity / (u_PointLight[i].CLQ.x + u_PointLight[i].CLQ.y * distance + u_PointLight[i].CLQ.z * distance * distance); 
     if (v_Normal == vec3(0.0))
     {
-        ambient  = u_PointLight[i].ADS.x * vec4(u_PointLight[i].Color, 1.0) * matDiffuse * ambientOcclusion;
-        diffuse  = u_PointLight[i].ADS.y * vec4(u_PointLight[i].Color, 1.0) * matDiffuse;
-        specular = vec4(0.0);
+        ambient  = u_PointLight[i].ADS.x * u_PointLight[i].Color * u_Diffuse[int(colorIndex.y)] * ssao;
+        diffuse  = u_PointLight[i].ADS.y * u_PointLight[i].Color * u_Diffuse[int(colorIndex.y)];
+        specular = vec3(0.0);
     }
     else
     {
         float diff = max(dot(normal, lightDir), 0.0);
         vec3 halfwayDir = normalize(lightDir + viewDir);
-        float spec = pow(max(dot(normal, halfwayDir), 0.0), matShininess);
-        ambient  = u_PointLight[i].ADS.x * vec4(u_PointLight[i].Color, 1.0) * matDiffuse * ambientOcclusion;
-        diffuse  = u_PointLight[i].ADS.y * vec4(u_PointLight[i].Color, 1.0) * diff * matDiffuse;
-        specular = u_PointLight[i].ADS.z * vec4(u_PointLight[i].Color, 1.0) * spec * matSpecular;
+        float spec = pow(max(dot(normal, halfwayDir), 0.0), c_Shininess);
+        ambient  = u_PointLight[i].ADS.x * u_PointLight[i].Color * u_Diffuse[int(colorIndex.y)] * ssao;
+        diffuse  = u_PointLight[i].ADS.y * u_PointLight[i].Color * diff * u_Diffuse[int(colorIndex.y)];
+        specular = u_PointLight[i].ADS.z * u_PointLight[i].Color * spec * u_Specular[int(colorIndex.z)];
     }
     // combine results
     ambient *= attenuation;
     diffuse *= attenuation;
     specular *= attenuation;
 
-    vec4 lighting = vec4(1.0);
+    vec3 lighting = vec3(1.0);
     if (u_PointLight[i].CastShadow)
     {   
         float currentDepth = distance;
@@ -270,9 +286,9 @@ vec4 CalcPointLight(int i)
     return lighting;
 }
 
-vec4 CalcSpotLight(int i)
+vec3 CalcSpotLight(int i)
 {
-    vec4 ambient, diffuse, specular;
+    vec3 ambient, diffuse, specular;
     vec3 lightDir = normalize(u_SpotLight[i].Position - v_FragPos);
     // Attenuation
     float distance = length(u_SpotLight[i].Position - v_FragPos);
@@ -283,24 +299,24 @@ vec4 CalcSpotLight(int i)
     float intensity = clamp((theta - cos(u_SpotLight[i].Angle * 0.5 + u_SpotLight[i].DimAngle)) / epsilon, 0.0, 1.0);
     if (v_Normal == vec3(0.0))
     {
-        ambient  = u_SpotLight[i].ADS.x * vec4(u_SpotLight[i].Color, 1.0) * matDiffuse * ambientOcclusion;
-        diffuse  = u_SpotLight[i].ADS.y * vec4(u_SpotLight[i].Color, 1.0) * matDiffuse;
-        specular = vec4(0.0);
+        ambient  = u_SpotLight[i].ADS.x * u_SpotLight[i].Color * u_Diffuse[int(colorIndex.y)] * ssao;
+        diffuse  = u_SpotLight[i].ADS.y * u_SpotLight[i].Color * u_Diffuse[int(colorIndex.y)];
+        specular = vec3(0.0);
     }
     else
     {
         float diff = max(dot(normal, lightDir), 0.0);
         vec3 halfwayDir = normalize(lightDir + viewDir);
-        float spec = pow(max(dot(normal, halfwayDir), 0.0), matShininess);
-        ambient  = u_SpotLight[i].ADS.x * vec4(u_SpotLight[i].Color, 1.0) * matDiffuse * ambientOcclusion;
-        diffuse  = u_SpotLight[i].ADS.y * vec4(u_SpotLight[i].Color, 1.0) * diff * matDiffuse;
-        specular = u_SpotLight[i].ADS.z * spec * matSpecular;
+        float spec = pow(max(dot(normal, halfwayDir), 0.0), c_Shininess);
+        ambient  = u_SpotLight[i].ADS.x * u_SpotLight[i].Color * u_Diffuse[int(colorIndex.y)] * ssao;
+        diffuse  = u_SpotLight[i].ADS.y * u_SpotLight[i].Color * diff * u_Diffuse[int(colorIndex.y)];
+        specular = u_SpotLight[i].ADS.z * spec * u_Specular[int(colorIndex.z)];
     }
     ambient *= attenuation;
     diffuse *= intensity * attenuation;
     specular *= intensity * attenuation;
 
-    vec4 lighting = vec4(1.0);
+    vec3 lighting = vec3(1.0);
     if (u_SpotLight[i].CastShadow)
     {
         float bias = max(u_SpotLight[i].Bias.x * (1.0 - dot(normal, lightDir)), u_SpotLight[i].Bias.y);
@@ -308,7 +324,7 @@ vec4 CalcSpotLight(int i)
         if (ndc.x < 1.0 && ndc.x > -1.0 && ndc.y < 1.0 && ndc.y > -1.0 && ndc.z > -1.0)
         {
             // Inside light's frustum
-            lighting = vec4(1.0);
+            lighting = vec3(1.0);
             vec2 shadowTex = ndc.xy;
             shadowTex = shadowTex * 0.5 + 0.5;
             float closestDepth = texture(u_SpotLight[i].ShadowMap, shadowTex).r;
@@ -364,32 +380,32 @@ vec4 CalcSpotLight(int i)
     return lighting;
 }
 
-vec4 CalcDirLight(int i)
+vec3 CalcDirLight(int i)
 {
-    vec4 ambient, diffuse, specular;
+    vec3 ambient, diffuse, specular;
     vec3 lightDir = u_DirLight[i].Direction;
     // Attenuation
     float attenuation = u_DirLight[i].Intensity;  
     if (v_Normal == vec3(0.0))
     {
-        ambient  = u_DirLight[i].ADS.x * vec4(u_DirLight[i].Color, 1.0) * matDiffuse * ambientOcclusion;
-        diffuse  = u_DirLight[i].ADS.y * vec4(u_DirLight[i].Color, 1.0) * matDiffuse;
-        specular = vec4(0.0);
+        ambient  = u_DirLight[i].ADS.x * u_DirLight[i].Color * u_Diffuse[int(colorIndex.y)] * ssao;
+        diffuse  = u_DirLight[i].ADS.y * u_DirLight[i].Color * u_Diffuse[int(colorIndex.y)];
+        specular = vec3(0.0);
     }
     else
     {
         float diff = max(dot(normal, lightDir), 0.0);
         vec3 halfwayDir = normalize(lightDir + viewDir);
-        float spec = pow(max(dot(normal, halfwayDir), 0.0), matShininess);
-        ambient  = u_DirLight[i].ADS.x * vec4(u_DirLight[i].Color, 1.0) * matDiffuse * ambientOcclusion;
-        diffuse  = u_DirLight[i].ADS.y * vec4(u_DirLight[i].Color, 1.0) * diff * matDiffuse;
-        specular = u_DirLight[i].ADS.z * vec4(u_DirLight[i].Color, 1.0) * spec * matSpecular;
+        float spec = pow(max(dot(normal, halfwayDir), 0.0), c_Shininess);
+        ambient  = u_DirLight[i].ADS.x * u_DirLight[i].Color * u_Diffuse[int(colorIndex.y)] * ssao;
+        diffuse  = u_DirLight[i].ADS.y * u_DirLight[i].Color * diff * u_Diffuse[int(colorIndex.y)];
+        specular = u_DirLight[i].ADS.z * u_DirLight[i].Color * spec * u_Specular[int(colorIndex.z)];
     }
     ambient *= attenuation;
     diffuse *= attenuation;
     specular *= attenuation;
 
-    vec4 lighting = vec4(0.0);
+    vec3 lighting = vec3(0.0);
     if (u_DirLight[i].CastShadow)
     {
         int level = 0;

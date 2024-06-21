@@ -28,8 +28,8 @@ private:
 	glm::vec3 m_SpecularValue; // ks
 	glm::vec3 m_EmissiveValue; // ke
 	float m_ReflectiveValue; // Ns
-	float m_RefractionValue; // Ni
 	float m_TransparentValue; // Tr
+	float m_RefractionValue; // Ni
 	glm::vec3 m_TransmissionValue; // Tf
 	unsigned int m_IllumValue; // illum
 
@@ -124,7 +124,7 @@ public:
 	{
 		return m_EmissiveValue;
 	};
-	inline float GetReflectivenValue() const
+	inline float GetReflectiveValue() const
 	{
 		return m_ReflectiveValue;
 	};

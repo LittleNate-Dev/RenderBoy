@@ -23,7 +23,7 @@ public:
 	// Change draw mode
 	void ChangeDrawMode();
 	// Add, delete and rename model
-	void AddModel(std::string name, Model model);
+	void AddModel(std::string name, Model& model);
 	void DeleteModel(std::string name);
 	void RenameModel(std::string oldName, std::string newName);
 	void AddLight(std::string name, Light_Type type);

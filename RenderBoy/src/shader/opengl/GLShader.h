@@ -28,6 +28,7 @@ private:
 
 
     ShaderProgramSource ParseShader(std::string filepath);
+    ShaderProgramSource ParseShader(std::string filepath, ModelStatics statics);
     unsigned int CreateShader(const ShaderProgramSource& source);
     unsigned int CompileShader(unsigned int type, const std::string& source);
     int GetUniformLocation(const std::string& name);
@@ -37,7 +38,7 @@ public:
     ~GLShader();
 
     bool Init(std::string filepath);
-    //void Init(Render_Mode mode, Scene& scene);
+    bool Init(ModelStatics statics);
     void Bind() const;
     void Unbind() const;
     inline unsigned int GetID() const

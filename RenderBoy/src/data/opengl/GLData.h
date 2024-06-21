@@ -63,6 +63,7 @@ struct GLVFXData
 
 struct GLModelData
 {
+	ModelStatics Statics;
 	GLVertexArray VA;
 	GLVertexBuffer VB;
 	GLVertexBuffer InstanceVB;
@@ -82,6 +83,8 @@ struct GLModelData
 	std::vector<glm::vec3> EmissiveValue;
 	std::vector<float> ReflectiveValue;
 	std::vector<float> TransparentValue;
+	std::vector<float> RefractionValue;
+	std::vector<glm::vec3> TransmissionValue;
 };
 
 class GLData
@@ -93,6 +96,7 @@ private:
 	GLPointLightData m_PointLightData;
 	GLSpotLightData m_SpotLightData;
 	GLDirLightData m_DirLightData;
+	std::vector<std::string> m_ModelList;
 	std::map<std::string, GLModelData> m_ModelData;
 	GLTexture m_CheckerMap;
 
@@ -105,6 +109,7 @@ private:
 	void RenamePointLight(std::string oldName, std::string newName);
 	void RenameSpotLight(std::string oldName, std::string newName);
 	void RenameDirLight(std::string oldName, std::string newName);
+	void ReInitShader();
 
 public:
 	GLData();
@@ -115,7 +120,7 @@ public:
 	// Change draw mode
 	void ChangeDrawMode();
 	// Add, delete and rename model data
-	void AddModel(std::string name, Model model);
+	void AddModel(std::string name, Model& model);
 	bool DeleteModel(std::string name);
 	bool RenameModel(std::string oldName, std::string newName);
 	void AddLight(std::string name, Light_Type type);

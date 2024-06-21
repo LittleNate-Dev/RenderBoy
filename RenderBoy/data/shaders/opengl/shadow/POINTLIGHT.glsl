@@ -2,7 +2,7 @@
 #version 460 core
 
 layout (location = 0) in vec3 a_Position;
-layout (location = 7) in mat4 a_ModelMat;
+layout (location = 9) in mat4 a_ModelMat;
 
 void main()
 {
