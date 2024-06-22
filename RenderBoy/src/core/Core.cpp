@@ -29,12 +29,12 @@ namespace core
 	std::string POPUP_MSG = "";
 	const std::vector<std::string> FILE_TYPE({
 		"gltf", "obj", "jpg", "png", "scene",
-		"ply", "glb"
+		"ply"
 		});
 	const std::vector<std::string> FILE_TYPE_ASSIMP({
 		"3mf", "blend", "3ds", "ase", "gltf", "fbx",
 		"ply", "smd", "vta", "x", "raw", "dxf", "stl",
-		"obj", "glb"
+		"obj"
 		});
 	const std::vector<std::string> FONT_STYLE({
 		"Open Sans",
@@ -144,6 +144,12 @@ namespace core
 		std::string fileName = filepath.substr(iPos, filepath.length() - iPos);
 		fileName = fileName.substr(0, fileName.rfind("."));
 		return fileName;
+	}
+
+	std::string ReplaceBackwardSlash(std::string filepath)
+	{
+		std::replace(filepath.begin(), filepath.end(), '\\', '/');
+		return filepath;
 	}
 
 	void SetUiStyle(UI_Style style)

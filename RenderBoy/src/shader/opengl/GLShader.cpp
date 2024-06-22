@@ -38,6 +38,9 @@ bool GLShader::Init(ModelStatics statics)
     case NOTEX:
         m_FilePath = SHADER_OPENGL_RENDER_NOTEX;
         break;
+    case HASTEX_ALBEDO:
+        m_FilePath = SHADER_OPENGL_RENDER_HASTEX_ALBEDO;
+        break;
     default:
         break;
     }
@@ -332,6 +335,18 @@ ShaderProgramSource GLShader::ParseShader(std::string filepath, ModelStatics sta
             }
             ss[(int)type] << line << '\n';
         }
+        else if (line.find("uniform sampler2D u_AlbedoTex[];") != std::string::npos)
+        {
+            if (statics.AlbedoTexCount)
+            {
+                line = "uniform sampler2D u_AlbedoTex[" + std::to_string(statics.AlbedoTexCount) + "];";
+            }
+            else
+            {
+                line = "uniform sampler2D u_AlbedoTex[1];";
+            }
+            ss[(int)type] << line << '\n';
+            }
         else
         {
             ss[(int)type] << line << '\n';

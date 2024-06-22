@@ -83,7 +83,7 @@ bool Mesh::HasTexture()
 
 bool Mesh::HasDiffuseTex()
 {
-	if (m_AlbedoTexFilePaths.size())
+	if (m_AlbedoTexFilePath != "")
 	{
 		return true;
 	}
@@ -92,7 +92,7 @@ bool Mesh::HasDiffuseTex()
 
 bool Mesh::HasSpecularTex()
 {
-	if (m_SpecularTexFilePaths.size())
+	if (m_SpecularTexFilePath != "")
 	{
 		return true;
 	}
@@ -101,7 +101,7 @@ bool Mesh::HasSpecularTex()
 
 bool Mesh::HasAlbedoTex()
 {
-	if (m_AlbedoTexFilePaths.size())
+	if (m_AlbedoTexFilePath != "")
 	{
 		return true;
 	}
@@ -110,7 +110,7 @@ bool Mesh::HasAlbedoTex()
 
 bool Mesh::HasMetallicTex()
 {
-	if (m_MetallicTexFilePaths.size())
+	if (m_MetallicTexFilePath != "")
 	{
 		return true;
 	}
@@ -119,7 +119,7 @@ bool Mesh::HasMetallicTex()
 
 bool Mesh::HasRoughnessTex()
 {
-	if (m_RoughnessTexFilePaths.size())
+	if (m_RoughnessTexFilePath != "")
 	{
 		return true;
 	}
@@ -128,7 +128,7 @@ bool Mesh::HasRoughnessTex()
 
 bool Mesh::HasAoTex()
 {
-	if (m_AoTexFilePaths.size())
+	if (m_AoTexFilePath != "")
 	{
 		return true;
 	}
@@ -137,7 +137,7 @@ bool Mesh::HasAoTex()
 
 bool Mesh::HasNormalTex()
 {
-	if (m_NormalTexFilePaths.size())
+	if (m_NormalTexFilePath != "")
 	{
 		return true;
 	}
@@ -146,7 +146,7 @@ bool Mesh::HasNormalTex()
 
 bool Mesh::HasBumpTex()
 {
-	if (m_BumpTexFilePaths.size())
+	if (m_BumpTexFilePath != "")
 	{
 		return true;
 	}
@@ -155,7 +155,7 @@ bool Mesh::HasBumpTex()
 
 bool Mesh::HasDisplacementTex()
 {
-	if (m_DisplacementTexFilePaths.size())
+	if (m_DisplacementTexFilePath != "")
 	{
 		return true;
 	}

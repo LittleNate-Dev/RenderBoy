@@ -15,14 +15,14 @@ class Mesh
 private:
 	std::vector<Vertex> m_Vertices;
 	std::vector<unsigned int> m_Indices;
-	std::vector<std::string> m_AlbedoTexFilePaths;
-	std::vector<std::string> m_SpecularTexFilePaths;
-	std::vector<std::string> m_MetallicTexFilePaths;
-	std::vector<std::string> m_RoughnessTexFilePaths;
-	std::vector<std::string> m_AoTexFilePaths;
-	std::vector<std::string> m_NormalTexFilePaths;
-	std::vector<std::string> m_BumpTexFilePaths;
-	std::vector<std::string> m_DisplacementTexFilePaths;
+	std::string m_AlbedoTexFilePath;
+	std::string m_SpecularTexFilePath;
+	std::string m_MetallicTexFilePath;
+	std::string m_RoughnessTexFilePath;
+	std::string m_AoTexFilePath;
+	std::string m_NormalTexFilePath;
+	std::string m_BumpTexFilePath;
+	std::string m_DisplacementTexFilePath;
 	glm::vec3 m_AmbientValue; // ka
 	glm::vec3 m_DiffuseValue; // kd
 	glm::vec3 m_SpecularValue; // ks
@@ -72,41 +72,41 @@ public:
 	{
 		return m_Indices;
 	};
-	inline std::vector<std::string>& GetDiffuseTexFilePaths()
+	inline std::string& GetDiffuseTexFilePath()
 	{
-		return m_AlbedoTexFilePaths;
+		return m_AlbedoTexFilePath;
 	};
-	inline std::vector<std::string>& GetSpecularTexFilePaths()
+	inline std::string& GetSpecularTexFilePath()
 	{
-		return m_SpecularTexFilePaths;
+		return m_SpecularTexFilePath;
 	};
-	inline std::vector<std::string>& GetAlbedoTexFilePaths()
+	inline std::string& GetAlbedoTexFilePath()
 	{
-		return m_AlbedoTexFilePaths;
+		return m_AlbedoTexFilePath;
 	};
-	inline std::vector<std::string>& GetMetallicTexFilePaths()
+	inline std::string& GetMetallicTexFilePath()
 	{
-		return m_MetallicTexFilePaths;
+		return m_MetallicTexFilePath;
 	};
-	inline std::vector<std::string>& GetRoughnessTexFilePaths()
+	inline std::string& GetRoughnessTexFilePath()
 	{
-		return m_RoughnessTexFilePaths;
+		return m_RoughnessTexFilePath;
 	};
-	inline std::vector<std::string>& GetAoTexFilePaths()
+	inline std::string& GetAoTexFilePath()
 	{
-		return m_AoTexFilePaths;
+		return m_AoTexFilePath;
 	};
-	inline std::vector<std::string>& GetNormalTexFilePaths()
+	inline std::string& GetNormalTexFilePath()
 	{
-		return m_NormalTexFilePaths;
+		return m_NormalTexFilePath;
 	};
-	inline std::vector<std::string>& GetBumpTexFilePaths()
+	inline std::string& GetBumpTexFilePath()
 	{
-		return m_BumpTexFilePaths;
+		return m_BumpTexFilePath;
 	};
-	inline std::vector<std::string>& GetDisplacementTexFilePaths()
+	inline std::string& GetDisplacementTexFilePath()
 	{
-		return m_DisplacementTexFilePaths;
+		return m_DisplacementTexFilePath;
 	};
 	inline glm::vec3 GetAmbientValue()
 	{

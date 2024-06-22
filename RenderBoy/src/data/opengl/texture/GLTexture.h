@@ -32,7 +32,7 @@ public:
     {
         return m_RendererID;
     };
-    inline GLuint64 GetHandle() const
+    inline GLuint64 GetHandle()
     {
         return m_Handle;
     };

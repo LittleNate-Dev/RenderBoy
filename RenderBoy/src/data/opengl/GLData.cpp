@@ -202,17 +202,22 @@ void GLData::AddModel(std::string name, Model& model)
 	GLModelData modelData;
 	m_ModelData.insert(std::pair<std::string, GLModelData>(name, modelData));
 	// Load in materials
+	std::vector<std::string> albedoTex;
+	std::vector<std::string> specularTex;
+	std::vector<std::string> metallicTex;
+	std::vector<std::string> roughnessTex;
+	std::vector<std::string> aoTex;
 	for (unsigned int i = 0; i < model.GetMeshes().size(); i++)
 	{
-		//std::cout << "Reflective value: " << model.GetMeshes()[i].GetReflectiveValue() << std::endl;
+		//std::cout << model.GetMeshes()[i].GetAlbedoTexFilePath() << std::endl;
 		bool hasValue = false;
-		if (model.GetStatics().RenderMode == NOTEX)
+		// Albedo texture
+		hasValue = false;
+		if (model.GetMeshes()[i].GetAlbedoTexFilePath() != "")
 		{
-			// Ambient
-			hasValue = false;
-			for (unsigned int j = 0; j < m_ModelData[name].AmbientValue.size(); j++)
+			for (unsigned int j = 0; j < albedoTex.size(); j++)
 			{
-				if (model.GetMeshes()[i].GetAmbientValue() == m_ModelData[name].AmbientValue[j])
+				if (model.GetMeshes()[i].GetAlbedoTexFilePath() == albedoTex[j])
 				{
 					hasValue = true;
 					break;
@@ -220,42 +225,14 @@ void GLData::AddModel(std::string name, Model& model)
 			}
 			if (!hasValue)
 			{
-				m_ModelData[name].AmbientValue.push_back(model.GetMeshes()[i].GetAmbientValue());
-			}
-			// Diffuse
-			hasValue = false;
-			for (unsigned int j = 0; j < m_ModelData[name].DiffuseValue.size(); j++)
-			{
-				if (model.GetMeshes()[i].GetDiffuseValue() == m_ModelData[name].DiffuseValue[j])
-				{
-					hasValue = true;
-					break;
-				}
-			}
-			if (!hasValue)
-			{
-				m_ModelData[name].DiffuseValue.push_back(model.GetMeshes()[i].GetDiffuseValue());
-			}
-			// Specular
-			hasValue = false;
-			for (unsigned int j = 0; j < m_ModelData[name].SpecularValue.size(); j++)
-			{
-				if (model.GetMeshes()[i].GetSpecularValue() == m_ModelData[name].SpecularValue[j])
-				{
-					hasValue = true;
-					break;
-				}
-			}
-			if (!hasValue)
-			{
-				m_ModelData[name].SpecularValue.push_back(model.GetMeshes()[i].GetSpecularValue());
+				albedoTex.push_back(model.GetMeshes()[i].GetAlbedoTexFilePath());
 			}
 		}
-		// Reflective
+		// Ambient
 		hasValue = false;
-		for (unsigned int j = 0; j < m_ModelData[name].ReflectiveValue.size(); j++)
+		for (unsigned int j = 0; j < m_ModelData[name].AmbientValue.size(); j++)
 		{
-			if (model.GetMeshes()[i].GetReflectiveValue() == m_ModelData[name].ReflectiveValue[j])
+			if (model.GetMeshes()[i].GetAmbientValue() == m_ModelData[name].AmbientValue[j])
 			{
 				hasValue = true;
 				break;
@@ -263,13 +240,13 @@ void GLData::AddModel(std::string name, Model& model)
 		}
 		if (!hasValue)
 		{
-			m_ModelData[name].ReflectiveValue.push_back(model.GetMeshes()[i].GetReflectiveValue());
+			m_ModelData[name].AmbientValue.push_back(model.GetMeshes()[i].GetAmbientValue());
 		}
-		// Transparent
+		// Diffuse
 		hasValue = false;
-		for (unsigned int j = 0; j < m_ModelData[name].TransparentValue.size(); j++)
+		for (unsigned int j = 0; j < m_ModelData[name].DiffuseValue.size(); j++)
 		{
-			if (model.GetMeshes()[i].GetTransparentValue() == m_ModelData[name].TransparentValue[j])
+			if (model.GetMeshes()[i].GetDiffuseValue() == m_ModelData[name].DiffuseValue[j])
 			{
 				hasValue = true;
 				break;
@@ -277,16 +254,59 @@ void GLData::AddModel(std::string name, Model& model)
 		}
 		if (!hasValue)
 		{
-			m_ModelData[name].TransparentValue.push_back(model.GetMeshes()[i].GetTransparentValue());
+			m_ModelData[name].DiffuseValue.push_back(model.GetMeshes()[i].GetDiffuseValue());
 		}
+		// Specular
+		hasValue = false;
+		for (unsigned int j = 0; j < m_ModelData[name].SpecularValue.size(); j++)
+		{
+			if (model.GetMeshes()[i].GetSpecularValue() == m_ModelData[name].SpecularValue[j])
+			{
+				hasValue = true;
+				break;
+			}
+		}
+		if (!hasValue)
+		{
+			m_ModelData[name].SpecularValue.push_back(model.GetMeshes()[i].GetSpecularValue());
+		}
+		//// Reflective
+		//hasValue = false;
+		//for (unsigned int j = 0; j < m_ModelData[name].ReflectiveValue.size(); j++)
+		//{
+		//	if (model.GetMeshes()[i].GetReflectiveValue() == m_ModelData[name].ReflectiveValue[j])
+		//	{
+		//		hasValue = true;
+		//		break;
+		//	}
+		//}
+		//if (!hasValue)
+		//{
+		//	m_ModelData[name].ReflectiveValue.push_back(model.GetMeshes()[i].GetReflectiveValue());
+		//}
+		//// Transparent
+		//hasValue = false;
+		//for (unsigned int j = 0; j < m_ModelData[name].TransparentValue.size(); j++)
+		//{
+		//	if (model.GetMeshes()[i].GetTransparentValue() == m_ModelData[name].TransparentValue[j])
+		//	{
+		//		hasValue = true;
+		//		break;
+		//	}
+		//}
+		//if (!hasValue)
+		//{
+		//	m_ModelData[name].TransparentValue.push_back(model.GetMeshes()[i].GetTransparentValue());
+		//}
 	}
+	model.GetStatics().AlbedoTexCount = albedoTex.size();
 	model.GetStatics().AmbientValueCount = m_ModelData[name].AmbientValue.size();
 	model.GetStatics().DiffuseValueCount = m_ModelData[name].DiffuseValue.size();
 	model.GetStatics().SpecularValueCount = m_ModelData[name].SpecularValue.size();
 	model.GetStatics().ReflectiveCount = m_ModelData[name].ReflectiveValue.size();
 	model.GetStatics().TransparentCount = m_ModelData[name].TransparentValue.size();
 	m_ModelData[name].Statics = model.GetStatics();
-	//std::cout << "Diffuse count: " << m_ModelData[name].Statics.DiffuseValueCount << std::endl;
+	std::cout << "Albedo count: " << albedoTex.size() << std::endl;
 	// Handle vertex position and index
 	std::vector<Vertex> vertices;
 	std::vector<unsigned int> indices;
@@ -298,60 +318,67 @@ void GLData::AddModel(std::string name, Model& model)
 			indices.push_back(model.GetMeshes()[i].GetIndices()[j] + indexOffset);
 		}
 		// Material index
-		glm::vec4 texIndex = glm::vec4(-1);
-		glm::vec3 colorIndex = glm::vec3(-1);
-		glm::vec4 attributeIndex = glm::vec4(-1);
-		glm::vec3 nbdIndex = glm::vec3(-1);
-		if (model.GetStatics().RenderMode == NOTEX)
+		glm::vec4 texIndex = glm::vec4(-1.0f);
+		glm::vec3 colorIndex = glm::vec3(-1.0f);
+		glm::vec4 attributeIndex = glm::vec4(-1.0f);
+		glm::vec3 nbdIndex = glm::vec3(-1.0f);
+		// Albedo tex
+		for (unsigned int j = 0; j < albedoTex.size(); j++)
 		{
-			// Ambient
-			for (unsigned int j = 0; j < m_ModelData[name].AmbientValue.size(); j++)
+			if (model.GetMeshes()[i].GetAlbedoTexFilePath() == albedoTex[j])
 			{
-				colorIndex.x++;
-				if (model.GetMeshes()[i].GetAmbientValue() == m_ModelData[name].AmbientValue[j])
-				{
-					break;
-				}
-			}
-			// Diffuse
-			for (unsigned int j = 0; j < m_ModelData[name].DiffuseValue.size(); j++)
-			{
-				colorIndex.y++;
-				if (model.GetMeshes()[i].GetDiffuseValue() == m_ModelData[name].DiffuseValue[j])
-				{
-					break;
-				}
-			}
-			// Specular
-			for (unsigned int j = 0; j < m_ModelData[name].SpecularValue.size(); j++)
-			{
-				colorIndex.z++;
-				if (model.GetMeshes()[i].GetSpecularValue() == m_ModelData[name].SpecularValue[j])
-				{
-					break;
-				}
-			}
-		}
-		// Reflective
-		for (unsigned int j = 0; j < m_ModelData[name].ReflectiveValue.size(); j++)
-		{
-			attributeIndex.x++;
-			if (model.GetMeshes()[i].GetReflectiveValue() == m_ModelData[name].ReflectiveValue[j])
-			{
+				texIndex.x = (float)j;
 				break;
 			}
 		}
-		// Transparent
-		for (unsigned int j = 0; j < m_ModelData[name].TransparentValue.size(); j++)
+		// Ambient
+		for (unsigned int j = 0; j < m_ModelData[name].AmbientValue.size(); j++)
 		{
-			attributeIndex.y++;
-			if (model.GetMeshes()[i].GetTransparentValue() == m_ModelData[name].TransparentValue[j])
+			if (model.GetMeshes()[i].GetAmbientValue() == m_ModelData[name].AmbientValue[j])
 			{
+				colorIndex.x = (float)j;
 				break;
 			}
 		}
+		// Diffuse
+		for (unsigned int j = 0; j < m_ModelData[name].DiffuseValue.size(); j++)
+		{
+			if (model.GetMeshes()[i].GetDiffuseValue() == m_ModelData[name].DiffuseValue[j])
+			{
+				colorIndex.y = (float)j;
+				break;
+			}
+		}
+		// Specular
+		for (unsigned int j = 0; j < m_ModelData[name].SpecularValue.size(); j++)
+		{
+			if (model.GetMeshes()[i].GetSpecularValue() == m_ModelData[name].SpecularValue[j])
+			{
+				colorIndex.z = (float)j;
+				break;
+			}
+		}
+		//// Reflective
+		//for (unsigned int j = 0; j < m_ModelData[name].ReflectiveValue.size(); j++)
+		//{
+		//	attributeIndex.x++;
+		//	if (model.GetMeshes()[i].GetReflectiveValue() == m_ModelData[name].ReflectiveValue[j])
+		//	{
+		//		break;
+		//	}
+		//}
+		//// Transparent
+		//for (unsigned int j = 0; j < m_ModelData[name].TransparentValue.size(); j++)
+		//{
+		//	attributeIndex.y++;
+		//	if (model.GetMeshes()[i].GetTransparentValue() == m_ModelData[name].TransparentValue[j])
+		//	{
+		//		break;
+		//	}
+		//}
 		for (unsigned int j = 0; j < model.GetMeshes()[i].GetVertices().size(); j++)
 		{
+			model.GetMeshes()[i].GetVertices()[j].TexIndex = texIndex;
 			model.GetMeshes()[i].GetVertices()[j].ColorIndex = colorIndex;
 			model.GetMeshes()[i].GetVertices()[j].AttributeIndex = attributeIndex;
 		}
@@ -392,24 +419,32 @@ void GLData::AddModel(std::string name, Model& model)
 	m_ModelData[name].Shader.Init(m_ModelData[name].Statics);
 	m_ModelData[name].Shader.Bind();
 	std::string uniformName;
-	if (model.GetStatics().RenderMode == NOTEX)
+	for (unsigned int i = 0; i < m_ModelData[name].DiffuseValue.size(); i++)
 	{
-		for (unsigned int i = 0; i < m_ModelData[name].DiffuseValue.size(); i++)
-		{
-			uniformName = "u_Diffuse[" + std::to_string(i) + "]";
-			m_ModelData[name].Shader.SetUniformVec3f(uniformName, m_ModelData[name].DiffuseValue[i]);
-		}
-		for (unsigned int i = 0; i < m_ModelData[name].SpecularValue.size(); i++)
-		{
-			uniformName = "u_Specular[" + std::to_string(i) + "]";
-			m_ModelData[name].Shader.SetUniformVec3f(uniformName, m_ModelData[name].SpecularValue[i]);
-		}
+		uniformName = "u_Diffuse[" + std::to_string(i) + "]";
+		m_ModelData[name].Shader.SetUniformVec3f(uniformName, m_ModelData[name].DiffuseValue[i]);
 	}
-	//for (unsigned int i = 0; i < m_ModelData[name].TransparentValue.size(); i++)
-	//{
-	//	uniformName = "u_Transparent[" + std::to_string(i) + "]";
-	//	m_ModelData[name].Shader.SetUniform1f(uniformName, m_ModelData[name].TransparentValue[i]);
-	//}
+	for (unsigned int i = 0; i < m_ModelData[name].SpecularValue.size(); i++)
+	{
+		uniformName = "u_Specular[" + std::to_string(i) + "]";
+		m_ModelData[name].Shader.SetUniformVec3f(uniformName, m_ModelData[name].SpecularValue[i]);
+	}
+	for (unsigned int i = 0; i < albedoTex.size(); i++)
+	{
+		GLTexture texture;
+		m_ModelData[name].AlbedoTex.push_back(texture);
+	}
+	for (unsigned int i = 0; i < m_ModelData[name].AlbedoTex.size(); i++)
+	{
+		uniformName = "u_AlbedoTex[" + std::to_string(i) + "]";
+		m_ModelData[name].AlbedoTex[i].GenTexture(albedoTex[i]);
+		m_ModelData[name].Shader.SetUniformHandleARB(uniformName, m_ModelData[name].AlbedoTex[i].GetHandle());
+	}
+	/*for (unsigned int i = 0; i < m_ModelData[name].TransparentValue.size(); i++)
+	{
+		uniformName = "u_Transparent[" + std::to_string(i) + "]";
+		
+	}*/
 	m_ModelData[name].Shader.Unbind();
 }
 
@@ -628,18 +663,20 @@ void GLData::ReInitShader()
 		m_ModelData[model].Shader.Init(m_ModelData[model].Statics);
 		m_ModelData[model].Shader.Bind();
 		std::string uniformName;
-		if (m_ModelData[model].Statics.RenderMode == NOTEX)
+		for (unsigned int i = 0; i < m_ModelData[model].DiffuseValue.size(); i++)
 		{
-			for (unsigned int i = 0; i < m_ModelData[model].DiffuseValue.size(); i++)
-			{
-				uniformName = "u_Diffuse[" + std::to_string(i) + "]";
-				m_ModelData[model].Shader.SetUniformVec3f(uniformName, m_ModelData[model].DiffuseValue[i]);
-			}
-			for (unsigned int i = 0; i < m_ModelData[model].SpecularValue.size(); i++)
-			{
-				uniformName = "u_Specular[" + std::to_string(i) + "]";
-				m_ModelData[model].Shader.SetUniformVec3f(uniformName, m_ModelData[model].SpecularValue[i]);
-			}
+			uniformName = "u_Diffuse[" + std::to_string(i) + "]";
+			m_ModelData[model].Shader.SetUniformVec3f(uniformName, m_ModelData[model].DiffuseValue[i]);
+		}
+		for (unsigned int i = 0; i < m_ModelData[model].SpecularValue.size(); i++)
+		{
+			uniformName = "u_Specular[" + std::to_string(i) + "]";
+			m_ModelData[model].Shader.SetUniformVec3f(uniformName, m_ModelData[model].SpecularValue[i]);
+		}
+		for (unsigned int i = 0; i < m_ModelData[model].AlbedoTex.size(); i++)
+		{
+			uniformName = "u_AlbedoTex[" + std::to_string(i) + "]";
+			m_ModelData[model].Shader.SetUniformHandleARB(uniformName, m_ModelData[model].AlbedoTex[i].GetHandle());
 		}
 		/*for (unsigned int i = 0; i < m_ModelData[model].TransparentValue.size(); i++)
 		{

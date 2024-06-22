@@ -44,7 +44,6 @@ void Model::UpdateStatics()
     }
     else
     {
-        spdlog::warn("no texture");
         m_Statics.RenderMode = NOTEX;
     }
 }
@@ -116,14 +115,46 @@ Mesh Model::AssimpProcessMesh(aiMesh* mesh, aiNode* node, const aiScene* scene)
     newMesh.SetTransparentValue(color.r);
     // TODO: Load Tf, Ns, Ni, Tr, d, illum from .mtl file
     // Load texture path
-    newMesh.GetAlbedoTexFilePaths() = AssimpLoadTexturePath(material, aiTextureType_DIFFUSE);
-    newMesh.GetSpecularTexFilePaths() = AssimpLoadTexturePath(material, aiTextureType_SPECULAR);
-    newMesh.GetMetallicTexFilePaths() = AssimpLoadTexturePath(material, aiTextureType_METALNESS);
-    newMesh.GetRoughnessTexFilePaths() = AssimpLoadTexturePath(material, aiTextureType_DIFFUSE_ROUGHNESS);
-    newMesh.GetAoTexFilePaths() = AssimpLoadTexturePath(material, aiTextureType_AMBIENT_OCCLUSION);
-    newMesh.GetNormalTexFilePaths() = AssimpLoadTexturePath(material, aiTextureType_NORMALS);
-    newMesh.GetBumpTexFilePaths() = AssimpLoadTexturePath(material, aiTextureType_HEIGHT);
-    newMesh.GetDisplacementTexFilePaths() = AssimpLoadTexturePath(material, aiTextureType_DISPLACEMENT);
+    if (AssimpLoadTexturePath(material, aiTextureType_DIFFUSE).size())
+    {
+        std::string filepath = AssimpLoadTexturePath(material, aiTextureType_DIFFUSE)[0];
+        newMesh.GetAlbedoTexFilePath() = core::ReplaceBackwardSlash(filepath);
+    }
+    if (AssimpLoadTexturePath(material, aiTextureType_SPECULAR).size())
+    {
+        std::string filepath = AssimpLoadTexturePath(material, aiTextureType_SPECULAR)[0];
+        newMesh.GetSpecularTexFilePath() = core::ReplaceBackwardSlash(filepath);
+    }
+    if (AssimpLoadTexturePath(material, aiTextureType_METALNESS).size())
+    {
+        std::string filepath = AssimpLoadTexturePath(material, aiTextureType_METALNESS)[0];
+        newMesh.GetMetallicTexFilePath() = core::ReplaceBackwardSlash(filepath);
+    }
+    if (AssimpLoadTexturePath(material, aiTextureType_DIFFUSE_ROUGHNESS).size())
+    {
+        std::string filepath = AssimpLoadTexturePath(material, aiTextureType_DIFFUSE_ROUGHNESS)[0];
+        newMesh.GetRoughnessTexFilePath() = core::ReplaceBackwardSlash(filepath);
+    }
+    if (AssimpLoadTexturePath(material, aiTextureType_AMBIENT_OCCLUSION).size())
+    {
+        std::string filepath = AssimpLoadTexturePath(material, aiTextureType_AMBIENT_OCCLUSION)[0];
+        newMesh.GetAoTexFilePath() = core::ReplaceBackwardSlash(filepath);
+    }
+    if (AssimpLoadTexturePath(material, aiTextureType_NORMALS).size())
+    {
+        std::string filepath = AssimpLoadTexturePath(material, aiTextureType_NORMALS)[0];
+        newMesh.GetNormalTexFilePath() = core::ReplaceBackwardSlash(filepath);
+    }
+    if (AssimpLoadTexturePath(material, aiTextureType_HEIGHT).size())
+    {
+        std::string filepath = AssimpLoadTexturePath(material, aiTextureType_HEIGHT)[0];
+        newMesh.GetBumpTexFilePath() = core::ReplaceBackwardSlash(filepath);
+    }
+    if (AssimpLoadTexturePath(material, aiTextureType_DISPLACEMENT).size())
+    {
+        std::string filepath = AssimpLoadTexturePath(material, aiTextureType_DISPLACEMENT)[0];
+        newMesh.GetDisplacementTexFilePath() = core::ReplaceBackwardSlash(filepath);
+    }
     //Process the indicies of each mesh
     for (unsigned int i = 0; i < mesh->mNumFaces; i++)
     {
@@ -212,7 +243,8 @@ std::vector<std::string> Model::AssimpLoadTexturePath(aiMaterial* mat, aiTexture
     {
         aiString str;
         mat->GetTexture(type, i, &str);
-        std::string filepath = GetDirectory() + "/" + std::string(str.C_Str());
+        //std::cout << std::string(str.C_Str()) << std::endl;
+        std::string filepath = core::GetFileDirectory(m_FilePath) + std::string(str.C_Str());
         texPath.push_back(filepath);
     }
     return texPath;

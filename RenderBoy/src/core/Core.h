@@ -50,6 +50,7 @@
 #define UV_MAP_FILEPATH "res/checkermap/CheckerMap.png"
 #define SHADER_OPENGL "data/shaders/opengl/"
 #define SHADER_OPENGL_RENDER_NOTEX "data/shaders/opengl/render_mode/NOTEX.glsl"
+#define SHADER_OPENGL_RENDER_HASTEX_ALBEDO "data/shaders/opengl/render_mode/HASTEX_ALBEDO.glsl"
 #define SHADER_OPENGL_GBUFFER "data/shaders/opengl/others/GBUFFER.glsl"
 #define SHADER_OPENGL_BLANK "data/shaders/opengl/draw_mode/BLANK.glsl"
 #define SHADER_OPENGL_WIREFRAME "data/shaders/opengl/draw_mode/WIREFRAME.glsl"
@@ -288,6 +289,8 @@ namespace core
 	std::string GetFileFormat(std::string filepath);
 	std::string GetFileName(std::string filepath);
 	std::string GetFileNameNoSuffix(std::string filepath);
+	// Replace all \ in a filepath with /
+	std::string ReplaceBackwardSlash(std::string filepath);
 	// Set UI style
 	void SetUiStyle(UI_Style style);
 	// Get Font Style

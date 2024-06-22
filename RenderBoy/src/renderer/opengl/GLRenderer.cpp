@@ -609,6 +609,7 @@ void GLRenderer::DrawSkybox(Scene& scene)
 	scene.GetData().GetDataGL().GetSkybox().Shader.SetUniformMat4f("u_ProjMat", scene.GetCamera().GetProjMat());
 	// Remove translation from view matrix
 	scene.GetData().GetDataGL().GetSkybox().Shader.SetUniformMat4f("u_ViewMat", glm::mat4(glm::mat3(scene.GetCamera().GetViewMat())));
+	scene.GetData().GetDataGL().GetSkybox().Shader.SetUniformHandleARB("u_Skybox", scene.GetData().GetDataGL().GetSkybox().Skybox.GetHandle());
 	scene.GetData().GetDataGL().GetSkybox().Shader.SetUniform1i("u_UseTex", scene.GetSkybox().Type);
 	scene.GetData().GetDataGL().GetSkybox().Shader.SetUniformVec3f("u_Color", scene.GetSkybox().Color);
 	scene.GetData().GetDataGL().GetSkybox().VA.Bind();
