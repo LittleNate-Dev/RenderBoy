@@ -51,6 +51,7 @@
 #define SHADER_OPENGL "data/shaders/opengl/"
 #define SHADER_OPENGL_RENDER_NOTEX "data/shaders/opengl/render_mode/NOTEX.glsl"
 #define SHADER_OPENGL_RENDER_HASTEX_ALBEDO "data/shaders/opengl/render_mode/HASTEX_ALBEDO.glsl"
+#define SHADER_OPENGL_RENDER_HASTEX_BLINN "data/shaders/opengl/render_mode/HASTEX_BLINN.glsl"
 #define SHADER_OPENGL_GBUFFER "data/shaders/opengl/others/GBUFFER.glsl"
 #define SHADER_OPENGL_BLANK "data/shaders/opengl/draw_mode/BLANK.glsl"
 #define SHADER_OPENGL_WIREFRAME "data/shaders/opengl/draw_mode/WIREFRAME.glsl"

@@ -41,6 +41,15 @@ void Model::UpdateStatics()
     if (hasTexture)
     {
         m_Statics.RenderMode = HASTEX_ALBEDO;
+        bool hasSpecularTex = false;
+        for (unsigned int i = 0; i < m_Meshes.size(); i++)
+        {
+            hasSpecularTex |= m_Meshes[i].HasSpecularTex();
+        }
+        if (hasSpecularTex)
+        {
+            m_Statics.RenderMode = HASTEX_BLINN;
+        }
     }
     else
     {

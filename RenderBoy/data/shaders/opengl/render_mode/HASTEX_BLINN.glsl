@@ -163,6 +163,7 @@ uniform vec3 u_Diffuse[];
 uniform vec3 u_Specular[];
 uniform float u_Transparent[];
 uniform sampler2D u_AlbedoTex[];
+uniform sampler2D u_SpecularTex[];
 
 const float c_Shininess = 32.0f;
 
@@ -172,6 +173,7 @@ float ssao = 1.0;
 vec3 colorIndex = vec3(-1.0);
 vec4 attributeIndex = vec4(-1.0);
 int albedoTexIndex = -1;
+int specularTexIndex = -1;
 
 vec3 CalcPointLight(int i);
 vec3 CalcSpotLight(int i);
@@ -180,6 +182,7 @@ vec3 CalcDirLight(int i);
 void main()
 {
     albedoTexIndex = int(v_TexIndex.x + 0.1);
+    specularTexIndex = int(v_TexIndex.y + 0.1);
     colorIndex = v_ColorIndex + vec3(0.1);
     attributeIndex = v_AttributeIndex + vec4(0.1);
     vec3 result = vec3(0.0);
@@ -196,7 +199,7 @@ void main()
     {
         discard;
     }
-    // SSAOD
+    // SSAO
     if (u_SSAO)
     {
         vec4 screenCoord = u_ProjMat * u_ViewMat * vec4(v_FragPos, 1.0);
@@ -271,8 +274,16 @@ vec3 CalcPointLight(int i)
         {
             ambient  = u_PointLight[i].ADS.x * u_PointLight[i].Color * texture(u_AlbedoTex[albedoTexIndex], v_TexCoord).rgb * ssao;
             diffuse  = u_PointLight[i].ADS.y * u_PointLight[i].Color * diff * texture(u_AlbedoTex[albedoTexIndex], v_TexCoord).rgb;
+            
         }
-        specular = u_PointLight[i].ADS.z * u_PointLight[i].Color * spec * u_Specular[int(colorIndex.z)];
+        if (v_TexIndex.y < 0)
+        {
+            specular = u_PointLight[i].ADS.z * u_PointLight[i].Color * spec;
+        }
+        else
+        {
+            specular = u_PointLight[i].ADS.z * u_PointLight[i].Color * spec * texture(u_SpecularTex[specularTexIndex], v_TexCoord).r;
+        }
     }
     // combine results
     ambient *= attenuation;
@@ -371,7 +382,15 @@ vec3 CalcSpotLight(int i)
             ambient  = u_SpotLight[i].ADS.x * u_SpotLight[i].Color * texture(u_AlbedoTex[albedoTexIndex], v_TexCoord).rgb * ssao;
             diffuse  = u_SpotLight[i].ADS.y * u_SpotLight[i].Color * diff * texture(u_AlbedoTex[albedoTexIndex], v_TexCoord).rgb;
         }
-        specular = u_SpotLight[i].ADS.z * spec * u_Specular[int(colorIndex.z)];
+        if (v_TexIndex.y < 0)
+        {
+            specular = u_SpotLight[i].ADS.z * u_SpotLight[i].Color * spec;
+        }
+        else
+        {
+            specular = u_SpotLight[i].ADS.z * u_SpotLight[i].Color * spec * texture(u_SpecularTex[specularTexIndex], v_TexCoord).r;
+        }
+        
     }
     ambient *= attenuation;
     diffuse *= intensity * attenuation;
@@ -476,7 +495,14 @@ vec3 CalcDirLight(int i)
             ambient  = u_DirLight[i].ADS.x * u_DirLight[i].Color * texture(u_AlbedoTex[albedoTexIndex], v_TexCoord).rgb * ssao;
             diffuse  = u_DirLight[i].ADS.y * u_DirLight[i].Color * diff * texture(u_AlbedoTex[albedoTexIndex], v_TexCoord).rgb;
         }
-        specular = u_DirLight[i].ADS.z * u_DirLight[i].Color * spec * u_Specular[int(colorIndex.z)];
+        if (v_TexIndex.y < 0)
+        {
+            specular = u_DirLight[i].ADS.z * u_DirLight[i].Color * spec;
+        }
+        else
+        {
+            specular = u_DirLight[i].ADS.z * u_DirLight[i].Color * spec * texture(u_SpecularTex[specularTexIndex], v_TexCoord).r;
+        }
     }
     ambient *= attenuation;
     diffuse *= attenuation;
@@ -538,6 +564,7 @@ vec3 CalcDirLight(int i)
     else
     {
         lighting = ambient + diffuse + specular;
+        lighting = specular;
     }
     return lighting;
 }

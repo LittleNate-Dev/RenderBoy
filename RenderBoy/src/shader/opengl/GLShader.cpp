@@ -41,6 +41,9 @@ bool GLShader::Init(ModelStatics statics)
     case HASTEX_ALBEDO:
         m_FilePath = SHADER_OPENGL_RENDER_HASTEX_ALBEDO;
         break;
+    case HASTEX_BLINN:
+        m_FilePath = SHADER_OPENGL_RENDER_HASTEX_BLINN;
+        break;
     default:
         break;
     }
@@ -335,6 +338,18 @@ ShaderProgramSource GLShader::ParseShader(std::string filepath, ModelStatics sta
             }
             ss[(int)type] << line << '\n';
         }
+        else if (line.find("uniform float u_Transparent[];") != std::string::npos)
+        {
+            if (statics.TransparentCount)
+            {
+                line = "uniform float u_Transparent[" + std::to_string(statics.TransparentCount) + "];";
+            }
+            else
+            {
+                line = "uniform float u_Transparent[1];";
+            }
+            ss[(int)type] << line << '\n';
+            }
         else if (line.find("uniform sampler2D u_AlbedoTex[];") != std::string::npos)
         {
             if (statics.AlbedoTexCount)
@@ -346,7 +361,19 @@ ShaderProgramSource GLShader::ParseShader(std::string filepath, ModelStatics sta
                 line = "uniform sampler2D u_AlbedoTex[1];";
             }
             ss[(int)type] << line << '\n';
+        }
+        else if (line.find("uniform sampler2D u_SpecularTex[];") != std::string::npos)
+        {
+            if (statics.SpecularTexCount)
+            {
+                line = "uniform sampler2D u_SpecularTex[" + std::to_string(statics.SpecularTexCount) + "];";
             }
+            else
+            {
+                line = "uniform sampler2D u_SpecularTex[1];";
+            }
+            ss[(int)type] << line << '\n';
+        }
         else
         {
             ss[(int)type] << line << '\n';
