@@ -207,6 +207,9 @@ void GLData::AddModel(std::string name, Model& model)
 	std::vector<std::string> metallicTex;
 	std::vector<std::string> roughnessTex;
 	std::vector<std::string> aoTex;
+	std::vector<std::string> normalTex;
+	std::vector<std::string> bumpTex;
+	std::vector<std::string> displacementTex;
 	for (unsigned int i = 0; i < model.GetMeshes().size(); i++)
 	{
 		//std::cout << model.GetMeshes()[i].GetAlbedoTexFilePath() << std::endl;
@@ -243,6 +246,60 @@ void GLData::AddModel(std::string name, Model& model)
 			if (!hasValue)
 			{
 				specularTex.push_back(model.GetMeshes()[i].GetSpecularTexFilePath());
+			}
+		}
+		// Metallic texture
+		hasValue = false;
+		if (model.GetMeshes()[i].GetMetallicTexFilePath() != "")
+		{
+			for (unsigned int j = 0; j < metallicTex.size(); j++)
+			{
+				if (model.GetMeshes()[i].GetMetallicTexFilePath() == metallicTex[j])
+				{
+					hasValue = true;
+					break;
+				}
+			}
+			if (!hasValue)
+			{
+				metallicTex.push_back(model.GetMeshes()[i].GetMetallicTexFilePath());
+			}
+		}
+		// Ao texture
+		hasValue = false;
+		if (model.GetMeshes()[i].GetAoTexFilePath() != "")
+		{
+			for (unsigned int j = 0; j < aoTex.size(); j++)
+			{
+				if (model.GetMeshes()[i].GetAoTexFilePath() == aoTex[j])
+				{
+					hasValue = true;
+					break;
+				}
+			}
+			if (!hasValue)
+			{
+				aoTex.push_back(model.GetMeshes()[i].GetAoTexFilePath());
+			}
+		}
+		if (model.GetStatics().RenderMode == HASTEX_PBR_4)
+		{
+			// Roughness texture
+			hasValue = false;
+			if (model.GetMeshes()[i].GetRoughnessTexFilePath() != "")
+			{
+				for (unsigned int j = 0; j < roughnessTex.size(); j++)
+				{
+					if (model.GetMeshes()[i].GetRoughnessTexFilePath() == roughnessTex[j])
+					{
+						hasValue = true;
+						break;
+					}
+				}
+				if (!hasValue)
+				{
+					roughnessTex.push_back(model.GetMeshes()[i].GetRoughnessTexFilePath());
+				}
 			}
 		}
 		// Ambient
@@ -301,6 +358,60 @@ void GLData::AddModel(std::string name, Model& model)
 		{
 			m_ModelData[name].TransparentValue.push_back(model.GetMeshes()[i].GetTransparentValue());
 		}
+		if (model.GetStatics().RenderMode != NOTEX && model.GetStatics().RenderMode != HASTEX_ALBEDO)
+		{
+			// Normal texture
+			hasValue = false;
+			if (model.GetMeshes()[i].GetNormalTexFilePath() != "")
+			{
+				for (unsigned int j = 0; j < normalTex.size(); j++)
+				{
+					if (model.GetMeshes()[i].GetNormalTexFilePath() == normalTex[j])
+					{
+						hasValue = true;
+						break;
+					}
+				}
+				if (!hasValue)
+				{
+					normalTex.push_back(model.GetMeshes()[i].GetNormalTexFilePath());
+				}
+			}
+			// Bump texture
+			hasValue = false;
+			if (model.GetMeshes()[i].GetBumpTexFilePath() != "")
+			{
+				for (unsigned int j = 0; j < bumpTex.size(); j++)
+				{
+					if (model.GetMeshes()[i].GetBumpTexFilePath() == bumpTex[j])
+					{
+						hasValue = true;
+						break;
+					}
+				}
+				if (!hasValue)
+				{
+					bumpTex.push_back(model.GetMeshes()[i].GetBumpTexFilePath());
+				}
+			}
+			// Displacement texture
+			hasValue = false;
+			if (model.GetMeshes()[i].GetDisplacementTexFilePath() != "")
+			{
+				for (unsigned int j = 0; j < displacementTex.size(); j++)
+				{
+					if (model.GetMeshes()[i].GetDisplacementTexFilePath() == displacementTex[j])
+					{
+						hasValue = true;
+						break;
+					}
+				}
+				if (!hasValue)
+				{
+					displacementTex.push_back(model.GetMeshes()[i].GetDisplacementTexFilePath());
+				}
+			}
+		}
 		//// Reflective
 		//hasValue = false;
 		//for (unsigned int j = 0; j < m_ModelData[name].ReflectiveValue.size(); j++)
@@ -318,13 +429,26 @@ void GLData::AddModel(std::string name, Model& model)
 	}
 	model.GetStatics().AlbedoTexCount = albedoTex.size();
 	model.GetStatics().SpecularTexCount = specularTex.size();
+	model.GetStatics().MetallicTexCount = metallicTex.size();
+	model.GetStatics().RoughnessTexCount = roughnessTex.size();
+	model.GetStatics().AoTexCount = aoTex.size();
 	model.GetStatics().AmbientValueCount = m_ModelData[name].AmbientValue.size();
 	model.GetStatics().DiffuseValueCount = m_ModelData[name].DiffuseValue.size();
 	model.GetStatics().SpecularValueCount = m_ModelData[name].SpecularValue.size();
 	model.GetStatics().ReflectiveCount = m_ModelData[name].ReflectiveValue.size();
 	model.GetStatics().TransparentCount = m_ModelData[name].TransparentValue.size();
+	model.GetStatics().NormalTexCount = normalTex.size();
+	model.GetStatics().BumpTexCount = bumpTex.size();
+	model.GetStatics().DisplacementTexCount = displacementTex.size();
 	m_ModelData[name].Statics = model.GetStatics();
-	std::cout << "specular count: " << model.GetStatics().SpecularTexCount << std::endl;
+	std::cout << "albedo tex count: " << model.GetStatics().AlbedoTexCount << std::endl;
+	std::cout << "specular tex count: " << model.GetStatics().SpecularTexCount << std::endl;
+	std::cout << "metallic tex count: " << model.GetStatics().MetallicTexCount << std::endl;
+	std::cout << "roughness tex count: " << model.GetStatics().RoughnessTexCount << std::endl;
+	std::cout << "ao tex count: " << model.GetStatics().AoTexCount << std::endl;
+	std::cout << "normal count: " << model.GetStatics().NormalTexCount << std::endl;
+	std::cout << "bump count: " << model.GetStatics().BumpTexCount << std::endl;
+	std::cout << "displacement count: " << model.GetStatics().DisplacementTexCount << std::endl;
 	// Handle vertex position and index
 	std::vector<Vertex> vertices;
 	std::vector<unsigned int> indices;
@@ -355,6 +479,33 @@ void GLData::AddModel(std::string name, Model& model)
 			if (model.GetMeshes()[i].GetSpecularTexFilePath() == specularTex[j])
 			{
 				texIndex.y = (float)j;
+				break;
+			}
+		}
+		// Metallic tex
+		for (unsigned int j = 0; j < metallicTex.size(); j++)
+		{
+			if (model.GetMeshes()[i].GetMetallicTexFilePath() == metallicTex[j])
+			{
+				texIndex.y = (float)j;
+				break;
+			}
+		}
+		// Roughness tex
+		for (unsigned int j = 0; j < roughnessTex.size(); j++)
+		{
+			if (model.GetMeshes()[i].GetRoughnessTexFilePath() == roughnessTex[j])
+			{
+				texIndex.z = (float)j;
+				break;
+			}
+		}
+		// Ao tex
+		for (unsigned int j = 0; j < aoTex.size(); j++)
+		{
+			if (model.GetMeshes()[i].GetAoTexFilePath() == aoTex[j])
+			{
+				texIndex.w = (float)j;
 				break;
 			}
 		}
@@ -394,11 +545,39 @@ void GLData::AddModel(std::string name, Model& model)
 				break;
 			}
 		}
+		// Normal tex
+		for (unsigned int j = 0; j < normalTex.size(); j++)
+		{
+			if (model.GetMeshes()[i].GetNormalTexFilePath() == normalTex[j])
+			{
+				nbdIndex.x = (float)j;
+				break;
+			}
+		}
+		// Bump tex
+		for (unsigned int j = 0; j < bumpTex.size(); j++)
+		{
+			if (model.GetMeshes()[i].GetBumpTexFilePath() == bumpTex[j])
+			{
+				nbdIndex.y = (float)j;
+				break;
+			}
+		}
+		// Displacement tex
+		for (unsigned int j = 0; j < displacementTex.size(); j++)
+		{
+			if (model.GetMeshes()[i].GetDisplacementTexFilePath() == displacementTex[j])
+			{
+				nbdIndex.z = (float)j;
+				break;
+			}
+		}
 		for (unsigned int j = 0; j < model.GetMeshes()[i].GetVertices().size(); j++)
 		{
 			model.GetMeshes()[i].GetVertices()[j].TexIndex = texIndex;
 			model.GetMeshes()[i].GetVertices()[j].ColorIndex = colorIndex;
-			model.GetMeshes()[i].GetVertices()[j].AttributeIndex = attributeIndex;
+			model.GetMeshes()[i].GetVertices()[j].AttributeIndex = attributeIndex; 
+			model.GetMeshes()[i].GetVertices()[j].NBDIndex = nbdIndex;
 		}
 		//// Reflective
 		//for (unsigned int j = 0; j < m_ModelData[name].ReflectiveValue.size(); j++)
@@ -466,6 +645,36 @@ void GLData::AddModel(std::string name, Model& model)
 		GLTexture texture;
 		m_ModelData[name].SpecularTex.push_back(texture);
 	}
+	for (unsigned int i = 0; i < metallicTex.size(); i++)
+	{
+		GLTexture texture;
+		m_ModelData[name].MetallicTex.push_back(texture);
+	}
+	for (unsigned int i = 0; i < roughnessTex.size(); i++)
+	{
+		GLTexture texture;
+		m_ModelData[name].RoughnessTex.push_back(texture);
+	}
+	for (unsigned int i = 0; i < aoTex.size(); i++)
+	{
+		GLTexture texture;
+		m_ModelData[name].AoTex.push_back(texture);
+	}
+	for (unsigned int i = 0; i < normalTex.size(); i++)
+	{
+		GLTexture texture;
+		m_ModelData[name].NormalTex.push_back(texture);
+	}
+	for (unsigned int i = 0; i < bumpTex.size(); i++)
+	{
+		GLTexture texture;
+		m_ModelData[name].BumpTex.push_back(texture);
+	}
+	for (unsigned int i = 0; i < displacementTex.size(); i++)
+	{
+		GLTexture texture;
+		m_ModelData[name].DisplacementTex.push_back(texture);
+	}
 	for (unsigned int i = 0; i < m_ModelData[name].AlbedoTex.size(); i++)
 	{
 		uniformName = "u_AlbedoTex[" + std::to_string(i) + "]";
@@ -478,10 +687,46 @@ void GLData::AddModel(std::string name, Model& model)
 		m_ModelData[name].SpecularTex[i].GenTexture(specularTex[i]);
 		m_ModelData[name].Shader.SetUniformHandleARB(uniformName, m_ModelData[name].SpecularTex[i].GetHandle());
 	}
+	for (unsigned int i = 0; i < m_ModelData[name].MetallicTex.size(); i++)
+	{
+		uniformName = "u_MetallicTex[" + std::to_string(i) + "]";
+		m_ModelData[name].MetallicTex[i].GenTexture(metallicTex[i]);
+		m_ModelData[name].Shader.SetUniformHandleARB(uniformName, m_ModelData[name].MetallicTex[i].GetHandle());
+	}
+	for (unsigned int i = 0; i < m_ModelData[name].RoughnessTex.size(); i++)
+	{
+		uniformName = "u_RoughnessTex[" + std::to_string(i) + "]";
+		m_ModelData[name].RoughnessTex[i].GenTexture(roughnessTex[i]);
+		m_ModelData[name].Shader.SetUniformHandleARB(uniformName, m_ModelData[name].RoughnessTex[i].GetHandle());
+	}
+	for (unsigned int i = 0; i < m_ModelData[name].AoTex.size(); i++)
+	{
+		uniformName = "u_AoTex[" + std::to_string(i) + "]";
+		m_ModelData[name].AoTex[i].GenTexture(aoTex[i]);
+		m_ModelData[name].Shader.SetUniformHandleARB(uniformName, m_ModelData[name].AoTex[i].GetHandle());
+	}
 	for (unsigned int i = 0; i < m_ModelData[name].TransparentValue.size(); i++)
 	{
 		uniformName = "u_Transparent[" + std::to_string(i) + "]";
 		m_ModelData[name].Shader.SetUniform1f(uniformName, m_ModelData[name].TransparentValue[i]);
+	}
+	for (unsigned int i = 0; i < m_ModelData[name].NormalTex.size(); i++)
+	{
+		uniformName = "u_NormalTex[" + std::to_string(i) + "]";
+		m_ModelData[name].NormalTex[i].GenTexture(normalTex[i]);
+		m_ModelData[name].Shader.SetUniformHandleARB(uniformName, m_ModelData[name].NormalTex[i].GetHandle());
+	}
+	for (unsigned int i = 0; i < m_ModelData[name].BumpTex.size(); i++)
+	{
+		uniformName = "u_BumpTex[" + std::to_string(i) + "]";
+		m_ModelData[name].BumpTex[i].GenTexture(bumpTex[i]);
+		m_ModelData[name].Shader.SetUniformHandleARB(uniformName, m_ModelData[name].BumpTex[i].GetHandle());
+	}
+	for (unsigned int i = 0; i < m_ModelData[name].DisplacementTex.size(); i++)
+	{
+		uniformName = "u_DisplacementTex[" + std::to_string(i) + "]";
+		m_ModelData[name].DisplacementTex[i].GenTexture(displacementTex[i]);
+		m_ModelData[name].Shader.SetUniformHandleARB(uniformName, m_ModelData[name].DisplacementTex[i].GetHandle());
 	}
 	m_ModelData[name].Shader.Unbind();
 }
@@ -721,10 +966,40 @@ void GLData::ReInitShader()
 			uniformName = "u_SpecularTex[" + std::to_string(i) + "]";
 			m_ModelData[model].Shader.SetUniformHandleARB(uniformName, m_ModelData[model].SpecularTex[i].GetHandle());
 		}
+		for (unsigned int i = 0; i < m_ModelData[model].MetallicTex.size(); i++)
+		{
+			uniformName = "u_MetallicTex[" + std::to_string(i) + "]";
+			m_ModelData[model].Shader.SetUniformHandleARB(uniformName, m_ModelData[model].MetallicTex[i].GetHandle());
+		}
+		for (unsigned int i = 0; i < m_ModelData[model].RoughnessTex.size(); i++)
+		{
+			uniformName = "u_RoughnessTex[" + std::to_string(i) + "]";
+			m_ModelData[model].Shader.SetUniformHandleARB(uniformName, m_ModelData[model].RoughnessTex[i].GetHandle());
+		}
+		for (unsigned int i = 0; i < m_ModelData[model].AoTex.size(); i++)
+		{
+			uniformName = "u_AoTex[" + std::to_string(i) + "]";
+			m_ModelData[model].Shader.SetUniformHandleARB(uniformName, m_ModelData[model].AoTex[i].GetHandle());
+		}
 		for (unsigned int i = 0; i < m_ModelData[model].TransparentValue.size(); i++)
 		{
 			uniformName = "u_Transparent[" + std::to_string(i) + "]";
 			m_ModelData[model].Shader.SetUniform1f(uniformName, m_ModelData[model].TransparentValue[i]);
+		}
+		for (unsigned int i = 0; i < m_ModelData[model].NormalTex.size(); i++)
+		{
+			uniformName = "u_NormalTex[" + std::to_string(i) + "]";
+			m_ModelData[model].Shader.SetUniformHandleARB(uniformName, m_ModelData[model].NormalTex[i].GetHandle());
+		}
+		for (unsigned int i = 0; i < m_ModelData[model].BumpTex.size(); i++)
+		{
+			uniformName = "u_BumpTex[" + std::to_string(i) + "]";
+			m_ModelData[model].Shader.SetUniformHandleARB(uniformName, m_ModelData[model].BumpTex[i].GetHandle());
+		}
+		for (unsigned int i = 0; i < m_ModelData[model].DisplacementTex.size(); i++)
+		{
+			uniformName = "u_DisplacementTex[" + std::to_string(i) + "]";
+			m_ModelData[model].Shader.SetUniformHandleARB(uniformName, m_ModelData[model].DisplacementTex[i].GetHandle());
 		}
 		m_ModelData[model].Shader.Unbind();
 	}

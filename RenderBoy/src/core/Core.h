@@ -40,7 +40,7 @@
 
 #include <freeimage/FreeImage.h>
 
-#define APP_VERSION "ver 0.6.8"
+#define APP_VERSION "ver 0.7.0"
 #define GIT_REPO "https://github.com/LittleNate-Dev/RenderBoy"
 #define SCENE_FILEPATH "saves/scene/"
 #define SETTING_FILEPATH "data/config/settings.config"
@@ -52,6 +52,8 @@
 #define SHADER_OPENGL_RENDER_NOTEX "data/shaders/opengl/render_mode/NOTEX.glsl"
 #define SHADER_OPENGL_RENDER_HASTEX_ALBEDO "data/shaders/opengl/render_mode/HASTEX_ALBEDO.glsl"
 #define SHADER_OPENGL_RENDER_HASTEX_BLINN "data/shaders/opengl/render_mode/HASTEX_BLINN.glsl"
+#define SHADER_OPENGL_RENDER_HASTEX_BLINN_NBD "data/shaders/opengl/render_mode/HASTEX_BLINN_NBD.glsl"
+#define SHADER_OPENGL_RENDER_HASTEX_PBR_3 "data/shaders/opengl/render_mode/HASTEX_PBR_3.glsl"
 #define SHADER_OPENGL_GBUFFER "data/shaders/opengl/others/GBUFFER.glsl"
 #define SHADER_OPENGL_BLANK "data/shaders/opengl/draw_mode/BLANK.glsl"
 #define SHADER_OPENGL_WIREFRAME "data/shaders/opengl/draw_mode/WIREFRAME.glsl"
@@ -60,7 +62,7 @@
 #define SHADER_OPENGL_POINTCLOUD "data/shaders/opengl/draw_mode/POINTCLOUD.glsl"
 #define SHADER_OPENGL_SKYBOX "data/shaders/opengl/others/SKYBOX.glsl"
 #define SHADER_OPENGL_NORMAL "data/shaders/opengl/others/NORMAL.glsl"
-#define SHADER_OPENGL_LIGHTCUBE "data/shaders/opengl/others/LIGHTCUBE.glsl"
+#define SHADER_OPENGL_LIGHTCUBE "data/shaders/opengwl/others/LIGHTCUBE.glsl"
 #define SHADER_OPENGL_BLOOM_DOWNSAMPLE "data/shaders/opengl/others/bloom/DOWNSAMPLE.glsl"
 #define SHADER_OPENGL_BLOOM_UPSAMPLE "data/shaders/opengl/others/bloom/UPSAMPLE.glsl"
 #define SHADER_OPENGL_BLOOM_BLEND "data/shaders/opengl/others/bloom/BLEND.glsl"
@@ -131,7 +133,8 @@ enum Render_Mode
 	HASTEX_ALBEDO = 1,
 	HASTEX_BLINN = 2,
 	HASTEX_PBR_3 = 3,
-	HASTEX_PBR_4 = 4
+	HASTEX_PBR_4 = 4,
+	HASTEX_BLINN_NBD = 5
 };
 
 enum Anti_Alising

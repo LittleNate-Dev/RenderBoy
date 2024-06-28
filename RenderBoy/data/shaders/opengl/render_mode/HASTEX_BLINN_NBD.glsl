@@ -164,6 +164,9 @@ uniform vec3 u_Specular[];
 uniform float u_Transparent[];
 uniform sampler2D u_AlbedoTex[];
 uniform sampler2D u_SpecularTex[];
+uniform sampler2D u_NormalTex[];
+uniform sampler2D u_BumpTex[];
+uniform sampler2D u_DisplacementTex[];
 
 const float c_Shininess = 32.0f;
 

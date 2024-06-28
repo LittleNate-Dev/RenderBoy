@@ -7,7 +7,10 @@ GLShader::GLShader()
 
 GLShader::~GLShader()
 {
-    glDeleteProgram(m_RendererID);
+    if (m_RendererID)
+    {
+        glDeleteProgram(m_RendererID);
+    }
 }
 
 bool GLShader::Init(std::string filepath)
@@ -43,6 +46,12 @@ bool GLShader::Init(ModelStatics statics)
         break;
     case HASTEX_BLINN:
         m_FilePath = SHADER_OPENGL_RENDER_HASTEX_BLINN;
+        break;
+    case HASTEX_BLINN_NBD:
+        m_FilePath = SHADER_OPENGL_RENDER_HASTEX_BLINN_NBD;
+        break;
+    case HASTEX_PBR_3:
+        m_FilePath = SHADER_OPENGL_RENDER_HASTEX_PBR_3;
         break;
     default:
         break;
@@ -371,6 +380,78 @@ ShaderProgramSource GLShader::ParseShader(std::string filepath, ModelStatics sta
             else
             {
                 line = "uniform sampler2D u_SpecularTex[1];";
+            }
+            ss[(int)type] << line << '\n';
+        }
+        else if (line.find("uniform sampler2D u_MetallicTex[];") != std::string::npos)
+        {
+            if (statics.MetallicTexCount)
+            {
+                line = "uniform sampler2D u_MetallicTex[" + std::to_string(statics.MetallicTexCount) + "];";
+            }
+            else
+            {
+                line = "uniform sampler2D u_MetallicTex[1];";
+            }
+            ss[(int)type] << line << '\n';
+        }
+        else if (line.find("uniform sampler2D u_RoughnessTex[];") != std::string::npos)
+        {
+            if (statics.RoughnessTexCount)
+            {
+                line = "uniform sampler2D u_RoughnessTex[" + std::to_string(statics.RoughnessTexCount) + "];";
+            }
+            else
+            {
+                line = "uniform sampler2D u_RoughnessTex[1];";
+            }
+            ss[(int)type] << line << '\n';
+        }
+        else if (line.find("uniform sampler2D u_AoTex[];") != std::string::npos)
+        {
+            if (statics.AoTexCount)
+            {
+                line = "uniform sampler2D u_AoTex[" + std::to_string(statics.AoTexCount) + "];";
+            }
+            else
+            {
+                line = "uniform sampler2D u_AoTex[1];";
+            }
+            ss[(int)type] << line << '\n';
+        }
+        else if (line.find("uniform sampler2D u_NormalTex[];") != std::string::npos)
+        {
+            if (statics.NormalTexCount)
+            {
+                line = "uniform sampler2D u_NormalTex[" + std::to_string(statics.NormalTexCount) + "];";
+            }
+            else
+            {
+                line = "uniform sampler2D u_NormalTex[1];";
+            }
+            ss[(int)type] << line << '\n';
+        }
+        else if (line.find("uniform sampler2D u_BumpTex[];") != std::string::npos)
+        {
+            if (statics.BumpTexCount)
+            {
+                line = "uniform sampler2D u_BumpTex[" + std::to_string(statics.BumpTexCount) + "];";
+            }
+            else
+            {
+                line = "uniform sampler2D u_BumpTex[1];";
+            }
+            ss[(int)type] << line << '\n';
+        }
+        else if (line.find("uniform sampler2D u_DisplacementTex[];") != std::string::npos)
+        {
+            if (statics.DisplacementTexCount)
+            {
+                line = "uniform sampler2D u_DisplacementTex[" + std::to_string(statics.DisplacementTexCount) + "];";
+            }
+            else
+            {
+                line = "uniform sampler2D u_DisplacementTex[1];";
             }
             ss[(int)type] << line << '\n';
         }

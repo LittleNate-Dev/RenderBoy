@@ -31,7 +31,6 @@ void Model::UpdateStatics()
         // Triangle statics
         m_Statics.TriangleCount += (unsigned int)m_Meshes[i].GetIndices().size() / 3;
     }
-
     // Analysing model's data and decide it's render mode
     bool hasTexture = false;
     for (unsigned int i = 0; i < m_Meshes.size(); i++)
@@ -42,13 +41,57 @@ void Model::UpdateStatics()
     {
         m_Statics.RenderMode = HASTEX_ALBEDO;
         bool hasSpecularTex = false;
+        bool hasMetallicTex = false;
+        bool hasRoughnessTex = false;
         for (unsigned int i = 0; i < m_Meshes.size(); i++)
         {
             hasSpecularTex |= m_Meshes[i].HasSpecularTex();
+            hasMetallicTex |= m_Meshes[i].HasMetallicTex();
+            hasRoughnessTex |= m_Meshes[i].HasRoughnessTex();
         }
         if (hasSpecularTex)
         {
             m_Statics.RenderMode = HASTEX_BLINN;
+            bool hasNormal = false;
+            bool hasBump = false;
+            bool hasDisplacement = false;
+            for (unsigned int i = 0; i < m_Meshes.size(); i++)
+            {
+                hasNormal |= m_Meshes[i].HasNormalTex();
+                hasBump |= m_Meshes[i].HasBumpTex();
+                hasDisplacement |= m_Meshes[i].HasDisplacementTex();
+            }
+            if (hasNormal || hasBump || hasDisplacement)
+            {
+                m_Statics.RenderMode = HASTEX_BLINN_NBD;
+            }
+        }
+        else if (hasMetallicTex)
+        {
+            for (unsigned int i = 0; i < m_Meshes.size(); i++)
+            {
+                if (m_Meshes[i].HasMetallicTex())
+                {
+                    if (m_Meshes[i].GetMetallicTexFilePath() == m_Meshes[i].GetRoughnessTexFilePath())
+                    {
+                        m_Statics.RenderMode = HASTEX_PBR_3;
+                    }
+                    else
+                    {
+                        m_Statics.RenderMode = HASTEX_PBR_4;
+                    }
+                    break;
+                }
+            }
+            /*bool hasNormal = false;
+            bool hasBump = false;
+            bool hasDisplacement = false;
+            for (unsigned int i = 0; i < m_Meshes.size(); i++)
+            {
+                hasNormal |= m_Meshes[i].HasNormalTex();
+                hasBump |= m_Meshes[i].HasBumpTex();
+                hasDisplacement |= m_Meshes[i].HasDisplacementTex();
+            }*/
         }
     }
     else
@@ -252,7 +295,6 @@ std::vector<std::string> Model::AssimpLoadTexturePath(aiMaterial* mat, aiTexture
     {
         aiString str;
         mat->GetTexture(type, i, &str);
-        //std::cout << std::string(str.C_Str()) << std::endl;
         std::string filepath = core::GetFileDirectory(m_FilePath) + std::string(str.C_Str());
         texPath.push_back(filepath);
     }

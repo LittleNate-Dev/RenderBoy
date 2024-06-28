@@ -100,5 +100,4 @@ void main()
         mixVal = exp2(-2.0 * x * x);
     }
     v_FragColor = mix(vec4(u_Color * u_Intensity, 1.0), lineColor, mixVal);
-    //v_FragColor = vec4(u_Color.r, u_Color.g, u_Color.b, 1.0);
 }

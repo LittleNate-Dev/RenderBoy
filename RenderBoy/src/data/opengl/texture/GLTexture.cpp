@@ -61,7 +61,6 @@ void GLTexture::GenTexture(const std::string filepath)
         GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_SRGB8_ALPHA8, m_Width, m_Height, 0, GL_BGRA, GL_UNSIGNED_BYTE, (void*)FreeImage_GetBits(m_LocalBuffer)));
     }
     GLCall(glGenerateMipmap(GL_TEXTURE_2D));
-    //std::cout << m_FilePath << std::endl;
     // Generate texture handle
     m_Handle = glGetTextureHandleARB(m_RendererID);
     GLCall(glMakeTextureHandleResidentARB(m_Handle));

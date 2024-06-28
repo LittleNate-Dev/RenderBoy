@@ -81,6 +81,7 @@ void main()
 #define POINT_LIGHT_COUNT
 #define SPOT_LIGHT_COUNT
 #define DIR_LIGHT_COUNT
+#define PI 3.14159265359
 
 struct FragPosDir
 {
@@ -160,42 +161,50 @@ uniform sampler2D u_SSAOTex;
 
 // Material
 uniform vec3 u_Diffuse[];
-uniform vec3 u_Specular[];
 uniform float u_Transparent[];
 uniform sampler2D u_AlbedoTex[];
-uniform sampler2D u_SpecularTex[];
+uniform sampler2D u_MetallicTex[];
+uniform sampler2D u_AoTex[];
 
-const float c_Shininess = 32.0f;
-
-vec3 viewDir = vec3(1.0);
-vec3 normal = vec3(0.0);
-float ssao = 1.0;
-vec3 colorIndex = vec3(-1.0);
-vec4 attributeIndex = vec4(-1.0);
-int albedoTexIndex = -1;
-int specularTexIndex = -1;
+vec3 c_ViewDir = vec3(1.0);
+vec3 c_Normal = vec3(0.0);
+float c_SSAO = 1.0;
+vec3 c_ColorIndex = vec3(-1.0);
+vec4 c_AttributeIndex = vec4(-1.0);
+int c_AlbedoTexIndex = -1;
+int c_MetallicTexIndex = -1;
+int c_AoTexIndex = -1;
+vec3 c_Albedo = vec3(0.0);
+float c_Metallic = 0.0;
+float c_Roughness = 1.0;
+float c_AO = 1.0;
+vec3 c_F0 = vec3(0.04); 
 
 vec3 CalcPointLight(int i);
 vec3 CalcSpotLight(int i);
 vec3 CalcDirLight(int i);
+float DistributionGGX(vec3 N, vec3 H, float roughness);
+float GeometrySchlickGGX(float NdotV, float roughness);
+float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness);
+vec3 FresnelSchlick(float cosTheta, vec3 F0);
 
 void main()
 {
-    albedoTexIndex = int(v_TexIndex.x + 0.1);
-    specularTexIndex = int(v_TexIndex.y + 0.1);
-    colorIndex = v_ColorIndex + vec3(0.1);
-    attributeIndex = v_AttributeIndex + vec4(0.1);
-    vec3 result = vec3(0.0);
-    viewDir = normalize(u_ViewPos - v_FragPos);
-    normal = normalize(v_Normal);
+    c_AlbedoTexIndex = int(v_TexIndex.x + 0.1);
+    c_MetallicTexIndex = int(v_TexIndex.y + 0.1);
+    c_AoTexIndex = int(v_TexIndex.w + 0.1);
+    c_ColorIndex = v_ColorIndex + vec3(0.1);
+    c_AttributeIndex = v_AttributeIndex + vec4(0.1);
+    c_ViewDir = normalize(u_ViewPos - v_FragPos);
+    c_Normal = normalize(v_Normal);
     if (v_TexIndex.x < 0)
     {
-        if (u_Transparent[int(attributeIndex.y)] < 0.1)
+        if (u_Transparent[int(c_AttributeIndex.y)] < 0.1)
         {
             discard;
         }
     }
-    else if (texture(u_AlbedoTex[albedoTexIndex], v_TexCoord).a < 0.1)
+    else if (texture(u_AlbedoTex[c_AlbedoTexIndex], v_TexCoord).a < 0.1)
     {
         discard;
     }
@@ -205,9 +214,26 @@ void main()
         vec4 screenCoord = u_ProjMat * u_ViewMat * vec4(v_FragPos, 1.0);
         vec2 aoCoord = screenCoord.xy / screenCoord.w;
         aoCoord = aoCoord * 0.5 + 0.5;
-        ssao = texture(u_SSAOTex, aoCoord).r;
+        c_SSAO = texture(u_SSAOTex, aoCoord).r;
     }
+    if (v_TexIndex.x < 0)
+    {
+        c_Albedo = u_Diffuse[int(c_ColorIndex.y)];
+    }
+    else
+    {
+        c_Albedo = texture(u_AlbedoTex[c_AlbedoTexIndex], v_TexCoord).rgb;
+        c_Metallic = texture(u_MetallicTex[c_MetallicTexIndex], v_TexCoord).b;
+        c_Roughness = texture(u_MetallicTex[c_MetallicTexIndex], v_TexCoord).g;
+    }
+    if (v_TexIndex.w >= 0)
+    {
+        c_AO = texture(u_AoTex[c_AoTexIndex], v_TexCoord).r;
+    }
+    c_AO *= c_SSAO;
+    c_F0 = mix(c_F0, c_Albedo, c_Metallic);
     // Calculate all lights
+    vec3 result = vec3(0.0);
     for (int i = 0; i < POINT_LIGHT_COUNT; i++)
     {
         if (u_PointLight[i].LightSwitch)
@@ -231,64 +257,38 @@ void main()
     }
     if (v_TexIndex.x < 0)
     {
-        v_FragColor = vec4(result, u_Transparent[int(attributeIndex.y)]);
+        v_FragColor = vec4(result, u_Transparent[int(c_AttributeIndex.y)]);
     }
     else
     {
-        v_FragColor = vec4(result, texture(u_AlbedoTex[albedoTexIndex], v_TexCoord).a);
+        v_FragColor = vec4(result, texture(u_AlbedoTex[c_AlbedoTexIndex], v_TexCoord).a);
     }
 }
 
 vec3 CalcPointLight(int i)
 {
-    vec3 ambient, diffuse, specular;
     vec3 lightDir = normalize(u_PointLight[i].Position - v_FragPos);
-    // Attenuation
+    vec3 halfwayDir = normalize(c_ViewDir + lightDir);
     float distance = length(u_PointLight[i].Position - v_FragPos);
-    float attenuation = u_PointLight[i].Intensity / (u_PointLight[i].CLQ.x + u_PointLight[i].CLQ.y * distance + u_PointLight[i].CLQ.z * distance * distance); 
-    if (v_Normal == vec3(0.0))
-    {
-        if (v_TexIndex.x < 0)
-        {
-            ambient  = u_PointLight[i].ADS.x * u_PointLight[i].Color * u_Diffuse[int(colorIndex.y)] * ssao;
-            diffuse  = u_PointLight[i].ADS.y * u_PointLight[i].Color * u_Diffuse[int(colorIndex.y)];
-        }
-        else
-        {
-            ambient  = u_PointLight[i].ADS.x * u_PointLight[i].Color * texture(u_AlbedoTex[albedoTexIndex], v_TexCoord).rgb * ssao;
-            diffuse  = u_PointLight[i].ADS.y * u_PointLight[i].Color * texture(u_AlbedoTex[albedoTexIndex], v_TexCoord).rgb;
-        }
-        specular = vec3(0.0);
-    }
-    else
-    {
-        float diff = max(dot(normal, lightDir), 0.0);
-        vec3 halfwayDir = normalize(lightDir + viewDir);
-        float spec = pow(max(dot(normal, halfwayDir), 0.0), c_Shininess);
-        if (v_TexIndex.x < 0)
-        {
-            ambient  = u_PointLight[i].ADS.x * u_PointLight[i].Color * u_Diffuse[int(colorIndex.y)] * ssao;
-            diffuse  = u_PointLight[i].ADS.y * u_PointLight[i].Color * diff * u_Diffuse[int(colorIndex.y)];
-        }
-        else
-        {
-            ambient  = u_PointLight[i].ADS.x * u_PointLight[i].Color * texture(u_AlbedoTex[albedoTexIndex], v_TexCoord).rgb * ssao;
-            diffuse  = u_PointLight[i].ADS.y * u_PointLight[i].Color * diff * texture(u_AlbedoTex[albedoTexIndex], v_TexCoord).rgb;
-            
-        }
-        if (v_TexIndex.y < 0)
-        {
-            specular = u_PointLight[i].ADS.z * u_PointLight[i].Color * spec;
-        }
-        else
-        {
-            specular = u_PointLight[i].ADS.z * u_PointLight[i].Color * spec * texture(u_SpecularTex[specularTexIndex], v_TexCoord).r;
-        }
-    }
-    // combine results
-    ambient *= attenuation;
-    diffuse *= attenuation;
-    specular *= attenuation;
+    float attenuation = u_PointLight[i].Intensity / (u_PointLight[i].CLQ.x + u_PointLight[i].CLQ.y * distance + u_PointLight[i].CLQ.z * distance * distance);
+    vec3 radiance = u_PointLight[i].Color * attenuation;
+
+    float NDF = DistributionGGX(c_Normal, halfwayDir, c_Roughness);   
+    float G = GeometrySmith(c_Normal, c_ViewDir, lightDir, c_Roughness);      
+    vec3 F = FresnelSchlick(max(dot(halfwayDir, c_ViewDir), 0.0), c_F0);
+
+    vec3 numerator = NDF * G * F; 
+    float denominator = 4.0 * max(dot(c_Normal, c_ViewDir), 0.0) * max(dot(c_Normal, lightDir), 0.0) + 0.0001;
+    
+    vec3 kS = F;
+    vec3 kD = vec3(1.0) - kS;
+    kD *= 1.0 - c_Metallic;	  
+    float NdotL = max(dot(c_Normal, lightDir), 0.0);
+
+    vec3 ambient, diffuse, specular;
+    ambient  = u_PointLight[i].ADS.x * u_PointLight[i].Color * c_Albedo * c_AO * attenuation;
+    diffuse = c_Albedo;
+    specular = numerator / denominator;
 
     vec3 lighting = vec3(1.0);
     if (u_PointLight[i].CastShadow)
@@ -297,7 +297,7 @@ vec3 CalcPointLight(int i)
         vec3 fragToLight = v_FragPos - u_PointLight[i].Position;
         if (currentDepth >= u_PointLight[i].FarPlane && texture(u_PointLight[i].ShadowMap, fragToLight).r == 1.0)
         {
-            lighting = ambient + diffuse + specular;
+            lighting = ambient + (kD * diffuse / PI + specular) * radiance * NdotL;
         }
         else
         {
@@ -331,75 +331,49 @@ vec3 CalcPointLight(int i)
                 float currentDepth = length(fragToLight);
                 shadow = currentDepth -  u_PointLight[i].Bias > closestDepth ? 1.0 : 0.0;        
             }
-            lighting = ambient + (1.0 - shadow) * (diffuse + specular); 
+            lighting = ambient + (1.0 - shadow) * (kD * diffuse / PI + specular) * radiance * NdotL;
         }
     }
     else
     {
-        lighting = ambient + diffuse + specular;
+        lighting = ambient + (kD * diffuse / PI + specular) * radiance * NdotL;
     }
-     
     return lighting;
 }
 
 vec3 CalcSpotLight(int i)
 {
-    vec3 ambient, diffuse, specular;
     vec3 lightDir = normalize(u_SpotLight[i].Position - v_FragPos);
-    // Attenuation
+    vec3 halfwayDir = normalize(c_ViewDir + lightDir);
     float distance = length(u_SpotLight[i].Position - v_FragPos);
-    float attenuation = u_SpotLight[i].Intensity / (u_SpotLight[i].CLQ.x + u_SpotLight[i].CLQ.y * distance + u_SpotLight[i].CLQ.z * (distance * distance)); 
+    float attenuation = u_SpotLight[i].Intensity / (u_SpotLight[i].CLQ.x + u_SpotLight[i].CLQ.y * distance + u_SpotLight[i].CLQ.z * distance * distance);
     // dim out the light
     float theta = dot(-lightDir, normalize(u_SpotLight[i].Direction));
     float epsilon = cos(u_SpotLight[i].Angle * 0.5) - cos(u_SpotLight[i].Angle * 0.5 + u_SpotLight[i].DimAngle);
     float intensity = clamp((theta - cos(u_SpotLight[i].Angle * 0.5 + u_SpotLight[i].DimAngle)) / epsilon, 0.0, 1.0);
-    if (v_Normal == vec3(0.0))
-    {
-        if (v_TexIndex.x < 0)
-        {
-            ambient  = u_SpotLight[i].ADS.x * u_SpotLight[i].Color * u_Diffuse[int(colorIndex.y)] * ssao;
-            diffuse  = u_SpotLight[i].ADS.y * u_SpotLight[i].Color * u_Diffuse[int(colorIndex.y)];
-        }
-        else
-        {
-            ambient  = u_SpotLight[i].ADS.x * u_SpotLight[i].Color * texture(u_AlbedoTex[albedoTexIndex], v_TexCoord).rgb * ssao;
-            diffuse  = u_SpotLight[i].ADS.y * u_SpotLight[i].Color * texture(u_AlbedoTex[albedoTexIndex], v_TexCoord).rgb;
-        }
-        specular = vec3(0.0);
-    }
-    else
-    {
-        float diff = max(dot(normal, lightDir), 0.0);
-        vec3 halfwayDir = normalize(lightDir + viewDir);
-        float spec = pow(max(dot(normal, halfwayDir), 0.0), c_Shininess);
-        if (v_TexIndex.x < 0)
-        {
-            ambient  = u_SpotLight[i].ADS.x * u_SpotLight[i].Color * u_Diffuse[int(colorIndex.y)] * ssao;
-            diffuse  = u_SpotLight[i].ADS.y * u_SpotLight[i].Color * diff * u_Diffuse[int(colorIndex.y)];
-        }
-        else
-        {
-            ambient  = u_SpotLight[i].ADS.x * u_SpotLight[i].Color * texture(u_AlbedoTex[albedoTexIndex], v_TexCoord).rgb * ssao;
-            diffuse  = u_SpotLight[i].ADS.y * u_SpotLight[i].Color * diff * texture(u_AlbedoTex[albedoTexIndex], v_TexCoord).rgb;
-        }
-        if (v_TexIndex.y < 0)
-        {
-            specular = u_SpotLight[i].ADS.z * u_SpotLight[i].Color * spec;
-        }
-        else
-        {
-            specular = u_SpotLight[i].ADS.z * u_SpotLight[i].Color * spec * texture(u_SpecularTex[specularTexIndex], v_TexCoord).r;
-        }
-        
-    }
-    ambient *= attenuation;
-    diffuse *= intensity * attenuation;
-    specular *= intensity * attenuation;
+    vec3 radiance = u_SpotLight[i].Color * attenuation * intensity;
+
+    float NDF = DistributionGGX(c_Normal, halfwayDir, c_Roughness);   
+    float G = GeometrySmith(c_Normal, c_ViewDir, lightDir, c_Roughness);      
+    vec3 F = FresnelSchlick(max(dot(halfwayDir, c_ViewDir), 0.0), c_F0);
+
+    vec3 numerator = NDF * G * F; 
+    float denominator = 4.0 * max(dot(c_Normal, c_ViewDir), 0.0) * max(dot(c_Normal, lightDir), 0.0) + 0.0001;
+    
+    vec3 kS = F;
+    vec3 kD = vec3(1.0) - kS;
+    kD *= 1.0 - c_Metallic;	  
+    float NdotL = max(dot(c_Normal, lightDir), 0.0);
+
+    vec3 ambient, diffuse, specular;
+    ambient  = u_SpotLight[i].ADS.x * u_SpotLight[i].Color * c_Albedo * c_AO * attenuation;
+    diffuse = c_Albedo;
+    specular = numerator / denominator;
 
     vec3 lighting = vec3(1.0);
     if (u_SpotLight[i].CastShadow)
     {
-        float bias = max(u_SpotLight[i].Bias.x * (1.0 - dot(normal, lightDir)), u_SpotLight[i].Bias.y);
+        float bias = max(u_SpotLight[i].Bias.x * (1.0 - dot(c_Normal, lightDir)), u_SpotLight[i].Bias.y);
         vec3 ndc = v_FragPosSpot[i].xyz / v_FragPosSpot[i].w;
         if (ndc.x < 1.0 && ndc.x > -1.0 && ndc.y < 1.0 && ndc.y > -1.0 && ndc.z > -1.0)
         {
@@ -411,7 +385,7 @@ vec3 CalcSpotLight(int i)
             float currentDepth = ndc.z * 0.5 + 0.5;
             if (closestDepth == 1.0)
             {
-                lighting = ambient + diffuse + specular;
+                lighting = ambient + (kD * diffuse / PI + specular) * radiance * NdotL;
             }
             else
             {
@@ -435,7 +409,7 @@ vec3 CalcSpotLight(int i)
                             }    
                         }
                         shadow /= pow(offset * 2.0 + 1.0, 2.0);
-                        lighting = ambient + (1.0 - shadow) * (diffuse + specular);
+                        lighting = ambient + (1.0 - shadow) * (kD * diffuse / PI + specular) * radiance * NdotL;
                     }
                     else
                     {
@@ -444,69 +418,46 @@ vec3 CalcSpotLight(int i)
                 }
                 else
                 {
-                    lighting = ambient + diffuse + specular;
+                    lighting = ambient + (kD * diffuse / PI + specular) * radiance * NdotL;
                 }
             }
         }
         else
         {
-            lighting = ambient + diffuse + specular;
+            lighting = ambient + (kD * diffuse / PI + specular) * radiance * NdotL;
         }
     }
     else
     {
-        lighting = ambient + diffuse + specular;
+        lighting = ambient + (kD * diffuse / PI + specular) * radiance * NdotL;
     }
     return lighting;
 }
 
 vec3 CalcDirLight(int i)
 {
-    vec3 ambient, diffuse, specular;
+    
     vec3 lightDir = u_DirLight[i].Direction;
-    // Attenuation
-    float attenuation = u_DirLight[i].Intensity;  
-    if (v_Normal == vec3(0.0))
-    {
-        if (v_TexIndex.x < 0)
-        {
-            ambient  = u_DirLight[i].ADS.x * u_DirLight[i].Color * u_Diffuse[int(colorIndex.y)] * ssao;
-            diffuse  = u_DirLight[i].ADS.y * u_DirLight[i].Color * u_Diffuse[int(colorIndex.y)];
-        }
-        else
-        {
-            ambient  = u_DirLight[i].ADS.x * u_DirLight[i].Color * texture(u_AlbedoTex[albedoTexIndex], v_TexCoord).rgb * ssao;
-            diffuse  = u_DirLight[i].ADS.y * u_DirLight[i].Color * texture(u_AlbedoTex[albedoTexIndex], v_TexCoord).rgb;
-        }
-        specular = vec3(0.0);
-    }
-    else
-    {
-        float diff = max(dot(normal, lightDir), 0.0);
-        vec3 halfwayDir = normalize(lightDir + viewDir);
-        float spec = pow(max(dot(normal, halfwayDir), 0.0), c_Shininess);
-        if (v_TexIndex.x < 0)
-        {
-            ambient  = u_DirLight[i].ADS.x * u_DirLight[i].Color * u_Diffuse[int(colorIndex.y)] * ssao;
-            diffuse  = u_DirLight[i].ADS.y * u_DirLight[i].Color * diff * u_Diffuse[int(colorIndex.y)];
-        }
-        else
-        {
-            ambient  = u_DirLight[i].ADS.x * u_DirLight[i].Color * texture(u_AlbedoTex[albedoTexIndex], v_TexCoord).rgb * ssao;
-            diffuse  = u_DirLight[i].ADS.y * u_DirLight[i].Color * diff * texture(u_AlbedoTex[albedoTexIndex], v_TexCoord).rgb;
-        }
-        if (v_TexIndex.y < 0)
-        {
-            specular = u_DirLight[i].ADS.z * u_DirLight[i].Color * spec;
-        }
-        else
-        {
-            specular = u_DirLight[i].ADS.z * u_DirLight[i].Color * spec * texture(u_SpecularTex[specularTexIndex], v_TexCoord).r;
-        }
-    }
-    ambient *= attenuation;
-    diffuse *= attenuation;
-    specular *= attenuation;
+    vec3 halfwayDir = normalize(c_ViewDir + lightDir);
+    float attenuation = u_DirLight[i].Intensity;
+    vec3 radiance = u_DirLight[i].Color * attenuation;
+
+    float NDF = DistributionGGX(c_Normal, halfwayDir, c_Roughness);   
+    float G = GeometrySmith(c_Normal, c_ViewDir, lightDir, c_Roughness);      
+    vec3 F = FresnelSchlick(max(dot(halfwayDir, c_ViewDir), 0.0), c_F0);
+
+    vec3 numerator = NDF * G * F; 
+    float denominator = 4.0 * max(dot(c_Normal, c_ViewDir), 0.0) * max(dot(c_Normal, lightDir), 0.0) + 0.0001;
+    
+    vec3 kS = F;
+    vec3 kD = vec3(1.0) - kS;
+    kD *= 1.0 - c_Metallic;	  
+    float NdotL = max(dot(c_Normal, lightDir), 0.0);
+
+    vec3 ambient, diffuse, specular;
+    ambient  = u_DirLight[i].ADS.x * u_DirLight[i].Color * c_Albedo * c_AO * attenuation;
+    diffuse = c_Albedo;
+    specular = numerator / denominator;
 
     vec3 lighting = vec3(0.0);
     if (u_DirLight[i].CastShadow)
@@ -527,7 +478,7 @@ vec3 CalcDirLight(int i)
         float currentDepth = ndc.z * 0.5 + 0.5;
         if (closestDepth == 1.0)
         {
-            lighting = ambient + diffuse + specular;
+            lighting = ambient + (kD * diffuse / PI + specular) * radiance * NdotL;
         }
         else
         {
@@ -548,7 +499,7 @@ vec3 CalcDirLight(int i)
                         }    
                     }
                     shadow /= pow(offset * 2.0 + 1.0, 2.0);
-                    lighting = ambient + (1.0 - shadow) * (diffuse + specular);
+                    lighting = ambient + (1.0 - shadow) * (kD * diffuse / PI + specular) * radiance * NdotL;
                 }
                 else
                 {
@@ -557,13 +508,53 @@ vec3 CalcDirLight(int i)
             }
             else
             {
-                lighting = ambient + diffuse + specular;
+                lighting = ambient + (kD * diffuse / PI + specular) * radiance * NdotL;
             }
         }
     }
     else
     {
-        lighting = ambient + diffuse + specular;
+        lighting = ambient + (kD * diffuse / PI + specular) * radiance * NdotL;
     }
     return lighting;
+}
+
+float DistributionGGX(vec3 N, vec3 H, float roughness)
+{
+    float a = roughness*roughness;
+    float a2 = a * a;
+    float NdotH = max(dot(N, H), 0.0);
+    float NdotH2 = NdotH*NdotH;
+	
+    float num = a2;
+    float denom = (NdotH2 * (a2 - 1.0) + 1.0);
+    denom = PI * denom * denom;
+	
+    return num / denom;
+}
+
+float GeometrySchlickGGX(float NdotV, float roughness)
+{
+    float r = (roughness + 1.0);
+    float k = (r*r) / 8.0;
+
+    float num = NdotV;
+    float denom = NdotV * (1.0 - k) + k;
+	
+    return num / denom;
+}
+
+float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness)
+{
+    float NdotV = max(dot(N, V), 0.0);
+    float NdotL = max(dot(N, L), 0.0);
+    float ggx2 = GeometrySchlickGGX(NdotV, roughness);
+    float ggx1 = GeometrySchlickGGX(NdotL, roughness);
+	
+    return ggx1 * ggx2;
+}
+
+vec3 FresnelSchlick(float cosTheta, vec3 F0)
+{
+    return F0 + (1.0 - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
 }

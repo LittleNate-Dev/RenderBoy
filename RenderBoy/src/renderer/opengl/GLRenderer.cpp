@@ -544,7 +544,9 @@ void GLRenderer::DrawNormal(Scene& scene)
 
 void GLRenderer::DrawLightCube(Scene& scene)
 {
+	spdlog::error("Bind light cube");
 	m_Shaders.Lightcube.Bind();
+	spdlog::error("light cube binded");
 	glm::vec2 renderRes = core::GetRenderResolution();
 	m_Shaders.Lightcube.SetUniformMat4f("u_ProjMat", scene.GetCamera().GetProjMat());
 	m_Shaders.Lightcube.SetUniformMat4f("u_ViewMat", scene.GetCamera().GetViewMat());
