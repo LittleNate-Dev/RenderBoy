@@ -62,7 +62,7 @@
 #define SHADER_OPENGL_POINTCLOUD "data/shaders/opengl/draw_mode/POINTCLOUD.glsl"
 #define SHADER_OPENGL_SKYBOX "data/shaders/opengl/others/SKYBOX.glsl"
 #define SHADER_OPENGL_NORMAL "data/shaders/opengl/others/NORMAL.glsl"
-#define SHADER_OPENGL_LIGHTCUBE "data/shaders/opengwl/others/LIGHTCUBE.glsl"
+#define SHADER_OPENGL_LIGHTCUBE "data/shaders/opengl/others/LIGHTCUBE.glsl"
 #define SHADER_OPENGL_BLOOM_DOWNSAMPLE "data/shaders/opengl/others/bloom/DOWNSAMPLE.glsl"
 #define SHADER_OPENGL_BLOOM_UPSAMPLE "data/shaders/opengl/others/bloom/UPSAMPLE.glsl"
 #define SHADER_OPENGL_BLOOM_BLEND "data/shaders/opengl/others/bloom/BLEND.glsl"
