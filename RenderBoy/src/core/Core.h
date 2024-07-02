@@ -54,6 +54,7 @@
 #define SHADER_OPENGL_RENDER_HASTEX_BLINN "data/shaders/opengl/render_mode/HASTEX_BLINN.glsl"
 #define SHADER_OPENGL_RENDER_HASTEX_BLINN_NBD "data/shaders/opengl/render_mode/HASTEX_BLINN_NBD.glsl"
 #define SHADER_OPENGL_RENDER_HASTEX_PBR_3 "data/shaders/opengl/render_mode/HASTEX_PBR_3.glsl"
+#define SHADER_OPENGL_RENDER_HASTEX_PBR_4 "data/shaders/opengl/render_mode/HASTEX_PBR_4.glsl"
 #define SHADER_OPENGL_GBUFFER "data/shaders/opengl/others/GBUFFER.glsl"
 #define SHADER_OPENGL_BLANK "data/shaders/opengl/draw_mode/BLANK.glsl"
 #define SHADER_OPENGL_WIREFRAME "data/shaders/opengl/draw_mode/WIREFRAME.glsl"

@@ -53,6 +53,9 @@ bool GLShader::Init(ModelStatics statics)
     case HASTEX_PBR_3:
         m_FilePath = SHADER_OPENGL_RENDER_HASTEX_PBR_3;
         break;
+    case HASTEX_PBR_4:
+        m_FilePath = SHADER_OPENGL_RENDER_HASTEX_PBR_4;
+        break;
     default:
         break;
     }

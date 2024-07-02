@@ -32,11 +32,11 @@ bool GLCubeMap::GenTexture(std::vector<std::string> filepath)
             unsigned int bpp = FreeImage_GetBPP(m_LocalBuffer);
             if (bpp == 24)
             {
-                GLCall(glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_SRGB8, m_Widths[i], m_Heights[i], 0, GL_BGR, GL_UNSIGNED_BYTE, (void*)FreeImage_GetBits(m_LocalBuffer)));
+                GLCall(glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_COMPRESSED_SRGB, m_Widths[i], m_Heights[i], 0, GL_BGR, GL_UNSIGNED_BYTE, (void*)FreeImage_GetBits(m_LocalBuffer)));
             }
             else if (bpp == 32)
             {
-                GLCall(glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_SRGB8_ALPHA8, m_Widths[i], m_Heights[i], 0, GL_BGRA, GL_UNSIGNED_BYTE, (void*)FreeImage_GetBits(m_LocalBuffer)));
+                GLCall(glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_COMPRESSED_SRGB_ALPHA, m_Widths[i], m_Heights[i], 0, GL_BGRA, GL_UNSIGNED_BYTE, (void*)FreeImage_GetBits(m_LocalBuffer)));
             }
             FreeImage_Unload(m_LocalBuffer);
         }

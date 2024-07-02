@@ -265,6 +265,26 @@ void GLData::AddModel(std::string name, Model& model)
 				metallicTex.push_back(model.GetMeshes()[i].GetMetallicTexFilePath());
 			}
 		}
+		// Roughness texture
+		if (model.GetStatics().RenderMode == HASTEX_PBR_4)
+		{
+			hasValue = false;
+			if (model.GetMeshes()[i].GetRoughnessTexFilePath() != "")
+			{
+				for (unsigned int j = 0; j < roughnessTex.size(); j++)
+				{
+					if (model.GetMeshes()[i].GetRoughnessTexFilePath() == roughnessTex[j])
+					{
+						hasValue = true;
+						break;
+					}
+				}
+				if (!hasValue)
+				{
+					roughnessTex.push_back(model.GetMeshes()[i].GetRoughnessTexFilePath());
+				}
+			}
+		}
 		// Ao texture
 		hasValue = false;
 		if (model.GetMeshes()[i].GetAoTexFilePath() != "")
@@ -635,6 +655,11 @@ void GLData::AddModel(std::string name, Model& model)
 		uniformName = "u_Specular[" + std::to_string(i) + "]";
 		m_ModelData[name].Shader.SetUniformVec3f(uniformName, m_ModelData[name].SpecularValue[i]);
 	}
+	for (unsigned int i = 0; i < m_ModelData[name].TransparentValue.size(); i++)
+	{
+		uniformName = "u_Transparent[" + std::to_string(i) + "]";
+		m_ModelData[name].Shader.SetUniform1f(uniformName, m_ModelData[name].TransparentValue[i]);
+	}
 	for (unsigned int i = 0; i < albedoTex.size(); i++)
 	{
 		GLTexture texture;
@@ -704,11 +729,6 @@ void GLData::AddModel(std::string name, Model& model)
 		uniformName = "u_AoTex[" + std::to_string(i) + "]";
 		m_ModelData[name].AoTex[i].GenTexture(aoTex[i]);
 		m_ModelData[name].Shader.SetUniformHandleARB(uniformName, m_ModelData[name].AoTex[i].GetHandle());
-	}
-	for (unsigned int i = 0; i < m_ModelData[name].TransparentValue.size(); i++)
-	{
-		uniformName = "u_Transparent[" + std::to_string(i) + "]";
-		m_ModelData[name].Shader.SetUniform1f(uniformName, m_ModelData[name].TransparentValue[i]);
 	}
 	for (unsigned int i = 0; i < m_ModelData[name].NormalTex.size(); i++)
 	{
@@ -956,6 +976,11 @@ void GLData::ReInitShader()
 			uniformName = "u_Specular[" + std::to_string(i) + "]";
 			m_ModelData[model].Shader.SetUniformVec3f(uniformName, m_ModelData[model].SpecularValue[i]);
 		}
+		for (unsigned int i = 0; i < m_ModelData[model].TransparentValue.size(); i++)
+		{
+			uniformName = "u_Transparent[" + std::to_string(i) + "]";
+			m_ModelData[model].Shader.SetUniform1f(uniformName, m_ModelData[model].TransparentValue[i]);
+		}
 		for (unsigned int i = 0; i < m_ModelData[model].AlbedoTex.size(); i++)
 		{
 			uniformName = "u_AlbedoTex[" + std::to_string(i) + "]";
@@ -980,11 +1005,6 @@ void GLData::ReInitShader()
 		{
 			uniformName = "u_AoTex[" + std::to_string(i) + "]";
 			m_ModelData[model].Shader.SetUniformHandleARB(uniformName, m_ModelData[model].AoTex[i].GetHandle());
-		}
-		for (unsigned int i = 0; i < m_ModelData[model].TransparentValue.size(); i++)
-		{
-			uniformName = "u_Transparent[" + std::to_string(i) + "]";
-			m_ModelData[model].Shader.SetUniform1f(uniformName, m_ModelData[model].TransparentValue[i]);
 		}
 		for (unsigned int i = 0; i < m_ModelData[model].NormalTex.size(); i++)
 		{
