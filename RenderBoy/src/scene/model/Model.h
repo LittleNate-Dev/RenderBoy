@@ -38,6 +38,8 @@ private:
 	std::vector<std::string> AssimpLoadTexturePath(aiMaterial* mat, aiTextureType type);
 	// After changing attributes, update matrix
 	void UpdateModelMat(unsigned int current = 0);
+	// Does this model has normal/bump/displacement map?
+	bool HasNBDTex();
 
 
 public:

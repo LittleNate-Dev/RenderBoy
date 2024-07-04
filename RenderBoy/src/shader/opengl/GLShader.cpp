@@ -56,6 +56,12 @@ bool GLShader::Init(ModelStatics statics)
     case HASTEX_PBR_4:
         m_FilePath = SHADER_OPENGL_RENDER_HASTEX_PBR_4;
         break;
+    case HASTEX_PBR_3_NBD:
+        m_FilePath = SHADER_OPENGL_RENDER_HASTEX_PBR_3_NBD;
+        break;
+    case HASTEX_PBR_4_NBD:
+        m_FilePath = SHADER_OPENGL_RENDER_HASTEX_PBR_4_NBD;
+        break;
     default:
         break;
     }
@@ -294,6 +300,22 @@ ShaderProgramSource GLShader::ParseShader(std::string filepath, ModelStatics sta
             }
             ss[(int)type] << line << '\n';
         }
+        /*else if (line.find("in vec4 v_FragPosTangentSpot[SPOT_LIGHT_COUNT];") != std::string::npos)
+        {
+            if (core::SCENE_STATICS.SpotLight == 0)
+            {
+                line = "in vec4 v_FragPosTangentSpot[1];";
+            }
+            ss[(int)type] << line << '\n';
+        }
+        else if (line.find("out vec4 v_FragPosTangentSpot[SPOT_LIGHT_COUNT];") != std::string::npos)
+        {
+            if (core::SCENE_STATICS.SpotLight == 0)
+            {
+                line = "out vec4 v_FragPosTangentSpot[1];";
+            }
+            ss[(int)type] << line << '\n';
+        }*/
         else if (line.find("in FragPosDir v_FragPosDir[DIR_LIGHT_COUNT];") != std::string::npos)
         {
             if (core::SCENE_STATICS.DirectionalLight == 0)

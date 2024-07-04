@@ -616,10 +616,10 @@ void GLData::AddModel(std::string name, Model& model)
 	GLVertexBufferLayout layout;
 	//vertex positions
 	layout.Push<float>(3);
-	//vertex normals
-	layout.Push<float>(3);
 	//vertex texture coords
 	layout.Push<float>(2);
+	//vertex normals
+	layout.Push<float>(3);
 	//vertex tangent
 	layout.Push<float>(3);
 	//vertex bitangent
@@ -703,7 +703,7 @@ void GLData::AddModel(std::string name, Model& model)
 	for (unsigned int i = 0; i < m_ModelData[name].AlbedoTex.size(); i++)
 	{
 		uniformName = "u_AlbedoTex[" + std::to_string(i) + "]";
-		m_ModelData[name].AlbedoTex[i].GenTexture(albedoTex[i]);
+		m_ModelData[name].AlbedoTex[i].GenTexture(albedoTex[i], true);
 		m_ModelData[name].Shader.SetUniformHandleARB(uniformName, m_ModelData[name].AlbedoTex[i].GetHandle());
 	}
 	for (unsigned int i = 0; i < m_ModelData[name].SpecularTex.size(); i++)
@@ -733,19 +733,19 @@ void GLData::AddModel(std::string name, Model& model)
 	for (unsigned int i = 0; i < m_ModelData[name].NormalTex.size(); i++)
 	{
 		uniformName = "u_NormalTex[" + std::to_string(i) + "]";
-		m_ModelData[name].NormalTex[i].GenTexture(normalTex[i]);
+		m_ModelData[name].NormalTex[i].GenTexture(normalTex[i], false);
 		m_ModelData[name].Shader.SetUniformHandleARB(uniformName, m_ModelData[name].NormalTex[i].GetHandle());
 	}
 	for (unsigned int i = 0; i < m_ModelData[name].BumpTex.size(); i++)
 	{
 		uniformName = "u_BumpTex[" + std::to_string(i) + "]";
-		m_ModelData[name].BumpTex[i].GenTexture(bumpTex[i]);
+		m_ModelData[name].BumpTex[i].GenTexture(bumpTex[i], false);
 		m_ModelData[name].Shader.SetUniformHandleARB(uniformName, m_ModelData[name].BumpTex[i].GetHandle());
 	}
 	for (unsigned int i = 0; i < m_ModelData[name].DisplacementTex.size(); i++)
 	{
 		uniformName = "u_DisplacementTex[" + std::to_string(i) + "]";
-		m_ModelData[name].DisplacementTex[i].GenTexture(displacementTex[i]);
+		m_ModelData[name].DisplacementTex[i].GenTexture(displacementTex[i], false);
 		m_ModelData[name].Shader.SetUniformHandleARB(uniformName, m_ModelData[name].DisplacementTex[i].GetHandle());
 	}
 	m_ModelData[name].Shader.Unbind();

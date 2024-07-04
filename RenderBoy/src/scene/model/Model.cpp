@@ -52,16 +52,7 @@ void Model::UpdateStatics()
         if (hasSpecularTex)
         {
             m_Statics.RenderMode = HASTEX_BLINN;
-            bool hasNormal = false;
-            bool hasBump = false;
-            bool hasDisplacement = false;
-            for (unsigned int i = 0; i < m_Meshes.size(); i++)
-            {
-                hasNormal |= m_Meshes[i].HasNormalTex();
-                hasBump |= m_Meshes[i].HasBumpTex();
-                hasDisplacement |= m_Meshes[i].HasDisplacementTex();
-            }
-            if (hasNormal || hasBump || hasDisplacement)
+            if (HasNBDTex())
             {
                 m_Statics.RenderMode = HASTEX_BLINN_NBD;
             }
@@ -75,23 +66,22 @@ void Model::UpdateStatics()
                     if (m_Meshes[i].GetMetallicTexFilePath() == m_Meshes[i].GetRoughnessTexFilePath())
                     {
                         m_Statics.RenderMode = HASTEX_PBR_3;
+                        if (HasNBDTex())
+                        {
+                            m_Statics.RenderMode = HASTEX_PBR_3_NBD;
+                        }
                     }
                     else
                     {
-                        m_Statics.RenderMode = HASTEX_PBR_4;
+                        m_Statics.RenderMode = HASTEX_PBR_4; 
+                        if (HasNBDTex())
+                        {
+                            m_Statics.RenderMode = HASTEX_PBR_4_NBD;
+                        }
                     }
                     break;
                 }
             }
-            /*bool hasNormal = false;
-            bool hasBump = false;
-            bool hasDisplacement = false;
-            for (unsigned int i = 0; i < m_Meshes.size(); i++)
-            {
-                hasNormal |= m_Meshes[i].HasNormalTex();
-                hasBump |= m_Meshes[i].HasBumpTex();
-                hasDisplacement |= m_Meshes[i].HasDisplacementTex();
-            }*/
         }
     }
     else
@@ -117,7 +107,7 @@ bool Model::LoadModel(std::string name, std::string filepath)
 bool Model::LoadModelAssimp(std::string filepath)
 {
     Assimp::Importer import;
-    const aiScene* scene = import.ReadFile(filepath, aiProcess_Triangulate | aiProcess_FlipUVs);
+    const aiScene* scene = import.ReadFile(filepath, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
     {
         core::ShowWarningMsg("Failed to load file! Check log for details.");
@@ -356,6 +346,24 @@ void Model::UpdateModelMat(unsigned int current)
         glm::mat4 modelMat = GetTranslateMat(current) * GetRotateMat(current) * GetScaleMat(current);
         m_ModelMats[current - 1] = modelMat;
     }
+}
+
+bool Model::HasNBDTex()
+{
+    bool hasNormal = false;
+    bool hasBump = false;
+    bool hasDisplacement = false;
+    for (unsigned int i = 0; i < m_Meshes.size(); i++)
+    {
+        hasNormal |= m_Meshes[i].HasNormalTex();
+        hasBump |= m_Meshes[i].HasBumpTex();
+        hasDisplacement |= m_Meshes[i].HasDisplacementTex();
+    }
+    if (hasNormal || hasBump || hasDisplacement)
+    {
+        return true;
+    }
+    return false;
 }
 
 void Model::SetCurrent(unsigned int current)

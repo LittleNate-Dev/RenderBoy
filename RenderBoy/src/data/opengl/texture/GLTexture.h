@@ -24,6 +24,7 @@ public:
 
     // Tell opengl to generate a texture
     void GenTexture(const std::string filepath);
+    void GenTexture(const std::string filepath, bool sRGB);
     void Bind(unsigned int slot = 0) const;
     void Unbind() const;
 

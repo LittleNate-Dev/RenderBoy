@@ -55,6 +55,8 @@
 #define SHADER_OPENGL_RENDER_HASTEX_BLINN_NBD "data/shaders/opengl/render_mode/HASTEX_BLINN_NBD.glsl"
 #define SHADER_OPENGL_RENDER_HASTEX_PBR_3 "data/shaders/opengl/render_mode/HASTEX_PBR_3.glsl"
 #define SHADER_OPENGL_RENDER_HASTEX_PBR_4 "data/shaders/opengl/render_mode/HASTEX_PBR_4.glsl"
+#define SHADER_OPENGL_RENDER_HASTEX_PBR_3_NBD "data/shaders/opengl/render_mode/HASTEX_PBR_3_NBD.glsl"
+#define SHADER_OPENGL_RENDER_HASTEX_PBR_4_NBD "data/shaders/opengl/render_mode/HASTEX_PBR_4_NBD.glsl"
 #define SHADER_OPENGL_GBUFFER "data/shaders/opengl/others/GBUFFER.glsl"
 #define SHADER_OPENGL_BLANK "data/shaders/opengl/draw_mode/BLANK.glsl"
 #define SHADER_OPENGL_WIREFRAME "data/shaders/opengl/draw_mode/WIREFRAME.glsl"
@@ -125,7 +127,6 @@ enum Draw_Mode
 	POINTCLOUD = 3,
 	UVSET = 4,
 	DEPTH = 5
-	
 };
 
 enum Render_Mode
@@ -135,7 +136,9 @@ enum Render_Mode
 	HASTEX_BLINN = 2,
 	HASTEX_PBR_3 = 3,
 	HASTEX_PBR_4 = 4,
-	HASTEX_BLINN_NBD = 5
+	HASTEX_BLINN_NBD = 5,
+	HASTEX_PBR_3_NBD = 6,
+	HASTEX_PBR_4_NBD = 7
 };
 
 enum Anti_Alising
@@ -193,8 +196,8 @@ struct Settings
 struct Vertex
 {
 	glm::vec3 Position = glm::vec3(0.0f);
-	glm::vec3 Normal = glm::vec3(0.0f);
 	glm::vec2 TexCoord = glm::vec2(0.0f);
+	glm::vec3 Normal = glm::vec3(0.0f);
 	glm::vec3 Tangent = glm::vec3(0.0f);
 	glm::vec3 Bitangent = glm::vec3(0.0f);
 	glm::vec4 TexIndex = glm::vec4(-1.0f);

@@ -18,6 +18,12 @@ GLCubeMap::~GLCubeMap()
 
 bool GLCubeMap::GenTexture(std::vector<std::string> filepath)
 {
+    std::vector<int>().swap(m_Widths);
+    std::vector<int>().swap(m_Heights);
+    if (m_Handle)
+    {
+        glMakeTextureHandleNonResidentARB(m_Handle);
+    }
     GLCall(glDeleteTextures(1, &m_RendererID));
     GLCall(glGenTextures(1, &m_RendererID));
     GLCall(glBindTexture(GL_TEXTURE_CUBE_MAP, m_RendererID));
