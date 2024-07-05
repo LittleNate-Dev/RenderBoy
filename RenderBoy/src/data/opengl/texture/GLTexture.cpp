@@ -58,6 +58,10 @@ void GLTexture::GenTexture(const std::string filepath)
     {
         GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_COMPRESSED_SRGB_ALPHA, m_Width, m_Height, 0, GL_BGRA, GL_UNSIGNED_BYTE, (void*)FreeImage_GetBits(m_LocalBuffer)));
     }
+    else if (bpp == 64)
+    {
+        GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_COMPRESSED_SRGB_ALPHA, m_Width, m_Height, 0, GL_BGRA, GL_UNSIGNED_BYTE, (void*)FreeImage_GetBits(m_LocalBuffer)));
+    }
     GLCall(glGenerateMipmap(GL_TEXTURE_2D));
     // Generate texture handle
     m_Handle = glGetTextureHandleARB(m_RendererID);
@@ -127,8 +131,18 @@ void GLTexture::GenTexture(const std::string filepath, bool sRGB)
         else
         {
             GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_COMPRESSED_RGBA, m_Width, m_Height, 0, GL_BGRA, GL_UNSIGNED_BYTE, (void*)FreeImage_GetBits(m_LocalBuffer)));
+        } 
+    }
+    else if (bpp == 64)
+    {
+        if (sRGB)
+        {
+            GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_COMPRESSED_SRGB_ALPHA, m_Width, m_Height, 0, GL_BGRA, GL_UNSIGNED_BYTE, (void*)FreeImage_GetBits(m_LocalBuffer)));
         }
-        
+        else
+        {
+            GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_COMPRESSED_RGBA, m_Width, m_Height, 0, GL_BGRA, GL_UNSIGNED_BYTE, (void*)FreeImage_GetBits(m_LocalBuffer)));
+        }
     }
     GLCall(glGenerateMipmap(GL_TEXTURE_2D));
     // Generate texture handle

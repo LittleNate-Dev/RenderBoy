@@ -709,25 +709,25 @@ void GLData::AddModel(std::string name, Model& model)
 	for (unsigned int i = 0; i < m_ModelData[name].SpecularTex.size(); i++)
 	{
 		uniformName = "u_SpecularTex[" + std::to_string(i) + "]";
-		m_ModelData[name].SpecularTex[i].GenTexture(specularTex[i]);
+		m_ModelData[name].SpecularTex[i].GenTexture(specularTex[i], false);
 		m_ModelData[name].Shader.SetUniformHandleARB(uniformName, m_ModelData[name].SpecularTex[i].GetHandle());
 	}
 	for (unsigned int i = 0; i < m_ModelData[name].MetallicTex.size(); i++)
 	{
 		uniformName = "u_MetallicTex[" + std::to_string(i) + "]";
-		m_ModelData[name].MetallicTex[i].GenTexture(metallicTex[i]);
+		m_ModelData[name].MetallicTex[i].GenTexture(metallicTex[i], false);
 		m_ModelData[name].Shader.SetUniformHandleARB(uniformName, m_ModelData[name].MetallicTex[i].GetHandle());
 	}
 	for (unsigned int i = 0; i < m_ModelData[name].RoughnessTex.size(); i++)
 	{
 		uniformName = "u_RoughnessTex[" + std::to_string(i) + "]";
-		m_ModelData[name].RoughnessTex[i].GenTexture(roughnessTex[i]);
+		m_ModelData[name].RoughnessTex[i].GenTexture(roughnessTex[i], false);
 		m_ModelData[name].Shader.SetUniformHandleARB(uniformName, m_ModelData[name].RoughnessTex[i].GetHandle());
 	}
 	for (unsigned int i = 0; i < m_ModelData[name].AoTex.size(); i++)
 	{
 		uniformName = "u_AoTex[" + std::to_string(i) + "]";
-		m_ModelData[name].AoTex[i].GenTexture(aoTex[i]);
+		m_ModelData[name].AoTex[i].GenTexture(aoTex[i], false);
 		m_ModelData[name].Shader.SetUniformHandleARB(uniformName, m_ModelData[name].AoTex[i].GetHandle());
 	}
 	for (unsigned int i = 0; i < m_ModelData[name].NormalTex.size(); i++)
