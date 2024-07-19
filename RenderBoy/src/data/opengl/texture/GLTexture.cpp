@@ -48,17 +48,13 @@ void GLTexture::GenTexture(const std::string filepath)
     if (bpp == 1 || bpp == 4 || bpp == 8)
     {
         m_LocalBuffer = FreeImage_ConvertTo24Bits(m_LocalBuffer);
-        GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_COMPRESSED_SRGB, m_Width, m_Height, 0, GL_BGR, GL_UNSIGNED_BYTE, (void*)FreeImage_GetBits(m_LocalBuffer)));
     }
-    else if (bpp == 24)
+    FIBITMAP *alphaChannel = FreeImage_GetChannel(m_LocalBuffer, FICC_ALPHA);
+    if (alphaChannel == nullptr)
     {
         GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_COMPRESSED_SRGB, m_Width, m_Height, 0, GL_BGR, GL_UNSIGNED_BYTE, (void*)FreeImage_GetBits(m_LocalBuffer)));
     }
-    else if (bpp == 32)
-    {
-        GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_COMPRESSED_SRGB_ALPHA, m_Width, m_Height, 0, GL_BGRA, GL_UNSIGNED_BYTE, (void*)FreeImage_GetBits(m_LocalBuffer)));
-    }
-    else if (bpp == 64)
+    else
     {
         GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_COMPRESSED_SRGB_ALPHA, m_Width, m_Height, 0, GL_BGRA, GL_UNSIGNED_BYTE, (void*)FreeImage_GetBits(m_LocalBuffer)));
     }
@@ -102,16 +98,9 @@ void GLTexture::GenTexture(const std::string filepath, bool sRGB)
     if (bpp == 1 || bpp == 4 || bpp == 8)
     {
         m_LocalBuffer = FreeImage_ConvertTo24Bits(m_LocalBuffer);
-        if (sRGB)
-        {
-            GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_COMPRESSED_SRGB, m_Width, m_Height, 0, GL_BGR, GL_UNSIGNED_BYTE, (void*)FreeImage_GetBits(m_LocalBuffer)));
-        }
-        else
-        {
-            GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_COMPRESSED_RGB, m_Width, m_Height, 0, GL_BGR, GL_UNSIGNED_BYTE, (void*)FreeImage_GetBits(m_LocalBuffer)));
-        }
     }
-    else if (bpp == 24)
+    FIBITMAP* alphaChannel = FreeImage_GetChannel(m_LocalBuffer, FICC_ALPHA);
+    if (alphaChannel == nullptr)
     {
         if (sRGB)
         {
@@ -122,18 +111,7 @@ void GLTexture::GenTexture(const std::string filepath, bool sRGB)
             GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_COMPRESSED_RGB, m_Width, m_Height, 0, GL_BGR, GL_UNSIGNED_BYTE, (void*)FreeImage_GetBits(m_LocalBuffer)));
         }
     }
-    else if (bpp == 32)
-    {
-        if (sRGB)
-        {
-            GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_COMPRESSED_SRGB_ALPHA, m_Width, m_Height, 0, GL_BGRA, GL_UNSIGNED_BYTE, (void*)FreeImage_GetBits(m_LocalBuffer)));
-        }
-        else
-        {
-            GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_COMPRESSED_RGBA, m_Width, m_Height, 0, GL_BGRA, GL_UNSIGNED_BYTE, (void*)FreeImage_GetBits(m_LocalBuffer)));
-        } 
-    }
-    else if (bpp == 64)
+    else
     {
         if (sRGB)
         {

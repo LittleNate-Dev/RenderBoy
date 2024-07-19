@@ -75,8 +75,7 @@ struct GLModelData
 	std::vector<GLTexture> RoughnessTex;
 	std::vector<GLTexture> AoTex;
 	std::vector<GLTexture> NormalTex;
-	std::vector<GLTexture> BumpTex;
-	std::vector<GLTexture> DisplacementTex;
+	std::vector<GLTexture> HeightTex;
 	std::vector<glm::vec3> AmbientValue;
 	std::vector<glm::vec3> DiffuseValue;
 	std::vector<glm::vec3> SpecularValue;

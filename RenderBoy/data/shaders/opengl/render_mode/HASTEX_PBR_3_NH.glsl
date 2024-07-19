@@ -30,7 +30,7 @@ layout (location = 4) in vec3 a_BiTangent;
 layout (location = 5) in vec4 a_TexIndex;
 layout (location = 6) in vec3 a_ColorIndex;
 layout (location = 7) in vec4 a_AttributeIndex;
-layout (location = 8) in vec3 a_NBDIndex;
+layout (location = 8) in vec2 a_NHIndex;
 layout (location = 9) in mat4 a_ModelMat;
 
 out vec3 v_FragPos;
@@ -40,7 +40,7 @@ out vec2 v_TexCoord;
 out vec4 v_TexIndex;
 out vec3 v_ColorIndex;
 out vec4 v_AttributeIndex;
-out vec3 v_NBDIndex;
+out vec2 v_NHIndex;
 out vec4 v_FragPosSpot[SPOT_LIGHT_COUNT];
 out FragPosDir v_FragPosDir[DIR_LIGHT_COUNT];
 
@@ -57,7 +57,7 @@ void main()
     v_TexIndex = a_TexIndex;
     v_ColorIndex = a_ColorIndex;
     v_AttributeIndex = a_AttributeIndex;
-    v_NBDIndex = a_NBDIndex;
+    v_NHIndex = a_NHIndex;
     if (a_Normal == vec3(0.0))
     {
         v_Normal = vec3(0.0);
@@ -160,7 +160,7 @@ in vec2 v_TexCoord;
 in vec4 v_TexIndex;
 in vec3 v_ColorIndex;
 in vec4 v_AttributeIndex;
-in vec3 v_NBDIndex;
+in vec2 v_NHIndex;
 in vec4 v_FragPosSpot[SPOT_LIGHT_COUNT];
 in FragPosDir v_FragPosDir[DIR_LIGHT_COUNT];
 
@@ -180,9 +180,9 @@ uniform sampler2D u_AlbedoTex[];
 uniform sampler2D u_MetallicTex[];
 uniform sampler2D u_AoTex[];
 uniform sampler2D u_NormalTex[];
-uniform sampler2D u_BumpTex[];
-uniform sampler2D u_DisplacementTex[];
+uniform sampler2D u_HeightTex[];
 
+vec2 c_TexCoord = vec2(0.0);
 vec3 c_ViewDir = vec3(0.0);
 vec3 c_Normal = vec3(0.0);
 float c_SSAO = 1.0;
@@ -192,8 +192,7 @@ int c_AlbedoTexIndex = -1;
 int c_MetallicTexIndex = -1;
 int c_AoTexIndex = -1;
 int c_NormalTexIndex = -1;
-int c_BumpTexIndex = -1;
-int c_DisplacementTexIndex = -1;
+int c_HeightTexIndex = -1;
 vec3 c_Albedo = vec3(0.0);
 float c_Metallic = 0.0;
 float c_Roughness = 1.0;
@@ -210,26 +209,74 @@ vec3 FresnelSchlick(float cosTheta, vec3 F0);
 
 void main()
 {
+    c_TexCoord = v_TexCoord;
     c_AlbedoTexIndex = int(v_TexIndex.x + 0.1);
     c_MetallicTexIndex = int(v_TexIndex.y + 0.1);
     c_AoTexIndex = int(v_TexIndex.w + 0.1);
     c_ColorIndex = v_ColorIndex + vec3(0.1);
     c_AttributeIndex = v_AttributeIndex + vec4(0.1);
-    c_NormalTexIndex = int(v_NBDIndex.x + 0.1);
-    c_BumpTexIndex = int(v_NBDIndex.y + 0.1);
+    c_NormalTexIndex = int(v_NHIndex.x + 0.1);
+    c_HeightTexIndex = int(v_NHIndex.y + 0.1);
     // Varibles used for lighting
     c_ViewDir = normalize(u_ViewPos - v_FragPos);
-    if (v_NBDIndex.x < 0)
+    // Height mapping
+    if (v_NHIndex.y >= 0 && v_NHIndex.y >= 0)
+    {
+//        float height = texture(u_HeightTex[c_HeightTexIndex], c_TexCoord).r;  
+        vec3 viewDirTBN = normalize(transpose(v_TBN) * c_ViewDir);
+//        vec2 p = viewDirTBN.xy / viewDirTBN.z * height * 0.05;
+//        c_TexCoord -= p;
+
+        // number of depth layers
+        const float numLayers = 10;
+        // calculate the size of each layer
+        float layerDepth = 1.0 / numLayers;
+        // depth of current layer
+        float currentLayerDepth = 0.0;
+        // the amount to shift the texture coordinates per layer (from vector P)
+        vec2 P = viewDirTBN.xy * 0.2; 
+        vec2 deltaTexCoords = P / numLayers;
+        // get initial values
+        vec2  currentTexCoords = c_TexCoord;
+        float currentDepthMapValue = texture(u_HeightTex[c_HeightTexIndex], c_TexCoord).r;
+  
+        while(currentLayerDepth < currentDepthMapValue)
+        {
+            // shift texture coordinates along direction of P
+            currentTexCoords -= deltaTexCoords;
+            // get depthmap value at current texture coordinates
+            currentDepthMapValue = texture(u_HeightTex[c_HeightTexIndex], currentTexCoords).r;  
+            // get depth of next layer
+            currentLayerDepth += layerDepth;  
+        }
+        // get texture coordinates before collision (reverse operations)
+        vec2 prevTexCoords = currentTexCoords + deltaTexCoords;
+
+        // get depth after and before collision for linear interpolation
+        float afterDepth  = currentDepthMapValue - currentLayerDepth;
+        float beforeDepth = texture(u_HeightTex[c_HeightTexIndex], prevTexCoords).r - currentLayerDepth + layerDepth;
+ 
+        // interpolation of texture coordinates
+        float weight = afterDepth / (afterDepth - beforeDepth);
+        c_TexCoord = prevTexCoords * weight + currentTexCoords * (1.0 - weight);
+        if(c_TexCoord.x > 1.0 || c_TexCoord.y > 1.0 || c_TexCoord.x < 0.0 || c_TexCoord.y < 0.0)
+        {
+            discard;
+        }
+    }
+    
+    // Normal mapping
+    if (v_NHIndex.x < 0)
     {
         c_Normal = normalize(v_Normal);
     } 
     else
     {
-        c_Normal = texture(u_NormalTex[c_NormalTexIndex], v_TexCoord).rgb;
+        c_Normal = texture(u_NormalTex[c_NormalTexIndex], c_TexCoord).rgb;
         c_Normal = normalize(c_Normal * 2.0 - 1.0);
         c_Normal = normalize(v_TBN * c_Normal);
     }
-    
+    // Discard fragment if it's highly transparent
     if (v_TexIndex.x < 0)
     {
         if (u_Transparent[int(c_AttributeIndex.y)] < 0.1)
@@ -237,7 +284,7 @@ void main()
             discard;
         }
     }
-    else if (texture(u_AlbedoTex[c_AlbedoTexIndex], v_TexCoord).a < 0.1)
+    else if (texture(u_AlbedoTex[c_AlbedoTexIndex], c_TexCoord).a < 0.1)
     {
         discard;
     }
@@ -255,13 +302,13 @@ void main()
     }
     else
     {
-        c_Albedo = texture(u_AlbedoTex[c_AlbedoTexIndex], v_TexCoord).rgb;
-        c_Metallic = texture(u_MetallicTex[c_MetallicTexIndex], v_TexCoord).b;
-        c_Roughness = texture(u_MetallicTex[c_MetallicTexIndex], v_TexCoord).g;
+        c_Albedo = texture(u_AlbedoTex[c_AlbedoTexIndex], c_TexCoord).rgb;
+        c_Metallic = texture(u_MetallicTex[c_MetallicTexIndex], c_TexCoord).b;
+        c_Roughness = texture(u_MetallicTex[c_MetallicTexIndex], c_TexCoord).g;
     }
     if (v_TexIndex.w >= 0)
     {
-        c_AO = texture(u_AoTex[c_AoTexIndex], v_TexCoord).r;
+        c_AO = texture(u_AoTex[c_AoTexIndex], c_TexCoord).r;
     }
     c_AO *= c_SSAO;
     c_F0 = mix(c_F0, c_Albedo, c_Metallic);
@@ -294,7 +341,7 @@ void main()
     }
     else
     {
-        v_FragColor = vec4(result, texture(u_AlbedoTex[c_AlbedoTexIndex], v_TexCoord).a);
+        v_FragColor = vec4(result, texture(u_AlbedoTex[c_AlbedoTexIndex], c_TexCoord).a);
     }
 }
 

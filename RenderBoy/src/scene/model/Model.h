@@ -39,7 +39,7 @@ private:
 	// After changing attributes, update matrix
 	void UpdateModelMat(unsigned int current = 0);
 	// Does this model has normal/bump/displacement map?
-	bool HasNBDTex();
+	bool HasNHTex();
 
 
 public:

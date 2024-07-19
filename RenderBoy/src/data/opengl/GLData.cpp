@@ -208,8 +208,7 @@ void GLData::AddModel(std::string name, Model& model)
 	std::vector<std::string> roughnessTex;
 	std::vector<std::string> aoTex;
 	std::vector<std::string> normalTex;
-	std::vector<std::string> bumpTex;
-	std::vector<std::string> displacementTex;
+	std::vector<std::string> heightTex;
 	for (unsigned int i = 0; i < model.GetMeshes().size(); i++)
 	{
 		//std::cout << model.GetMeshes()[i].GetAlbedoTexFilePath() << std::endl;
@@ -397,13 +396,13 @@ void GLData::AddModel(std::string name, Model& model)
 					normalTex.push_back(model.GetMeshes()[i].GetNormalTexFilePath());
 				}
 			}
-			// Bump texture
+			// Height texture
 			hasValue = false;
-			if (model.GetMeshes()[i].GetBumpTexFilePath() != "")
+			if (model.GetMeshes()[i].GetHeightTexFilePath() != "")
 			{
-				for (unsigned int j = 0; j < bumpTex.size(); j++)
+				for (unsigned int j = 0; j < heightTex.size(); j++)
 				{
-					if (model.GetMeshes()[i].GetBumpTexFilePath() == bumpTex[j])
+					if (model.GetMeshes()[i].GetHeightTexFilePath() == heightTex[j])
 					{
 						hasValue = true;
 						break;
@@ -411,24 +410,7 @@ void GLData::AddModel(std::string name, Model& model)
 				}
 				if (!hasValue)
 				{
-					bumpTex.push_back(model.GetMeshes()[i].GetBumpTexFilePath());
-				}
-			}
-			// Displacement texture
-			hasValue = false;
-			if (model.GetMeshes()[i].GetDisplacementTexFilePath() != "")
-			{
-				for (unsigned int j = 0; j < displacementTex.size(); j++)
-				{
-					if (model.GetMeshes()[i].GetDisplacementTexFilePath() == displacementTex[j])
-					{
-						hasValue = true;
-						break;
-					}
-				}
-				if (!hasValue)
-				{
-					displacementTex.push_back(model.GetMeshes()[i].GetDisplacementTexFilePath());
+					heightTex.push_back(model.GetMeshes()[i].GetHeightTexFilePath());
 				}
 			}
 		}
@@ -458,8 +440,7 @@ void GLData::AddModel(std::string name, Model& model)
 	model.GetStatics().ReflectiveCount = m_ModelData[name].ReflectiveValue.size();
 	model.GetStatics().TransparentCount = m_ModelData[name].TransparentValue.size();
 	model.GetStatics().NormalTexCount = normalTex.size();
-	model.GetStatics().BumpTexCount = bumpTex.size();
-	model.GetStatics().DisplacementTexCount = displacementTex.size();
+	model.GetStatics().HeightTexCount = heightTex.size();
 	m_ModelData[name].Statics = model.GetStatics();
 	std::cout << "albedo tex count: " << model.GetStatics().AlbedoTexCount << std::endl;
 	std::cout << "specular tex count: " << model.GetStatics().SpecularTexCount << std::endl;
@@ -467,8 +448,7 @@ void GLData::AddModel(std::string name, Model& model)
 	std::cout << "roughness tex count: " << model.GetStatics().RoughnessTexCount << std::endl;
 	std::cout << "ao tex count: " << model.GetStatics().AoTexCount << std::endl;
 	std::cout << "normal count: " << model.GetStatics().NormalTexCount << std::endl;
-	std::cout << "bump count: " << model.GetStatics().BumpTexCount << std::endl;
-	std::cout << "displacement count: " << model.GetStatics().DisplacementTexCount << std::endl;
+	std::cout << "height count: " << model.GetStatics().HeightTexCount << std::endl;
 	// Handle vertex position and index
 	std::vector<Vertex> vertices;
 	std::vector<unsigned int> indices;
@@ -483,7 +463,7 @@ void GLData::AddModel(std::string name, Model& model)
 		glm::vec4 texIndex = glm::vec4(-1.0f);
 		glm::vec3 colorIndex = glm::vec3(-1.0f);
 		glm::vec4 attributeIndex = glm::vec4(-1.0f);
-		glm::vec3 nbdIndex = glm::vec3(-1.0f);
+		glm::vec2 nhIndex = glm::vec2(-1.0f);
 		// Albedo tex
 		for (unsigned int j = 0; j < albedoTex.size(); j++)
 		{
@@ -570,25 +550,16 @@ void GLData::AddModel(std::string name, Model& model)
 		{
 			if (model.GetMeshes()[i].GetNormalTexFilePath() == normalTex[j])
 			{
-				nbdIndex.x = (float)j;
+				nhIndex.x = (float)j;
 				break;
 			}
 		}
-		// Bump tex
-		for (unsigned int j = 0; j < bumpTex.size(); j++)
+		// Height tex
+		for (unsigned int j = 0; j < heightTex.size(); j++)
 		{
-			if (model.GetMeshes()[i].GetBumpTexFilePath() == bumpTex[j])
+			if (model.GetMeshes()[i].GetHeightTexFilePath() == heightTex[j])
 			{
-				nbdIndex.y = (float)j;
-				break;
-			}
-		}
-		// Displacement tex
-		for (unsigned int j = 0; j < displacementTex.size(); j++)
-		{
-			if (model.GetMeshes()[i].GetDisplacementTexFilePath() == displacementTex[j])
-			{
-				nbdIndex.z = (float)j;
+				nhIndex.y = (float)j;
 				break;
 			}
 		}
@@ -597,7 +568,7 @@ void GLData::AddModel(std::string name, Model& model)
 			model.GetMeshes()[i].GetVertices()[j].TexIndex = texIndex;
 			model.GetMeshes()[i].GetVertices()[j].ColorIndex = colorIndex;
 			model.GetMeshes()[i].GetVertices()[j].AttributeIndex = attributeIndex; 
-			model.GetMeshes()[i].GetVertices()[j].NBDIndex = nbdIndex;
+			model.GetMeshes()[i].GetVertices()[j].NHIndex = nhIndex;
 		}
 		//// Reflective
 		//for (unsigned int j = 0; j < m_ModelData[name].ReflectiveValue.size(); j++)
@@ -630,8 +601,8 @@ void GLData::AddModel(std::string name, Model& model)
 	layout.Push<float>(3);
 	//mesh attribute index
 	layout.Push<float>(4);
-	//vertex Normal, Bump or Displacement map index
-	layout.Push<float>(3);
+	//vertex Normal or Height map index
+	layout.Push<float>(2);
 	m_ModelData[name].VA.AddBuffer(m_ModelData[name].VB, layout);
 	// Add model matrix as vertex attribute
 	m_ModelData[name].InstanceVB.GenVertexBuffer(&model.GetModelMats()[0], (unsigned int)model.GetModelMats().size() * sizeof(glm::mat4));
@@ -690,15 +661,10 @@ void GLData::AddModel(std::string name, Model& model)
 		GLTexture texture;
 		m_ModelData[name].NormalTex.push_back(texture);
 	}
-	for (unsigned int i = 0; i < bumpTex.size(); i++)
+	for (unsigned int i = 0; i < heightTex.size(); i++)
 	{
 		GLTexture texture;
-		m_ModelData[name].BumpTex.push_back(texture);
-	}
-	for (unsigned int i = 0; i < displacementTex.size(); i++)
-	{
-		GLTexture texture;
-		m_ModelData[name].DisplacementTex.push_back(texture);
+		m_ModelData[name].HeightTex.push_back(texture);
 	}
 	for (unsigned int i = 0; i < m_ModelData[name].AlbedoTex.size(); i++)
 	{
@@ -736,17 +702,11 @@ void GLData::AddModel(std::string name, Model& model)
 		m_ModelData[name].NormalTex[i].GenTexture(normalTex[i], false);
 		m_ModelData[name].Shader.SetUniformHandleARB(uniformName, m_ModelData[name].NormalTex[i].GetHandle());
 	}
-	for (unsigned int i = 0; i < m_ModelData[name].BumpTex.size(); i++)
+	for (unsigned int i = 0; i < m_ModelData[name].HeightTex.size(); i++)
 	{
-		uniformName = "u_BumpTex[" + std::to_string(i) + "]";
-		m_ModelData[name].BumpTex[i].GenTexture(bumpTex[i], false);
-		m_ModelData[name].Shader.SetUniformHandleARB(uniformName, m_ModelData[name].BumpTex[i].GetHandle());
-	}
-	for (unsigned int i = 0; i < m_ModelData[name].DisplacementTex.size(); i++)
-	{
-		uniformName = "u_DisplacementTex[" + std::to_string(i) + "]";
-		m_ModelData[name].DisplacementTex[i].GenTexture(displacementTex[i], false);
-		m_ModelData[name].Shader.SetUniformHandleARB(uniformName, m_ModelData[name].DisplacementTex[i].GetHandle());
+		uniformName = "u_HeightTex[" + std::to_string(i) + "]";
+		m_ModelData[name].HeightTex[i].GenTexture(heightTex[i], false);
+		m_ModelData[name].Shader.SetUniformHandleARB(uniformName, m_ModelData[name].HeightTex[i].GetHandle());
 	}
 	m_ModelData[name].Shader.Unbind();
 }
@@ -1011,15 +971,10 @@ void GLData::ReInitShader()
 			uniformName = "u_NormalTex[" + std::to_string(i) + "]";
 			m_ModelData[model].Shader.SetUniformHandleARB(uniformName, m_ModelData[model].NormalTex[i].GetHandle());
 		}
-		for (unsigned int i = 0; i < m_ModelData[model].BumpTex.size(); i++)
+		for (unsigned int i = 0; i < m_ModelData[model].HeightTex.size(); i++)
 		{
-			uniformName = "u_BumpTex[" + std::to_string(i) + "]";
-			m_ModelData[model].Shader.SetUniformHandleARB(uniformName, m_ModelData[model].BumpTex[i].GetHandle());
-		}
-		for (unsigned int i = 0; i < m_ModelData[model].DisplacementTex.size(); i++)
-		{
-			uniformName = "u_DisplacementTex[" + std::to_string(i) + "]";
-			m_ModelData[model].Shader.SetUniformHandleARB(uniformName, m_ModelData[model].DisplacementTex[i].GetHandle());
+			uniformName = "u_HeightTex[" + std::to_string(i) + "]";
+			m_ModelData[model].Shader.SetUniformHandleARB(uniformName, m_ModelData[model].HeightTex[i].GetHandle());
 		}
 		m_ModelData[model].Shader.Unbind();
 	}

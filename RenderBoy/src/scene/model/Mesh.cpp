@@ -17,56 +17,6 @@ Mesh::~Mesh()
 {
 }
 
-void Mesh::SetAmbientValue(glm::vec3 value)
-{
-	m_AmbientValue = value;
-}
-
-void Mesh::SetDiffuseValue(glm::vec3 value)
-{
-	m_DiffuseValue = value;
-}
-
-void Mesh::SetSpecularValue(glm::vec3 value)
-{
-	m_SpecularValue = value;
-}
-
-void Mesh::SetEmissiveValue(glm::vec3 value)
-{
-	m_EmissiveValue = value;
-}
-
-void Mesh::SetReflectiveValue(float value)
-{
-	m_ReflectiveValue = value;
-}
-
-void Mesh::SetRefractionValue(float value)
-{
-	m_RefractionValue = value;
-}
-
-void Mesh::SetTransparentValue(float value)
-{
-	m_TransparentValue = value;
-}
-
-void Mesh::SetDissolveValue(float value)
-{
-	m_TransparentValue = 1.0f - value;
-}
-
-void Mesh::SetTransmissionValue(glm::vec3 value)
-{
-	m_TransmissionValue = value;
-}
-
-void Mesh::SetIllumValue(unsigned int value)
-{
-	m_IllumValue = value;
-}
-
 bool Mesh::HasTexture()
 {
 	bool hasTexture = false;
@@ -76,8 +26,7 @@ bool Mesh::HasTexture()
 	hasTexture |= HasRoughnessTex();
 	hasTexture |= HasAoTex();
 	hasTexture |= HasNormalTex();
-	hasTexture |= HasBumpTex();
-	hasTexture |= HasDisplacementTex();
+	hasTexture |= HasHeightTex();
 	return hasTexture;
 }
 
@@ -144,18 +93,9 @@ bool Mesh::HasNormalTex()
 	return false;
 }
 
-bool Mesh::HasBumpTex()
+bool Mesh::HasHeightTex()
 {
-	if (m_BumpTexFilePath != "")
-	{
-		return true;
-	}
-	return false;
-}
-
-bool Mesh::HasDisplacementTex()
-{
-	if (m_DisplacementTexFilePath != "")
+	if (m_HeightTexFilePath != "")
 	{
 		return true;
 	}

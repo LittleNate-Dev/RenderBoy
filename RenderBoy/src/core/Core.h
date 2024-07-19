@@ -52,11 +52,11 @@
 #define SHADER_OPENGL_RENDER_NOTEX "data/shaders/opengl/render_mode/NOTEX.glsl"
 #define SHADER_OPENGL_RENDER_HASTEX_ALBEDO "data/shaders/opengl/render_mode/HASTEX_ALBEDO.glsl"
 #define SHADER_OPENGL_RENDER_HASTEX_BLINN "data/shaders/opengl/render_mode/HASTEX_BLINN.glsl"
-#define SHADER_OPENGL_RENDER_HASTEX_BLINN_NBD "data/shaders/opengl/render_mode/HASTEX_BLINN_NBD.glsl"
+#define SHADER_OPENGL_RENDER_HASTEX_BLINN_NH "data/shaders/opengl/render_mode/HASTEX_BLINN_NH.glsl"
 #define SHADER_OPENGL_RENDER_HASTEX_PBR_3 "data/shaders/opengl/render_mode/HASTEX_PBR_3.glsl"
 #define SHADER_OPENGL_RENDER_HASTEX_PBR_4 "data/shaders/opengl/render_mode/HASTEX_PBR_4.glsl"
-#define SHADER_OPENGL_RENDER_HASTEX_PBR_3_NBD "data/shaders/opengl/render_mode/HASTEX_PBR_3_NBD.glsl"
-#define SHADER_OPENGL_RENDER_HASTEX_PBR_4_NBD "data/shaders/opengl/render_mode/HASTEX_PBR_4_NBD.glsl"
+#define SHADER_OPENGL_RENDER_HASTEX_PBR_3_NH "data/shaders/opengl/render_mode/HASTEX_PBR_3_NH.glsl"
+#define SHADER_OPENGL_RENDER_HASTEX_PBR_4_NH "data/shaders/opengl/render_mode/HASTEX_PBR_4_NH.glsl"
 #define SHADER_OPENGL_GBUFFER "data/shaders/opengl/others/GBUFFER.glsl"
 #define SHADER_OPENGL_BLANK "data/shaders/opengl/draw_mode/BLANK.glsl"
 #define SHADER_OPENGL_WIREFRAME "data/shaders/opengl/draw_mode/WIREFRAME.glsl"
@@ -136,9 +136,9 @@ enum Render_Mode
 	HASTEX_BLINN = 2,
 	HASTEX_PBR_3 = 3,
 	HASTEX_PBR_4 = 4,
-	HASTEX_BLINN_NBD = 5,
-	HASTEX_PBR_3_NBD = 6,
-	HASTEX_PBR_4_NBD = 7
+	HASTEX_BLINN_NH = 5,
+	HASTEX_PBR_3_NH = 6,
+	HASTEX_PBR_4_NH = 7
 };
 
 enum Anti_Alising
@@ -203,7 +203,7 @@ struct Vertex
 	glm::vec4 TexIndex = glm::vec4(-1.0f);
 	glm::vec3 ColorIndex = glm::vec3(-1.0f);
 	glm::vec4 AttributeIndex = glm::vec4(-1.0f); // Ns, Ni, Tr, Tf
-	glm::vec3 NBDIndex = glm::vec3(-1.0f); // NBD stands for normal, bump and displacement
+	glm::vec2 NHIndex = glm::vec2(-1.0f); // NBD stands for normal, bump and displacement
 };
 
 struct ModelStatics
@@ -218,8 +218,7 @@ struct ModelStatics
 	unsigned int RoughnessTexCount = 0;
 	unsigned int AoTexCount = 0;
 	unsigned int NormalTexCount = 0;
-	unsigned int BumpTexCount = 0;
-	unsigned int DisplacementTexCount = 0;
+	unsigned int HeightTexCount = 0;
 	unsigned int AmbientValueCount = 0;
 	unsigned int DiffuseValueCount = 0;
 	unsigned int SpecularValueCount = 0;

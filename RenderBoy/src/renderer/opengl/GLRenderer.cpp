@@ -249,6 +249,8 @@ void GLRenderer::Draw(Scene& scene)
 	Clear();
 	glm::vec2 renderRes = core::GetRenderResolution();
 	GLCall(glViewport(0, 0, (GLsizei)renderRes.x, (GLsizei)renderRes.y));
+	// Draw Skybox
+	DrawSkybox(scene);
 	switch (core::SETTINGS.DrawMode)
 	{
 	case DEFAULT:
@@ -277,8 +279,6 @@ void GLRenderer::Draw(Scene& scene)
 	{
 		DrawNormal(scene);
 	}
-	// Draw Skybox
-	DrawSkybox(scene);
 	// Draw your content inside this scope
 	if ((int)core::SETTINGS.AA >= 1 && (int)core::SETTINGS.AA <= 4)
 	{
@@ -604,7 +604,8 @@ void GLRenderer::DrawLightCube(Scene& scene)
 
 void GLRenderer::DrawSkybox(Scene& scene)
 {
-	GLCall(glDepthFunc(GL_LEQUAL));
+	//GLCall(glDepthFunc(GL_LEQUAL));
+	GLCall(glDisable(GL_DEPTH_TEST));
 	scene.GetData().GetDataGL().GetSkybox().Shader.Bind();
 	scene.GetData().GetDataGL().GetSkybox().Shader.SetUniformMat4f("u_ProjMat", scene.GetCamera().GetProjMat());
 	// Remove translation from view matrix
@@ -618,7 +619,8 @@ void GLRenderer::DrawSkybox(Scene& scene)
 	scene.GetData().GetDataGL().GetSkybox().VA.Unbind();
 	scene.GetData().GetDataGL().GetSkybox().IB.Unbind();
 	scene.GetData().GetDataGL().GetSkybox().Shader.Unbind();
-	GLCall(glDepthFunc(GL_LESS)); // set depth function back to default
+	GLCall(glEnable(GL_DEPTH_TEST));
+	//GLCall(glDepthFunc(GL_LESS)); // set depth function back to default
 }
 
 void GLRenderer::DrawPointLightShadow(Scene& scene)

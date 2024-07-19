@@ -47,8 +47,8 @@ bool GLShader::Init(ModelStatics statics)
     case HASTEX_BLINN:
         m_FilePath = SHADER_OPENGL_RENDER_HASTEX_BLINN;
         break;
-    case HASTEX_BLINN_NBD:
-        m_FilePath = SHADER_OPENGL_RENDER_HASTEX_BLINN_NBD;
+    case HASTEX_BLINN_NH:
+        m_FilePath = SHADER_OPENGL_RENDER_HASTEX_BLINN_NH;
         break;
     case HASTEX_PBR_3:
         m_FilePath = SHADER_OPENGL_RENDER_HASTEX_PBR_3;
@@ -56,11 +56,11 @@ bool GLShader::Init(ModelStatics statics)
     case HASTEX_PBR_4:
         m_FilePath = SHADER_OPENGL_RENDER_HASTEX_PBR_4;
         break;
-    case HASTEX_PBR_3_NBD:
-        m_FilePath = SHADER_OPENGL_RENDER_HASTEX_PBR_3_NBD;
+    case HASTEX_PBR_3_NH:
+        m_FilePath = SHADER_OPENGL_RENDER_HASTEX_PBR_3_NH;
         break;
-    case HASTEX_PBR_4_NBD:
-        m_FilePath = SHADER_OPENGL_RENDER_HASTEX_PBR_4_NBD;
+    case HASTEX_PBR_4_NH:
+        m_FilePath = SHADER_OPENGL_RENDER_HASTEX_PBR_4_NH;
         break;
     default:
         break;
@@ -300,22 +300,6 @@ ShaderProgramSource GLShader::ParseShader(std::string filepath, ModelStatics sta
             }
             ss[(int)type] << line << '\n';
         }
-        /*else if (line.find("in vec4 v_FragPosTangentSpot[SPOT_LIGHT_COUNT];") != std::string::npos)
-        {
-            if (core::SCENE_STATICS.SpotLight == 0)
-            {
-                line = "in vec4 v_FragPosTangentSpot[1];";
-            }
-            ss[(int)type] << line << '\n';
-        }
-        else if (line.find("out vec4 v_FragPosTangentSpot[SPOT_LIGHT_COUNT];") != std::string::npos)
-        {
-            if (core::SCENE_STATICS.SpotLight == 0)
-            {
-                line = "out vec4 v_FragPosTangentSpot[1];";
-            }
-            ss[(int)type] << line << '\n';
-        }*/
         else if (line.find("in FragPosDir v_FragPosDir[DIR_LIGHT_COUNT];") != std::string::npos)
         {
             if (core::SCENE_STATICS.DirectionalLight == 0)
@@ -456,27 +440,15 @@ ShaderProgramSource GLShader::ParseShader(std::string filepath, ModelStatics sta
             }
             ss[(int)type] << line << '\n';
         }
-        else if (line.find("uniform sampler2D u_BumpTex[];") != std::string::npos)
+        else if (line.find("uniform sampler2D u_HeightTex[];") != std::string::npos)
         {
-            if (statics.BumpTexCount)
+            if (statics.HeightTexCount)
             {
-                line = "uniform sampler2D u_BumpTex[" + std::to_string(statics.BumpTexCount) + "];";
+                line = "uniform sampler2D u_HeightTex[" + std::to_string(statics.HeightTexCount) + "];";
             }
             else
             {
-                line = "uniform sampler2D u_BumpTex[1];";
-            }
-            ss[(int)type] << line << '\n';
-        }
-        else if (line.find("uniform sampler2D u_DisplacementTex[];") != std::string::npos)
-        {
-            if (statics.DisplacementTexCount)
-            {
-                line = "uniform sampler2D u_DisplacementTex[" + std::to_string(statics.DisplacementTexCount) + "];";
-            }
-            else
-            {
-                line = "uniform sampler2D u_DisplacementTex[1];";
+                line = "uniform sampler2D u_HeightTex[1];";
             }
             ss[(int)type] << line << '\n';
         }

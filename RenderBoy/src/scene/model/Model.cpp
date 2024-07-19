@@ -52,9 +52,9 @@ void Model::UpdateStatics()
         if (hasSpecularTex)
         {
             m_Statics.RenderMode = HASTEX_BLINN;
-            if (HasNBDTex())
+            if (HasNHTex())
             {
-                m_Statics.RenderMode = HASTEX_BLINN_NBD;
+                m_Statics.RenderMode = HASTEX_BLINN_NH;
             }
         }
         else if (hasMetallicTex)
@@ -66,17 +66,17 @@ void Model::UpdateStatics()
                     if (m_Meshes[i].GetMetallicTexFilePath() == m_Meshes[i].GetRoughnessTexFilePath())
                     {
                         m_Statics.RenderMode = HASTEX_PBR_3;
-                        if (HasNBDTex())
+                        if (HasNHTex())
                         {
-                            m_Statics.RenderMode = HASTEX_PBR_3_NBD;
+                            m_Statics.RenderMode = HASTEX_PBR_3_NH;
                         }
                     }
                     else
                     {
                         m_Statics.RenderMode = HASTEX_PBR_4; 
-                        if (HasNBDTex())
+                        if (HasNHTex())
                         {
-                            m_Statics.RenderMode = HASTEX_PBR_4_NBD;
+                            m_Statics.RenderMode = HASTEX_PBR_4_NH;
                         }
                     }
                     break;
@@ -182,20 +182,26 @@ Mesh Model::AssimpProcessMesh(aiMesh* mesh, aiNode* node, const aiScene* scene)
         std::string filepath = AssimpLoadTexturePath(material, aiTextureType_AMBIENT_OCCLUSION)[0];
         newMesh.GetAoTexFilePath() = core::ReplaceBackwardSlash(filepath);
     }
-    if (AssimpLoadTexturePath(material, aiTextureType_NORMALS).size())
+    if (core::GetFileFormat(m_FilePath) == "obj")
     {
-        std::string filepath = AssimpLoadTexturePath(material, aiTextureType_NORMALS)[0];
-        newMesh.GetNormalTexFilePath() = core::ReplaceBackwardSlash(filepath);
+        if (AssimpLoadTexturePath(material, aiTextureType_HEIGHT).size())
+        {
+            std::string filepath = AssimpLoadTexturePath(material, aiTextureType_HEIGHT)[0];
+            newMesh.GetNormalTexFilePath() = core::ReplaceBackwardSlash(filepath);
+        }
     }
-    if (AssimpLoadTexturePath(material, aiTextureType_HEIGHT).size())
+    else
     {
-        std::string filepath = AssimpLoadTexturePath(material, aiTextureType_HEIGHT)[0];
-        newMesh.GetBumpTexFilePath() = core::ReplaceBackwardSlash(filepath);
-    }
-    if (AssimpLoadTexturePath(material, aiTextureType_DISPLACEMENT).size())
-    {
-        std::string filepath = AssimpLoadTexturePath(material, aiTextureType_DISPLACEMENT)[0];
-        newMesh.GetDisplacementTexFilePath() = core::ReplaceBackwardSlash(filepath);
+        if (AssimpLoadTexturePath(material, aiTextureType_NORMALS).size())
+        {
+            std::string filepath = AssimpLoadTexturePath(material, aiTextureType_NORMALS)[0];
+            newMesh.GetNormalTexFilePath() = core::ReplaceBackwardSlash(filepath);
+        }
+        if (AssimpLoadTexturePath(material, aiTextureType_HEIGHT).size())
+        {
+            std::string filepath = AssimpLoadTexturePath(material, aiTextureType_HEIGHT)[0];
+            newMesh.GetHeightTexFilePath() = core::ReplaceBackwardSlash(filepath);
+        }
     }
     //Process the indicies of each mesh
     for (unsigned int i = 0; i < mesh->mNumFaces; i++)
@@ -348,18 +354,16 @@ void Model::UpdateModelMat(unsigned int current)
     }
 }
 
-bool Model::HasNBDTex()
+bool Model::HasNHTex()
 {
     bool hasNormal = false;
-    bool hasBump = false;
-    bool hasDisplacement = false;
+    bool hasHeight = false;
     for (unsigned int i = 0; i < m_Meshes.size(); i++)
     {
         hasNormal |= m_Meshes[i].HasNormalTex();
-        hasBump |= m_Meshes[i].HasBumpTex();
-        hasDisplacement |= m_Meshes[i].HasDisplacementTex();
+        hasHeight |= m_Meshes[i].HasHeightTex();
     }
-    if (hasNormal || hasBump || hasDisplacement)
+    if (hasNormal || hasHeight)
     {
         return true;
     }

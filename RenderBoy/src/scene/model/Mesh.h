@@ -21,8 +21,7 @@ private:
 	std::string m_RoughnessTexFilePath;
 	std::string m_AoTexFilePath;
 	std::string m_NormalTexFilePath;
-	std::string m_BumpTexFilePath;
-	std::string m_DisplacementTexFilePath;
+	std::string m_HeightTexFilePath;
 	glm::vec3 m_AmbientValue; // ka
 	glm::vec3 m_DiffuseValue; // kd
 	glm::vec3 m_SpecularValue; // ks
@@ -39,16 +38,46 @@ public:
 	~Mesh();
 
 	// Set Mesh's color value
-	void SetAmbientValue(glm::vec3 value);
-	void SetDiffuseValue(glm::vec3 value);
-	void SetSpecularValue(glm::vec3 value);
-	void SetEmissiveValue(glm::vec3 value);
-	void SetReflectiveValue(float value);
-	void SetRefractionValue(float value);
-	void SetTransparentValue(float value);
-	void SetDissolveValue(float value);
-	void SetTransmissionValue(glm::vec3 value);
-	void SetIllumValue(unsigned int value);
+	inline void SetAmbientValue(glm::vec3 value)
+	{
+		m_AmbientValue = value;
+	};
+	inline void SetDiffuseValue(glm::vec3 value)
+	{
+		m_DiffuseValue = value;
+	};
+	inline void SetSpecularValue(glm::vec3 value)
+	{
+		m_SpecularValue = value;
+	};
+	inline void SetEmissiveValue(glm::vec3 value)
+	{
+		m_EmissiveValue = value;
+	};
+	inline void SetReflectiveValue(float value)
+	{
+		m_ReflectiveValue = value;
+	};
+	inline void SetRefractionValue(float value)
+	{
+		m_RefractionValue = value;
+	};
+	inline void SetTransparentValue(float value)
+	{
+		m_TransparentValue = value;
+	};
+	inline void SetDissolveValue(float value)
+	{
+		m_TransparentValue = 1.0f - value;
+	};
+	inline void SetTransmissionValue(glm::vec3 value)
+	{
+		m_TransmissionValue = value;
+	};
+	inline void SetIllumValue(unsigned int value)
+	{
+		m_IllumValue = value;
+	};
 
 	// Does this mesh has ____ texture?
 	bool HasTexture();
@@ -59,8 +88,7 @@ public:
 	bool HasRoughnessTex();
 	bool HasAoTex();
 	bool HasNormalTex();
-	bool HasBumpTex();
-	bool HasDisplacementTex();
+	bool HasHeightTex();
 	// Does this mesh has color value?
 	bool HasColorValue();
 	// Get Mesh's members
@@ -100,13 +128,9 @@ public:
 	{
 		return m_NormalTexFilePath;
 	};
-	inline std::string& GetBumpTexFilePath()
+	inline std::string& GetHeightTexFilePath()
 	{
-		return m_BumpTexFilePath;
-	};
-	inline std::string& GetDisplacementTexFilePath()
-	{
-		return m_DisplacementTexFilePath;
+		return m_HeightTexFilePath;
 	};
 	inline glm::vec3 GetAmbientValue()
 	{
