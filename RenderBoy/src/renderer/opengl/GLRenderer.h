@@ -48,6 +48,7 @@ private:
 	void DrawWireFrame(Scene& scene);
 	void DrawPointCloud(Scene& scene);
 	void DrawDepth(Scene& scene);
+	void DrawNormalDM(Scene& scene); //Draw mode
 	void DrawUVSet(Scene& scene);
 	void DrawNormal(Scene& scene);
 	void DrawLightCube(Scene& scene);

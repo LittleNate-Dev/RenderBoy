@@ -61,8 +61,10 @@
 #define SHADER_OPENGL_BLANK "data/shaders/opengl/draw_mode/BLANK.glsl"
 #define SHADER_OPENGL_WIREFRAME "data/shaders/opengl/draw_mode/WIREFRAME.glsl"
 #define SHADER_OPENGL_DEPTH "data/shaders/opengl/draw_mode/DEPTH.glsl"
+#define SHADER_OPENGL_DEPTH "data/shaders/opengl/draw_mode/DEPTH.glsl"
 #define SHADER_OPENGL_UVSET "data/shaders/opengl/draw_mode/UVSET.glsl"
 #define SHADER_OPENGL_POINTCLOUD "data/shaders/opengl/draw_mode/POINTCLOUD.glsl"
+#define SHADER_OPENGL_NORMAL_DM "data/shaders/opengl/draw_mode/NORMAL_DM.glsl"
 #define SHADER_OPENGL_SKYBOX "data/shaders/opengl/others/SKYBOX.glsl"
 #define SHADER_OPENGL_NORMAL "data/shaders/opengl/others/NORMAL.glsl"
 #define SHADER_OPENGL_LIGHTCUBE "data/shaders/opengl/others/LIGHTCUBE.glsl"
@@ -74,7 +76,7 @@
 #define SHADER_OPENGL_SHADOW_POINT "data/shaders/opengl/shadow/POINTLIGHT.glsl"
 #define SHADER_OPENGL_SHADOW_SPOT "data/shaders/opengl/shadow/SPOTLIGHT.glsl"
 #define SHADER_OPENGL_SHADOW_DIR "data/shaders/opengl/shadow/DIRLIGHT.glsl"
-#define DRAW_MODE_COUNT 6
+#define DRAW_MODE_COUNT 7
 #define POST_PROCESS_COUNT 5
 #define MAX_FOV 120
 #define MIN_FOV 40
@@ -126,7 +128,8 @@ enum Draw_Mode
 	WIREFRAME = 2,
 	POINTCLOUD = 3,
 	UVSET = 4,
-	DEPTH = 5
+	DEPTH = 5,
+	NORMAL_DM = 6
 };
 
 enum Render_Mode

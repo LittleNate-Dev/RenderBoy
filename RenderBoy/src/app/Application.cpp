@@ -857,7 +857,8 @@ void Application::DrawSettingWindow()
                     "Wireframe",
                     "Point Cloud",
                     "UV Set",
-                    "Depth"
+                    "Depth",
+                    "Normal"
                 };
                 static int currentDrawMode;
                 currentDrawMode = core::SETTINGS.DrawMode;

@@ -271,6 +271,9 @@ void GLRenderer::Draw(Scene& scene)
 	case UVSET:
 		DrawUVSet(scene);
 		break;
+	case NORMAL_DM:
+		DrawNormalDM(scene);
+		break;
 	}
 	// Draw Light Cube
 	DrawLightCube(scene);
@@ -491,6 +494,24 @@ void GLRenderer::DrawDepth(Scene& scene)
 	scene.GetData().GetDataGL().GetShader().SetUniformMat4f("u_ViewMat", scene.GetCamera().GetViewMat());
 	scene.GetData().GetDataGL().GetShader().SetUniform1f("u_NearPlane", scene.GetCamera().GetNearPlane());
 	scene.GetData().GetDataGL().GetShader().SetUniform1f("u_FarPlane", scene.GetCamera().GetFarPlane());
+	for (unsigned int i = 0; i < scene.GetModelList().size(); i++)
+	{
+		model = scene.GetModelList()[i];
+		scene.GetData().GetDataGL().GetModelData()[model].VA.Bind();
+		scene.GetData().GetDataGL().GetModelData()[model].IB.Bind();
+		GLCall(glDrawElementsInstanced(GL_TRIANGLES, scene.GetData().GetDataGL().GetModelData()[model].IB.GetCount(), GL_UNSIGNED_INT, nullptr, scene.GetModels()[model].GetInstance()));
+		scene.GetData().GetDataGL().GetModelData()[model].VA.Unbind();
+		scene.GetData().GetDataGL().GetModelData()[model].IB.Unbind();
+	}
+	scene.GetData().GetDataGL().GetShader().Unbind();
+}
+
+void GLRenderer::DrawNormalDM(Scene& scene)
+{
+	std::string model;
+	scene.GetData().GetDataGL().GetShader().Bind();
+	scene.GetData().GetDataGL().GetShader().SetUniformMat4f("u_ProjMat", scene.GetCamera().GetProjMat());
+	scene.GetData().GetDataGL().GetShader().SetUniformMat4f("u_ViewMat", scene.GetCamera().GetViewMat());
 	for (unsigned int i = 0; i < scene.GetModelList().size(); i++)
 	{
 		model = scene.GetModelList()[i];

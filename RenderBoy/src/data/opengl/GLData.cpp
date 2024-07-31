@@ -193,6 +193,9 @@ void GLData::ChangeDrawMode()
 	case DEPTH:
 		m_Shader.Init(SHADER_OPENGL_DEPTH);
 		break;
+	case NORMAL_DM:
+		m_Shader.Init(SHADER_OPENGL_NORMAL_DM);
+		break;
 	}
 }
 
