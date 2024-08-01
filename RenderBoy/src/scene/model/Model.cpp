@@ -14,6 +14,7 @@ Model::Model()
     m_InstanceScale.push_back(glm::vec3(1.0f));
     m_InstanceEulerAngle.push_back(glm::vec3(0.0f));
     m_ModelMats.push_back(glm::mat4(1.0f));
+    m_UpdateShadow = false;
 }
 
 Model::~Model()
@@ -93,6 +94,7 @@ void Model::UpdateStatics()
 bool Model::LoadModel(std::string name, std::string filepath)
 {
     m_Name = name;
+    m_UpdateShadow = true;
     if (core::CheckFileFormatAssimp(core::GetFileFormat(filepath)))
     {
         if (LoadModelAssimp(filepath))
@@ -334,6 +336,7 @@ void Model::SetInstance(unsigned int instance)
         }
     }
     m_Instance = instance;
+    m_UpdateShadow = true;
 }
 
 void Model::UpdateModelMat(unsigned int current)
@@ -352,6 +355,7 @@ void Model::UpdateModelMat(unsigned int current)
         glm::mat4 modelMat = GetTranslateMat(current) * GetRotateMat(current) * GetScaleMat(current);
         m_ModelMats[current - 1] = modelMat;
     }
+    m_UpdateShadow = true;
 }
 
 bool Model::HasNHTex()

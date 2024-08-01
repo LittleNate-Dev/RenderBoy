@@ -35,6 +35,7 @@ SpotLight::~SpotLight()
 void SpotLight::UpdateProjMat()
 {
 	m_ProjMat = glm::perspective(glm::radians(m_Angle + m_DimAngle), 1.0f, 0.01f, GetFarPlane());
+	m_UpdateShadow = true;
 }
 
 void SpotLight::UpdateViewMat()
@@ -44,12 +45,14 @@ void SpotLight::UpdateViewMat()
 	glm::vec4 axis = rotateMat * glm::vec4(0.0f, 0.0f, 1.0f, 0.0f);
 	rotateMat = core::GetRodrigue(glm::normalize(axis), m_EulerAngle.z + 180.0f) * rotateMat;
 	m_ViewMat = glm::inverse(translateMat * rotateMat);
+	m_UpdateShadow = true;
 }
 
 void SpotLight::UpdateModelMat()
 {
 	glm::mat4 modelMat = glm::scale(glm::mat4(1.0f), glm::vec3(sqrt(2.0f) * sin(glm::radians(m_Angle / 2.0f)), sqrt(2.0f) * sin(glm::radians(m_Angle / 2.0f)), sqrt(2.0f) * cos(glm::radians(m_Angle / 2.0f))));
 	m_ModelMat = GetTranslateMat() * GetRotateMat() * modelMat;
+	m_UpdateShadow = true;
 }
 
 void SpotLight::UpdateDirection()
@@ -58,6 +61,7 @@ void SpotLight::UpdateDirection()
 	glm::mat4 rotateMat = glm::rotate(glm::mat4(1.0f), glm::radians(m_EulerAngle.y), glm::vec3(0, 1, 0)) * glm::rotate(glm::mat4(1.0f), glm::radians(m_EulerAngle.x), glm::vec3(1, 0, 0));
 	direction = glm::vec3(rotateMat * glm::vec4(direction, 0.0f));
 	m_Direction = glm::normalize(direction);
+	m_UpdateShadow = true;
 }
 
 glm::vec3 SpotLight::GetDirection()
@@ -365,17 +369,20 @@ void SpotLight::SetShowCube(bool showCube)
 void SpotLight::SetLightSwitch(bool lightSwitch)
 {
 	m_LightSwitch = lightSwitch;
+	m_UpdateShadow = true;
 }
 
 void SpotLight::SetCastShadow(bool castShadow)
 {
 	m_CastShadow = castShadow;
+	m_UpdateShadow = true;
 }
 
 void SpotLight::SetShadowRes(unsigned int res)
 {
 	res = res == 0 ? m_ShadowRes : res;
 	m_ShadowRes = res;
+	m_UpdateShadow = true;
 	((Data*)core::SCENE_DATA)->SetShadowRes(m_Name, m_ShadowRes, m_ShadowRes, SPOT_LIGHT);
 }
 
@@ -525,6 +532,7 @@ void SpotLight::DrawUI()
 						m_ShadowRes = 1024;
 						break;
 					}
+					m_UpdateShadow = true;
 					((Data*)core::SCENE_DATA)->SetShadowRes(m_Name, m_ShadowRes, m_ShadowRes, SPOT_LIGHT);
 				}
 				ImGui::PopItemWidth();

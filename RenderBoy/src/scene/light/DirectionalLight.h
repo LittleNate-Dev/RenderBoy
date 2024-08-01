@@ -34,6 +34,7 @@ private:
 	glm::vec3 m_Bias;
 	bool m_SoftShadow;
 	int m_SoftDegree;
+	bool m_UpdateShadow;
 
 public:
 	DirectionalLight();
@@ -137,6 +138,10 @@ public:
 	inline int GetSoftDegree() const
 	{
 		return m_SoftDegree;
+	};
+	inline bool& UpdateShadow()
+	{
+		return m_UpdateShadow;
 	};
 	// Draw UI
 	void DrawUI();

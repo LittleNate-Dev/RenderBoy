@@ -20,6 +20,7 @@ DirectionalLight::DirectionalLight()
 		m_ProjMat[i] = glm::mat4(1.0f);
 		m_ViewMat[i] = glm::mat4(1.0f);
 	}
+	m_UpdateShadow = true;
 }
 
 DirectionalLight::~DirectionalLight()
@@ -91,6 +92,7 @@ void DirectionalLight::UpdateShadowMat(std::vector<glm::mat4> cameraProj, glm::m
 
 		m_ProjMat[i] = glm::ortho(minX, maxX, minY, maxY, minZ, maxZ);
 	}
+	m_UpdateShadow = true;
 }
 
 glm::vec3 DirectionalLight::GetDirection()
@@ -162,6 +164,7 @@ void DirectionalLight::SetPitch(float pitch)
 		}
 	}
 	m_EulerAngle.x = pitch;
+	m_UpdateShadow = true;
 }
 
 void DirectionalLight::SetYaw(float yaw)
@@ -178,6 +181,7 @@ void DirectionalLight::SetYaw(float yaw)
 		}
 	}
 	m_EulerAngle.y = yaw;
+	m_UpdateShadow = true;
 }
 
 void DirectionalLight::SetRoll(float roll)
@@ -194,6 +198,7 @@ void DirectionalLight::SetRoll(float roll)
 		}
 	}
 	m_EulerAngle.z = roll;
+	m_UpdateShadow = true;
 }
 
 void DirectionalLight::SetEulerAngle(float pitch, float yaw, float roll)
@@ -232,6 +237,7 @@ void DirectionalLight::SetEulerAngle(float pitch, float yaw, float roll)
 		}
 	}
 	m_EulerAngle = glm::vec3(pitch, yaw, roll);
+	m_UpdateShadow = true;
 }
 
 void DirectionalLight::SetEulerAngle(glm::vec3 eulerAngle)
@@ -270,6 +276,7 @@ void DirectionalLight::SetEulerAngle(glm::vec3 eulerAngle)
 		}
 	}
 	m_EulerAngle = eulerAngle;
+	m_UpdateShadow = true;
 }
 
 void DirectionalLight::SetColor(glm::vec3 color)
@@ -318,6 +325,7 @@ void DirectionalLight::SetIntensity(float intensity)
 {
 	intensity = intensity < 0.0f ? 0.0f : intensity;
 	m_Intensity = intensity;
+	m_UpdateShadow = true;
 }
 
 void DirectionalLight::SetShowCube(bool drawCube)
@@ -328,17 +336,20 @@ void DirectionalLight::SetShowCube(bool drawCube)
 void DirectionalLight::SetLightSwitch(bool lightSwitch)
 {
 	m_LightSwitch = lightSwitch;
+	m_UpdateShadow = true;
 }
 
 void DirectionalLight::SetCastShadow(bool castShadow)
 {
 	m_CastShadow = castShadow;
+	m_UpdateShadow = true;
 }
 
 void DirectionalLight::SetShadowRes(unsigned int res)
 {
 	res = res == 0 ? m_ShadowRes : res;
 	m_ShadowRes = res;
+	m_UpdateShadow = true;
 	((Data*)core::SCENE_DATA)->SetShadowRes(m_Name, m_ShadowRes, m_ShadowRes, DIRECTIONAL_LIGHT);
 }
 
@@ -357,12 +368,14 @@ void DirectionalLight::SetCSMRatio(glm::vec2 ratio)
 		return;
 	}
 	m_CSMRatio = ratio;
+	m_UpdateShadow = true;
 }
 
 void DirectionalLight::SetShadowEnlarge(float enlarge)
 {
 	enlarge = enlarge >= 1.0f ? enlarge : 1.0f;
 	m_ShadowEnlarge = enlarge;
+	m_UpdateShadow = true;
 }
 
 void DirectionalLight::SetBias(glm::vec3 bias)
@@ -464,6 +477,7 @@ void DirectionalLight::DrawUI()
 						m_ShadowRes = 1024;
 						break;
 					}
+					m_UpdateShadow = true;
 					((Data*)core::SCENE_DATA)->SetShadowRes(m_Name, m_ShadowRes, m_ShadowRes, DIRECTIONAL_LIGHT);
 				}
 				ImGui::PopItemWidth();

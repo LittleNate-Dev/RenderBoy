@@ -37,6 +37,7 @@ private:
 	unsigned int m_ShadowRes;
 	bool m_SoftShadow;
 	float m_SoftDegree; // Degree of soft shadow
+	bool m_UpdateShadow;
 
 public:
 	PointLight();
@@ -159,6 +160,10 @@ public:
 	inline float GetSoftDegree() const
 	{
 		return m_SoftDegree;
+	};
+	inline bool& UpdateShadow()
+	{
+		return m_UpdateShadow;
 	};
 	// Draw UI
 	void DrawUI();

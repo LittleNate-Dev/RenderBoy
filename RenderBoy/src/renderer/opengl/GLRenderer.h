@@ -53,8 +53,8 @@ private:
 	void DrawNormal(Scene& scene);
 	void DrawLightCube(Scene& scene);
 	void DrawSkybox(Scene& scene);
-	void DrawPointLightShadow(Scene& scene);
-	void DrawSpotLightShadow(Scene& scene);
+	void DrawPointLightShadow(Scene& scene, bool update);
+	void DrawSpotLightShadow(Scene& scene, bool update);
 	void DrawDirLightShadow(Scene& scene);
 	void DrawBloom(Scene& scene);
 	void DrawSSAO(Scene& scene);

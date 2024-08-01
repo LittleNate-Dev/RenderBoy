@@ -41,6 +41,7 @@ private:
 	bool m_SoftShadow;
 	glm::vec2 m_Bias;
 	int m_SoftDegree;
+	bool m_UpdateShadow;
 
 public:
 	SpotLight();
@@ -186,6 +187,10 @@ public:
 	inline float GetFarPlane() const
 	{
 		return m_Range * (m_Intensity > 1.0f ? m_Intensity : 1.0f);
+	};
+	inline bool& UpdateShadow()
+	{
+		return m_UpdateShadow;
 	};
 	// Draw UI
 	void DrawUI();

@@ -232,8 +232,16 @@ void GLRenderer::Draw(Scene& scene)
 	// Draw Shadow Depth map
 	if (core::SETTINGS.DrawMode == DEFAULT || core::SETTINGS.DrawMode == BLANK)
 	{
-		DrawPointLightShadow(scene);
-		DrawSpotLightShadow(scene);
+		std::string model;
+		bool update = false;
+		for (unsigned int i = 0; i < scene.GetModelList().size(); i++)
+		{
+			model = scene.GetModelList()[i];
+			update |= scene.GetModels()[model].UpdateShadow();
+			scene.GetModels()[model].UpdateShadow() = false;
+		}
+		DrawPointLightShadow(scene, update);
+		DrawSpotLightShadow(scene, update);
 		DrawDirLightShadow(scene);
 	}
 	// MSAA
@@ -644,7 +652,7 @@ void GLRenderer::DrawSkybox(Scene& scene)
 	//GLCall(glDepthFunc(GL_LESS)); // set depth function back to default
 }
 
-void GLRenderer::DrawPointLightShadow(Scene& scene)
+void GLRenderer::DrawPointLightShadow(Scene& scene, bool update)
 {
 	std::string light;
 	scene.GetData().GetDataGL().GetPointLightData().Shader.Bind();
@@ -655,8 +663,11 @@ void GLRenderer::DrawPointLightShadow(Scene& scene)
 		{
 			// TODO
 		}
-		if (scene.GetPointLights()[light].LightSwitch() && scene.GetPointLights()[light].CastShadow())
+		//(scene.GetPointLights()[light].UpdateShadow() || update)
+		if (scene.GetPointLights()[light].LightSwitch() && scene.GetPointLights()[light].CastShadow()
+			&& (scene.GetPointLights()[light].UpdateShadow() || update))
 		{
+			scene.GetPointLights()[light].UpdateShadow() = false;
 			GLCall(glViewport(0, 0, scene.GetPointLights()[light].GetShadowRes() , scene.GetPointLights()[light].GetShadowRes()));
 			scene.GetData().GetDataGL().GetPointLightData().DepthMap[light].Bind();
 			GLCall(glClear(GL_DEPTH_BUFFER_BIT));
@@ -685,7 +696,7 @@ void GLRenderer::DrawPointLightShadow(Scene& scene)
 	scene.GetData().GetDataGL().GetPointLightData().Shader.Unbind();
 }
 
-void GLRenderer::DrawSpotLightShadow(Scene& scene)
+void GLRenderer::DrawSpotLightShadow(Scene& scene, bool update)
 {
 	std::string light;
 	scene.GetData().GetDataGL().GetSpotLightData().Shader.Bind();
@@ -696,8 +707,10 @@ void GLRenderer::DrawSpotLightShadow(Scene& scene)
 		{
 			// TODO
 		}
-		if (scene.GetSpotLights()[light].LightSwitch() && scene.GetSpotLights()[light].CastShadow())
+		if (scene.GetSpotLights()[light].LightSwitch() && scene.GetSpotLights()[light].CastShadow()
+			&& (scene.GetSpotLights()[light].UpdateShadow() || update))
 		{
+			scene.GetSpotLights()[light].UpdateShadow() = false;
 			GLCall(glViewport(0, 0, scene.GetSpotLights()[light].GetShadowRes(), scene.GetSpotLights()[light].GetShadowRes()));
 			scene.GetData().GetDataGL().GetSpotLightData().DepthMap[light].Bind();
 			GLCall(glClear(GL_DEPTH_BUFFER_BIT));

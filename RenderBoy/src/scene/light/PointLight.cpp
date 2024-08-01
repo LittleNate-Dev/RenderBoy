@@ -33,6 +33,8 @@ PointLight::~PointLight()
 void PointLight::UpdateProjMat()
 {
 	m_ProjMat = glm::perspective(glm::radians(90.0f), 1.0f, 0.05f, GetFarPlane());
+	m_UpdateShadow = true;
+
 }
 
 void PointLight::UpdateViewMat()
@@ -66,11 +68,13 @@ void PointLight::UpdateViewMat()
 		viewMat = glm::inverse(viewMat);
 		m_ViewMat[i] = viewMat;
 	}
+	m_UpdateShadow = true;
 }
 
 void PointLight::UpdateModelMat()
 {
 	m_ModelMat = glm::translate(glm::mat4(1.0f), m_Position);
+	m_UpdateShadow = true;
 }
 
 glm::mat4 PointLight::GetViewMat(unsigned int face)
@@ -207,17 +211,20 @@ void PointLight::SetShowCube(bool drawCube)
 void PointLight::SetLightSwitch(bool lightSwitch)
 {
 	m_LightSwitch = lightSwitch;
+	m_UpdateShadow = true;
 }
 
 void PointLight::SetCastShadow(bool castShadow)
 {
 	m_CastShadow = castShadow;
+	m_UpdateShadow = true;
 }
 
 void PointLight::SetShadowRes(unsigned int res)
 {
 	res = res == 0 ? m_ShadowRes : res;
 	m_ShadowRes = res;
+	m_UpdateShadow = true;
 	((Data*)core::SCENE_DATA)->SetShadowRes(m_Name, m_ShadowRes, m_ShadowRes, POINT_LIGHT);
 }
 
@@ -330,6 +337,7 @@ void PointLight::DrawUI()
 						m_ShadowRes = 1024;
 						break;
 					}
+					m_UpdateShadow = true;
 					((Data*)core::SCENE_DATA)->SetShadowRes(m_Name, m_ShadowRes, m_ShadowRes, POINT_LIGHT);
 				}
 				ImGui::PopItemWidth();

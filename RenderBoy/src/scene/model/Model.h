@@ -28,6 +28,7 @@ private:
 	std::vector<glm::vec3> m_InstanceScale;
 	std::vector<glm::vec3> m_InstanceEulerAngle;
 	std::vector<glm::mat4> m_ModelMats;
+	bool m_UpdateShadow;
 
 	// After loading model, update model statics
 	void UpdateStatics();
@@ -96,6 +97,10 @@ public:
 	inline std::vector<glm::mat4>& GetModelMats()
 	{
 		return m_ModelMats;
+	};
+	inline bool& UpdateShadow()
+	{
+		return m_UpdateShadow;
 	};
 	glm::mat4 GetModelMat(unsigned int current = 0);
 	glm::mat4 GetTranslateMat(unsigned int current = 0);
