@@ -10,11 +10,6 @@ GLRenderer::~GLRenderer()
 
 void GLRenderer::Init(Scene& scene)
 {
-	GLCall(glEnable(GL_BLEND));
-	GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
-	GLCall(glEnable(GL_DEPTH_TEST));
-	//GLCall(glEnable(GL_CULL_FACE));
-	//GLCall(glCullFace(GL_BACK));
 	GLCall(glLineWidth(0.4f));
 	GLCall(glPointSize(1.5f));
 	// Initialize shaders
@@ -112,8 +107,116 @@ void GLRenderer::Clear()
 	GLCall(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 }
 
+void GLRenderer::Draw(Scene& scene)
+{
+	UpdateModelMat(scene);
+	DrawGBuffer(scene);
+	if (scene.GetVFX().SSAO)
+	{
+		DrawSSAO(scene);
+	}
+	// Draw Shadow Depth map
+	if (core::SETTINGS.DrawMode == DEFAULT || core::SETTINGS.DrawMode == BLANK)
+	{
+		std::string model;
+		bool update = false;
+		static int modelCount = 0;
+		if (modelCount != scene.GetModelList().size())
+		{
+			update = true;
+			modelCount = scene.GetModelList().size();
+		}
+		for (unsigned int i = 0; i < scene.GetModelList().size(); i++)
+		{
+			model = scene.GetModelList()[i];
+			update |= scene.GetModels()[model].UpdateShadow();
+			scene.GetModels()[model].UpdateShadow() = false;
+		}
+		DrawPointLightShadow(scene, update);
+		DrawSpotLightShadow(scene, update);
+		DrawDirLightShadow(scene);
+	}
+	// MSAA
+	if ((int)core::SETTINGS.AA >= 1 && (int)core::SETTINGS.AA <= 4)
+	{
+		m_Frame.FBMsaa.Bind();
+	}
+	else
+	{
+		m_Frame.FB.Bind();
+	}
+	// Draw your content inside this scope
+	Clear();
+	glm::vec2 renderRes = core::GetRenderResolution();
+	GLCall(glViewport(0, 0, (GLsizei)renderRes.x, (GLsizei)renderRes.y));
+	// Draw Skybox
+	DrawSkybox(scene);
+	switch (core::SETTINGS.DrawMode)
+	{
+	case DEFAULT:
+		DrawDefault(scene);
+		break;
+	case BLANK:
+		DrawBlank(scene);
+		break;
+	case WIREFRAME:
+		DrawWireFrame(scene);
+		break;
+	case POINTCLOUD:
+		DrawPointCloud(scene);
+		break;
+	case DEPTH:
+		DrawDepth(scene);
+		break;
+	case UVSET:
+		DrawUVSet(scene);
+		break;
+	case NORMAL_DM:
+		DrawNormalDM(scene);
+		break;
+	}
+	// Draw Light Cube
+	DrawLightCube(scene);
+	// Draw normals
+	if (core::SETTINGS.ShowNormal)
+	{
+		DrawNormal(scene);
+	}
+	// Draw your content inside this scope
+	if ((int)core::SETTINGS.AA >= 1 && (int)core::SETTINGS.AA <= 4)
+	{
+		GLCall(glBindFramebuffer(GL_READ_FRAMEBUFFER, m_Frame.FBMsaa.GetID()));
+		GLCall(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_Frame.FB.GetID()));
+		int width = (int)(core::SETTINGS.Width * core::SETTINGS.Resolution);
+		int height = (int)(core::SETTINGS.Height * core::SETTINGS.Resolution);
+		GLCall(glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST));
+	}
+	m_Frame.FB.Unbind();
+	if (scene.GetVFX().Bloom && (core::SETTINGS.DrawMode == BLANK || core::SETTINGS.DrawMode == DEFAULT))
+	{
+		DrawBloom(scene);
+	}
+	Clear();
+	// Draw frame buffer's content on the screen;
+	GLCall(glViewport(0, 0, core::SETTINGS.Width, core::SETTINGS.Height));
+	GLCall(glDisable(GL_DEPTH_TEST));
+	m_Shaders.Screen.Bind();
+	m_Frame.FB.BindTex();
+	m_Shaders.Screen.SetUniform1i("u_ScreenTex", 0);
+	m_Shaders.Screen.SetUniform1f("u_Gamma", core::SETTINGS.Gamma);
+	m_Frame.VA.Bind();
+	m_Frame.IB.Bind();
+	GLCall(glDrawElements(GL_TRIANGLES, m_Frame.IB.GetCount(), GL_UNSIGNED_INT, nullptr));
+	m_Frame.VA.Unbind();
+	m_Frame.IB.Unbind();
+	m_Shaders.Screen.Unbind();
+	m_Frame.FB.UnbindTex();
+	GLCall(glEnable(GL_DEPTH_TEST));
+}
+
 void GLRenderer::DrawDefault(Scene& scene)
 {
+	//glDisable(GL_DEPTH_TEST);
 	std::string model;
 	for (unsigned int i = 0; i < scene.GetModelList().size(); i++)
 	{
@@ -219,107 +322,6 @@ void GLRenderer::DrawDefault(Scene& scene)
 		scene.GetData().GetDataGL().GetModelData()[model].IB.Unbind();
 	}
 	scene.GetData().GetDataGL().GetShader().Unbind();
-}
-
-void GLRenderer::Draw(Scene& scene)
-{
-	UpdateModelMat(scene);
-	DrawGBuffer(scene);
-	if (scene.GetVFX().SSAO)
-	{
-		DrawSSAO(scene);
-	}
-	// Draw Shadow Depth map
-	if (core::SETTINGS.DrawMode == DEFAULT || core::SETTINGS.DrawMode == BLANK)
-	{
-		std::string model;
-		bool update = false;
-		for (unsigned int i = 0; i < scene.GetModelList().size(); i++)
-		{
-			model = scene.GetModelList()[i];
-			update |= scene.GetModels()[model].UpdateShadow();
-			scene.GetModels()[model].UpdateShadow() = false;
-		}
-		DrawPointLightShadow(scene, update);
-		DrawSpotLightShadow(scene, update);
-		DrawDirLightShadow(scene);
-	}
-	// MSAA
-	if ((int)core::SETTINGS.AA >= 1 && (int)core::SETTINGS.AA <= 4)
-	{
-		m_Frame.FBMsaa.Bind();
-	}
-	else
-	{
-		m_Frame.FB.Bind();
-	}
-	// Draw your content inside this scope
-	Clear();
-	glm::vec2 renderRes = core::GetRenderResolution();
-	GLCall(glViewport(0, 0, (GLsizei)renderRes.x, (GLsizei)renderRes.y));
-	// Draw Skybox
-	DrawSkybox(scene);
-	switch (core::SETTINGS.DrawMode)
-	{
-	case DEFAULT:
-		DrawDefault(scene);
-		break;
-	case BLANK:
-		DrawBlank(scene);
-		break;
-	case WIREFRAME:
-		DrawWireFrame(scene);
-		break;
-	case POINTCLOUD:
-		DrawPointCloud(scene);
-		break;
-	case DEPTH:
-		DrawDepth(scene);
-		break;
-	case UVSET:
-		DrawUVSet(scene);
-		break;
-	case NORMAL_DM:
-		DrawNormalDM(scene);
-		break;
-	}
-	// Draw Light Cube
-	DrawLightCube(scene);
-	// Draw normals
-	if (core::SETTINGS.ShowNormal)
-	{
-		DrawNormal(scene);
-	}
-	// Draw your content inside this scope
-	if ((int)core::SETTINGS.AA >= 1 && (int)core::SETTINGS.AA <= 4)
-	{
-		GLCall(glBindFramebuffer(GL_READ_FRAMEBUFFER, m_Frame.FBMsaa.GetID()));
-		GLCall(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_Frame.FB.GetID()));
-		int width = (int)(core::SETTINGS.Width * core::SETTINGS.Resolution);
-		int height = (int)(core::SETTINGS.Height * core::SETTINGS.Resolution);
-		GLCall(glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST));
-	}
-	m_Frame.FB.Unbind();
-	if (scene.GetVFX().Bloom && (core::SETTINGS.DrawMode == BLANK || core::SETTINGS.DrawMode == DEFAULT))
-	{
-		DrawBloom(scene);
-	}
-	Clear();
-	// Draw frame buffer's content on the screen;
-	GLCall(glViewport(0, 0, core::SETTINGS.Width, core::SETTINGS.Height));
-	GLCall(glDisable(GL_DEPTH_TEST));
-	m_Shaders.Screen.Bind();
-	m_Frame.FB.BindTex();
-	m_Shaders.Screen.SetUniform1i("u_ScreenTex", 0);
-	m_Shaders.Screen.SetUniform1f("u_Gamma", core::SETTINGS.Gamma);
-	m_Frame.VA.Bind();
-	m_Frame.IB.Bind();
-	GLCall(glDrawElements(GL_TRIANGLES, m_Frame.IB.GetCount(), GL_UNSIGNED_INT, nullptr));
-	m_Frame.VA.Unbind();
-	m_Frame.IB.Unbind();
-	m_Shaders.Screen.Unbind();
-	m_Frame.FB.UnbindTex();
-	GLCall(glEnable(GL_DEPTH_TEST));
 }
 
 void GLRenderer::DrawGBuffer(Scene& scene)
@@ -659,11 +661,6 @@ void GLRenderer::DrawPointLightShadow(Scene& scene, bool update)
 	for (unsigned int i = 0; i < scene.GetPointLightList().size(); i++)
 	{
 		light = scene.GetPointLightList()[i];
-		// If light's shadow can't be seen, then skip
-		{
-			// TODO
-		}
-		//(scene.GetPointLights()[light].UpdateShadow() || update)
 		if (scene.GetPointLights()[light].LightSwitch() && scene.GetPointLights()[light].CastShadow()
 			&& (scene.GetPointLights()[light].UpdateShadow() || update))
 		{
@@ -703,10 +700,6 @@ void GLRenderer::DrawSpotLightShadow(Scene& scene, bool update)
 	for (unsigned int i = 0; i < scene.GetSpotLightList().size(); i++)
 	{
 		light = scene.GetSpotLightList()[i];
-		// If light's shadow can't be seen, then skip
-		{
-			// TODO
-		}
 		if (scene.GetSpotLights()[light].LightSwitch() && scene.GetSpotLights()[light].CastShadow()
 			&& (scene.GetSpotLights()[light].UpdateShadow() || update))
 		{
@@ -906,7 +899,7 @@ void GLRenderer::DrawSSAO(Scene& scene)
 	GLCall(glEnable(GL_BLEND));
 }
 
-bool GLRenderer::SaveScreenShot()
+bool GLRenderer::SaveScreenShot(Scene& scene)
 {
 	// Make the BYTE array, factor of 3 because it's RBG.
 	BYTE* pixels = new BYTE[3 * core::SETTINGS.Width * core::SETTINGS.Height];
@@ -914,7 +907,8 @@ bool GLRenderer::SaveScreenShot()
 	// Generate screenshot file name
 	SYSTEMTIME time;
 	GetLocalTime(&time);
-	std::string filepath = SCREENSHOT_FILEPATH 
+	std::string filepath = SCREENSHOT_FILEPATH
+							+ scene.GetName() + "_"
 							+ std::to_string(time.wYear) 
 							+ std::to_string(time.wMonth)
 							+ std::to_string(time.wDay)

@@ -178,6 +178,7 @@ uniform vec3 u_Diffuse[];
 uniform float u_Transparent[];
 uniform sampler2D u_AlbedoTex[];
 uniform sampler2D u_MetallicTex[];
+uniform sampler2D u_RoughnessTex[];
 uniform sampler2D u_AoTex[];
 uniform sampler2D u_NormalTex[];
 uniform sampler2D u_HeightTex[];
@@ -190,6 +191,7 @@ vec3 c_ColorIndex = vec3(-1.0);
 vec4 c_AttributeIndex = vec4(-1.0);
 int c_AlbedoTexIndex = -1;
 int c_MetallicTexIndex = -1;
+int c_RoughnessTexIndex = -1;
 int c_AoTexIndex = -1;
 int c_NormalTexIndex = -1;
 int c_HeightTexIndex = -1;
@@ -212,6 +214,7 @@ void main()
     c_TexCoord = v_TexCoord;
     c_AlbedoTexIndex = int(v_TexIndex.x + 0.1);
     c_MetallicTexIndex = int(v_TexIndex.y + 0.1);
+    c_RoughnessTexIndex = int(v_TexIndex.z + 0.1);
     c_AoTexIndex = int(v_TexIndex.w + 0.1);
     c_ColorIndex = v_ColorIndex + vec3(0.1);
     c_AttributeIndex = v_AttributeIndex + vec4(0.1);
@@ -223,13 +226,11 @@ void main()
     if (v_NHIndex.y >= 0 && v_NHIndex.y >= 0)
     { 
         vec3 viewDirTBN = normalize(transpose(v_TBN) * c_ViewDir);
-
         const float numLayers = 10;
         float layerDepth = 1.0 / numLayers;
         float currentLayerDepth = 0.0;
         vec2 P = viewDirTBN.xy * 0.2; 
         vec2 deltaTexCoords = P / numLayers;
-        // get initial values
         vec2  currentTexCoords = c_TexCoord;
         float currentDepthMapValue = texture(u_HeightTex[c_HeightTexIndex], c_TexCoord).r;
   
@@ -289,7 +290,7 @@ void main()
     {
         c_Albedo = texture(u_AlbedoTex[c_AlbedoTexIndex], c_TexCoord).rgb;
         c_Metallic = texture(u_MetallicTex[c_MetallicTexIndex], c_TexCoord).b;
-        c_Roughness = texture(u_MetallicTex[c_MetallicTexIndex], c_TexCoord).g;
+        c_Roughness = texture(u_RoughnessTex[c_RoughnessTexIndex], v_TexCoord).r;
     }
     if (v_TexIndex.w >= 0)
     {

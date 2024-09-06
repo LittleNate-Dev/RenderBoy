@@ -45,12 +45,12 @@ void Renderer::Clear()
 	}
 }
 
-bool Renderer::SaveScreenShot()
+bool Renderer::SaveScreenShot(Scene& scene)
 {
 	switch (core::SETTINGS.GraphicsCore)
 	{
 	case OPENGL:
-		if (m_RendererGL.SaveScreenShot())
+		if (m_RendererGL.SaveScreenShot(scene))
 		{
 			return true;
 		}

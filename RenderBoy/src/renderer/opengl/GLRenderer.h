@@ -66,7 +66,7 @@ public:
 	void Init(Scene& scene);
 	void Draw(Scene& scene);
 	
-	bool SaveScreenShot();
+	bool SaveScreenShot(Scene& scene);
 	void ChangeResolution();
 	void ChangeMSAA();
 	void ChangePostProcess();

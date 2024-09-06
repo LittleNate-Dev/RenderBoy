@@ -1205,7 +1205,7 @@ void Application::KeyboardInput()
     {
         if (!core::IS_WARNING_OPENED)
         {
-            m_Renderer.SaveScreenShot();
+            m_Renderer.SaveScreenShot(m_Scene);
         }
     }
     // Save Screenshot
@@ -1363,7 +1363,7 @@ void Application::GamepadInput()
         {
             // Save Screenshot
             isGamepadStartPressed = false;
-            m_Renderer.SaveScreenShot();
+            m_Renderer.SaveScreenShot(m_Scene);
         }
 
         static bool isGamepadDpadUpPressed;
