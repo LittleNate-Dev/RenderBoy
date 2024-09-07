@@ -138,7 +138,8 @@ struct DirLight
     float SoftDegree;
 };
 
-layout(location = 0) out vec4 v_FragColor;
+layout(location = 0) out vec4 v_Accum;
+layout(location = 1) out float v_Reveal;
 
 in vec3 v_FragPos;
 in vec3 v_Normal;
@@ -165,6 +166,8 @@ uniform float u_Transparent[];
 uniform sampler2D u_AlbedoTex[];
 uniform sampler2D u_SpecularTex[];
 
+uniform bool u_OITPass;
+
 const float c_Shininess = 32.0f;
 
 vec3 viewDir = vec3(1.0);
@@ -174,6 +177,7 @@ vec3 colorIndex = vec3(-1.0);
 vec4 attributeIndex = vec4(-1.0);
 int albedoTexIndex = -1;
 int specularTexIndex = -1;
+float alpha = 1.0;
 
 vec3 CalcPointLight(int i);
 vec3 CalcSpotLight(int i);
@@ -190,15 +194,21 @@ void main()
     normal = normalize(v_Normal);
     if (v_TexIndex.x < 0)
     {
-        if (u_Transparent[int(attributeIndex.y)] < 0.1)
-        {
-            discard;
-        }
+        alpha = u_Transparent[int(attributeIndex.y)];
     }
-    else if (texture(u_AlbedoTex[albedoTexIndex], v_TexCoord).a < 0.1)
+    else
+    {
+        alpha = texture(u_AlbedoTex[albedoTexIndex], v_TexCoord).a;
+    }
+    if (!u_OITPass && alpha < 1.0)
     {
         discard;
     }
+    else if (u_OITPass && alpha == 1.0)
+    {
+        discard;
+    }
+    
     // SSAO
     if (u_SSAO)
     {
@@ -229,13 +239,17 @@ void main()
             result += CalcDirLight(i);
         }
     }
-    if (v_TexIndex.x < 0)
+    vec4 outputData = vec4(result, alpha);
+    if (!u_OITPass)
     {
-        v_FragColor = vec4(result, u_Transparent[int(attributeIndex.y)]);
+        v_Accum = outputData;
     }
     else
     {
-        v_FragColor = vec4(result, texture(u_AlbedoTex[albedoTexIndex], v_TexCoord).a);
+        float weight = clamp(pow(min(1.0, outputData.a * 10.0) + 0.01, 3.0) * 1e8 * 
+                         pow(1.0 - gl_FragCoord.z * 0.9, 3.0), 1e-2, 3e3);
+        v_Accum = vec4(outputData.rgb * outputData.a, outputData.a) * weight;
+        v_Reveal = outputData.a;
     }
 }
 

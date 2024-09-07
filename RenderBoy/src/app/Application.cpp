@@ -949,36 +949,7 @@ void Application::DrawSettingWindow()
             {
                 ImGui::CenterAlignWidget("Anti-Alising", 100.0f * core::GetWidgetWidthCoefficient());
                 ImGui::LabelHighlighted("Anti-Alising");
-                ImGui::PushItemWidth(100.0f * core::GetWidgetWidthCoefficient());
-                const char* aaOps[] = {
-                    "None",
-                    "MSAA 4x",
-                    "MSAA 8x",
-                    "MSAA 16x",
-                    "MSAA 32x"
-                };
-                static int currentAa;
-                currentAa = core::SETTINGS.AA;
-                if (ImGui::Combo("##Anti_Alising", &currentAa, aaOps, IM_ARRAYSIZE(aaOps)))
-                {
-                    core::SETTINGS.AA = (Anti_Alising)currentAa;
-                    switch (currentAa)
-                    {
-                    case Anti_Alising::MSAA4X:
-                        m_Renderer.ChangeMSAA();
-                        break;
-                    case Anti_Alising::MSAA8X:
-                        m_Renderer.ChangeMSAA();
-                        break;
-                    case Anti_Alising::MSAA16X:
-                        m_Renderer.ChangeMSAA();
-                        break;
-                    case Anti_Alising::MSAA32X:
-                        m_Renderer.ChangeMSAA();
-                        break;
-                    }
-                }
-                ImGui::PopItemWidth();
+                // TODO
             }
             ImGui::TreePop();
         }
@@ -1000,7 +971,6 @@ void Application::DrawSettingWindow()
             core::SETTINGS.Resolution = 1.0f;
             m_Renderer.ChangeResolution();
             core::SETTINGS.AA = NO_AA;
-            m_Renderer.ChangeMSAA();
         }
         ImGui::PopStyleColor(1);
         ImGui::End();

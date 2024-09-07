@@ -151,7 +151,8 @@ struct DirLight
     float SoftDegree;
 };
 
-layout(location = 0) out vec4 v_FragColor;
+layout(location = 0) out vec4 v_Accum;
+layout(location = 1) out float v_Reveal;
 
 in vec3 v_FragPos;
 in vec3 v_Normal;
@@ -199,7 +200,8 @@ vec3 c_Albedo = vec3(0.0);
 float c_Metallic = 0.0;
 float c_Roughness = 1.0;
 float c_AO = 1.0;
-vec3 c_F0 = vec3(0.04); 
+vec3 c_F0 = vec3(0.04);
+float alpha = 1.0;
 
 vec3 CalcPointLight(int i);
 vec3 CalcSpotLight(int i);
@@ -222,6 +224,22 @@ void main()
     c_HeightTexIndex = int(v_NHIndex.y + 0.1);
     // Varibles used for lighting
     c_ViewDir = normalize(u_ViewPos - v_FragPos);
+    if (v_TexIndex.x < 0)
+    {
+        alpha = u_Transparent[int(c_AttributeIndex.y)];
+    }
+    else
+    {
+        alpha = texture(u_AlbedoTex[c_AlbedoTexIndex], v_TexCoord).a;
+    }
+    if (!u_OITPass && alpha < 1.0)
+    {
+        discard;
+    }
+    else if (u_OITPass && alpha == 1.0)
+    {
+        discard;
+    }
     // Height mapping
     if (v_NHIndex.y >= 0 && v_NHIndex.y >= 0)
     { 
@@ -261,18 +279,6 @@ void main()
         c_Normal = texture(u_NormalTex[c_NormalTexIndex], c_TexCoord).rgb;
         c_Normal = normalize(c_Normal * 2.0 - 1.0);
         c_Normal = normalize(v_TBN * c_Normal);
-    }
-    // Discard fragment if it's highly transparent
-    if (v_TexIndex.x < 0)
-    {
-        if (u_Transparent[int(c_AttributeIndex.y)] < 0.1)
-        {
-            discard;
-        }
-    }
-    else if (texture(u_AlbedoTex[c_AlbedoTexIndex], c_TexCoord).a < 0.1)
-    {
-        discard;
     }
     // SSAO
     if (u_SSAO)
@@ -321,13 +327,17 @@ void main()
             result += CalcDirLight(i);
         }
     }
-    if (v_TexIndex.x < 0)
+    vec4 outputData = vec4(result, alpha);
+    if (!u_OITPass)
     {
-        v_FragColor = vec4(result, u_Transparent[int(c_AttributeIndex.y)]);
+        v_Accum = outputData;
     }
     else
     {
-        v_FragColor = vec4(result, texture(u_AlbedoTex[c_AlbedoTexIndex], c_TexCoord).a);
+        float weight = clamp(pow(min(1.0, outputData.a * 10.0) + 0.01, 3.0) * 1e8 * 
+                         pow(1.0 - gl_FragCoord.z * 0.9, 3.0), 1e-2, 3e3);
+        v_Accum = vec4(outputData.rgb * outputData.a, outputData.a) * weight;
+        v_Reveal = outputData.a;
     }
 }
 

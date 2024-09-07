@@ -203,7 +203,6 @@ void main()
             result += CalcDirLight(i);
         }
     }
-    //v_FragColor = vec4(result, u_Transparent[int(attributeIndex.y)]);
     v_FragColor = vec4(result, 1.0);
 }
 

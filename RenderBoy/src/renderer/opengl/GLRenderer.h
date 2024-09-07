@@ -15,7 +15,7 @@
 struct Frame
 {
 	GLFrameBuffer FB;
-	GLFrameBuffer FBMsaa;
+	GLFrameBuffer OIT;
 	GLFrameBuffer GBuffer;
 	GLFrameBuffer Bloom[7];
 	GLFrameBuffer SSAO[2];
@@ -26,6 +26,7 @@ struct Frame
 
 struct Shaders
 {
+	GLShader OIT;
 	GLShader GBuffer;
 	GLShader Normal;
 	GLShader Lightcube;
@@ -68,6 +69,5 @@ public:
 	
 	bool SaveScreenShot(Scene& scene);
 	void ChangeResolution();
-	void ChangeMSAA();
 	void ChangePostProcess();
 };

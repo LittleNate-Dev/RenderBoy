@@ -43,25 +43,6 @@ void GLFrameBuffer::Init(FBType type)
 {
 	int width = (int)(core::SETTINGS.Width * core::SETTINGS.Resolution);
 	int height = (int)(core::SETTINGS.Height * core::SETTINGS.Resolution);
-	int msaa;
-	switch (core::SETTINGS.AA)
-	{
-	case MSAA4X:
-		msaa = 4;
-		break;
-	case MSAA8X:
-		msaa = 8;
-		break;
-	case MSAA16X:
-		msaa = 16;
-		break;
-	case MSAA32X:
-		msaa = 32;
-		break;
-	default:
-		msaa = 4;
-		break;
-	}
 
 	Destroy();
 	m_TexSize = glm::vec2(width, height);
@@ -85,24 +66,57 @@ void GLFrameBuffer::Init(FBType type)
 		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
 		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
 		GLCall(glBindTexture(GL_TEXTURE_2D, 0));
+		//// Depth buffer
+		//m_TexIDs.push_back(0);
+		//GLCall(glGenTextures(1, &m_TexIDs[1]));
+		//GLCall(glBindTexture(GL_TEXTURE_2D, m_TexIDs[1]));
+		//GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL));
+		//GLCall(glBindTexture(GL_TEXTURE_2D, 0));
+
 		GLCall(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, m_RenderBufferID));
 		GLCall(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_TexIDs[0], 0));
+		//GLCall(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_TexIDs[1], 0));
 	}
-	else if (m_Type == MSAA)
+	else if (m_Type == OIT)
 	{
 		// Render buffer
 		GLCall(glGenRenderbuffers(1, &m_RenderBufferID));
 		GLCall(glBindRenderbuffer(GL_RENDERBUFFER, m_RenderBufferID));
-		GLCall(glRenderbufferStorageMultisample(GL_RENDERBUFFER, msaa, GL_DEPTH32F_STENCIL8, width, height));
+		GLCall(glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH32F_STENCIL8, width, height));
 		GLCall(glBindRenderbuffer(GL_RENDERBUFFER, 0));
-		// Color buffer
+		GLCall(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, m_RenderBufferID));
+		// accum buffer
 		m_TexIDs.push_back(0);
 		GLCall(glGenTextures(1, &m_TexIDs[0]));
-		GLCall(glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, m_TexIDs[0]));
-		GLCall(glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, msaa, GL_RGBA16F, width, height, GL_TRUE));
-		GLCall(glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0));
-		GLCall(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, m_RenderBufferID));
-		GLCall(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, m_TexIDs[0], 0));
+		GLCall(glBindTexture(GL_TEXTURE_2D, m_TexIDs[0]));
+		GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, width, height, 0, GL_RGBA, GL_HALF_FLOAT, NULL));
+		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
+		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+		m_Handles.push_back(0);
+		m_Handles[0] = glGetTextureHandleARB(m_TexIDs[0]);
+		GLCall(glMakeTextureHandleResidentARB(m_Handles[0]));
+		GLCall(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_TexIDs[0], 0));
+		GLCall(glBindTexture(GL_TEXTURE_2D, 0));
+		// reveal color buffer
+		m_TexIDs.push_back(0);
+		GLCall(glGenTextures(1, &m_TexIDs[1]));
+		GLCall(glBindTexture(GL_TEXTURE_2D, m_TexIDs[1]));
+		GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, width, height, 0, GL_RED, GL_FLOAT, NULL));
+		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
+		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+		m_Handles.push_back(0);
+		m_Handles[1] = glGetTextureHandleARB(m_TexIDs[1]);
+		GLCall(glMakeTextureHandleResidentARB(m_Handles[1]));
+		GLCall(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, m_TexIDs[1], 0));
+		GLCall(glBindTexture(GL_TEXTURE_2D, 0));
+		//// Depth buffer
+		//m_TexIDs.push_back(0);
+		//GLCall(glGenTextures(1, &m_TexIDs[2]));
+		//GLCall(glBindTexture(GL_TEXTURE_2D, m_TexIDs[2]));
+		//GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL));
+		//GLCall(glBindTexture(GL_TEXTURE_2D, 0));
+		unsigned int attachments[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+		GLCall(glDrawBuffers(2, attachments));
 	}
 	else if (m_Type == G_BUFFER)
 	{
@@ -196,8 +210,16 @@ void GLFrameBuffer::Init(FBType type, unsigned int width, unsigned int height)
 		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
 		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
 		GLCall(glBindTexture(GL_TEXTURE_2D, 0));
+		//// Depth buffer
+		//m_TexIDs.push_back(0);
+		//GLCall(glGenTextures(1, &m_TexIDs[1]));
+		//GLCall(glBindTexture(GL_TEXTURE_2D, m_TexIDs[1]));
+		//GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL));
+		//GLCall(glBindTexture(GL_TEXTURE_2D, 0));
+
 		GLCall(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, m_RenderBufferID));
 		GLCall(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_TexIDs[0], 0));
+		//GLCall(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_TexIDs[1], 0));
 	}
 	else if (m_Type == G_BUFFER)
 	{
@@ -248,6 +270,47 @@ void GLFrameBuffer::Init(FBType type, unsigned int width, unsigned int height)
 
 		unsigned int attachments[3] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
 		GLCall(glDrawBuffers(3, attachments));
+	}
+	else if (m_Type == OIT)
+	{
+		// Render buffer
+		GLCall(glGenRenderbuffers(1, &m_RenderBufferID));
+		GLCall(glBindRenderbuffer(GL_RENDERBUFFER, m_RenderBufferID));
+		GLCall(glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH32F_STENCIL8, width, height));
+		GLCall(glBindRenderbuffer(GL_RENDERBUFFER, 0));
+		GLCall(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, m_RenderBufferID));
+		// accum buffer
+		m_TexIDs.push_back(0);
+		GLCall(glGenTextures(1, &m_TexIDs[0]));
+		GLCall(glBindTexture(GL_TEXTURE_2D, m_TexIDs[0]));
+		GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, width, height, 0, GL_RGBA, GL_HALF_FLOAT, NULL));
+		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
+		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+		m_Handles.push_back(0);
+		m_Handles[0] = glGetTextureHandleARB(m_TexIDs[0]);
+		GLCall(glMakeTextureHandleResidentARB(m_Handles[0]));
+		GLCall(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_TexIDs[0], 0));
+		GLCall(glBindTexture(GL_TEXTURE_2D, 0));
+		// reveal color buffer
+		m_TexIDs.push_back(0);
+		GLCall(glGenTextures(1, &m_TexIDs[1]));
+		GLCall(glBindTexture(GL_TEXTURE_2D, m_TexIDs[1]));
+		GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, width, height, 0, GL_RED, GL_FLOAT, NULL));
+		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
+		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+		m_Handles.push_back(0);
+		m_Handles[1] = glGetTextureHandleARB(m_TexIDs[1]);
+		GLCall(glMakeTextureHandleResidentARB(m_Handles[1]));
+		GLCall(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, m_TexIDs[1], 0));
+		GLCall(glBindTexture(GL_TEXTURE_2D, 0));
+		//// Depth buffer
+		//m_TexIDs.push_back(0);
+		//GLCall(glGenTextures(1, &m_TexIDs[2]));
+		//GLCall(glBindTexture(GL_TEXTURE_2D, m_TexIDs[2]));
+		//GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL));
+		//GLCall(glBindTexture(GL_TEXTURE_2D, 0));
+		unsigned int attachments[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+		GLCall(glDrawBuffers(2, attachments));
 	}
 	else if (m_Type == DEPTH_MAP)
 	{
@@ -333,10 +396,6 @@ void GLFrameBuffer::BindTex(unsigned int slot) const
 		GLCall(glActiveTexture(GL_TEXTURE0 + slot));
 		GLCall(glBindTexture(GL_TEXTURE_2D, m_TexIDs[0]));
 		break;
-	case MSAA:
-		GLCall(glActiveTexture(GL_TEXTURE0 + slot));
-		GLCall(glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, m_TexIDs[0]));
-		break;
 	case DEPTH_MAP:
 		GLCall(glActiveTexture(GL_TEXTURE0 + slot));
 		GLCall(glBindTexture(GL_TEXTURE_2D, m_TexIDs[0]));
@@ -353,6 +412,12 @@ void GLFrameBuffer::BindTex(unsigned int slot) const
 		GLCall(glActiveTexture(GL_TEXTURE0 + slot + 2));
 		GLCall(glBindTexture(GL_TEXTURE_2D, m_TexIDs[2]));
 		break;
+	case OIT:
+		GLCall(glActiveTexture(GL_TEXTURE0 + slot));
+		GLCall(glBindTexture(GL_TEXTURE_2D, m_TexIDs[0]));
+		GLCall(glActiveTexture(GL_TEXTURE0 + slot + 1));
+		GLCall(glBindTexture(GL_TEXTURE_2D, m_TexIDs[1]));
+		break;
 	case SSAO:
 		GLCall(glActiveTexture(GL_TEXTURE0 + slot));
 		GLCall(glBindTexture(GL_TEXTURE_2D, m_TexIDs[0]));
@@ -367,9 +432,6 @@ void GLFrameBuffer::UnbindTex() const
 	case FRAME:
 		GLCall(glBindTexture(GL_TEXTURE_2D, 0));
 		break;
-	case MSAA:
-		GLCall(glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0));
-		break;
 	case DEPTH_MAP:
 		GLCall(glBindTexture(GL_TEXTURE_2D, 0));
 		break;
@@ -377,6 +439,9 @@ void GLFrameBuffer::UnbindTex() const
 		GLCall(glBindTexture(GL_TEXTURE_CUBE_MAP, 0));
 		break;
 	case G_BUFFER:
+		GLCall(glBindTexture(GL_TEXTURE_2D, 0));
+		break;
+	case OIT:
 		GLCall(glBindTexture(GL_TEXTURE_2D, 0));
 		break;
 	case SSAO:
@@ -389,25 +454,6 @@ void GLFrameBuffer::ChangeResolution()
 {
 	int width = (int)(core::SETTINGS.Width * core::SETTINGS.Resolution);
 	int height = (int)(core::SETTINGS.Height * core::SETTINGS.Resolution);
-	int msaa;
-	switch (core::SETTINGS.AA)
-	{
-	case MSAA4X:
-		msaa = 4;
-		break;
-	case MSAA8X:
-		msaa = 8;
-		break;
-	case MSAA16X:
-		msaa = 16;
-		break;
-	case MSAA32X:
-		msaa = 16;
-		break;
-	default:
-		msaa = 32;
-		break;
-	}
 	m_TexSize = glm::vec2(width, height);
 	switch (m_Type)
 	{
@@ -420,54 +466,11 @@ void GLFrameBuffer::ChangeResolution()
 		GLCall(glBindTexture(GL_TEXTURE_2D, m_TexIDs[0]));
 		GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, width, height, 0, GL_RGBA, GL_FLOAT, NULL));
 		GLCall(glBindTexture(GL_TEXTURE_2D, 0));
+		// Depth buffer
+		GLCall(glBindTexture(GL_TEXTURE_2D, m_TexIDs[1]));
+		GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL));
+		GLCall(glBindTexture(GL_TEXTURE_2D, 0));
 		break;
-	case MSAA:
-		// Render buffer
-		GLCall(glBindRenderbuffer(GL_RENDERBUFFER, m_RenderBufferID));
-		GLCall(glRenderbufferStorageMultisample(GL_RENDERBUFFER, msaa, GL_DEPTH24_STENCIL8, width, height));
-		GLCall(glBindRenderbuffer(GL_RENDERBUFFER, 0));
-		// Color buffer
-		GLCall(glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, m_TexIDs[0]));
-		GLCall(glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, msaa, GL_RGBA16F, width, height, GL_TRUE));
-		GLCall(glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0));
-		break;
-	}
-}
-
-void GLFrameBuffer::ChangeMSAA()
-{
-	if (m_Type == MSAA)
-	{
-		int width = (int)(core::SETTINGS.Width * core::SETTINGS.Resolution);
-		int height = (int)(core::SETTINGS.Height * core::SETTINGS.Resolution);
-		int msaa;
-		switch (core::SETTINGS.AA)
-		{
-		case MSAA4X:
-			msaa = 4;
-			break;
-		case MSAA8X:
-			msaa = 8;
-			break;
-		case MSAA16X:
-			msaa = 16;
-			break;
-		case MSAA32X:
-			msaa = 32;
-			break;
-		default:
-			msaa = 4;
-			break;
-		}
-		m_TexSize = glm::vec2(width, height);
-		// Render buffer
-		GLCall(glBindRenderbuffer(GL_RENDERBUFFER, m_RenderBufferID));
-		GLCall(glRenderbufferStorageMultisample(GL_RENDERBUFFER, msaa, GL_DEPTH32F_STENCIL8, width, height));
-		GLCall(glBindRenderbuffer(GL_RENDERBUFFER, 0));
-		// Color buffer
-		GLCall(glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, m_TexIDs[0]));
-		GLCall(glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, msaa, GL_RGBA16F, width, height, GL_TRUE));
-		GLCall(glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0));
 	}
 }
 

@@ -12,11 +12,11 @@
 enum FBType
 {
 	FRAME = 0,
-	MSAA = 1,
-	G_BUFFER = 2,
-	DEPTH_MAP = 3,
-	DEPTH_CUBE = 4,
-	SSAO = 5
+	G_BUFFER = 1,
+	DEPTH_MAP = 2,
+	DEPTH_CUBE = 3,
+	SSAO = 4,
+	OIT = 5
 };
 
 class GLFrameBuffer
@@ -47,7 +47,6 @@ public:
 	void UnbindTex() const;
 	// Window resize
 	void ChangeResolution();
-	void ChangeMSAA();
 	void ChangeShadowRes(unsigned int width, unsigned int height);
 	// Get GLFrameBuffer's members
 	inline unsigned int GetID() const

@@ -74,18 +74,6 @@ void Renderer::ChangeResolution()
 	}
 }
 
-void Renderer::ChangeMSAA()
-{
-	switch (core::SETTINGS.GraphicsCore)
-	{
-	case OPENGL:
-		m_RendererGL.ChangeMSAA();
-		break;
-	default:
-		break;
-	}
-}
-
 void Renderer::ChangePostProcess()
 {
 	switch (core::SETTINGS.GraphicsCore)

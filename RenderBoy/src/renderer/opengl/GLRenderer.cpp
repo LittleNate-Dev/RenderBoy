@@ -19,6 +19,7 @@ void GLRenderer::Init(Scene& scene)
 	m_Shaders.Bloom[0].Init(SHADER_OPENGL_BLOOM_DOWNSAMPLE); 
 	m_Shaders.Bloom[1].Init(SHADER_OPENGL_BLOOM_UPSAMPLE);
 	m_Shaders.Bloom[2].Init(SHADER_OPENGL_BLOOM_BLEND);
+	m_Shaders.OIT.Init(SHADER_OPENGL_OIT);
 	// Shaders used for ssao
 	{
 		m_Shaders.SSAO[0].Init(SHADER_OPENGL_SSAO_GEN);
@@ -33,13 +34,9 @@ void GLRenderer::Init(Scene& scene)
 	}
 	ChangePostProcess();
 	// Initialize frame buffers
-	m_Frame.FBMsaa.Init(FBType::MSAA);
-	if (!m_Frame.FBMsaa.IsInitialized())
-	{
-		core::ShowWarningMsg("Failed to initialize OpenGL renderer!");
-	}
 	m_Frame.FB.Init(FBType::FRAME);
 	m_Frame.GBuffer.Init(FBType::G_BUFFER);
+	m_Frame.OIT.Init(FBType::OIT);
 	// Initialize framebuffers used for ssao
 	m_Frame.SSAO[0].Init(FBType::SSAO); 
 	m_Frame.SSAO[1].Init(FBType::SSAO);
@@ -103,7 +100,7 @@ void GLRenderer::UpdateModelMat(Scene& scene)
 
 void GLRenderer::Clear()
 {
-	GLCall(glClearColor(0.0f, 0.0f, 0.0f, 1.0f));
+	GLCall(glClearColor(0.0f, 0.0f, 0.0f, 0.0f));
 	GLCall(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 }
 
@@ -136,17 +133,10 @@ void GLRenderer::Draw(Scene& scene)
 		DrawSpotLightShadow(scene, update);
 		DrawDirLightShadow(scene);
 	}
-	// MSAA
-	if ((int)core::SETTINGS.AA >= 1 && (int)core::SETTINGS.AA <= 4)
-	{
-		m_Frame.FBMsaa.Bind();
-	}
-	else
-	{
-		m_Frame.FB.Bind();
-	}
 	// Draw your content inside this scope
+	m_Frame.FB.Bind();
 	Clear();
+	m_Frame.FB.Unbind();
 	glm::vec2 renderRes = core::GetRenderResolution();
 	GLCall(glViewport(0, 0, (GLsizei)renderRes.x, (GLsizei)renderRes.y));
 	// Draw Skybox
@@ -182,15 +172,6 @@ void GLRenderer::Draw(Scene& scene)
 	{
 		DrawNormal(scene);
 	}
-	// Draw your content inside this scope
-	if ((int)core::SETTINGS.AA >= 1 && (int)core::SETTINGS.AA <= 4)
-	{
-		GLCall(glBindFramebuffer(GL_READ_FRAMEBUFFER, m_Frame.FBMsaa.GetID()));
-		GLCall(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_Frame.FB.GetID()));
-		int width = (int)(core::SETTINGS.Width * core::SETTINGS.Resolution);
-		int height = (int)(core::SETTINGS.Height * core::SETTINGS.Resolution);
-		GLCall(glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST));
-	}
 	m_Frame.FB.Unbind();
 	if (scene.GetVFX().Bloom && (core::SETTINGS.DrawMode == BLANK || core::SETTINGS.DrawMode == DEFAULT))
 	{
@@ -216,13 +197,17 @@ void GLRenderer::Draw(Scene& scene)
 
 void GLRenderer::DrawDefault(Scene& scene)
 {
-	//glDisable(GL_DEPTH_TEST);
 	std::string model;
+	// 1.Opaque pass
+	m_Frame.FB.Bind();
+	GLCall(glEnable(GL_DEPTH_TEST));
+	GLCall(glDepthFunc(GL_LESS));
+	GLCall(glDepthMask(GL_TRUE));
+	GLCall(glDisable(GL_BLEND));
 	for (unsigned int i = 0; i < scene.GetModelList().size(); i++)
 	{
 		model = scene.GetModelList()[i];;
 		scene.GetData().GetDataGL().GetModelData()[model].Shader.Bind();
-		//std::cout << model << " " << scene.GetData().GetDataGL().GetModelData()[model].Shader.GetID() << std::endl;
 		scene.GetData().GetDataGL().GetModelData()[model].Shader.SetUniformMat4f("u_ProjMat", scene.GetCamera().GetProjMat());
 		scene.GetData().GetDataGL().GetModelData()[model].Shader.SetUniformMat4f("u_ViewMat", scene.GetCamera().GetViewMat());
 		scene.GetData().GetDataGL().GetModelData()[model].Shader.SetUniformVec3f("u_ViewPos", scene.GetCamera().GetPosition());
@@ -315,13 +300,64 @@ void GLRenderer::DrawDefault(Scene& scene)
 			}
 		}
 		scene.GetData().GetDataGL().GetModelData()[model].VA.Bind();
-		scene.GetData().GetDataGL().GetModelData()[model].IB.Bind();
-		// Draw Model
+		scene.GetData().GetDataGL().GetModelData()[model].IB.Bind();		
+		scene.GetData().GetDataGL().GetModelData()[model].Shader.SetUniform1i("u_OITPass", 0);
 		GLCall(glDrawElementsInstanced(GL_TRIANGLES, scene.GetData().GetDataGL().GetModelData()[model].IB.GetCount(), GL_UNSIGNED_INT, nullptr, scene.GetModels()[model].GetInstance()));
 		scene.GetData().GetDataGL().GetModelData()[model].VA.Unbind();
 		scene.GetData().GetDataGL().GetModelData()[model].IB.Unbind();
+		scene.GetData().GetDataGL().GetModelData()[model].Shader.Unbind();
 	}
-	scene.GetData().GetDataGL().GetShader().Unbind();
+
+	m_Frame.FB.Unbind();
+	// 2.Transparent pass
+	m_Frame.OIT.Bind();
+	int width = m_Frame.FB.GetTexWidth();
+	int height = m_Frame.FB.GetTexHeight();
+	GLCall(glBindFramebuffer(GL_READ_FRAMEBUFFER, m_Frame.FB.GetID()));
+	GLCall(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_Frame.OIT.GetID()));
+	GLCall(glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_DEPTH_BUFFER_BIT, GL_NEAREST));
+	GLCall(glDepthMask(GL_FALSE));
+	GLCall(glEnable(GL_BLEND));
+	GLCall(glBlendFunci(0, GL_ONE, GL_ONE));
+	GLCall(glBlendFunci(1, GL_ZERO, GL_ONE_MINUS_SRC_COLOR));
+	GLCall(glBlendEquation(GL_FUNC_ADD));
+	glm::vec4 zeroFillerVec = glm::vec4(0.0f);
+	GLCall(glClearBufferfv(GL_COLOR, 0, &zeroFillerVec[0]));
+	glm::vec4 oneFillerVec = glm::vec4(1.0f);
+	GLCall(glClearBufferfv(GL_COLOR, 1, &oneFillerVec[0]));
+	for (unsigned int i = 0; i < scene.GetModelList().size(); i++)
+	{
+		model = scene.GetModelList()[i];;
+		scene.GetData().GetDataGL().GetModelData()[model].Shader.Bind();
+		scene.GetData().GetDataGL().GetModelData()[model].VA.Bind();
+		scene.GetData().GetDataGL().GetModelData()[model].IB.Bind();
+		scene.GetData().GetDataGL().GetModelData()[model].Shader.SetUniform1i("u_OITPass", 1);
+		GLCall(glDrawElementsInstanced(GL_TRIANGLES, scene.GetData().GetDataGL().GetModelData()[model].IB.GetCount(), GL_UNSIGNED_INT, nullptr, scene.GetModels()[model].GetInstance()));
+		scene.GetData().GetDataGL().GetModelData()[model].VA.Unbind();
+		scene.GetData().GetDataGL().GetModelData()[model].IB.Unbind();
+		scene.GetData().GetDataGL().GetModelData()[model].Shader.Unbind();
+	}
+	
+	m_Frame.OIT.Unbind();
+	// 3.Composite the result
+	m_Frame.FB.Bind();
+	GLCall(glDepthFunc(GL_ALWAYS));
+	GLCall(glEnable(GL_BLEND));
+	GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+	m_Shaders.OIT.Bind();
+	m_Shaders.OIT.SetUniformHandleARB("u_Accum", m_Frame.OIT.GetHandle(0));
+	m_Shaders.OIT.SetUniformHandleARB("u_Reveal", m_Frame.OIT.GetHandle(1));
+	m_Frame.VA.Bind();
+	m_Frame.IB.Bind();
+	GLCall(glDrawElements(GL_TRIANGLES, m_Frame.IB.GetCount(), GL_UNSIGNED_INT, nullptr));
+	m_Frame.VA.Unbind();
+	m_Frame.IB.Unbind();
+	m_Shaders.OIT.Unbind();
+	m_Frame.FB.Unbind();
+	GLCall(glDepthMask(GL_TRUE));
+	//GLCall(glEnable(GL_DEPTH_TEST));
+	GLCall(glDepthFunc(GL_LESS));
+	//GLCall(glDisable(GL_BLEND));
 }
 
 void GLRenderer::DrawGBuffer(Scene& scene)
@@ -350,6 +386,7 @@ void GLRenderer::DrawGBuffer(Scene& scene)
 
 void GLRenderer::DrawBlank(Scene& scene)
 {
+	m_Frame.FB.Bind();
 	scene.GetData().GetDataGL().GetShader().Bind();
 	scene.GetData().GetDataGL().GetShader().SetUniformMat4f("u_ProjMat", scene.GetCamera().GetProjMat());
 	scene.GetData().GetDataGL().GetShader().SetUniformMat4f("u_ViewMat", scene.GetCamera().GetViewMat());
@@ -454,10 +491,12 @@ void GLRenderer::DrawBlank(Scene& scene)
 		scene.GetData().GetDataGL().GetModelData()[model].IB.Unbind();
 	}
 	scene.GetData().GetDataGL().GetShader().Unbind();
+	m_Frame.FB.Unbind();
 }
 
 void GLRenderer::DrawWireFrame(Scene& scene)
 {
+	m_Frame.FB.Bind();
 	std::string model;
 	scene.GetData().GetDataGL().GetShader().Bind();
 	scene.GetData().GetDataGL().GetShader().SetUniformMat4f("u_ProjMat", scene.GetCamera().GetProjMat());
@@ -476,10 +515,12 @@ void GLRenderer::DrawWireFrame(Scene& scene)
 		scene.GetData().GetDataGL().GetModelData()[model].IB.Unbind();
 	}
 	scene.GetData().GetDataGL().GetShader().Unbind();
+	m_Frame.FB.Unbind();
 }
 
 void GLRenderer::DrawPointCloud(Scene& scene)
 {
+	m_Frame.FB.Bind();
 	std::string model;
 	scene.GetData().GetDataGL().GetShader().Bind();
 	scene.GetData().GetDataGL().GetShader().SetUniformMat4f("u_ProjMat", scene.GetCamera().GetProjMat());
@@ -494,10 +535,12 @@ void GLRenderer::DrawPointCloud(Scene& scene)
 		scene.GetData().GetDataGL().GetModelData()[model].IB.Unbind();
 	}
 	scene.GetData().GetDataGL().GetShader().Unbind();
+	m_Frame.FB.Unbind();
 }
 
 void GLRenderer::DrawDepth(Scene& scene)
 {
+	m_Frame.FB.Bind();
 	std::string model;
 	scene.GetData().GetDataGL().GetShader().Bind();
 	scene.GetData().GetDataGL().GetShader().SetUniformMat4f("u_ProjMat", scene.GetCamera().GetProjMat());
@@ -514,10 +557,12 @@ void GLRenderer::DrawDepth(Scene& scene)
 		scene.GetData().GetDataGL().GetModelData()[model].IB.Unbind();
 	}
 	scene.GetData().GetDataGL().GetShader().Unbind();
+	m_Frame.FB.Unbind();
 }
 
 void GLRenderer::DrawNormalDM(Scene& scene)
 {
+	m_Frame.FB.Bind();
 	std::string model;
 	scene.GetData().GetDataGL().GetShader().Bind();
 	scene.GetData().GetDataGL().GetShader().SetUniformMat4f("u_ProjMat", scene.GetCamera().GetProjMat());
@@ -532,10 +577,12 @@ void GLRenderer::DrawNormalDM(Scene& scene)
 		scene.GetData().GetDataGL().GetModelData()[model].IB.Unbind();
 	}
 	scene.GetData().GetDataGL().GetShader().Unbind();
+	m_Frame.FB.Unbind();
 }
 
 void GLRenderer::DrawUVSet(Scene& scene)
 {
+	m_Frame.FB.Bind();
 	std::string model;
 	scene.GetData().GetDataGL().GetShader().Bind();
 	scene.GetData().GetDataGL().GetShader().SetUniformMat4f("u_ProjMat", scene.GetCamera().GetProjMat());
@@ -551,10 +598,12 @@ void GLRenderer::DrawUVSet(Scene& scene)
 		scene.GetData().GetDataGL().GetModelData()[model].IB.Unbind();
 	}
 	scene.GetData().GetDataGL().GetShader().Unbind();
+	m_Frame.FB.Unbind();
 }
 
 void GLRenderer::DrawNormal(Scene& scene)
 {
+	m_Frame.FB.Bind();
 	std::string model;
 	m_Shaders.Normal.Bind();
 	m_Shaders.Normal.SetUniformMat4f("u_ProjMat", scene.GetCamera().GetProjMat());
@@ -571,10 +620,12 @@ void GLRenderer::DrawNormal(Scene& scene)
 		scene.GetData().GetDataGL().GetModelData()[model].IB.Unbind();
 	}
 	m_Shaders.Normal.Unbind();
+	m_Frame.FB.Bind();
 }
 
 void GLRenderer::DrawLightCube(Scene& scene)
 {
+	m_Frame.FB.Bind();
 	m_Shaders.Lightcube.Bind();
 	glm::vec2 renderRes = core::GetRenderResolution();
 	m_Shaders.Lightcube.SetUniformMat4f("u_ProjMat", scene.GetCamera().GetProjMat());
@@ -631,10 +682,12 @@ void GLRenderer::DrawLightCube(Scene& scene)
 	scene.GetData().GetDataGL().GetDirLightData().VA.Unbind();
 	scene.GetData().GetDataGL().GetDirLightData().IB.Unbind();
 	m_Shaders.Lightcube.Unbind();
+	m_Frame.FB.Unbind();
 }
 
 void GLRenderer::DrawSkybox(Scene& scene)
 {
+	m_Frame.FB.Bind();
 	//GLCall(glDepthFunc(GL_LEQUAL));
 	GLCall(glDisable(GL_DEPTH_TEST));
 	scene.GetData().GetDataGL().GetSkybox().Shader.Bind();
@@ -651,7 +704,7 @@ void GLRenderer::DrawSkybox(Scene& scene)
 	scene.GetData().GetDataGL().GetSkybox().IB.Unbind();
 	scene.GetData().GetDataGL().GetSkybox().Shader.Unbind();
 	GLCall(glEnable(GL_DEPTH_TEST));
-	//GLCall(glDepthFunc(GL_LESS)); // set depth function back to default
+	m_Frame.FB.Unbind();
 }
 
 void GLRenderer::DrawPointLightShadow(Scene& scene, bool update)
@@ -932,10 +985,10 @@ bool GLRenderer::SaveScreenShot(Scene& scene)
 void GLRenderer::ChangeResolution()
 {
 	m_Frame.FB.ChangeResolution();
-	m_Frame.FBMsaa.ChangeResolution();
 	m_Frame.GBuffer.Init(FBType::G_BUFFER);
 	m_Frame.SSAO[0].Init(FBType::SSAO);
 	m_Frame.SSAO[1].Init(FBType::SSAO);
+	m_Frame.OIT.Init(FBType::OIT);
 	// Initialize framebuffers used for bloom effect
 	for (unsigned int i = 0; i < 7; i++)
 	{
@@ -957,11 +1010,6 @@ void GLRenderer::ChangeResolution()
 			break;
 		}
 	}
-}
-
-void GLRenderer::ChangeMSAA()
-{
-	m_Frame.FBMsaa.ChangeMSAA();
 }
 
 void GLRenderer::ChangePostProcess()

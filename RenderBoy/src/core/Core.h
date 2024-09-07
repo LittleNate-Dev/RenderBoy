@@ -49,6 +49,7 @@
 #define SCREENSHOT_FILEPATH "saves/screenshot/"
 #define UV_MAP_FILEPATH "res/checkermap/CheckerMap.png"
 #define SHADER_OPENGL "data/shaders/opengl/"
+#define SHADER_OPENGL_OIT "data/shaders/opengl/others/OIT.glsl"
 #define SHADER_OPENGL_RENDER_NOTEX "data/shaders/opengl/render_mode/NOTEX.glsl"
 #define SHADER_OPENGL_RENDER_HASTEX_ALBEDO "data/shaders/opengl/render_mode/HASTEX_ALBEDO.glsl"
 #define SHADER_OPENGL_RENDER_HASTEX_BLINN "data/shaders/opengl/render_mode/HASTEX_BLINN.glsl"
@@ -146,11 +147,7 @@ enum Render_Mode
 
 enum Anti_Alising
 {
-	NO_AA = 0,
-	MSAA4X = 1,
-	MSAA8X = 2,
-	MSAA16X = 3,
-	MSAA32X = 4
+	NO_AA = 0
 };
 
 enum Post_Process
