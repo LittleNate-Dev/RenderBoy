@@ -66,16 +66,9 @@ void GLFrameBuffer::Init(FBType type)
 		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
 		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
 		GLCall(glBindTexture(GL_TEXTURE_2D, 0));
-		//// Depth buffer
-		//m_TexIDs.push_back(0);
-		//GLCall(glGenTextures(1, &m_TexIDs[1]));
-		//GLCall(glBindTexture(GL_TEXTURE_2D, m_TexIDs[1]));
-		//GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL));
-		//GLCall(glBindTexture(GL_TEXTURE_2D, 0));
 
 		GLCall(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, m_RenderBufferID));
 		GLCall(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_TexIDs[0], 0));
-		//GLCall(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_TexIDs[1], 0));
 	}
 	else if (m_Type == OIT)
 	{
@@ -109,12 +102,7 @@ void GLFrameBuffer::Init(FBType type)
 		GLCall(glMakeTextureHandleResidentARB(m_Handles[1]));
 		GLCall(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, m_TexIDs[1], 0));
 		GLCall(glBindTexture(GL_TEXTURE_2D, 0));
-		//// Depth buffer
-		//m_TexIDs.push_back(0);
-		//GLCall(glGenTextures(1, &m_TexIDs[2]));
-		//GLCall(glBindTexture(GL_TEXTURE_2D, m_TexIDs[2]));
-		//GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL));
-		//GLCall(glBindTexture(GL_TEXTURE_2D, 0));
+
 		unsigned int attachments[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
 		GLCall(glDrawBuffers(2, attachments));
 	}
@@ -210,16 +198,9 @@ void GLFrameBuffer::Init(FBType type, unsigned int width, unsigned int height)
 		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
 		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
 		GLCall(glBindTexture(GL_TEXTURE_2D, 0));
-		//// Depth buffer
-		//m_TexIDs.push_back(0);
-		//GLCall(glGenTextures(1, &m_TexIDs[1]));
-		//GLCall(glBindTexture(GL_TEXTURE_2D, m_TexIDs[1]));
-		//GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL));
-		//GLCall(glBindTexture(GL_TEXTURE_2D, 0));
 
 		GLCall(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, m_RenderBufferID));
 		GLCall(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_TexIDs[0], 0));
-		//GLCall(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_TexIDs[1], 0));
 	}
 	else if (m_Type == G_BUFFER)
 	{
@@ -279,7 +260,7 @@ void GLFrameBuffer::Init(FBType type, unsigned int width, unsigned int height)
 		GLCall(glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH32F_STENCIL8, width, height));
 		GLCall(glBindRenderbuffer(GL_RENDERBUFFER, 0));
 		GLCall(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, m_RenderBufferID));
-		// accum buffer
+		// Accum buffer
 		m_TexIDs.push_back(0);
 		GLCall(glGenTextures(1, &m_TexIDs[0]));
 		GLCall(glBindTexture(GL_TEXTURE_2D, m_TexIDs[0]));
@@ -291,7 +272,7 @@ void GLFrameBuffer::Init(FBType type, unsigned int width, unsigned int height)
 		GLCall(glMakeTextureHandleResidentARB(m_Handles[0]));
 		GLCall(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_TexIDs[0], 0));
 		GLCall(glBindTexture(GL_TEXTURE_2D, 0));
-		// reveal color buffer
+		// Reveal color buffer
 		m_TexIDs.push_back(0);
 		GLCall(glGenTextures(1, &m_TexIDs[1]));
 		GLCall(glBindTexture(GL_TEXTURE_2D, m_TexIDs[1]));
@@ -303,12 +284,7 @@ void GLFrameBuffer::Init(FBType type, unsigned int width, unsigned int height)
 		GLCall(glMakeTextureHandleResidentARB(m_Handles[1]));
 		GLCall(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, m_TexIDs[1], 0));
 		GLCall(glBindTexture(GL_TEXTURE_2D, 0));
-		//// Depth buffer
-		//m_TexIDs.push_back(0);
-		//GLCall(glGenTextures(1, &m_TexIDs[2]));
-		//GLCall(glBindTexture(GL_TEXTURE_2D, m_TexIDs[2]));
-		//GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL));
-		//GLCall(glBindTexture(GL_TEXTURE_2D, 0));
+
 		unsigned int attachments[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
 		GLCall(glDrawBuffers(2, attachments));
 	}

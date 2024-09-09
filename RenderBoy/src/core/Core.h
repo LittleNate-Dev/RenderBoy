@@ -40,7 +40,7 @@
 
 #include <freeimage/FreeImage.h>
 
-#define APP_VERSION "ver 0.7.0"
+#define APP_VERSION "ver 0.7.5"
 #define GIT_REPO "https://github.com/LittleNate-Dev/RenderBoy"
 #define SCENE_FILEPATH "saves/scene/"
 #define SETTING_FILEPATH "data/config/settings.config"

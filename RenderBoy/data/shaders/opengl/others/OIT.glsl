@@ -28,13 +28,13 @@ uniform sampler2D u_Reveal;
 const float EPSILON = 0.00001f;
 
 // calculate floating point numbers equality accurately
-bool isApproximatelyEqual(float a, float b)
+bool IsApproximatelyEqual(float a, float b)
 {
     return abs(a - b) <= (abs(a) < abs(b) ? abs(b) : abs(a)) * EPSILON;
 }
 
 // get the max value between three values
-float max3(vec3 v)
+float Max3(vec3 v)
 {
     return max(max(v.x, v.y), v.z);
 }
@@ -45,7 +45,7 @@ void main()
     float revealage = texture(u_Reveal, v_TexCoord).r;
 
     // save the blending and color texture fetch cost if there is not a transparent fragment
-    if (isApproximatelyEqual(revealage, 1.0f))
+    if (IsApproximatelyEqual(revealage, 1.0f))
     {
         //discard;
     }
@@ -54,7 +54,7 @@ void main()
     vec4 accumulation = texture(u_Accum, v_TexCoord);
 
     // suppress overflow
-    if (isinf(max3(abs(accumulation.rgb))))
+    if (isinf(Max3(abs(accumulation.rgb))))
     {
         accumulation.rgb = vec3(accumulation.a);
     }
@@ -64,6 +64,4 @@ void main()
 
     // blend pixels
     v_FragColor = vec4(average_color, 1.0 - revealage);
-    //v_FragColor = vec4(revealage, revealage, revealage, 1.0);
-    //v_FragColor = accumulation;
 }

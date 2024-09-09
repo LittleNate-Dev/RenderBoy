@@ -465,7 +465,7 @@ void GLData::AddModel(std::string name, Model& model)
 		// Material index
 		glm::vec4 texIndex = glm::vec4(-1.0f);
 		glm::vec3 colorIndex = glm::vec3(-1.0f);
-		glm::vec4 attributeIndex = glm::vec4(-1.0f);
+		glm::vec4 c_AttributeIndex = glm::vec4(-1.0f);
 		glm::vec2 nhIndex = glm::vec2(-1.0f);
 		// Albedo tex
 		for (unsigned int j = 0; j < albedoTex.size(); j++)
@@ -544,7 +544,7 @@ void GLData::AddModel(std::string name, Model& model)
 		{
 			if (model.GetMeshes()[i].GetTransparentValue() == m_ModelData[name].TransparentValue[j])
 			{
-				attributeIndex.y = (float)j;
+				c_AttributeIndex.y = (float)j;
 				break;
 			}
 		}
@@ -570,13 +570,13 @@ void GLData::AddModel(std::string name, Model& model)
 		{
 			model.GetMeshes()[i].GetVertices()[j].TexIndex = texIndex;
 			model.GetMeshes()[i].GetVertices()[j].ColorIndex = colorIndex;
-			model.GetMeshes()[i].GetVertices()[j].AttributeIndex = attributeIndex; 
+			model.GetMeshes()[i].GetVertices()[j].AttributeIndex = c_AttributeIndex; 
 			model.GetMeshes()[i].GetVertices()[j].NHIndex = nhIndex;
 		}
 		//// Reflective
 		//for (unsigned int j = 0; j < m_ModelData[name].ReflectiveValue.size(); j++)
 		//{
-		//	attributeIndex.x++;
+		//	c_AttributeIndex.x++;
 		//	if (model.GetMeshes()[i].GetReflectiveValue() == m_ModelData[name].ReflectiveValue[j])
 		//	{
 		//		break;

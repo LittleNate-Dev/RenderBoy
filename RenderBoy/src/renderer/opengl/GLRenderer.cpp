@@ -20,7 +20,7 @@ void GLRenderer::Init(Scene& scene)
 	m_Shaders.Bloom[1].Init(SHADER_OPENGL_BLOOM_UPSAMPLE);
 	m_Shaders.Bloom[2].Init(SHADER_OPENGL_BLOOM_BLEND);
 	m_Shaders.OIT.Init(SHADER_OPENGL_OIT);
-	// Shaders used for ssao
+	// Shaders used for c_SSAO
 	{
 		m_Shaders.SSAO[0].Init(SHADER_OPENGL_SSAO_GEN);
 		m_Shaders.SSAO[0].Bind();
@@ -37,7 +37,7 @@ void GLRenderer::Init(Scene& scene)
 	m_Frame.FB.Init(FBType::FRAME);
 	m_Frame.GBuffer.Init(FBType::G_BUFFER);
 	m_Frame.OIT.Init(FBType::OIT);
-	// Initialize framebuffers used for ssao
+	// Initialize framebuffers used for c_SSAO
 	m_Frame.SSAO[0].Init(FBType::SSAO); 
 	m_Frame.SSAO[1].Init(FBType::SSAO);
 	// Initialize framebuffers used for bloom effect
@@ -327,7 +327,11 @@ void GLRenderer::DrawDefault(Scene& scene)
 	GLCall(glClearBufferfv(GL_COLOR, 1, &oneFillerVec[0]));
 	for (unsigned int i = 0; i < scene.GetModelList().size(); i++)
 	{
-		model = scene.GetModelList()[i];;
+		model = scene.GetModelList()[i];
+		if (scene.GetModels()[model].GetStatics().RenderMode == Render_Mode::NOTEX)
+		{
+			continue;
+		}
 		scene.GetData().GetDataGL().GetModelData()[model].Shader.Bind();
 		scene.GetData().GetDataGL().GetModelData()[model].VA.Bind();
 		scene.GetData().GetDataGL().GetModelData()[model].IB.Bind();
@@ -355,9 +359,7 @@ void GLRenderer::DrawDefault(Scene& scene)
 	m_Shaders.OIT.Unbind();
 	m_Frame.FB.Unbind();
 	GLCall(glDepthMask(GL_TRUE));
-	//GLCall(glEnable(GL_DEPTH_TEST));
 	GLCall(glDepthFunc(GL_LESS));
-	//GLCall(glDisable(GL_BLEND));
 }
 
 void GLRenderer::DrawGBuffer(Scene& scene)

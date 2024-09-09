@@ -201,7 +201,7 @@ float c_Metallic = 0.0;
 float c_Roughness = 1.0;
 float c_AO = 1.0;
 vec3 c_F0 = vec3(0.04);
-float alpha = 1.0;
+float c_Alpha = 1.0;
 
 vec3 CalcPointLight(int i);
 vec3 CalcSpotLight(int i);
@@ -226,17 +226,17 @@ void main()
     c_ViewDir = normalize(u_ViewPos - v_FragPos);
     if (v_TexIndex.x < 0)
     {
-        alpha = u_Transparent[int(c_AttributeIndex.y)];
+        c_Alpha = u_Transparent[int(c_AttributeIndex.y)];
     }
     else
     {
-        alpha = texture(u_AlbedoTex[c_AlbedoTexIndex], v_TexCoord).a;
+        c_Alpha = texture(u_AlbedoTex[c_AlbedoTexIndex], v_TexCoord).a;
     }
-    if (!u_OITPass && alpha < 1.0)
+    if (!u_OITPass && c_Alpha < 1.0)
     {
         discard;
     }
-    else if (u_OITPass && alpha == 1.0)
+    else if (u_OITPass && (c_Alpha == 1.0 || c_Alpha < 0.05))
     {
         discard;
     }
@@ -327,7 +327,7 @@ void main()
             result += CalcDirLight(i);
         }
     }
-    vec4 outputData = vec4(result, alpha);
+    vec4 outputData = vec4(result, c_Alpha);
     if (!u_OITPass)
     {
         v_Accum = outputData;
