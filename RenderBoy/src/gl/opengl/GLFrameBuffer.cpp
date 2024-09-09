@@ -426,30 +426,6 @@ void GLFrameBuffer::UnbindTex() const
 	}
 }
 
-void GLFrameBuffer::ChangeResolution()
-{
-	int width = (int)(core::SETTINGS.Width * core::SETTINGS.Resolution);
-	int height = (int)(core::SETTINGS.Height * core::SETTINGS.Resolution);
-	m_TexSize = glm::vec2(width, height);
-	switch (m_Type)
-	{
-	case FRAME:
-		// Render buffer
-		GLCall(glBindRenderbuffer(GL_RENDERBUFFER, m_RenderBufferID));
-		GLCall(glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height));
-		GLCall(glBindRenderbuffer(GL_RENDERBUFFER, 0));
-		// Color buffer
-		GLCall(glBindTexture(GL_TEXTURE_2D, m_TexIDs[0]));
-		GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, width, height, 0, GL_RGBA, GL_FLOAT, NULL));
-		GLCall(glBindTexture(GL_TEXTURE_2D, 0));
-		// Depth buffer
-		GLCall(glBindTexture(GL_TEXTURE_2D, m_TexIDs[1]));
-		GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL));
-		GLCall(glBindTexture(GL_TEXTURE_2D, 0));
-		break;
-	}
-}
-
 void GLFrameBuffer::ChangeShadowRes(unsigned int width, unsigned int height)
 {
 	GLCall(glDeleteTextures(1, &m_TexIDs[0]));

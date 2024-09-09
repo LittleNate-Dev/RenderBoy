@@ -79,10 +79,12 @@
 #define SHADER_OPENGL_SHADOW_DIR "data/shaders/opengl/shadow/DIRLIGHT.glsl"
 #define DRAW_MODE_COUNT 7
 #define POST_PROCESS_COUNT 5
-#define MAX_FOV 120
-#define MIN_FOV 40
-#define MIN_MOUSE_SEN 0.1f
-#define MAX_MOUSE_SEN 2.0f
+#define SETTING_MAX_FOV 120
+#define SETTING_MIN_FOV 40
+#define SETTING_RES_MIN 20
+#define SETTING_RES_MAX 200
+#define SETTING_MOUSE_MIN_SEN 0.1f
+#define SETTING_MOUSE_MAX_SEN 2.0f
 
 #define ASSERT(x) if (!(x)) __debugbreak();
 #define GLCall(x) GLClearError();\

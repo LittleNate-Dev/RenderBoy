@@ -315,6 +315,8 @@ void GLRenderer::DrawDefault(Scene& scene)
 	int height = m_Frame.FB.GetTexHeight();
 	GLCall(glBindFramebuffer(GL_READ_FRAMEBUFFER, m_Frame.FB.GetID()));
 	GLCall(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_Frame.OIT.GetID()));
+	//std::cout << "FB: " << width << " " << height << std::endl;
+	//std::cout << "OIT: " << m_Frame.OIT.GetTexWidth() << " " << m_Frame.OIT.GetTexHeight() << std::endl;
 	GLCall(glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_DEPTH_BUFFER_BIT, GL_NEAREST));
 	GLCall(glDepthMask(GL_FALSE));
 	GLCall(glEnable(GL_BLEND));
@@ -986,11 +988,14 @@ bool GLRenderer::SaveScreenShot(Scene& scene)
 
 void GLRenderer::ChangeResolution()
 {
-	m_Frame.FB.ChangeResolution();
-	m_Frame.GBuffer.Init(FBType::G_BUFFER);
-	m_Frame.SSAO[0].Init(FBType::SSAO);
-	m_Frame.SSAO[1].Init(FBType::SSAO);
-	m_Frame.OIT.Init(FBType::OIT);
+	int width = (int)(core::SETTINGS.Width * core::SETTINGS.Resolution);
+	int height = (int)(core::SETTINGS.Height * core::SETTINGS.Resolution);
+
+	m_Frame.FB.Init(FBType::FRAME, width, height);
+	m_Frame.GBuffer.Init(FBType::G_BUFFER, width, height);
+	m_Frame.SSAO[0].Init(FBType::SSAO, width, height);
+	m_Frame.SSAO[1].Init(FBType::SSAO, width, height);
+	m_Frame.OIT.Init(FBType::OIT, width, height);
 	// Initialize framebuffers used for bloom effect
 	for (unsigned int i = 0; i < 7; i++)
 	{

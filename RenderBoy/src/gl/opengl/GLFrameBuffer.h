@@ -46,7 +46,6 @@ public:
 	void BindTex(unsigned int slot = 0) const;
 	void UnbindTex() const;
 	// Window resize
-	void ChangeResolution();
 	void ChangeShadowRes(unsigned int width, unsigned int height);
 	// Get GLFrameBuffer's members
 	inline unsigned int GetID() const

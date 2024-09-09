@@ -295,7 +295,7 @@ void Camera::DrawUI()
 			static int fov;
 			fov = (int)GetFOV();
 			ImGui::PushItemWidth(220.0f * core::GetWidgetWidthCoefficient());
-			if (ImGui::SliderInt("##FOV", &fov, MIN_FOV, MAX_FOV))
+			if (ImGui::SliderInt("##FOV", &fov, SETTING_MIN_FOV, SETTING_MAX_FOV))
 			{
 				SetFOV(fov);
 			}

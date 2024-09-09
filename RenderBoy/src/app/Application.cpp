@@ -500,9 +500,13 @@ void Application::DrawUI()
         {
             core::FILE_BROWSER.Display();
         }
-        if (!m_Launched)
+        if (!m_Launched && !core::IS_SETTINGS_OPENED)
         {
             DrawLaunchWindow();
+        }
+        else if (!m_Launched && core::IS_SETTINGS_OPENED)
+        {
+            DrawSettingWindow();
         }
         else if (core::IS_UI_OPENED)
         {
@@ -601,33 +605,35 @@ void Application::DrawMenuBar()
 void Application::DrawLaunchWindow()
 {
     ImGuiIO& io = ImGui::GetIO(); (void)io;
-    ImGui::SetNextWindowSize(ImVec2(io.DisplaySize.x / 5.0f, io.DisplaySize.y / 3.0f));
-    ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x / 5.0f * 2.0f, io.DisplaySize.y / 3.0f));
     ImGuiWindowFlags windowFlags = 0;
-    windowFlags |= ImGuiWindowFlags_NoMove;
     windowFlags |= ImGuiWindowFlags_NoTitleBar;
-    windowFlags |= ImGuiWindowFlags_NoResize;
     windowFlags |= ImGuiWindowFlags_NoScrollbar;
+    windowFlags |= ImGuiWindowFlags_AlwaysAutoResize;
+    windowFlags |= ImGuiWindowFlags_NoMove;
+    windowFlags |= ImGuiWindowFlags_NoCollapse;
     ImGui::Begin("RenderBoy", nullptr, windowFlags);
+    ImVec2 displaySize = io.DisplaySize;
     ImVec2 windowSize = ImGui::GetWindowSize();
-    ImGui::SetCursorPosX((windowSize.x - windowSize.x / 3.0f) * 0.5f);
+    ImGui::SetWindowPos(ImVec2((displaySize.x - windowSize.x) / 2.0f, (displaySize.y - windowSize.y) / 2.0f));
     if (m_IconTexID)
     {
-        ImGui::CenterAlignWidget(windowSize.x / 2.0f);
-        ImGui::Image(m_IconTexID, ImVec2(windowSize.x / 2.0f, windowSize.x / 2.0f));
+        ImGui::CenterAlignWidget(displaySize.x / 8.0f);
+        ImGui::Image(m_IconTexID, ImVec2(displaySize.x / 8.0f, displaySize.x / 8.0f));
     }
-    ImGui::SetCursorPosY(((windowSize.y - windowSize.x / 2.0f) / 4.0f) + windowSize.x / 2.0f);
     ImGui::CenterAlignWidget("RenderBoy");
     ImGui::Text("RenderBoy");
-    ImGui::SetCursorPosY(((windowSize.y - windowSize.x / 2.0f) / 4.0f) * 2.0f + windowSize.x / 2.0f);
     ImGui::CenterAlignWidget(APP_VERSION);
     ImGui::Text(APP_VERSION);
-    ImGui::SetCursorPosY(((windowSize.y - windowSize.x / 2.0f) / 4.0f) * 3.0f + windowSize.x / 2.0f);
-    ImGui::CenterAlignWidget("Open File");
-    if (ImGui::Button("Open File"))
+    ImGui::CenterAlignWidget("Open");
+    if (ImGui::Button("Open"))
     {
         core::LOAD_TYPE = RESET_SCENE;
         core::FILE_BROWSER.Open();
+    }
+    ImGui::CenterAlignWidget("Settings");
+    if (ImGui::Button("Settings"))
+    {
+        core::IS_SETTINGS_OPENED = true;
     }
     ImGui::End();
 }
@@ -810,7 +816,7 @@ void Application::DrawSettingWindow()
                     ImGui::CenterAlignWidget("Sensitivity", 220.0f * core::GetWidgetWidthCoefficient());
                     ImGui::LabelHighlighted("Sensitivity");
                     ImGui::PushItemWidth(220.0f * core::GetWidgetWidthCoefficient());
-                    ImGui::SliderFloat("##MouseSensitivity", &core::SETTINGS.Sensitivity, MIN_MOUSE_SEN, MAX_MOUSE_SEN);
+                    ImGui::SliderFloat("##MouseSensitivity", &core::SETTINGS.Sensitivity, SETTING_MOUSE_MIN_SEN, SETTING_MOUSE_MAX_SEN);
                 }
                 ImGui::TreePop();
             }
@@ -938,7 +944,7 @@ void Application::DrawSettingWindow()
                 ImGui::PushItemWidth(200.0f * core::GetWidgetWidthCoefficient());
                 static int resolution;
                 resolution = (int)(100.0f * core::SETTINGS.Resolution);
-                if (ImGui::SliderInt("##Resolution", &resolution, 20, 400))
+                if (ImGui::SliderInt("##Resolution", &resolution, 20, 200))
                 {
                     core::SETTINGS.Resolution = (float)resolution / 100.0f;
                     m_Renderer.ChangeResolution();
@@ -947,8 +953,8 @@ void Application::DrawSettingWindow()
             }
             // Anti-Alising
             {
-                ImGui::CenterAlignWidget("Anti-Alising", 100.0f * core::GetWidgetWidthCoefficient());
-                ImGui::LabelHighlighted("Anti-Alising");
+                /*ImGui::CenterAlignWidget("Anti-Alising", 100.0f * core::GetWidgetWidthCoefficient());
+                ImGui::LabelHighlighted("Anti-Alising");*/
                 // TODO
             }
             ImGui::TreePop();
