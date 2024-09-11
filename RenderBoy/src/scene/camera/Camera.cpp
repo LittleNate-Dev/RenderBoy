@@ -10,10 +10,33 @@ Camera::Camera()
 	m_EulerAngle = glm::vec3(0.0f);
 	m_MoveSpeed = 1.0f;
 	m_RotateSpeed = 1.0f;
+	m_VFX.Bloom.Switch = true;
+	m_VFX.Bloom.Strength = 0.1f;
+	m_VFX.Bloom.FilterRadius = 0.01f;
+	m_VFX.Focus.Distance = 100.0f;
+	m_VFX.Focus.Range = 250.0f;
+	m_VFX.Focus.FocalLength = 3.0f;
 }
 
 Camera::~Camera()
 {
+}
+
+void Camera::Reset()
+{
+	m_Type = true;
+	m_FOV = 80.0f;
+	m_Plane = glm::vec2(0.1f, 500.0f);
+	m_Position = glm::vec3(0.0f);
+	m_EulerAngle = glm::vec3(0.0f);
+	m_MoveSpeed = 1.0f;
+	m_RotateSpeed = 1.0f;
+	m_VFX.Bloom.Switch = true;
+	m_VFX.Bloom.Strength = 0.1f;
+	m_VFX.Bloom.FilterRadius = 0.01f;
+	m_VFX.Focus.Distance = 1.0f;
+	m_VFX.Focus.Range = 250.0f;
+	m_VFX.Focus.FocalLength = 3.0f;
 }
 
 glm::vec3 Camera::GetDirection(glm::vec3 direction)
@@ -262,6 +285,38 @@ void Camera::SetRotateSpeed(float speed)
 	m_RotateSpeed = speed;
 }
 
+void Camera::SetBloomStrength(float strength)
+{
+	m_VFX.Bloom.Strength = strength;
+}
+
+void Camera::SetBloomFilterRadius(float radius)
+{
+	radius = radius > 0.0f ? radius : 0.005f;
+	m_VFX.Bloom.FilterRadius = radius;
+}
+
+void Camera::SetFocusDistance(float distance)
+{
+	distance = distance < m_Plane.x ? m_Plane.x : distance;
+	distance = distance > m_Plane.y ? m_Plane.y : distance;
+	m_VFX.Focus.Distance = distance;
+}
+
+void Camera::SetFocusRange(float range)
+{
+	range = range < 0.0f ? 0.0f : range;
+	range = range > (m_Plane.y - m_Plane.x) ? (m_Plane.y - m_Plane.x) : range;
+	m_VFX.Focus.Range = range;
+}
+
+void Camera::SetFocalLength(float length)
+{
+	length = length > SETTING_VFX_DOF_MAX_FLENGTH ? SETTING_VFX_DOF_MAX_FLENGTH : length;
+	length = length < SETTING_VFX_DOF_MIN_FLENGTH ? SETTING_VFX_DOF_MIN_FLENGTH : length;
+	m_VFX.Focus.FocalLength = length;
+}
+
 void Camera::DrawUI()
 {
 	ImGui::LabelHighlighted("Position:");
@@ -396,12 +451,96 @@ void Camera::DrawUI()
 		}
 		ImGui::TreePop();
 	}
+	// Camera effects
+	if (ImGui::TreeNode("Effects"))
+	{
+		if (ImGui::TreeNode("Depth of Field"))
+		{
+			ImGui::CenterAlignWidget("Enable");
+			ImGui::LabelHighlighted("Enable");
+			ImGui::Checkbox("##Enable", &m_VFX.Focus.Switch);
+			static bool slider = true;
+			if (m_VFX.Focus.Switch)
+			{
+				ImGui::Checkbox("Slider", &slider);
+				if (slider)
+				{
+					ImGui::CenterAlignWidget("Distance", 180.0f * core::GetWidgetWidthCoefficient());
+					ImGui::LabelHighlighted("Distance");
+					ImGui::PushItemWidth(180.0f * core::GetWidgetWidthCoefficient());
+					if (ImGui::SliderFloat("##FocusDistance", &m_VFX.Focus.Distance, m_Plane.x, m_Plane.y))
+					{
+						SetFocusDistance(m_VFX.Focus.Distance);
+					}
+					ImGui::PopItemWidth();
+					ImGui::CenterAlignWidget("Range", 180.0f * core::GetWidgetWidthCoefficient());
+					ImGui::LabelHighlighted("Range");
+					ImGui::PushItemWidth(180.0f * core::GetWidgetWidthCoefficient());
+					if (ImGui::SliderFloat("##FocusRange", &m_VFX.Focus.Range, 0.0f, (m_Plane.y - m_Plane.x)))
+					{
+						SetFocusRange(m_VFX.Focus.Range);
+					}
+					ImGui::PopItemWidth();
+					ImGui::CenterAlignWidget("Focal Length", 150.0f * core::GetWidgetWidthCoefficient());
+					ImGui::LabelHighlighted("Focal Length");
+					ImGui::PushItemWidth(150.0f * core::GetWidgetWidthCoefficient());
+					ImGui::SliderFloat("##FocusFocalLength", &m_VFX.Focus.FocalLength, SETTING_VFX_DOF_MIN_FLENGTH, SETTING_VFX_DOF_MAX_FLENGTH);
+					ImGui::PopItemWidth();
+				}
+				else
+				{
+					ImGui::PushItemWidth(80.0f * core::GetWidgetWidthCoefficient());
+					ImGui::CenterAlignWidget("Distance", 80.0f * core::GetWidgetWidthCoefficient());
+					ImGui::LabelHighlighted("Distance");
+					if (ImGui::InputFloat("##FocusDistance", &m_VFX.Focus.Distance))
+					{
+						SetFocusDistance(m_VFX.Focus.Distance);
+					}
+					ImGui::CenterAlignWidget("Range", 80.0f * core::GetWidgetWidthCoefficient());
+					ImGui::LabelHighlighted("Range");
+					if (ImGui::InputFloat("##FocusRange", &m_VFX.Focus.Range))
+					{
+						SetFocusRange(m_VFX.Focus.Range);
+					}
+					ImGui::CenterAlignWidget("Focal Length", 80.0f * core::GetWidgetWidthCoefficient());
+					ImGui::LabelHighlighted("Focal Length");
+					if (ImGui::InputFloat("##Focal Length", &m_VFX.Focus.FocalLength))
+					{
+						SetFocalLength(m_VFX.Focus.FocalLength);
+					}
+					ImGui::PopItemWidth();
+				}
+			}
+			ImGui::TreePop();
+		}
+		if (ImGui::TreeNode("Bloom"))
+		{
+			ImGui::CenterAlignWidget("Enable");
+			ImGui::LabelHighlighted("Enable");
+			ImGui::Checkbox("##Enable", &m_VFX.Bloom.Switch);
+			if (m_VFX.Bloom.Switch)
+			{
+				// Bloom Strength
+				ImGui::PushItemWidth(60.0f * core::GetWidgetWidthCoefficient());
+				ImGui::CenterAlignWidget("Strength", 60.0f * core::GetWidgetWidthCoefficient());
+				ImGui::LabelHighlighted("Strength");
+				ImGui::InputFloat("##BloomStrength", &m_VFX.Bloom.Strength, 0.0f, 0.0f, "%.4f");
+				// Bloom Filter Radius
+				ImGui::PushItemWidth(80.0f * core::GetWidgetWidthCoefficient());
+				ImGui::CenterAlignWidget("Filter Radius", 80.0f * core::GetWidgetWidthCoefficient());
+				ImGui::LabelHighlighted("Filter Radius");
+				if (ImGui::InputFloat("##BloomFilterRadius", &m_VFX.Bloom.FilterRadius, 0.0f, 0.0f, "%.6f"))
+				{
+					m_VFX.Bloom.FilterRadius = m_VFX.Bloom.FilterRadius > 0.0f ? m_VFX.Bloom.FilterRadius : 0.005f;
+				}
+			}
+			ImGui::TreePop();
+		}
+		ImGui::TreePop();
+	}
 	ImGui::CenterAlignWidget("Reset");
 	if (ImGui::Button("Reset"))
 	{
-		m_Position = glm::vec3(0.0f);
-		m_EulerAngle = glm::vec3(0.0f);
-		m_MoveSpeed = 1.0f;
-		m_RotateSpeed = 1.0f;
+		Reset();
 	}
 }

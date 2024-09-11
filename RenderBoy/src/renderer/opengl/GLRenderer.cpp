@@ -20,6 +20,11 @@ void GLRenderer::Init(Scene& scene)
 	m_Shaders.Bloom[1].Init(SHADER_OPENGL_BLOOM_UPSAMPLE);
 	m_Shaders.Bloom[2].Init(SHADER_OPENGL_BLOOM_BLEND);
 	m_Shaders.OIT.Init(SHADER_OPENGL_OIT);
+	m_Shaders.DOF[0].Init(SHADER_OPENGL_DOF_COC);
+	m_Shaders.DOF[1].Init(SHADER_OPENGL_DOF_BOKEH);
+	m_Shaders.DOF[2].Init(SHADER_OPENGL_DOF_DOWNSAMPLE);
+	m_Shaders.DOF[3].Init(SHADER_OPENGL_DOF_BLEND);
+	m_Shaders.GaussianBlur.Init(SHADER_OPENGL_UTIL_GAUSSIAN_BLUR);
 	// Shaders used for c_SSAO
 	{
 		m_Shaders.SSAO[0].Init(SHADER_OPENGL_SSAO_GEN);
@@ -37,9 +42,15 @@ void GLRenderer::Init(Scene& scene)
 	m_Frame.FB.Init(FBType::FRAME);
 	m_Frame.GBuffer.Init(FBType::G_BUFFER);
 	m_Frame.OIT.Init(FBType::OIT);
-	// Initialize framebuffers used for c_SSAO
+	// Initialize framebuffers used for SSAO
 	m_Frame.SSAO[0].Init(FBType::SSAO); 
 	m_Frame.SSAO[1].Init(FBType::SSAO);
+	// Initialize framebuffers used for depth of field
+	m_Frame.DOF[0].Init(FBType::FRAME);
+	m_Frame.DOF[1].Init(FBType::FRAME);
+	glm::vec2 renderRes = core::GetRenderResolution() * 0.5f;
+	m_Frame.DOF[2].Init(FBType::FRAME, (int)renderRes.x, (int)renderRes.y);
+	m_Frame.DOF[3].Init(FBType::FRAME, (int)renderRes.x, (int)renderRes.y);
 	// Initialize framebuffers used for bloom effect
 	int bloomWidth = (int)(core::SETTINGS.Width * core::SETTINGS.Resolution);
 	int bloomHeight = (int)(core::SETTINGS.Height * core::SETTINGS.Resolution);
@@ -139,8 +150,6 @@ void GLRenderer::Draw(Scene& scene)
 	m_Frame.FB.Unbind();
 	glm::vec2 renderRes = core::GetRenderResolution();
 	GLCall(glViewport(0, 0, (GLsizei)renderRes.x, (GLsizei)renderRes.y));
-	// Draw Skybox
-	DrawSkybox(scene);
 	switch (core::SETTINGS.DrawMode)
 	{
 	case DEFAULT:
@@ -165,25 +174,19 @@ void GLRenderer::Draw(Scene& scene)
 		DrawNormalDM(scene);
 		break;
 	}
-	// Draw Light Cube
-	DrawLightCube(scene);
 	// Draw normals
 	if (core::SETTINGS.ShowNormal)
 	{
 		DrawNormal(scene);
 	}
 	m_Frame.FB.Unbind();
-	if (scene.GetVFX().Bloom && (core::SETTINGS.DrawMode == BLANK || core::SETTINGS.DrawMode == DEFAULT))
-	{
-		DrawBloom(scene);
-	}
 	Clear();
 	// Draw frame buffer's content on the screen;
 	GLCall(glViewport(0, 0, core::SETTINGS.Width, core::SETTINGS.Height));
 	GLCall(glDisable(GL_DEPTH_TEST));
 	m_Shaders.Screen.Bind();
-	m_Frame.FB.BindTex();
-	m_Shaders.Screen.SetUniform1i("u_ScreenTex", 0);
+	m_Shaders.Screen.SetUniformHandleARB("u_ScreenTex", m_Frame.FB.GetHandle());
+	//m_Shaders.Screen.SetUniformHandleARB("u_ScreenTex", m_Frame.DOF[1].GetHandle());
 	m_Shaders.Screen.SetUniform1f("u_Gamma", core::SETTINGS.Gamma);
 	m_Frame.VA.Bind();
 	m_Frame.IB.Bind();
@@ -195,8 +198,35 @@ void GLRenderer::Draw(Scene& scene)
 	GLCall(glEnable(GL_DEPTH_TEST));
 }
 
+void GLRenderer::DrawGBuffer(Scene& scene)
+{
+	m_Frame.GBuffer.Bind();
+	Clear();
+	glm::vec2 texSize = m_Frame.GBuffer.GetTexSize();
+	GLCall(glViewport(0, 0, texSize.x, texSize.y));
+	m_Shaders.GBuffer.Bind();
+	m_Shaders.GBuffer.SetUniformMat4f("u_ProjMat", scene.GetCamera().GetProjMat());
+	m_Shaders.GBuffer.SetUniformMat4f("u_ViewMat", scene.GetCamera().GetViewMat());
+	m_Shaders.GBuffer.SetUniformVec2f("u_Plane", scene.GetCamera().GetPlane());
+	std::string model;
+	for (unsigned int i = 0; i < scene.GetModelList().size(); i++)
+	{
+		model = scene.GetModelList()[i];
+		scene.GetData().GetDataGL().GetModelData()[model].VA.Bind();
+		scene.GetData().GetDataGL().GetModelData()[model].IB.Bind();
+		// Draw Model
+		GLCall(glDrawElementsInstanced(GL_TRIANGLES, scene.GetData().GetDataGL().GetModelData()[model].IB.GetCount(), GL_UNSIGNED_INT, nullptr, scene.GetModels()[model].GetInstance()));
+		scene.GetData().GetDataGL().GetModelData()[model].VA.Unbind();
+		scene.GetData().GetDataGL().GetModelData()[model].IB.Unbind();
+	}
+	m_Shaders.GBuffer.Unbind();
+	m_Frame.GBuffer.Unbind();
+}
+
 void GLRenderer::DrawDefault(Scene& scene)
 {
+	// Draw Skybox
+	DrawSkybox(scene);
 	std::string model;
 	// 1.Opaque pass
 	m_Frame.FB.Bind();
@@ -315,18 +345,14 @@ void GLRenderer::DrawDefault(Scene& scene)
 	int height = m_Frame.FB.GetTexHeight();
 	GLCall(glBindFramebuffer(GL_READ_FRAMEBUFFER, m_Frame.FB.GetID()));
 	GLCall(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_Frame.OIT.GetID()));
-	//std::cout << "FB: " << width << " " << height << std::endl;
-	//std::cout << "OIT: " << m_Frame.OIT.GetTexWidth() << " " << m_Frame.OIT.GetTexHeight() << std::endl;
 	GLCall(glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_DEPTH_BUFFER_BIT, GL_NEAREST));
 	GLCall(glDepthMask(GL_FALSE));
 	GLCall(glEnable(GL_BLEND));
 	GLCall(glBlendFunci(0, GL_ONE, GL_ONE));
 	GLCall(glBlendFunci(1, GL_ZERO, GL_ONE_MINUS_SRC_COLOR));
 	GLCall(glBlendEquation(GL_FUNC_ADD));
-	glm::vec4 zeroFillerVec = glm::vec4(0.0f);
-	GLCall(glClearBufferfv(GL_COLOR, 0, &zeroFillerVec[0]));
-	glm::vec4 oneFillerVec = glm::vec4(1.0f);
-	GLCall(glClearBufferfv(GL_COLOR, 1, &oneFillerVec[0]));
+	GLCall(glClearBufferfv(GL_COLOR, 0, &glm::vec4(0.0f)[0]));
+	GLCall(glClearBufferfv(GL_COLOR, 1, &glm::vec4(1.0f)[0]));
 	for (unsigned int i = 0; i < scene.GetModelList().size(); i++)
 	{
 		model = scene.GetModelList()[i];
@@ -362,30 +388,18 @@ void GLRenderer::DrawDefault(Scene& scene)
 	m_Frame.FB.Unbind();
 	GLCall(glDepthMask(GL_TRUE));
 	GLCall(glDepthFunc(GL_LESS));
-}
-
-void GLRenderer::DrawGBuffer(Scene& scene)
-{
-	m_Frame.GBuffer.Bind();
-	Clear();
-	glm::vec2 texSize = m_Frame.GBuffer.GetTexSize();
-	GLCall(glViewport(0, 0, texSize.x, texSize.y));
-	m_Shaders.GBuffer.Bind();
-	m_Shaders.GBuffer.SetUniformMat4f("u_ProjMat", scene.GetCamera().GetProjMat());
-	m_Shaders.GBuffer.SetUniformMat4f("u_ViewMat", scene.GetCamera().GetViewMat());
-	std::string model;
-	for (unsigned int i = 0; i < scene.GetModelList().size(); i++)
+	// Draw Bloom
+	if (scene.GetCamera().GetBloom().Switch && (core::SETTINGS.DrawMode == BLANK || core::SETTINGS.DrawMode == DEFAULT))
 	{
-		model = scene.GetModelList()[i];
-		scene.GetData().GetDataGL().GetModelData()[model].VA.Bind();
-		scene.GetData().GetDataGL().GetModelData()[model].IB.Bind();
-		// Draw Model
-		GLCall(glDrawElementsInstanced(GL_TRIANGLES, scene.GetData().GetDataGL().GetModelData()[model].IB.GetCount(), GL_UNSIGNED_INT, nullptr, scene.GetModels()[model].GetInstance()));
-		scene.GetData().GetDataGL().GetModelData()[model].VA.Unbind();
-		scene.GetData().GetDataGL().GetModelData()[model].IB.Unbind();
+		DrawBloom(scene);
 	}
-	m_Shaders.GBuffer.Unbind();
-	m_Frame.GBuffer.Unbind();
+	// Draw Depth of Field
+	if (scene.GetCamera().GetFocus().Switch)
+	{
+		DrawDOF(scene);
+	}
+	// Draw Light Cube
+	DrawLightCube(scene);
 }
 
 void GLRenderer::DrawBlank(Scene& scene)
@@ -826,8 +840,78 @@ void GLRenderer::DrawDirLightShadow(Scene& scene)
 	scene.GetData().GetDataGL().GetDirLightData().Shader.Unbind();
 }
 
+void GLRenderer::DrawDOF(Scene& scene)
+{
+	GLCall(glDisable(GL_DEPTH_TEST));
+	GLCall(glDepthMask(GL_FALSE));
+	GLCall(glDisable(GL_BLEND));
+
+	m_Frame.VA.Bind();
+	m_Frame.IB.Bind();
+	// Generate original coc
+	m_Frame.DOF[0].Bind();
+	m_Shaders.DOF[0].Bind();
+	m_Shaders.DOF[0].SetUniformHandleARB("u_Source", m_Frame.FB.GetHandle());
+	m_Shaders.DOF[0].SetUniformHandleARB("u_Depth", m_Frame.GBuffer.GetHandle(2));
+	m_Shaders.DOF[0].SetUniform1f("u_Distance", scene.GetCamera().GetFocus().Distance);
+	m_Shaders.DOF[0].SetUniform1f("u_Range", scene.GetCamera().GetFocus().Range);
+	m_Shaders.DOF[0].SetUniform1f("u_Radius", scene.GetCamera().GetFocus().FocalLength);
+	GLCall(glDrawElements(GL_TRIANGLES, m_Frame.IB.GetCount(), GL_UNSIGNED_INT, nullptr));
+	m_Shaders.DOF[0].Unbind();
+	m_Frame.DOF[0].Unbind();
+	// Downsample the coc
+	m_Frame.DOF[2].Bind();
+	m_Shaders.DOF[2].Bind();
+	glm::vec2 renderRes = core::GetRenderResolution() * 0.5f;
+	GLCall(glViewport(0, 0, (GLsizei)renderRes.x, (GLsizei)renderRes.y));
+	m_Shaders.DOF[2].SetUniformHandleARB("u_Source", m_Frame.DOF[0].GetHandle());
+	m_Shaders.DOF[2].SetUniformVec2f("u_TexelSize", 1.0f / glm::vec2(m_Frame.DOF[0].GetTexWidth(), m_Frame.DOF[0].GetTexHeight()));
+	GLCall(glDrawElements(GL_TRIANGLES, m_Frame.IB.GetCount(), GL_UNSIGNED_INT, nullptr));
+	m_Shaders.DOF[2].Unbind();
+	m_Frame.DOF[2].Unbind();
+	// Generate Bokeh using the downsampled img
+	m_Frame.DOF[3].Bind();
+	m_Shaders.DOF[1].Bind();	
+	m_Shaders.DOF[1].SetUniformHandleARB("u_Source", m_Frame.DOF[2].GetHandle());
+	m_Shaders.DOF[1].SetUniformVec2f("u_TexelSize", 1.0f / glm::vec2(m_Frame.DOF[2].GetTexWidth(), m_Frame.DOF[2].GetTexHeight()));
+	m_Shaders.DOF[1].SetUniform1f("u_Radius", scene.GetCamera().GetFocus().FocalLength);
+	GLCall(glDrawElements(GL_TRIANGLES, m_Frame.IB.GetCount(), GL_UNSIGNED_INT, nullptr));
+	m_Shaders.DOF[1].Unbind();
+	m_Frame.DOF[3].Unbind();
+	// After generate bokeh, perform a gaussian blur on the generated bokeh
+	m_Frame.DOF[2].Bind();
+	m_Shaders.GaussianBlur.Bind();
+	m_Shaders.GaussianBlur.SetUniformHandleARB("u_Source", m_Frame.DOF[3].GetHandle());
+	m_Shaders.GaussianBlur.SetUniformVec2f("u_TexelSize", 1.0f / glm::vec2(m_Frame.DOF[3].GetTexWidth(), m_Frame.DOF[3].GetTexHeight()));
+	GLCall(glDrawElements(GL_TRIANGLES, m_Frame.IB.GetCount(), GL_UNSIGNED_INT, nullptr));
+	m_Shaders.GaussianBlur.Unbind();
+	m_Frame.DOF[2].Unbind();
+	// Upsample the blury bokeh to original resolution
+	GLCall(glBindFramebuffer(GL_READ_FRAMEBUFFER, m_Frame.DOF[2].GetID()));
+	GLCall(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_Frame.DOF[1].GetID()));
+	GLCall(glBlitFramebuffer(0, 0, m_Frame.DOF[2].GetTexWidth(), m_Frame.DOF[2].GetTexHeight(), 0, 0, m_Frame.DOF[1].GetTexWidth(), m_Frame.DOF[1].GetTexHeight(), GL_COLOR_BUFFER_BIT, GL_LINEAR));
+	renderRes = core::GetRenderResolution();
+	GLCall(glViewport(0, 0, (GLsizei)renderRes.x, (GLsizei)renderRes.y));
+	// Now DOF[0] contains the original img and coc, DOF[1] contains the img applied bokeh, 
+	// DOF[2] contains the blury downsampled bokeh img, DOF[3] contains the downsampled bokeh img
+	// Combine the bokeh img and the source img
+	m_Frame.FB.Bind();
+	m_Shaders.DOF[3].Bind();
+	m_Shaders.DOF[3].SetUniformHandleARB("u_Source", m_Frame.DOF[0].GetHandle());
+	m_Shaders.DOF[3].SetUniformHandleARB("u_DOF", m_Frame.DOF[1].GetHandle());
+	GLCall(glDrawElements(GL_TRIANGLES, m_Frame.IB.GetCount(), GL_UNSIGNED_INT, nullptr));
+	m_Shaders.DOF[3].Unbind();
+	m_Frame.FB.Unbind();
+	m_Frame.VA.Unbind();
+	m_Frame.IB.Unbind();
+	GLCall(glEnable(GL_BLEND));
+	GLCall(glDepthMask(GL_TRUE));
+	GLCall(glEnable(GL_DEPTH_TEST));
+}
+
 void GLRenderer::DrawBloom(Scene& scene)
 {
+	GLCall(glDepthMask(GL_FALSE));
 	// Copy current screen buffer content to a new fb
 	int width = m_Frame.FB.GetTexWidth();
 	int height = m_Frame.FB.GetTexHeight();
@@ -889,7 +973,7 @@ void GLRenderer::DrawBloom(Scene& scene)
 		Clear();
 		m_Frame.Bloom[i].BindTex(0);
 		m_Shaders.Bloom[1].SetUniform1i("u_SrcTex", 0);
-		m_Shaders.Bloom[1].SetUniform1f("u_FilterRadius", scene.GetVFX().BloomFilterRadius);
+		m_Shaders.Bloom[1].SetUniform1f("u_FilterRadius", scene.GetCamera().GetBloom().FilterRadius);
 		GLCall(glDrawElements(GL_TRIANGLES, m_Frame.IB.GetCount(), GL_UNSIGNED_INT, nullptr));
 		m_Frame.Bloom[i].UnbindTex();
 		m_Frame.Bloom[i - 1].Unbind();
@@ -907,7 +991,7 @@ void GLRenderer::DrawBloom(Scene& scene)
 	m_Frame.Bloom[6].BindTex(1);
 	m_Shaders.Bloom[2].SetUniform1i("u_ScreenTex", 1);
 	m_Shaders.Bloom[2].SetUniform1i("u_BloomTex", 0);
-	m_Shaders.Bloom[2].SetUniform1f("u_BloomStrength", scene.GetVFX().BloomStrength);
+	m_Shaders.Bloom[2].SetUniform1f("u_BloomStrength", scene.GetCamera().GetBloom().Strength);
 	GLCall(glDrawElements(GL_TRIANGLES, m_Frame.IB.GetCount(), GL_UNSIGNED_INT, nullptr));
 	m_Frame.Bloom[0].UnbindTex();
 	m_Frame.Bloom[6].UnbindTex();
@@ -916,6 +1000,7 @@ void GLRenderer::DrawBloom(Scene& scene)
 	m_Frame.VA.Unbind();
 	m_Frame.IB.Unbind();
 	GLCall(glEnable(GL_DEPTH_TEST));
+	GLCall(glDepthMask(GL_TRUE));
 }
 
 void GLRenderer::DrawSSAO(Scene& scene)
@@ -996,6 +1081,11 @@ void GLRenderer::ChangeResolution()
 	m_Frame.SSAO[0].Init(FBType::SSAO, width, height);
 	m_Frame.SSAO[1].Init(FBType::SSAO, width, height);
 	m_Frame.OIT.Init(FBType::OIT, width, height);
+	m_Frame.DOF[0].Init(FBType::FRAME, width, height);
+	m_Frame.DOF[1].Init(FBType::FRAME, width, height);
+	glm::vec2 renderRes = core::GetRenderResolution() * 0.5f;
+	m_Frame.DOF[2].Init(FBType::FRAME, (int)renderRes.x, (int)renderRes.y);
+	m_Frame.DOF[3].Init(FBType::FRAME, (int)renderRes.x, (int)renderRes.y);
 	// Initialize framebuffers used for bloom effect
 	for (unsigned int i = 0; i < 7; i++)
 	{

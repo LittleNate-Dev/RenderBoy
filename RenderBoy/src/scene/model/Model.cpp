@@ -1010,16 +1010,20 @@ void Model::DrawUI()
     {
         if (m_SetInstance)
         {
+            SetInstance(1);
+            SetPosition(glm::vec3(0.0f), 1);
+            SetScale(glm::vec3(1.0f), 1);
+            SetEulerAngle(glm::vec3(0.0f), 1);
             SetPosition(glm::vec3(0.0f));
             SetScale(glm::vec3(1.0f));
             SetEulerAngle(glm::vec3(0.0f));
         }
         else
         {
-            SetPosition(glm::vec3(0.0f), 1);
-            SetScale(glm::vec3(1.0f), 1);
-            SetEulerAngle(glm::vec3(0.0f), 1);
-            SetInstance(1);
+            SetPosition(glm::vec3(0.0f), m_Current);
+            SetScale(glm::vec3(1.0f), m_Current);
+            SetEulerAngle(glm::vec3(0.0f), m_Current);
+            
         }
     }
 }

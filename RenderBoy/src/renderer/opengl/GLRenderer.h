@@ -19,6 +19,7 @@ struct Frame
 	GLFrameBuffer GBuffer;
 	GLFrameBuffer Bloom[7];
 	GLFrameBuffer SSAO[2];
+	GLFrameBuffer DOF[4];
 	GLVertexArray VA;
 	GLVertexBuffer VB;
 	GLIndexBuffer IB;
@@ -31,8 +32,10 @@ struct Shaders
 	GLShader Normal;
 	GLShader Lightcube;
 	GLShader Screen;
-	GLShader Bloom[3];
-	GLShader SSAO[2];
+	GLShader Bloom[3]; // 0: DOWNSAMPLE, 1: UPSAMPLE, 2: BLEND
+	GLShader SSAO[2]; // 0: GEN, 1: BLUR
+	GLShader DOF[4]; // 0: COC, 1: BOKEH, 2: DOWNSAMPLE, 3: BLEND
+	GLShader GaussianBlur;
 };
 
 class GLRenderer
@@ -57,6 +60,7 @@ private:
 	void DrawPointLightShadow(Scene& scene, bool update);
 	void DrawSpotLightShadow(Scene& scene, bool update);
 	void DrawDirLightShadow(Scene& scene);
+	void DrawDOF(Scene& scene); // Depth of Field
 	void DrawBloom(Scene& scene);
 	void DrawSSAO(Scene& scene);
 

@@ -24,9 +24,6 @@ struct Skybox
 
 struct VisualEffects
 {
-	bool Bloom = false;
-	float BloomStrength = 0.04f;
-	float BloomFilterRadius = 0.005f;
 	bool SSAO = false;
 	int SSAOKernelSize = 64;
 	float SSAORadius = 0.5f;

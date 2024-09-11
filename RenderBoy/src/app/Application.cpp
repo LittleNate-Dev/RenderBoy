@@ -499,21 +499,18 @@ void Application::DrawUI()
         if (core::IS_UI_OPENED)
         {
             core::FILE_BROWSER.Display();
+            DrawSettingWindow();
         }
         if (!m_Launched && !core::IS_SETTINGS_OPENED)
         {
             DrawLaunchWindow();
         }
-        else if (!m_Launched && core::IS_SETTINGS_OPENED)
-        {
-            DrawSettingWindow();
-        }
-        else if (core::IS_UI_OPENED)
+        else if (m_Launched && core::IS_UI_OPENED)
         {
             DrawMenuBar();
             DrawAboutRenderBoyWindow();
             DrawPerfWindow();
-            DrawSettingWindow();
+            //DrawSettingWindow();
             m_Scene.DrawUI();
         }
         if (core::IS_UI_OPENED)
@@ -944,7 +941,7 @@ void Application::DrawSettingWindow()
                 ImGui::PushItemWidth(200.0f * core::GetWidgetWidthCoefficient());
                 static int resolution;
                 resolution = (int)(100.0f * core::SETTINGS.Resolution);
-                if (ImGui::SliderInt("##Resolution", &resolution, 20, 200))
+                if (ImGui::SliderInt("##Resolution", &resolution, SETTING_RES_MIN, SETTING_RES_MAX))
                 {
                     core::SETTINGS.Resolution = (float)resolution / 100.0f;
                     m_Renderer.ChangeResolution();

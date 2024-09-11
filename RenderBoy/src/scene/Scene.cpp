@@ -20,13 +20,7 @@ void Scene::Reset()
 {
 	m_Name = "Default";
 	m_FilePath = "";
-	m_Camera.SetFOV(80.0f);
-	m_Camera.SetCameraType(true);
-	m_Camera.SetPlane(glm::vec2(0.1f, 500.0f));
-	m_Camera.SetMoveSpeed(1.0f);
-	m_Camera.SetRotateSpeed(1.0f);
-	m_Camera.SetPosition(glm::vec3(0.0f));
-	m_Camera.SetEulerAngle(glm::vec3(0.0f));
+	m_Camera.Reset();
 	Skybox newSkybox;
 	m_Skybox = newSkybox;
 	VisualEffects newVFX;
@@ -133,6 +127,41 @@ bool Scene::LoadScene(std::string filepath)
 					glm::vec3 euler = glm::vec3((float)std::atof(values[0].c_str()), (float)std::atof(values[1].c_str()), (float)std::atof(values[2].c_str()));
 					m_Camera.SetEulerAngle(euler);
 				}
+				else if (line.find("#CAMERA_VFX_BLOOM_SWITCH") != std::string::npos)
+				{
+					values = core::GetFileValue(line);
+					m_Camera.SetBloomSwitch((bool)std::atoi(values[0].c_str()));
+				}
+				else if (line.find("#CAMERA_VFX_BLOOM_STRENGTH") != std::string::npos)
+				{
+					values = core::GetFileValue(line);
+					m_Camera.SetBloomStrength((float)std::atof(values[0].c_str()));
+				}
+				else if (line.find("#CAMERA_VFX_BLOOM_FILTER_RADIUS") != std::string::npos)
+				{
+					values = core::GetFileValue(line);
+					m_Camera.SetBloomFilterRadius((float)std::atof(values[0].c_str()));
+				}
+				else if (line.find("#CAMERA_VFX_DOF_SWITCH") != std::string::npos)
+				{
+					values = core::GetFileValue(line);
+					m_Camera.SetFocusSwitch((bool)std::atoi(values[0].c_str()));
+				}
+				else if (line.find("#CAMERA_VFX_DOF_DISTANCE") != std::string::npos)
+				{
+					values = core::GetFileValue(line);
+					m_Camera.SetFocusDistance((float)std::atof(values[0].c_str()));
+				}
+				else if (line.find("#CAMERA_VFX_DOF_RANGE") != std::string::npos)
+				{
+					values = core::GetFileValue(line);
+					m_Camera.SetFocusRange((float)std::atof(values[0].c_str()));
+				}
+				else if (line.find("#CAMERA_VFX_DOF_FOCAL_LENGTH") != std::string::npos)
+				{
+					values = core::GetFileValue(line);
+					m_Camera.SetFocalLength((float)std::atof(values[0].c_str()));
+				}
 			}
 			// Load Skybox
 			{
@@ -175,22 +204,7 @@ bool Scene::LoadScene(std::string filepath)
 			}
 			// Load VFX
 			{
-				if (line.find("#BLOOM_SWITCH") != std::string::npos)
-				{
-					values = core::GetFileValue(line);
-					m_VFX.Bloom = (bool)std::atoi(values[0].c_str());
-				}
-				else if (line.find("#BLOOM_STRENGTH") != std::string::npos)
-				{
-					values = core::GetFileValue(line);
-					m_VFX.BloomStrength = (float)std::atof(values[0].c_str());;
-				}
-				else if (line.find("#BLOOM_FILTER_RADIUS") != std::string::npos)
-				{
-					values = core::GetFileValue(line);
-					m_VFX.BloomFilterRadius = (float)std::atof(values[0].c_str());;
-				}
-				else if (line.find("#SSAO_SWITCH") != std::string::npos)
+				if (line.find("#SSAO_SWITCH") != std::string::npos)
 				{
 					values = core::GetFileValue(line);
 					m_VFX.SSAO = (bool)std::atoi(values[0].c_str());
@@ -580,6 +594,20 @@ void Scene::SaveScene()
 		glm::vec3 euler = m_Camera.GetEulerAngle();
 		line = "#CAMERA_EULERANGLE " + std::to_string(euler.x) + " " + std::to_string(euler.y) + " " + std::to_string(euler.z) + "\n";
 		stream << line;
+		line = "#CAMERA_VFX_BLOOM_SWITCH " + std::to_string(m_Camera.GetBloom().Switch) + "\n";
+		stream << line;
+		line = "#CAMERA_VFX_BLOOM_STRENGTH " + std::to_string(m_Camera.GetBloom().Strength) + "\n";
+		stream << line;
+		line = "#CAMERA_VFX_BLOOM_FILTER_RADIUS " + std::to_string(m_Camera.GetBloom().FilterRadius) + "\n";
+		stream << line;
+		line = "#CAMERA_VFX_DOF_SWITCH " + std::to_string(m_Camera.GetFocus().Switch) + "\n";
+		stream << line;
+		line = "#CAMERA_VFX_DOF_DISTANCE " + std::to_string(m_Camera.GetFocus().Distance) + "\n";
+		stream << line;
+		line = "#CAMERA_VFX_DOF_RANGE " + std::to_string(m_Camera.GetFocus().Range) + "\n";
+		stream << line;
+		line = "#CAMERA_VFX_DOF_FOCAL_LENGTH " + std::to_string(m_Camera.GetFocus().FocalLength) + "\n";
+		stream << line;
 	}
 	// Save Skybox
 	{
@@ -598,12 +626,6 @@ void Scene::SaveScene()
 	}
 	// SaveVFX
 	{
-		line = "#BLOOM_SWITCH " + std::to_string(m_VFX.Bloom) + "\n";
-		stream << line;
-		line = "#BLOOM_STRENGTH " + std::to_string(m_VFX.BloomStrength) + "\n";
-		stream << line;
-		line = "#BLOOM_FILTER_RADIUS " + std::to_string(m_VFX.BloomFilterRadius) + "\n";
-		stream << line;
 		line = "#SSAO_SWITCH " + std::to_string(m_VFX.SSAO) + "\n";
 		stream << line;
 		line = "#SSAO_KERNEL_SIZE " + std::to_string(m_VFX.SSAOKernelSize) + "\n";
@@ -1273,30 +1295,6 @@ void Scene::DrawSceneWindow()
 		// VFX
 		if (ImGui::TreeNode("Visual Effects"))
 		{
-			// Bloom
-			if (ImGui::TreeNode("Bloom"))
-			{
-				ImGui::CenterAlignWidget("Bloom");
-				ImGui::LabelHighlighted("Bloom");
-				ImGui::Checkbox("##Bloom", &m_VFX.Bloom);
-				if (m_VFX.Bloom)
-				{
-					// Bloom Strength
-					ImGui::PushItemWidth(60.0f * core::GetWidgetWidthCoefficient());
-					ImGui::CenterAlignWidget("Strength", 60.0f * core::GetWidgetWidthCoefficient());
-					ImGui::LabelHighlighted("Strength");
-					ImGui::InputFloat("##BloomStrength", &m_VFX.BloomStrength, 0.0f, 0.0f, "%.4f");
-					// Bloom Filter Radius
-					ImGui::PushItemWidth(80.0f * core::GetWidgetWidthCoefficient());
-					ImGui::CenterAlignWidget("Filter Radius", 80.0f * core::GetWidgetWidthCoefficient());
-					ImGui::LabelHighlighted("Filter Radius");
-					if (ImGui::InputFloat("##BloomFilterRadius", &m_VFX.BloomFilterRadius, 0.0f, 0.0f, "%.6f"))
-					{
-						m_VFX.BloomFilterRadius = m_VFX.BloomFilterRadius > 0.0f ? m_VFX.BloomFilterRadius : 0.005f;
-					}
-				}
-				ImGui::TreePop();
-			}
 			// SSAO
 			if (ImGui::TreeNode("SSAO"))
 			{

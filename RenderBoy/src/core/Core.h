@@ -40,7 +40,7 @@
 
 #include <freeimage/FreeImage.h>
 
-#define APP_VERSION "ver 0.7.5"
+#define APP_VERSION "ver 0.8.0"
 #define GIT_REPO "https://github.com/LittleNate-Dev/RenderBoy"
 #define SCENE_FILEPATH "saves/scene/"
 #define SETTING_FILEPATH "data/config/settings.config"
@@ -69,14 +69,19 @@
 #define SHADER_OPENGL_SKYBOX "data/shaders/opengl/others/SKYBOX.glsl"
 #define SHADER_OPENGL_NORMAL "data/shaders/opengl/others/NORMAL.glsl"
 #define SHADER_OPENGL_LIGHTCUBE "data/shaders/opengl/others/LIGHTCUBE.glsl"
-#define SHADER_OPENGL_BLOOM_DOWNSAMPLE "data/shaders/opengl/others/bloom/DOWNSAMPLE.glsl"
-#define SHADER_OPENGL_BLOOM_UPSAMPLE "data/shaders/opengl/others/bloom/UPSAMPLE.glsl"
-#define SHADER_OPENGL_BLOOM_BLEND "data/shaders/opengl/others/bloom/BLEND.glsl"
-#define SHADER_OPENGL_SSAO_GEN "data/shaders/opengl/others/ssao/GEN.glsl"
-#define SHADER_OPENGL_SSAO_BLUR "data/shaders/opengl/others/ssao/BLUR.glsl"
+#define SHADER_OPENGL_BLOOM_DOWNSAMPLE "data/shaders/opengl/vfx/bloom/DOWNSAMPLE.glsl"
+#define SHADER_OPENGL_BLOOM_UPSAMPLE "data/shaders/opengl/vfx/bloom/UPSAMPLE.glsl"
+#define SHADER_OPENGL_BLOOM_BLEND "data/shaders/opengl/vfx/bloom/BLEND.glsl"
+#define SHADER_OPENGL_DOF_COC "data/shaders/opengl/vfx/dof/COC.glsl"
+#define SHADER_OPENGL_DOF_DOWNSAMPLE "data/shaders/opengl/vfx/dof/DOWNSAMPLE.glsl"
+#define SHADER_OPENGL_DOF_BOKEH "data/shaders/opengl/vfx/dof/BOKEH.glsl"
+#define SHADER_OPENGL_DOF_BLEND "data/shaders/opengl/vfx/dof/BLEND.glsl"
+#define SHADER_OPENGL_SSAO_GEN "data/shaders/opengl/vfx/ssao/GEN.glsl"
+#define SHADER_OPENGL_SSAO_BLUR "data/shaders/opengl/vfx/ssao/BLUR.glsl"
 #define SHADER_OPENGL_SHADOW_POINT "data/shaders/opengl/shadow/POINTLIGHT.glsl"
 #define SHADER_OPENGL_SHADOW_SPOT "data/shaders/opengl/shadow/SPOTLIGHT.glsl"
 #define SHADER_OPENGL_SHADOW_DIR "data/shaders/opengl/shadow/DIRLIGHT.glsl"
+#define SHADER_OPENGL_UTIL_GAUSSIAN_BLUR "data/shaders/opengl/util/GAUSSIAN_BLUR.glsl"
 #define DRAW_MODE_COUNT 7
 #define POST_PROCESS_COUNT 5
 #define SETTING_MAX_FOV 120
@@ -85,6 +90,8 @@
 #define SETTING_RES_MAX 200
 #define SETTING_MOUSE_MIN_SEN 0.1f
 #define SETTING_MOUSE_MAX_SEN 2.0f
+#define SETTING_VFX_DOF_MIN_FLENGTH 0.1f
+#define SETTING_VFX_DOF_MAX_FLENGTH 10.0f
 
 #define ASSERT(x) if (!(x)) __debugbreak();
 #define GLCall(x) GLClearError();\

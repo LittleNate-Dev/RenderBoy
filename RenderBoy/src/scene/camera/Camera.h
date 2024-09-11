@@ -9,6 +9,27 @@
 
 #include "core/Core.h"
 
+struct VFX_Bloom
+{
+	bool Switch = false;
+	float Strength = 0.04f;
+	float FilterRadius = 0.005f;
+};
+
+struct VFX_Focus
+{
+	bool Switch = true;
+	float Distance;
+	float Range;
+	float FocalLength = 8.0f;
+};
+
+struct VFX
+{
+	VFX_Bloom Bloom;
+	VFX_Focus Focus;
+};
+
 class Camera
 {
 private:
@@ -25,11 +46,13 @@ private:
 	glm::vec3 m_EulerAngle;
 	float m_MoveSpeed;
 	float m_RotateSpeed;
+	VFX m_VFX;
 
 public:
 	Camera();
 	~Camera();
 
+	void Reset();
 	// Set Camera's parameter
 	// True:: Perspective False: Orthographic
 	void SetCameraType(bool type);
@@ -49,6 +72,21 @@ public:
 	void SetEulerAngle(glm::vec3 eulerAngle);
 	void SetMoveSpeed(float speed);
 	void SetRotateSpeed(float speed);
+	// Camera VFX
+	inline void SetBloomSwitch(bool bloomSwitch) 
+	{
+		m_VFX.Bloom.Switch = bloomSwitch;
+	};
+	void SetBloomStrength(float strength);
+	void SetBloomFilterRadius(float radius);
+	inline void SetFocusSwitch(bool focusSwitch)
+	{
+		m_VFX.Focus.Switch = focusSwitch;
+	};
+	void SetFocusDistance(float distance);
+	void SetFocusRange(float range);
+	void SetFocalLength(float length);
+	
 	// Get Camera's matrices
 	glm::vec3 GetDirection(glm::vec3 direction);
 	glm::mat4 GetViewMat();
@@ -94,6 +132,14 @@ public:
 	inline float GetRotateSpeed() const
 	{
 		return m_RotateSpeed;
+	};
+	inline VFX_Focus GetFocus() const
+	{
+		return m_VFX.Focus;
+	};
+	inline VFX_Bloom GetBloom() const 
+	{
+		return m_VFX.Bloom;
 	};
 	// Draw UI
 	void DrawUI();
