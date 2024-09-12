@@ -950,9 +950,20 @@ void Application::DrawSettingWindow()
             }
             // Anti-Alising
             {
-                /*ImGui::CenterAlignWidget("Anti-Alising", 100.0f * core::GetWidgetWidthCoefficient());
-                ImGui::LabelHighlighted("Anti-Alising");*/
-                // TODO
+                ImGui::CenterAlignWidget("Anti Alising", 100.0f * core::GetWidgetWidthCoefficient());
+                ImGui::LabelHighlighted("Anti Alising");
+                ImGui::PushItemWidth(100.0f * core::GetWidgetWidthCoefficient());
+                const char* aaOps[] = {
+                    "Off",
+                    "FXAA"
+                };
+                static int currentAA;
+                currentAA = core::SETTINGS.AA;
+                if (ImGui::Combo("##AntiAlising", &currentAA, aaOps, IM_ARRAYSIZE(aaOps)))
+                {
+                    core::SETTINGS.AA = (Anti_Alising)currentAA;
+                }
+                ImGui::PopItemWidth();
             }
             ImGui::TreePop();
         }

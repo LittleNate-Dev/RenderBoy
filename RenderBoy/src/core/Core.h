@@ -40,7 +40,7 @@
 
 #include <freeimage/FreeImage.h>
 
-#define APP_VERSION "ver 0.8.0"
+#define APP_VERSION "ver 0.8.1"
 #define GIT_REPO "https://github.com/LittleNate-Dev/RenderBoy"
 #define SCENE_FILEPATH "saves/scene/"
 #define SETTING_FILEPATH "data/config/settings.config"
@@ -69,6 +69,7 @@
 #define SHADER_OPENGL_SKYBOX "data/shaders/opengl/others/SKYBOX.glsl"
 #define SHADER_OPENGL_NORMAL "data/shaders/opengl/others/NORMAL.glsl"
 #define SHADER_OPENGL_LIGHTCUBE "data/shaders/opengl/others/LIGHTCUBE.glsl"
+#define SHADER_OPENGL_AA_FXAA "data/shaders/opengl/aa/FXAA.glsl"
 #define SHADER_OPENGL_BLOOM_DOWNSAMPLE "data/shaders/opengl/vfx/bloom/DOWNSAMPLE.glsl"
 #define SHADER_OPENGL_BLOOM_UPSAMPLE "data/shaders/opengl/vfx/bloom/UPSAMPLE.glsl"
 #define SHADER_OPENGL_BLOOM_BLEND "data/shaders/opengl/vfx/bloom/BLEND.glsl"
@@ -156,7 +157,8 @@ enum Render_Mode
 
 enum Anti_Alising
 {
-	NO_AA = 0
+	NO_AA = 0,
+	FXAA = 1
 };
 
 enum Post_Process

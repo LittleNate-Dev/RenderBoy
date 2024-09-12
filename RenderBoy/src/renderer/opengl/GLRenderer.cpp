@@ -25,6 +25,7 @@ void GLRenderer::Init(Scene& scene)
 	m_Shaders.DOF[2].Init(SHADER_OPENGL_DOF_DOWNSAMPLE);
 	m_Shaders.DOF[3].Init(SHADER_OPENGL_DOF_BLEND);
 	m_Shaders.GaussianBlur.Init(SHADER_OPENGL_UTIL_GAUSSIAN_BLUR);
+	m_Shaders.FXAA.Init(SHADER_OPENGL_AA_FXAA);
 	// Shaders used for c_SSAO
 	{
 		m_Shaders.SSAO[0].Init(SHADER_OPENGL_SSAO_GEN);
@@ -42,6 +43,8 @@ void GLRenderer::Init(Scene& scene)
 	m_Frame.FB.Init(FBType::FRAME);
 	m_Frame.GBuffer.Init(FBType::G_BUFFER);
 	m_Frame.OIT.Init(FBType::OIT);
+	// Initialize framebuffer used for FXAA
+	m_Frame.FXAA.Init(FBType::FRAME);
 	// Initialize framebuffers used for SSAO
 	m_Frame.SSAO[0].Init(FBType::SSAO); 
 	m_Frame.SSAO[1].Init(FBType::SSAO);
@@ -388,6 +391,11 @@ void GLRenderer::DrawDefault(Scene& scene)
 	m_Frame.FB.Unbind();
 	GLCall(glDepthMask(GL_TRUE));
 	GLCall(glDepthFunc(GL_LESS));
+	// Apply FXAA
+	if (core::SETTINGS.AA == FXAA)
+	{
+		DrawFXAA(scene);
+	}
 	// Draw Bloom
 	if (scene.GetCamera().GetBloom().Switch && (core::SETTINGS.DrawMode == BLANK || core::SETTINGS.DrawMode == DEFAULT))
 	{
@@ -873,7 +881,7 @@ void GLRenderer::DrawDOF(Scene& scene)
 	m_Frame.DOF[3].Bind();
 	m_Shaders.DOF[1].Bind();	
 	m_Shaders.DOF[1].SetUniformHandleARB("u_Source", m_Frame.DOF[2].GetHandle());
-	m_Shaders.DOF[1].SetUniformVec2f("u_TexelSize", 1.0f / glm::vec2(m_Frame.DOF[2].GetTexWidth(), m_Frame.DOF[2].GetTexHeight()));
+	m_Shaders.DOF[1].SetUniformVec2f("u_TexelSize", 1.0f / glm::vec2(core::SETTINGS.Width, core::SETTINGS.Height));
 	m_Shaders.DOF[1].SetUniform1f("u_Radius", scene.GetCamera().GetFocus().FocalLength);
 	GLCall(glDrawElements(GL_TRIANGLES, m_Frame.IB.GetCount(), GL_UNSIGNED_INT, nullptr));
 	m_Shaders.DOF[1].Unbind();
@@ -1041,6 +1049,30 @@ void GLRenderer::DrawSSAO(Scene& scene)
 	GLCall(glEnable(GL_BLEND));
 }
 
+void GLRenderer::DrawFXAA(Scene& scene)
+{
+	GLCall(glDisable(GL_DEPTH_TEST));
+	GLCall(glDepthMask(GL_FALSE));
+	GLCall(glDisable(GL_BLEND));
+	m_Frame.FXAA.Bind();
+	m_Shaders.FXAA.Bind();
+	m_Shaders.FXAA.SetUniformHandleARB("u_Source", m_Frame.FB.GetHandle()); 
+	m_Shaders.FXAA.SetUniformVec2f("u_InverseScreenSize", 1.0f / core::GetRenderResolution());
+	m_Frame.VA.Bind();
+	m_Frame.IB.Bind();
+	GLCall(glDrawElements(GL_TRIANGLES, m_Frame.IB.GetCount(), GL_UNSIGNED_INT, nullptr));
+	m_Frame.VA.Unbind();
+	m_Frame.IB.Unbind();
+	m_Shaders.FXAA.Unbind();
+	m_Frame.FXAA.Unbind();
+	GLCall(glEnable(GL_BLEND));
+	GLCall(glDepthMask(GL_TRUE));
+	GLCall(glEnable(GL_DEPTH_TEST));
+	GLCall(glBindFramebuffer(GL_READ_FRAMEBUFFER, m_Frame.FXAA.GetID()));
+	GLCall(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_Frame.FB.GetID()));
+	GLCall(glBlitFramebuffer(0, 0, m_Frame.FXAA.GetTexWidth(), m_Frame.FXAA.GetTexHeight(), 0, 0, m_Frame.FB.GetTexWidth(), m_Frame.FB.GetTexHeight(), GL_COLOR_BUFFER_BIT, GL_LINEAR));
+}
+
 bool GLRenderer::SaveScreenShot(Scene& scene)
 {
 	// Make the BYTE array, factor of 3 because it's RBG.
@@ -1077,6 +1109,7 @@ void GLRenderer::ChangeResolution()
 	int height = (int)(core::SETTINGS.Height * core::SETTINGS.Resolution);
 
 	m_Frame.FB.Init(FBType::FRAME, width, height);
+	m_Frame.FXAA.Init(FBType::FRAME);
 	m_Frame.GBuffer.Init(FBType::G_BUFFER, width, height);
 	m_Frame.SSAO[0].Init(FBType::SSAO, width, height);
 	m_Frame.SSAO[1].Init(FBType::SSAO, width, height);

@@ -14,15 +14,16 @@
 
 struct Frame
 {
+	GLVertexArray VA;
+	GLVertexBuffer VB;
+	GLIndexBuffer IB;
 	GLFrameBuffer FB;
 	GLFrameBuffer OIT;
 	GLFrameBuffer GBuffer;
 	GLFrameBuffer Bloom[7];
 	GLFrameBuffer SSAO[2];
 	GLFrameBuffer DOF[4];
-	GLVertexArray VA;
-	GLVertexBuffer VB;
-	GLIndexBuffer IB;
+	GLFrameBuffer FXAA;
 };
 
 struct Shaders
@@ -36,6 +37,7 @@ struct Shaders
 	GLShader SSAO[2]; // 0: GEN, 1: BLUR
 	GLShader DOF[4]; // 0: COC, 1: BOKEH, 2: DOWNSAMPLE, 3: BLEND
 	GLShader GaussianBlur;
+	GLShader FXAA;
 };
 
 class GLRenderer
@@ -63,6 +65,7 @@ private:
 	void DrawDOF(Scene& scene); // Depth of Field
 	void DrawBloom(Scene& scene);
 	void DrawSSAO(Scene& scene);
+	void DrawFXAA(Scene& scene);
 
 public:
 	GLRenderer();
