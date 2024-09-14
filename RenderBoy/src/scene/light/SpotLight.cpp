@@ -322,6 +322,7 @@ void SpotLight::SetRange(float range)
 	range = range < 0.0f ? 0.0f : range;
 	m_Range = range;
 	m_CLQ = core::GetAttenuationValues(m_Range);
+	m_UpdateShadow = true;
 	UpdateProjMat();
 }
 
@@ -329,6 +330,7 @@ void SpotLight::SetIntensity(float intensity)
 {
 	intensity = intensity < 0.0f ? 0.0f : intensity;
 	m_Intensity = intensity;
+	m_UpdateShadow = true;
 }
 
 void SpotLight::SetConstant(float constant)

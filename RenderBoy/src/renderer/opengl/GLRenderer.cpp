@@ -189,7 +189,6 @@ void GLRenderer::Draw(Scene& scene)
 	GLCall(glDisable(GL_DEPTH_TEST));
 	m_Shaders.Screen.Bind();
 	m_Shaders.Screen.SetUniformHandleARB("u_ScreenTex", m_Frame.FB.GetHandle());
-	//m_Shaders.Screen.SetUniformHandleARB("u_ScreenTex", m_Frame.DOF[1].GetHandle());
 	m_Shaders.Screen.SetUniform1f("u_Gamma", core::SETTINGS.Gamma);
 	m_Frame.VA.Bind();
 	m_Frame.IB.Bind();
@@ -735,6 +734,8 @@ void GLRenderer::DrawSkybox(Scene& scene)
 
 void GLRenderer::DrawPointLightShadow(Scene& scene, bool update)
 {
+	GLCall(glEnable(GL_CULL_FACE));
+	GLCall(glCullFace(GL_BACK));
 	std::string light;
 	scene.GetData().GetDataGL().GetPointLightData().Shader.Bind();
 	for (unsigned int i = 0; i < scene.GetPointLightList().size(); i++)
@@ -770,10 +771,13 @@ void GLRenderer::DrawPointLightShadow(Scene& scene, bool update)
 		}
 	}
 	scene.GetData().GetDataGL().GetPointLightData().Shader.Unbind();
+	GLCall(glDisable(GL_CULL_FACE));
 }
 
 void GLRenderer::DrawSpotLightShadow(Scene& scene, bool update)
 {
+	GLCall(glEnable(GL_CULL_FACE));
+	GLCall(glCullFace(GL_BACK));
 	std::string light;
 	scene.GetData().GetDataGL().GetSpotLightData().Shader.Bind();
 	for (unsigned int i = 0; i < scene.GetSpotLightList().size(); i++)
@@ -804,10 +808,13 @@ void GLRenderer::DrawSpotLightShadow(Scene& scene, bool update)
 		}
 	}
 	scene.GetData().GetDataGL().GetSpotLightData().Shader.Unbind();
+	GLCall(glDisable(GL_CULL_FACE));
 }
 
 void GLRenderer::DrawDirLightShadow(Scene& scene)
 {
+	GLCall(glEnable(GL_CULL_FACE));
+	GLCall(glCullFace(GL_BACK));
 	std::string light;
 	scene.GetData().GetDataGL().GetDirLightData().Shader.Bind();
 	for (unsigned int i = 0; i < scene.GetDirLightList().size(); i++)
@@ -846,6 +853,7 @@ void GLRenderer::DrawDirLightShadow(Scene& scene)
 		}
 	}
 	scene.GetData().GetDataGL().GetDirLightData().Shader.Unbind();
+	GLCall(glDisable(GL_CULL_FACE));
 }
 
 void GLRenderer::DrawDOF(Scene& scene)
