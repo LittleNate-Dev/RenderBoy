@@ -14,9 +14,11 @@ struct ShaderProgramSource
     bool HasVertex;
     bool HasGeometry;
     bool HasFragment;
+    bool HasCompute;
     std::string VertexSource;
     std::string GeometrySource;
     std::string FragmentSource;
+    std::string ComputeSource;
 };
 
 class GLShader

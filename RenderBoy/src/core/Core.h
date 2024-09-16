@@ -83,6 +83,7 @@
 #define SHADER_OPENGL_SHADOW_SPOT "data/shaders/opengl/shadow/SPOTLIGHT.glsl"
 #define SHADER_OPENGL_SHADOW_DIR "data/shaders/opengl/shadow/DIRLIGHT.glsl"
 #define SHADER_OPENGL_UTIL_GAUSSIAN_BLUR "data/shaders/opengl/util/GAUSSIAN_BLUR.glsl"
+#define SHADER_OPENGL_EXPOSURE_HISTOGRAM "data/shaders/opengl/vfx/exposure/HISTOGRAM.glsl"
 #define DRAW_MODE_COUNT 7
 #define POST_PROCESS_COUNT 5
 #define SETTING_MAX_FOV 120
@@ -115,6 +116,15 @@ enum UI_Style
 	DEFAULT_LIGHT = 0,
 	DEFAULT_DARK = 1,
 	SPECTRUM = 2
+};
+
+enum Shader_Type
+{
+	NONE = -1, 
+	VERTEX = 0, 
+	GEOMETRY = 1, 
+	FRAGMENT = 2,
+	COMPUTE = 3
 };
 
 enum Load_Type

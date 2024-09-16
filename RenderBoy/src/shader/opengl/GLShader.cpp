@@ -80,18 +80,15 @@ bool GLShader::Init(ModelStatics statics)
 ShaderProgramSource GLShader::ParseShader(std::string filepath)
 {
     std::ifstream stream(filepath);
-    enum class ShaderType
-    {
-        NONE = -1, VERTEX = 0, GEOMETRY = 1, FRAGMENT = 2
-    };
     std::string line;
-    std::stringstream ss[3];
-    ShaderType type = ShaderType::NONE;
+    std::stringstream ss[4];
+    Shader_Type type = Shader_Type::NONE;
 
     ShaderProgramSource sps;
-    sps.HasFragment = false;
+    sps.HasVertex = false;
     sps.HasGeometry = false;
     sps.HasFragment = false;
+    sps.HasCompute = false;
     while (getline(stream, line))
     {
         if (line.find("#SHADER") != std::string::npos)
@@ -99,17 +96,22 @@ ShaderProgramSource GLShader::ParseShader(std::string filepath)
             if (line.find("VERTEX") != std::string::npos)
             {
                 sps.HasVertex = true;
-                type = ShaderType::VERTEX;
+                type = Shader_Type::VERTEX;
             }
             else if (line.find("GEOMETRY") != std::string::npos)
             {
                 sps.HasGeometry = true;
-                type = ShaderType::GEOMETRY;
+                type = Shader_Type::GEOMETRY;
             }
             else if (line.find("FRAGMENT") != std::string::npos)
             {
                 sps.HasFragment = true;
-                type = ShaderType::FRAGMENT;
+                type = Shader_Type::FRAGMENT;
+            }
+            else if (line.find("COMPUTE") != std::string::npos)
+            {
+                sps.HasCompute = true;
+                type = Shader_Type::COMPUTE;
             }
         }
         else if (line.find("#define POINT_LIGHT_COUNT") != std::string::npos)
@@ -207,24 +209,22 @@ ShaderProgramSource GLShader::ParseShader(std::string filepath)
     sps.VertexSource = ss[0].str();
     sps.GeometrySource = ss[1].str();
     sps.FragmentSource = ss[2].str();
+    sps.ComputeSource = ss[3].str();
     return sps;
 }
 
 ShaderProgramSource GLShader::ParseShader(std::string filepath, ModelStatics statics)
 {
     std::ifstream stream(filepath);
-    enum class ShaderType
-    {
-        NONE = -1, VERTEX = 0, GEOMETRY = 1, FRAGMENT = 2
-    };
     std::string line;
-    std::stringstream ss[3];
-    ShaderType type = ShaderType::NONE;
+    std::stringstream ss[4];
+    Shader_Type type = Shader_Type::NONE;
 
     ShaderProgramSource sps;
-    sps.HasFragment = false;
+    sps.HasVertex = false;
     sps.HasGeometry = false;
     sps.HasFragment = false;
+    sps.HasCompute = false;
     while (getline(stream, line))
     {
         if (line.find("#SHADER") != std::string::npos)
@@ -232,17 +232,22 @@ ShaderProgramSource GLShader::ParseShader(std::string filepath, ModelStatics sta
             if (line.find("VERTEX") != std::string::npos)
             {
                 sps.HasVertex = true;
-                type = ShaderType::VERTEX;
+                type = Shader_Type::VERTEX;
             }
             else if (line.find("GEOMETRY") != std::string::npos)
             {
                 sps.HasGeometry = true;
-                type = ShaderType::GEOMETRY;
+                type = Shader_Type::GEOMETRY;
             }
             else if (line.find("FRAGMENT") != std::string::npos)
             {
                 sps.HasFragment = true;
-                type = ShaderType::FRAGMENT;
+                type = Shader_Type::FRAGMENT;
+            }
+            else if (line.find("COMPUTE") != std::string::npos)
+            {
+                sps.HasCompute = true;
+                type = Shader_Type::COMPUTE;
             }
         }
         else if (line.find("#define POINT_LIGHT_COUNT") != std::string::npos)
@@ -460,13 +465,14 @@ ShaderProgramSource GLShader::ParseShader(std::string filepath, ModelStatics sta
     sps.VertexSource = ss[0].str();
     sps.GeometrySource = ss[1].str();
     sps.FragmentSource = ss[2].str();
+    sps.ComputeSource = ss[3].str();
     return sps;
 }
 
 unsigned int GLShader::CreateShader(const ShaderProgramSource& source)
 {
     unsigned int program = glCreateProgram();
-    unsigned int vs, gs, fs;
+    unsigned int vs, gs, fs, cs;
     if (source.HasVertex)
     {
         vs = CompileShader(GL_VERTEX_SHADER, source.VertexSource);
@@ -481,6 +487,11 @@ unsigned int GLShader::CreateShader(const ShaderProgramSource& source)
     {
         fs = CompileShader(GL_FRAGMENT_SHADER, source.FragmentSource);
         glAttachShader(program, fs);
+    }
+    if (source.HasCompute)
+    {
+        cs = CompileShader(GL_COMPUTE_SHADER, source.ComputeSource);
+        glAttachShader(program, cs);
     }
     glLinkProgram(program);
     glValidateProgram(program);
@@ -497,7 +508,10 @@ unsigned int GLShader::CreateShader(const ShaderProgramSource& source)
     {
         glDeleteShader(fs);
     }
-
+    if (source.HasCompute)
+    {
+        glDeleteShader(cs);
+    }
     return program;
 }
 
@@ -507,7 +521,7 @@ unsigned int GLShader::CompileShader(unsigned int type, const std::string& sourc
     const char* src = source.c_str();
     glShaderSource(id, 1, &src, nullptr);
     glCompileShader(id);
-
+    
     int result;
     glGetShaderiv(id, GL_COMPILE_STATUS, &result);
     if (result == GL_FALSE)
@@ -525,9 +539,13 @@ unsigned int GLShader::CompileShader(unsigned int type, const std::string& sourc
         {
             errorMsg += "geometry shader: " + m_FilePath;
         }
-        else
+        else if (type == GL_FRAGMENT_SHADER)
         {
             errorMsg += "fragment shader: " + m_FilePath;
+        }
+        else
+        {
+            errorMsg += "compute shader: " + m_FilePath;
         }
         spdlog::error(errorMsg);
         spdlog::error(message);
@@ -535,6 +553,16 @@ unsigned int GLShader::CompileShader(unsigned int type, const std::string& sourc
     }
 
     return id;
+}
+
+void GLShader::Bind() const
+{
+    GLCall(glUseProgram(m_RendererID));
+}
+
+void GLShader::Unbind() const
+{
+    GLCall(glUseProgram(0));
 }
 
 int GLShader::GetUniformLocation(const std::string& name)
@@ -550,16 +578,6 @@ int GLShader::GetUniformLocation(const std::string& name)
     }
     m_UniformLocationCache[name] = location;
     return location;
-}
-
-void GLShader::Bind() const
-{
-    GLCall(glUseProgram(m_RendererID));
-}
-
-void GLShader::Unbind() const
-{
-    GLCall(glUseProgram(0));
 }
 
 void GLShader::SetUniformHandleARB(std::string name, GLuint64 handle)

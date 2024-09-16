@@ -26,7 +26,8 @@ void GLRenderer::Init(Scene& scene)
 	m_Shaders.DOF[3].Init(SHADER_OPENGL_DOF_BLEND);
 	m_Shaders.GaussianBlur.Init(SHADER_OPENGL_UTIL_GAUSSIAN_BLUR);
 	m_Shaders.FXAA.Init(SHADER_OPENGL_AA_FXAA);
-	// Shaders used for c_SSAO
+	m_Shaders.Exposure.Init(SHADER_OPENGL_EXPOSURE_HISTOGRAM);
+	// Shaders used for SSAO
 	{
 		m_Shaders.SSAO[0].Init(SHADER_OPENGL_SSAO_GEN);
 		m_Shaders.SSAO[0].Bind();
@@ -390,6 +391,11 @@ void GLRenderer::DrawDefault(Scene& scene)
 	m_Frame.FB.Unbind();
 	GLCall(glDepthMask(GL_TRUE));
 	GLCall(glDepthFunc(GL_LESS));
+	// Auto Exposure
+	if (scene.GetCamera().GetExposure().Auto)
+	{
+		DrawAutoExposure(scene);
+	}
 	// Apply FXAA
 	if (core::SETTINGS.AA == FXAA)
 	{
@@ -1079,6 +1085,20 @@ void GLRenderer::DrawFXAA(Scene& scene)
 	GLCall(glBindFramebuffer(GL_READ_FRAMEBUFFER, m_Frame.FXAA.GetID()));
 	GLCall(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_Frame.FB.GetID()));
 	GLCall(glBlitFramebuffer(0, 0, m_Frame.FXAA.GetTexWidth(), m_Frame.FXAA.GetTexHeight(), 0, 0, m_Frame.FB.GetTexWidth(), m_Frame.FB.GetTexHeight(), GL_COLOR_BUFFER_BIT, GL_LINEAR));
+}
+
+void GLRenderer::DrawAutoExposure(Scene& scene)
+{
+	m_Shaders.Exposure.Bind();
+	//m_Frame.FB.BindTex();
+	//GLCall(glBindImageTexture(0, m_Frame.FB.GetTexID(), 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA16F));
+	//m_Shaders.Exposure.SetUniformHandleARB("imgOutput", m_Frame.FB.GetHandle());
+	//GLCall(glDispatchCompute(m_Frame.FB.GetTexWidth()/10, m_Frame.FB.GetTexHeight()/10, 1));
+
+	// make sure writing to image has finished before read
+	//GLCall(glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT));
+	//m_Frame.FB.UnbindTex();
+	m_Shaders.Exposure.Unbind();
 }
 
 bool GLRenderer::SaveScreenShot(Scene& scene)

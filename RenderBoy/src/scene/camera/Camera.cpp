@@ -39,6 +39,12 @@ void Camera::Reset()
 	m_VFX.Focus.FocalLength = 3.0f;
 }
 
+void Camera::SetExposure(float exposure)
+{
+	exposure = exposure > 0.01f ? exposure : 0.01f;
+	m_VFX.Exposure.Strength = exposure;
+}
+
 glm::vec3 Camera::GetDirection(glm::vec3 direction)
 {
 	glm::mat4 rotateMat = glm::rotate(glm::mat4(1.0f), glm::radians(m_EulerAngle.y), glm::vec3(0, 1, 0)) * glm::rotate(glm::mat4(1.0f), glm::radians(m_EulerAngle.x), glm::vec3(1, 0, 0));

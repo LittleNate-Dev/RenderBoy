@@ -38,6 +38,7 @@ struct Shaders
 	GLShader DOF[4]; // 0: COC, 1: BOKEH, 2: DOWNSAMPLE, 3: BLEND
 	GLShader GaussianBlur;
 	GLShader FXAA;
+	GLShader Exposure;
 };
 
 class GLRenderer
@@ -66,6 +67,7 @@ private:
 	void DrawBloom(Scene& scene);
 	void DrawSSAO(Scene& scene);
 	void DrawFXAA(Scene& scene);
+	void DrawAutoExposure(Scene& scene);
 
 public:
 	GLRenderer();

@@ -257,6 +257,8 @@ bool Application::InitOpenGL()
 
     // Make the window's context current
     glfwMakeContextCurrent(m_Window);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     /*if (core::SETTINGS.FullScreen)
     {
         GLFWmonitor* monitor = glfwGetWindowMonitor(m_Window);

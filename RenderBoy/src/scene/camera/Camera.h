@@ -24,10 +24,17 @@ struct VFX_Focus
 	float FocalLength = 8.0f;
 };
 
+struct VFX_Exposure
+{
+	bool Auto = true;
+	float Strength = 1.0f;
+};
+
 struct VFX
 {
 	VFX_Bloom Bloom;
 	VFX_Focus Focus;
+	VFX_Exposure Exposure;
 };
 
 class Camera
@@ -86,6 +93,11 @@ public:
 	void SetFocusDistance(float distance);
 	void SetFocusRange(float range);
 	void SetFocalLength(float length);
+	inline void SetAutoExposure(bool autoEx)
+	{
+		m_VFX.Exposure.Auto = autoEx;
+	};
+	void SetExposure(float exposure);
 	
 	// Get Camera's matrices
 	glm::vec3 GetDirection(glm::vec3 direction);
@@ -140,6 +152,10 @@ public:
 	inline VFX_Bloom GetBloom() const 
 	{
 		return m_VFX.Bloom;
+	};
+	inline VFX_Exposure GetExposure() const 
+	{
+		return m_VFX.Exposure;
 	};
 	// Draw UI
 	void DrawUI();
