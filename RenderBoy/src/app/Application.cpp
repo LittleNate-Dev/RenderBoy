@@ -104,6 +104,10 @@ bool Application::LoadSettings()
             {
                 core::SETTINGS.AA = (Anti_Alising)std::atoi(core::GetFileValue(line)[0].c_str());
             }
+            else if (line.find("#TONEMAP_CURVE") != std::string::npos)
+            {
+                core::SETTINGS.TonemapCurve = (Tonemap_Curve)std::atoi(core::GetFileValue(line)[0].c_str());
+            }
             else if (line.find("#POST_PROCESS") != std::string::npos)
             {
                 core::SETTINGS.PP = (Post_Process)std::atoi(core::GetFileValue(line)[0].c_str());
@@ -196,6 +200,8 @@ void Application::SaveSettings()
     line = "#RESOLUTION " + std::to_string(core::SETTINGS.Resolution) + "\n";
     stream << line;
     line = "#ANTI_ALISING " + std::to_string(core::SETTINGS.AA) + "\n";
+    stream << line;
+    line = "#TONEMAP_CURVE " + std::to_string(core::SETTINGS.TonemapCurve) + "\n";
     stream << line;
     line = "#POST_PROCESS " + std::to_string(core::SETTINGS.PP) + "\n";
     stream << line;
@@ -969,6 +975,26 @@ void Application::DrawSettingWindow()
                 if (ImGui::Combo("##AntiAlising", &currentAA, aaOps, IM_ARRAYSIZE(aaOps)))
                 {
                     core::SETTINGS.AA = (Anti_Alising)currentAA;
+                }
+                ImGui::PopItemWidth();
+            }
+            // Tonemap Curve
+            {
+                ImGui::CenterAlignWidget("Tonemap Curve", 100.0f * core::GetWidgetWidthCoefficient());
+                ImGui::LabelHighlighted("Tonemap Curve");
+                ImGui::PushItemWidth(100.0f * core::GetWidgetWidthCoefficient());
+                const char* curveOps[] = {
+                    "Reinhard",
+                    "Reinhard2",
+                    "ACES",
+                    "Uchimura",
+                    "Lottes"
+                };
+                static int currentCurve;
+                currentCurve = core::SETTINGS.TonemapCurve;
+                if (ImGui::Combo("##TonemapCurve", &currentCurve, curveOps, IM_ARRAYSIZE(curveOps)))
+                {
+                    core::SETTINGS.TonemapCurve = (Tonemap_Curve)currentCurve;
                 }
                 ImGui::PopItemWidth();
             }

@@ -24,10 +24,15 @@ in vec2 v_TexCoord;
 uniform sampler2D u_ScreenTex;
 uniform float u_Gamma;
 uniform float u_Exposure;
+uniform int u_TonemapCurve;
 
+float Tonemap_Reinhard(float x);
+float Tonemap_Reinhard2(float x);
+float Tonemap_ACES(float x);
+float Tonemap_Uchimura(float x);
+float Tonemap_Lottes(float x);
 vec3 RGBtoYXY(vec3 color);
 vec3 YXYtoRGB(vec3 color);
-float Tonemap_ACES(float x);
 
 void main()
 {
@@ -36,12 +41,103 @@ void main()
     float lp = Yxy.x * u_Exposure;
 
     // Tone mapping
-    Yxy.x = Tonemap_ACES(lp);
-
+    switch (u_TonemapCurve)
+    {
+    case 0:
+        Yxy.x = Tonemap_Reinhard(lp);
+        break;
+    case 1:
+        Yxy.x = Tonemap_Reinhard2(lp);
+        break;
+    case 2:
+        Yxy.x = Tonemap_ACES(lp);
+        break;
+    case 3:
+        Yxy.x = Tonemap_Uchimura(lp);
+        break;
+    case 4:
+        Yxy.x = Tonemap_Lottes(lp);
+        break;
+    }
     vec3 result = YXYtoRGB(Yxy);
     result = pow(result, vec3(1.0 / u_Gamma));
     v_FragColor = vec4(result, 1.0);
 }
+
+float Tonemap_Reinhard(float x)
+{
+    return x / (1.0 + x);
+}
+
+float Tonemap_Reinhard2(float x)
+{
+    const float L_white = 4.0;
+    return (x * (1.0 + x / (L_white * L_white))) / (1.0 + x);
+}
+
+float Tonemap_ACES(float x)
+{
+    // Narkowicz 2015, "ACES Filmic Tone Mapping Curve"
+    float a = 2.51;
+    float b = 0.03;
+    float c = 2.43;
+    float d = 0.59;
+    float e = 0.14;
+    return (x * (a * x + b)) / (x * (c * x + d) + e);
+}
+
+float Tonemap_Uchimura(float x)
+{
+    // Uchimura 2017, "HDR theory and practice"
+    // Math: https://www.desmos.com/calculator/gslcdxvipg
+    // Source: https://www.slideshare.net/nikuque/hdr-theory-and-practicce-jp
+    const float P = 1.0;  // max display brightness
+    const float a = 1.0;  // contrast
+    const float m = 0.22; // linear section start
+    const float l = 0.4;  // linear section length
+    const float c = 1.33; // black
+    const float b = 0.0;  // pedestal
+    float l0 = ((P - m) * l) / a;
+    float L0 = m - m / a;
+    float L1 = m + (1.0 - m) / a;
+    float S0 = m + l0;
+    float S1 = m + a * l0;
+    float C2 = (a * P) / (P - S1);
+    float CP = -C2 / P;
+
+    float w0 = 1.0 - smoothstep(0.0, m, x);
+    float w2 = step(m + l0, x);
+    float w1 = 1.0 - w0 - w2;
+
+    float T = m * pow(x / m, c) + b;
+    float S = P - (P - S1) * exp(CP * (x - S0));
+    float L = m + a * (x - m);
+
+    return T * w0 + L * w1 + S * w2;
+}
+
+float Tonemap_Lottes(float x)
+{
+    // Lottes 2016, "Advanced Techniques and Optimization of HDR Color Pipelines"
+    const float a = 1.6;
+    const float d = 0.977;
+    const float hdrMax = 8.0;
+    const float midIn = 0.18;
+    const float midOut = 0.267;
+
+    // Can be precomputed
+    //const float b =
+        //(-pow(midIn, a) + pow(hdrMax, a) * midOut) /
+        //((pow(hdrMax, a * d) - pow(midIn, a * d)) * midOut);
+    //const float c =
+        //(pow(hdrMax, a * d) * pow(midIn, a) - pow(hdrMax, a) * pow(midIn, a * d) * midOut) /
+        //((pow(hdrMax, a * d) - pow(midIn, a * d)) * midOut);
+    const float b = 1.07304;
+    const float c = 0.16742;
+
+    return pow(x, a) / (pow(x, a * d) * b + c);
+}
+
 
 vec3 RGBtoYXY(vec3 color)
 {
@@ -121,15 +217,4 @@ vec3 YXYtoRGB(vec3 color)
     }
     vec3 RGB = vec3(R, G, B) * 255.0;
     return RGB;
-}
-
-float Tonemap_ACES(float x) 
-{
-    // Narkowicz 2015, "ACES Filmic Tone Mapping Curve"
-    float a = 2.51;
-    float b = 0.03;
-    float c = 2.43;
-    float d = 0.59;
-    float e = 0.14;
-    return (x * (a * x + b)) / (x * (c * x + d) + e);
 }

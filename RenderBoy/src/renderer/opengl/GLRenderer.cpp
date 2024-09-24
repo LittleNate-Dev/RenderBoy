@@ -193,6 +193,10 @@ void GLRenderer::Draw(Scene& scene)
 	m_Shaders.Screen.SetUniformHandleARB("u_ScreenTex", m_Frame.FB.GetHandle());
 	m_Shaders.Screen.SetUniform1f("u_Gamma", core::SETTINGS.Gamma);
 	m_Shaders.Screen.SetUniform1f("u_Exposure", scene.GetCamera().GetExposure().Strength);
+	if (core::SETTINGS.DrawMode == DEFAULT)
+	{
+		m_Shaders.Screen.SetUniform1i("u_TonemapCurve", core::SETTINGS.TonemapCurve);
+	}
 	m_Frame.VA.Bind();
 	m_Frame.IB.Bind();
 	GLCall(glDrawElements(GL_TRIANGLES, m_Frame.IB.GetCount(), GL_UNSIGNED_INT, nullptr));

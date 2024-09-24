@@ -187,6 +187,15 @@ enum Skybox_Type
 	PICTURE = 1
 };
 
+enum Tonemap_Curve
+{
+	REINHARD = 0,
+	REINHARD2 = 1,
+	ACES = 2,
+	UCHIMURA = 3,
+	LOTTES = 4
+};
+
 // Structures
 struct Settings
 {
@@ -201,6 +210,7 @@ struct Settings
 	float Resolution = 1.0f;
 	Anti_Alising AA = NO_AA;
 	Post_Process PP = NO_PP;
+	Tonemap_Curve TonemapCurve = REINHARD;
 	bool ShowNormal = false;
 	glm::vec3 NormalColor = glm::vec3(1.0f);
 	float NormalMagnitude = 1.0f;
