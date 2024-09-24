@@ -18,9 +18,9 @@ struct VFX_Bloom
 
 struct VFX_Focus
 {
-	bool Switch = true;
-	float Distance;
-	float Range;
+	bool Switch = false;
+	float Distance = 100.0f;
+	float Range = 250.0f;
 	float FocalLength = 8.0f;
 };
 

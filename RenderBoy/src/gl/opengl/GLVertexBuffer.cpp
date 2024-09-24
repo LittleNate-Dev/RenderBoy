@@ -11,7 +11,7 @@ GLVertexBuffer::~GLVertexBuffer()
 }
 
 //public
-void GLVertexBuffer::GenVertexBuffer(const void* data, unsigned int size)
+void GLVertexBuffer::GenBuffer(const void* data, unsigned int size)
 {
     GLCall(glGenBuffers(1, &m_RendererID));
     Bind();
@@ -19,7 +19,7 @@ void GLVertexBuffer::GenVertexBuffer(const void* data, unsigned int size)
     Unbind();
 }
 
-void GLVertexBuffer::UpdateVertexBuffer(const void* data, unsigned int size)
+void GLVertexBuffer::UpdateBuffer(const void* data, unsigned int size)
 {
     Bind();
     GLCall(glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW));

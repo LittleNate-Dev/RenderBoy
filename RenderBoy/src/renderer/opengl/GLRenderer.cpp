@@ -26,7 +26,8 @@ void GLRenderer::Init(Scene& scene)
 	m_Shaders.DOF[3].Init(SHADER_OPENGL_DOF_BLEND);
 	m_Shaders.GaussianBlur.Init(SHADER_OPENGL_UTIL_GAUSSIAN_BLUR);
 	m_Shaders.FXAA.Init(SHADER_OPENGL_AA_FXAA);
-	m_Shaders.Exposure.Init(SHADER_OPENGL_EXPOSURE_HISTOGRAM);
+	m_Shaders.Exposure[0].Init(SHADER_OPENGL_EXPOSURE_HISTOGRAM);
+	m_Shaders.Exposure[1].Init(SHADER_OPENGL_EXPOSURE_AVERAGE);
 	// Shaders used for SSAO
 	{
 		m_Shaders.SSAO[0].Init(SHADER_OPENGL_SSAO_GEN);
@@ -52,7 +53,7 @@ void GLRenderer::Init(Scene& scene)
 	// Initialize framebuffers used for depth of field
 	m_Frame.DOF[0].Init(FBType::FRAME);
 	m_Frame.DOF[1].Init(FBType::FRAME);
-	glm::vec2 renderRes = core::GetRenderResolution() * 0.5f;
+	glm::vec2 renderRes = core::GetRenderRes() * 0.5f;
 	m_Frame.DOF[2].Init(FBType::FRAME, (int)renderRes.x, (int)renderRes.y);
 	m_Frame.DOF[3].Init(FBType::FRAME, (int)renderRes.x, (int)renderRes.y);
 	// Initialize framebuffers used for bloom effect
@@ -87,8 +88,8 @@ void GLRenderer::Init(Scene& scene)
 			2, 3, 0
 		};
 		m_Frame.VA.GenVertexArray();
-		m_Frame.VB.GenVertexBuffer(position, sizeof(position));
-		m_Frame.IB.GenIndexBuffer(indices, 6);
+		m_Frame.VB.GenBuffer(position, sizeof(position));
+		m_Frame.IB.GenBuffer(indices, 6);
 		GLVertexBufferLayout layout;
 		layout.Push<float>(2);
 		layout.Push<float>(2);
@@ -106,7 +107,7 @@ void GLRenderer::UpdateModelMat(Scene& scene)
 	for (unsigned int i = 0; i < scene.GetModelList().size(); i++)
 	{
 		model = scene.GetModelList()[i];
-		scene.GetData().GetDataGL().GetModelData()[model].InstanceVB.UpdateVertexBuffer(
+		scene.GetData().GetDataGL().GetModelData()[model].InstanceVB.UpdateBuffer(
 			&scene.GetModels()[model].GetModelMats()[0],
 			(unsigned int)scene.GetModels()[model].GetModelMats().size() * sizeof(glm::mat4)
 		);
@@ -152,7 +153,7 @@ void GLRenderer::Draw(Scene& scene)
 	m_Frame.FB.Bind();
 	Clear();
 	m_Frame.FB.Unbind();
-	glm::vec2 renderRes = core::GetRenderResolution();
+	glm::vec2 renderRes = core::GetRenderRes();
 	GLCall(glViewport(0, 0, (GLsizei)renderRes.x, (GLsizei)renderRes.y));
 	switch (core::SETTINGS.DrawMode)
 	{
@@ -191,6 +192,7 @@ void GLRenderer::Draw(Scene& scene)
 	m_Shaders.Screen.Bind();
 	m_Shaders.Screen.SetUniformHandleARB("u_ScreenTex", m_Frame.FB.GetHandle());
 	m_Shaders.Screen.SetUniform1f("u_Gamma", core::SETTINGS.Gamma);
+	m_Shaders.Screen.SetUniform1f("u_Exposure", scene.GetCamera().GetExposure().Strength);
 	m_Frame.VA.Bind();
 	m_Frame.IB.Bind();
 	GLCall(glDrawElements(GL_TRIANGLES, m_Frame.IB.GetCount(), GL_UNSIGNED_INT, nullptr));
@@ -340,7 +342,6 @@ void GLRenderer::DrawDefault(Scene& scene)
 		scene.GetData().GetDataGL().GetModelData()[model].IB.Unbind();
 		scene.GetData().GetDataGL().GetModelData()[model].Shader.Unbind();
 	}
-
 	m_Frame.FB.Unbind();
 	// 2.Transparent pass
 	m_Frame.OIT.Bind();
@@ -372,7 +373,6 @@ void GLRenderer::DrawDefault(Scene& scene)
 		scene.GetData().GetDataGL().GetModelData()[model].IB.Unbind();
 		scene.GetData().GetDataGL().GetModelData()[model].Shader.Unbind();
 	}
-	
 	m_Frame.OIT.Unbind();
 	// 3.Composite the result
 	m_Frame.FB.Bind();
@@ -532,7 +532,7 @@ void GLRenderer::DrawWireFrame(Scene& scene)
 	scene.GetData().GetDataGL().GetShader().Bind();
 	scene.GetData().GetDataGL().GetShader().SetUniformMat4f("u_ProjMat", scene.GetCamera().GetProjMat());
 	scene.GetData().GetDataGL().GetShader().SetUniformMat4f("u_ViewMat", scene.GetCamera().GetViewMat());
-	glm::vec2 renderRes = core::GetRenderResolution();
+	glm::vec2 renderRes = core::GetRenderRes();
 	scene.GetData().GetDataGL().GetShader().SetUniformMat4f("u_ViewPortMat", core::GetViewPortMatrix((unsigned int)renderRes.x, (unsigned int)renderRes.y));
 	scene.GetData().GetDataGL().GetShader().SetUniformVec2f("u_RenderRes", renderRes);
 	for (unsigned int i = 0; i < scene.GetModelList().size(); i++)
@@ -658,7 +658,7 @@ void GLRenderer::DrawLightCube(Scene& scene)
 {
 	m_Frame.FB.Bind();
 	m_Shaders.Lightcube.Bind();
-	glm::vec2 renderRes = core::GetRenderResolution();
+	glm::vec2 renderRes = core::GetRenderRes();
 	m_Shaders.Lightcube.SetUniformMat4f("u_ProjMat", scene.GetCamera().GetProjMat());
 	m_Shaders.Lightcube.SetUniformMat4f("u_ViewMat", scene.GetCamera().GetViewMat());
 	m_Shaders.Lightcube.SetUniformMat4f("u_ViewPortMat", core::GetViewPortMatrix((unsigned int)renderRes.x, (unsigned int)renderRes.y));
@@ -884,7 +884,7 @@ void GLRenderer::DrawDOF(Scene& scene)
 	// Downsample the coc
 	m_Frame.DOF[2].Bind();
 	m_Shaders.DOF[2].Bind();
-	glm::vec2 renderRes = core::GetRenderResolution() * 0.5f;
+	glm::vec2 renderRes = core::GetRenderRes() * 0.5f;
 	GLCall(glViewport(0, 0, (GLsizei)renderRes.x, (GLsizei)renderRes.y));
 	m_Shaders.DOF[2].SetUniformHandleARB("u_Source", m_Frame.DOF[0].GetHandle());
 	m_Shaders.DOF[2].SetUniformVec2f("u_TexelSize", 1.0f / glm::vec2(m_Frame.DOF[0].GetTexWidth(), m_Frame.DOF[0].GetTexHeight()));
@@ -912,7 +912,7 @@ void GLRenderer::DrawDOF(Scene& scene)
 	GLCall(glBindFramebuffer(GL_READ_FRAMEBUFFER, m_Frame.DOF[2].GetID()));
 	GLCall(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_Frame.DOF[1].GetID()));
 	GLCall(glBlitFramebuffer(0, 0, m_Frame.DOF[2].GetTexWidth(), m_Frame.DOF[2].GetTexHeight(), 0, 0, m_Frame.DOF[1].GetTexWidth(), m_Frame.DOF[1].GetTexHeight(), GL_COLOR_BUFFER_BIT, GL_LINEAR));
-	renderRes = core::GetRenderResolution();
+	renderRes = core::GetRenderRes();
 	GLCall(glViewport(0, 0, (GLsizei)renderRes.x, (GLsizei)renderRes.y));
 	// Now DOF[0] contains the original img and coc, DOF[1] contains the img applied bokeh, 
 	// DOF[2] contains the blury downsampled bokeh img, DOF[3] contains the downsampled bokeh img
@@ -1071,7 +1071,7 @@ void GLRenderer::DrawFXAA(Scene& scene)
 	m_Frame.FXAA.Bind();
 	m_Shaders.FXAA.Bind();
 	m_Shaders.FXAA.SetUniformHandleARB("u_Source", m_Frame.FB.GetHandle()); 
-	m_Shaders.FXAA.SetUniformVec2f("u_InverseScreenSize", 1.0f / core::GetRenderResolution());
+	m_Shaders.FXAA.SetUniformVec2f("u_InverseScreenSize", 1.0f / core::GetRenderRes());
 	m_Frame.VA.Bind();
 	m_Frame.IB.Bind();
 	GLCall(glDrawElements(GL_TRIANGLES, m_Frame.IB.GetCount(), GL_UNSIGNED_INT, nullptr));
@@ -1089,16 +1089,30 @@ void GLRenderer::DrawFXAA(Scene& scene)
 
 void GLRenderer::DrawAutoExposure(Scene& scene)
 {
-	m_Shaders.Exposure.Bind();
-	//m_Frame.FB.BindTex();
-	//GLCall(glBindImageTexture(0, m_Frame.FB.GetTexID(), 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA16F));
-	//m_Shaders.Exposure.SetUniformHandleARB("imgOutput", m_Frame.FB.GetHandle());
-	//GLCall(glDispatchCompute(m_Frame.FB.GetTexWidth()/10, m_Frame.FB.GetTexHeight()/10, 1));
-
-	// make sure writing to image has finished before read
-	//GLCall(glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT));
-	//m_Frame.FB.UnbindTex();
-	m_Shaders.Exposure.Unbind();
+	// First reset histogram
+	scene.GetData().GetDataGL().GetVFXData().ExpoHistogram.assign(scene.GetData().GetDataGL().GetVFXData().ExpoHistogram.size(), 0);
+	scene.GetData().GetDataGL().GetVFXData().ExpoHistoDB.SetData(&scene.GetData().GetDataGL().GetVFXData().ExpoHistogram[0], 1024, GL_DYNAMIC_COPY);
+	// Then transform the original frame into histogram
+	m_Shaders.Exposure[0].Bind();
+	GLCall(glBindImageTexture(0, m_Frame.FB.GetTexID(), 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA16F));
+	scene.GetData().GetDataGL().GetVFXData().ExpoHistoDB.Bind(1);
+	GLCall(glDispatchCompute(ceil(m_Frame.FB.GetTexWidth() / 32.0), ceil(m_Frame.FB.GetTexHeight() / 32.0), 1));
+	GLCall(glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT));
+	scene.GetData().GetDataGL().GetVFXData().ExpoHistoDB.Unbind();
+	m_Shaders.Exposure[0].Unbind();
+	// Calculate the average luminance
+	m_Shaders.Exposure[1].Bind();
+	scene.GetData().GetDataGL().GetVFXData().ExpoHistoDB.Bind(0);
+	scene.GetData().GetDataGL().GetVFXData().ExpoAvgDB.Bind(1);
+	glm::vec2 renderRes = core::GetRenderRes();
+	m_Shaders.Exposure[1].SetUniform1f("u_TimeDelta", core::TIME_DELTA);
+	m_Shaders.Exposure[1].SetUniform1i("u_PixelNum", (int)(renderRes.x * renderRes.y));
+	GLCall(glDispatchCompute(1, 1, 1));
+	GLCall(glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT));
+	m_Shaders.Exposure[1].Unbind();
+	scene.GetData().GetDataGL().GetVFXData().ExpoAvgDB.GetData(&scene.GetData().GetDataGL().GetVFXData().ExpoAvg, 0, sizeof(float));
+	float exposure = 1.0f / (9.6f * scene.GetData().GetDataGL().GetVFXData().ExpoAvg + 0.0001f);
+	scene.GetCamera().SetExposure(exposure);
 }
 
 bool GLRenderer::SaveScreenShot(Scene& scene)
@@ -1144,7 +1158,7 @@ void GLRenderer::ChangeResolution()
 	m_Frame.OIT.Init(FBType::OIT, width, height);
 	m_Frame.DOF[0].Init(FBType::FRAME, width, height);
 	m_Frame.DOF[1].Init(FBType::FRAME, width, height);
-	glm::vec2 renderRes = core::GetRenderResolution() * 0.5f;
+	glm::vec2 renderRes = core::GetRenderRes() * 0.5f;
 	m_Frame.DOF[2].Init(FBType::FRAME, (int)renderRes.x, (int)renderRes.y);
 	m_Frame.DOF[3].Init(FBType::FRAME, (int)renderRes.x, (int)renderRes.y);
 	// Initialize framebuffers used for bloom effect

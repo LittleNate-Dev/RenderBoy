@@ -11,6 +11,10 @@ namespace core
 	bool RELOAD_FONT = false;
 	void* SCENE_DATA = nullptr;
 	SceneStatics SCENE_STATICS;
+	glm::vec2 RENDER_RES = glm::vec2(1280, 720);
+	float CURRENT_TIME = 0.0f;
+	float LAST_TIME = 0.0f;
+	float TIME_DELTA = 0.0f;
 	const char* currentModelScene = nullptr;
 	const char* currentPointLight = nullptr;
 	const char* currentSpotLight = nullptr;
@@ -69,12 +73,20 @@ bool GLLogCall(const char* function, const char* file, int line)
 
 namespace core
 {
-	glm::vec2 GetRenderResolution()
+	void UpdateRenderRes()
 	{
 		int width = (int)(core::SETTINGS.Width * core::SETTINGS.Resolution);
 		int height = (int)(core::SETTINGS.Height * core::SETTINGS.Resolution);
+		core::RENDER_RES = glm::vec2(width, height);
+	}
+
+	glm::vec2 GetRenderRes()
+	{
+		/*int width = (int)(core::SETTINGS.Width * core::SETTINGS.Resolution);
+		int height = (int)(core::SETTINGS.Height * core::SETTINGS.Resolution);
 		glm::vec2 resolution = glm::vec2(width, height);
-		return resolution;
+		return resolution;*/
+		return core::RENDER_RES;
 	}
 
 	void ShowWarningMsg(std::string msg)

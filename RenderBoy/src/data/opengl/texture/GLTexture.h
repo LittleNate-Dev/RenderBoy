@@ -9,6 +9,11 @@
 
 #include "core/Core.h"
 
+enum Tex_Type
+{
+    NOISE_SSAO = 0
+};
+
 class GLTexture
 {
 private:
@@ -25,6 +30,7 @@ public:
     // Tell opengl to generate a texture
     void GenTexture(const std::string filepath);
     void GenTexture(const std::string filepath, bool sRGB);
+    void GenTexture(Tex_Type type);
     void Bind(unsigned int slot = 0) const;
     void Unbind() const;
 

@@ -40,7 +40,7 @@
 
 #include <freeimage/FreeImage.h>
 
-#define APP_VERSION "ver 0.8.1"
+#define APP_VERSION "ver 0.8.2"
 #define GIT_REPO "https://github.com/LittleNate-Dev/RenderBoy"
 #define SCENE_FILEPATH "saves/scene/"
 #define SETTING_FILEPATH "data/config/settings.config"
@@ -84,6 +84,7 @@
 #define SHADER_OPENGL_SHADOW_DIR "data/shaders/opengl/shadow/DIRLIGHT.glsl"
 #define SHADER_OPENGL_UTIL_GAUSSIAN_BLUR "data/shaders/opengl/util/GAUSSIAN_BLUR.glsl"
 #define SHADER_OPENGL_EXPOSURE_HISTOGRAM "data/shaders/opengl/vfx/exposure/HISTOGRAM.glsl"
+#define SHADER_OPENGL_EXPOSURE_AVERAGE "data/shaders/opengl/vfx/exposure/AVERAGE.glsl"
 #define DRAW_MODE_COUNT 7
 #define POST_PROCESS_COUNT 5
 #define SETTING_MAX_FOV 120
@@ -186,11 +187,6 @@ enum Skybox_Type
 	PICTURE = 1
 };
 
-enum Noise_Tex_Type 
-{
-	NOISE_SSAO = 0
-};
-
 // Structures
 struct Settings
 {
@@ -270,6 +266,11 @@ namespace core
 	// A pointer point to scene data
 	extern void* SCENE_DATA;
 	extern SceneStatics SCENE_STATICS;
+	extern glm::vec2 RENDER_RES;
+	// system time
+	extern float CURRENT_TIME;
+	extern float LAST_TIME;
+	extern float TIME_DELTA;
 	// used for combo widgets
 	extern const char* currentModelScene;
 	extern const char* currentPointLight;
@@ -304,7 +305,8 @@ namespace ImGui
 namespace core
 {
 	// Get current render resolution
-	glm::vec2 GetRenderResolution();
+	void UpdateRenderRes();
+	glm::vec2 GetRenderRes();
 	// Show popup message
 	void ShowWarningMsg(std::string msg);
 	// Do selected file format is supported

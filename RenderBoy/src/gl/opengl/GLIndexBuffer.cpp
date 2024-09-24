@@ -12,7 +12,7 @@ GLIndexBuffer::~GLIndexBuffer()
 }
 
 //public
-void GLIndexBuffer::GenIndexBuffer(const unsigned int* data, unsigned int count)
+void GLIndexBuffer::GenBuffer(const unsigned int* data, unsigned int count)
 {
     m_Count = count;
     GLCall(glGenBuffers(1, &m_RendererID));

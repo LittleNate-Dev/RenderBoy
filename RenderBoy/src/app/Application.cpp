@@ -231,6 +231,7 @@ bool Application::Init()
     // Init renderer and scene
     m_Width = core::SETTINGS.Width;
     m_Height = core::SETTINGS.Height;
+    core::UpdateRenderRes();
     m_Scene.Init();
     m_Renderer.Init(m_Scene);
     m_Scene.GetCamera().SetWindowSize(m_Width, m_Height);
@@ -331,6 +332,9 @@ void Application::Run()
     // render loop
     while (!glfwWindowShouldClose(m_Window)) 
     {
+        core::CURRENT_TIME = glfwGetTime();
+        core::TIME_DELTA = core::CURRENT_TIME - core::LAST_TIME;
+        core::LAST_TIME = core::CURRENT_TIME;
         if (core::IS_RENDERBOY_OPENED)
         {
             Update();
@@ -946,6 +950,7 @@ void Application::DrawSettingWindow()
                 if (ImGui::SliderInt("##Resolution", &resolution, SETTING_RES_MIN, SETTING_RES_MAX))
                 {
                     core::SETTINGS.Resolution = (float)resolution / 100.0f;
+                    core::UpdateRenderRes();
                     m_Renderer.ChangeResolution();
                 }
                 ImGui::PopItemWidth();
@@ -1082,6 +1087,7 @@ void Application::WindowResize(int width, int height)
     m_Height = height;
     core::SETTINGS.Width = width;
     core::SETTINGS.Height = height;
+    core::UpdateRenderRes();
 }
 
 void Application::KeyboardInput()

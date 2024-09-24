@@ -45,8 +45,8 @@ void GLData::Init()
 			2, 4, 6
 		};
 		m_SkyboxData.VA.GenVertexArray();
-		m_SkyboxData.VB.GenVertexBuffer(position, sizeof(position));
-		m_SkyboxData.IB.GenIndexBuffer(indices, 36);
+		m_SkyboxData.VB.GenBuffer(position, sizeof(position));
+		m_SkyboxData.IB.GenBuffer(indices, 36);
 		GLVertexBufferLayout layout;
 		layout.Push<float>(3);
 		m_SkyboxData.VA.AddBuffer(m_SkyboxData.VB, layout);
@@ -70,7 +70,7 @@ void GLData::Init()
 				m_VFXData.SSAOSamples.push_back(sample);
 			}
 		}
-		m_VFXData.SSAONoiseTex.GenTexture(Noise_Tex_Type::NOISE_SSAO);
+		m_VFXData.SSAONoiseTex.GenTexture(Tex_Type::NOISE_SSAO);
 	}
 	// Initialize point light's cube
 	{
@@ -93,8 +93,8 @@ void GLData::Init()
 			5, 4, 1
 		};
 		m_PointLightData.VA.GenVertexArray();
-		m_PointLightData.VB.GenVertexBuffer(position, sizeof(position));
-		m_PointLightData.IB.GenIndexBuffer(indices, 24);
+		m_PointLightData.VB.GenBuffer(position, sizeof(position));
+		m_PointLightData.IB.GenBuffer(indices, 24);
 		GLVertexBufferLayout layout;
 		layout.Push<float>(3);
 		m_PointLightData.VA.AddBuffer(m_PointLightData.VB, layout);
@@ -117,8 +117,8 @@ void GLData::Init()
 			4, 2, 3
 		};
 		m_SpotLightData.VA.GenVertexArray();
-		m_SpotLightData.VB.GenVertexBuffer(position, sizeof(position));
-		m_SpotLightData.IB.GenIndexBuffer(indices, 18);
+		m_SpotLightData.VB.GenBuffer(position, sizeof(position));
+		m_SpotLightData.IB.GenBuffer(indices, 18);
 		GLVertexBufferLayout layout;
 		layout.Push<float>(3);
 		m_SpotLightData.VA.AddBuffer(m_SpotLightData.VB, layout);
@@ -150,11 +150,17 @@ void GLData::Init()
 			4, 7, 3
 		};
 		m_DirLightData.VA.GenVertexArray();
-		m_DirLightData.VB.GenVertexBuffer(position, sizeof(position));
-		m_DirLightData.IB.GenIndexBuffer(indices, 36);
+		m_DirLightData.VB.GenBuffer(position, sizeof(position));
+		m_DirLightData.IB.GenBuffer(indices, 36);
 		GLVertexBufferLayout layout;
 		layout.Push<float>(3);
 		m_DirLightData.VA.AddBuffer(m_DirLightData.VB, layout);
+	}
+	// Initialize data used for auto exposure
+	{
+		m_VFXData.ExpoHistogram = std::vector<unsigned int>(256, 0);
+		m_VFXData.ExpoHistoDB.GenBuffer(&m_VFXData.ExpoHistogram[0], m_VFXData.ExpoHistogram.size() * sizeof(unsigned int), GL_DYNAMIC_COPY);
+		m_VFXData.ExpoAvgDB.GenBuffer(&m_VFXData.ExpoAvg, sizeof(int), GL_DYNAMIC_COPY);
 	}
 }
 
@@ -214,7 +220,6 @@ void GLData::AddModel(std::string name, Model& model)
 	std::vector<std::string> heightTex;
 	for (unsigned int i = 0; i < model.GetMeshes().size(); i++)
 	{
-		//std::cout << model.GetMeshes()[i].GetAlbedoTexFilePath() << std::endl;
 		bool hasValue = false;
 		// Albedo texture
 		hasValue = false;
@@ -585,8 +590,8 @@ void GLData::AddModel(std::string name, Model& model)
 		vertices.insert(vertices.end(), model.GetMeshes()[i].GetVertices().begin(), model.GetMeshes()[i].GetVertices().end());
 	}
 	m_ModelData[name].VA.GenVertexArray();
-	m_ModelData[name].VB.GenVertexBuffer(&vertices[0], (unsigned int)vertices.size() * sizeof(Vertex));
-	m_ModelData[name].IB.GenIndexBuffer(&indices[0], (unsigned int)indices.size());
+	m_ModelData[name].VB.GenBuffer(&vertices[0], (unsigned int)vertices.size() * sizeof(Vertex));
+	m_ModelData[name].IB.GenBuffer(&indices[0], (unsigned int)indices.size());
 	GLVertexBufferLayout layout;
 	//vertex positions
 	layout.Push<float>(3);
@@ -608,7 +613,7 @@ void GLData::AddModel(std::string name, Model& model)
 	layout.Push<float>(2);
 	m_ModelData[name].VA.AddBuffer(m_ModelData[name].VB, layout);
 	// Add model matrix as vertex attribute
-	m_ModelData[name].InstanceVB.GenVertexBuffer(&model.GetModelMats()[0], (unsigned int)model.GetModelMats().size() * sizeof(glm::mat4));
+	m_ModelData[name].InstanceVB.GenBuffer(&model.GetModelMats()[0], (unsigned int)model.GetModelMats().size() * sizeof(glm::mat4));
 	GLVertexBufferLayout instanceLayout;
 	instanceLayout.Push<float>(4);
 	instanceLayout.Push<float>(4);

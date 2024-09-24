@@ -19,8 +19,8 @@ public:
     ~GLVertexBuffer();
 
     // Tell opengl to generate a vertex buffer object
-    void GenVertexBuffer(const void* data, unsigned int size);
-    void UpdateVertexBuffer(const void* data, unsigned int size);
+    void GenBuffer(const void* data, unsigned int size);
+    void UpdateBuffer(const void* data, unsigned int size);
     void Bind() const;
     void Unbind() const;
 

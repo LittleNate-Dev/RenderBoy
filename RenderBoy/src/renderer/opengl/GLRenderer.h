@@ -38,7 +38,7 @@ struct Shaders
 	GLShader DOF[4]; // 0: COC, 1: BOKEH, 2: DOWNSAMPLE, 3: BLEND
 	GLShader GaussianBlur;
 	GLShader FXAA;
-	GLShader Exposure;
+	GLShader Exposure[2]; // 0£º HISTOGRAM, 1: AVERAGE
 };
 
 class GLRenderer

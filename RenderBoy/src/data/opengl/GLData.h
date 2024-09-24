@@ -14,10 +14,10 @@
 #include "gl/opengl/GLVertexBuffer.h"
 #include "gl/opengl/GLVertexBufferLayout.h"
 #include "gl/opengl/GLIndexBuffer.h"
+#include "gl/opengl/GLDataBuffer.h"
 #include "shader/opengl/GLShader.h"
 #include "data/opengl/texture/GLTexture.h"
 #include "data/opengl/texture/GLCubeMap.h"
-#include "data/opengl/texture/GLNoiseTexture.h"
 
 struct GLPointLightData
 {
@@ -58,7 +58,11 @@ struct GLSkyboxData
 struct GLVFXData
 {
 	std::vector<glm::vec3> SSAOSamples;
-	GLNoiseTexture SSAONoiseTex;
+	GLTexture SSAONoiseTex;
+	std::vector<unsigned int> ExpoHistogram;
+	float ExpoAvg = 0.0f;
+	GLDataBuffer ExpoHistoDB;
+	GLDataBuffer ExpoAvgDB;
 };
 
 struct GLModelData

@@ -20,7 +20,7 @@ public:
 	~GLIndexBuffer();
 
 	// Tell opengl to generate an index buffer object
-	void GenIndexBuffer(const unsigned int* data, unsigned int count);
+	void GenBuffer(const unsigned int* data, unsigned int count);
 	void Bind() const;
 	void Unbind() const;
 

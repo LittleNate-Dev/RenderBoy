@@ -111,7 +111,7 @@
     <ClCompile Include="data\library\imgui\imgui_widgets.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\data\opengl\texture\GLNoiseTexture.cpp">
+    <ClCompile Include="src\gl\opengl\GLDataBuffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1655,7 +1655,7 @@
     <ClInclude Include="data\library\spdlog\version.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\data\opengl\texture\GLNoiseTexture.h">
+    <ClInclude Include="src\gl\opengl\GLDataBuffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

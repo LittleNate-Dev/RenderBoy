@@ -10,12 +10,6 @@ Camera::Camera()
 	m_EulerAngle = glm::vec3(0.0f);
 	m_MoveSpeed = 1.0f;
 	m_RotateSpeed = 1.0f;
-	m_VFX.Bloom.Switch = true;
-	m_VFX.Bloom.Strength = 0.1f;
-	m_VFX.Bloom.FilterRadius = 0.01f;
-	m_VFX.Focus.Distance = 100.0f;
-	m_VFX.Focus.Range = 250.0f;
-	m_VFX.Focus.FocalLength = 3.0f;
 }
 
 Camera::~Camera()
@@ -31,17 +25,19 @@ void Camera::Reset()
 	m_EulerAngle = glm::vec3(0.0f);
 	m_MoveSpeed = 1.0f;
 	m_RotateSpeed = 1.0f;
-	m_VFX.Bloom.Switch = true;
+	m_VFX.Bloom.Switch = false;
 	m_VFX.Bloom.Strength = 0.1f;
 	m_VFX.Bloom.FilterRadius = 0.01f;
+	m_VFX.Focus.Switch = false;
 	m_VFX.Focus.Distance = 1.0f;
 	m_VFX.Focus.Range = 250.0f;
 	m_VFX.Focus.FocalLength = 3.0f;
+	m_VFX.Exposure.Auto = true;
+	m_VFX.Exposure.Strength = 1.0f;
 }
 
 void Camera::SetExposure(float exposure)
 {
-	exposure = exposure > 0.01f ? exposure : 0.01f;
 	m_VFX.Exposure.Strength = exposure;
 }
 
@@ -460,6 +456,24 @@ void Camera::DrawUI()
 	// Camera effects
 	if (ImGui::TreeNode("Effects"))
 	{
+		if (ImGui::TreeNode("Exposure"))
+		{
+			ImGui::CenterAlignWidget("Auto");
+			ImGui::LabelHighlighted("Auto");
+			ImGui::Checkbox("##AutoExposure", &m_VFX.Exposure.Auto);
+			if (!m_VFX.Exposure.Auto)
+			{
+				ImGui::PushItemWidth(80.0f * core::GetWidgetWidthCoefficient());
+				ImGui::CenterAlignWidget("Exposure", 80.0f * core::GetWidgetWidthCoefficient());
+				ImGui::LabelHighlighted("Exposure");
+				if (ImGui::InputFloat("##Exposure", &m_VFX.Exposure.Strength))
+				{
+					SetExposure(m_VFX.Exposure.Strength);
+				}
+				ImGui::PopItemWidth();
+			}
+			ImGui::TreePop();
+		}
 		if (ImGui::TreeNode("Depth of Field"))
 		{
 			ImGui::CenterAlignWidget("Enable");

@@ -127,6 +127,16 @@ bool Scene::LoadScene(std::string filepath)
 					glm::vec3 euler = glm::vec3((float)std::atof(values[0].c_str()), (float)std::atof(values[1].c_str()), (float)std::atof(values[2].c_str()));
 					m_Camera.SetEulerAngle(euler);
 				}
+				else if (line.find("#CAMERA_VFX_EXPOSURE_AUTO") != std::string::npos)
+				{
+					values = core::GetFileValue(line);
+					m_Camera.SetAutoExposure((bool)std::atoi(values[0].c_str()));
+				}
+				else if (line.find("#CAMERA_VFX_EXPOSURE_STRENGTH") != std::string::npos)
+				{
+					values = core::GetFileValue(line);
+					m_Camera.SetExposure((float)std::atof(values[0].c_str()));
+				}
 				else if (line.find("#CAMERA_VFX_BLOOM_SWITCH") != std::string::npos)
 				{
 					values = core::GetFileValue(line);
@@ -593,6 +603,10 @@ void Scene::SaveScene()
 		stream << line;
 		glm::vec3 euler = m_Camera.GetEulerAngle();
 		line = "#CAMERA_EULERANGLE " + std::to_string(euler.x) + " " + std::to_string(euler.y) + " " + std::to_string(euler.z) + "\n";
+		stream << line;
+		line = "#CAMERA_VFX_EXPOSURE_AUTO " + std::to_string(m_Camera.GetExposure().Auto) + "\n";
+		stream << line;
+		line = "#CAMERA_VFX_EXPOSURE_STRENGTH " + std::to_string(m_Camera.GetExposure().Strength) + "\n";
 		stream << line;
 		line = "#CAMERA_VFX_BLOOM_SWITCH " + std::to_string(m_Camera.GetBloom().Switch) + "\n";
 		stream << line;
