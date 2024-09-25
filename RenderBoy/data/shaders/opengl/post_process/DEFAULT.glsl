@@ -91,19 +91,32 @@ float Tonemap_Uchimura(float x)
     // Uchimura 2017, "HDR theory and practice"
     // Math: https://www.desmos.com/calculator/gslcdxvipg
     // Source: https://www.slideshare.net/nikuque/hdr-theory-and-practicce-jp
-    const float P = 1.0;  // max display brightness
-    const float a = 1.0;  // contrast
-    const float m = 0.22; // linear section start
-    const float l = 0.4;  // linear section length
-    const float c = 1.33; // black
-    const float b = 0.0;  // pedestal
-    float l0 = ((P - m) * l) / a;
-    float L0 = m - m / a;
-    float L1 = m + (1.0 - m) / a;
-    float S0 = m + l0;
-    float S1 = m + a * l0;
-    float C2 = (a * P) / (P - S1);
-    float CP = -C2 / P;
+//    const float P = 1.0;  // max display brightness
+//    const float a = 1.0;  // contrast
+//    const float m = 0.22; // linear section start
+//    const float l = 0.4;  // linear section length
+//    const float c = 1.33; // black
+//    const float b = 0.0;  // pedestal
+//    float l0 = ((P - m) * l) / a;
+//    float L0 = m - m / a;
+//    float L1 = m + (1.0 - m) / a;
+//    float S0 = m + l0;
+//    float S1 = m + a * l0;
+//    float C2 = (a * P) / (P - S1);
+//    float CP = -C2 / P;
+
+    const float P = 1.0;
+    const float a = 1.0;
+    const float m = 0.22;
+    const float c = 1.33;
+    const float b = 0.0;
+    const float l0 = 0.312;
+    const float L0 = 0.0;
+    const float L1 = 1.0;
+    const float S0 = 0.532;
+    const float S1 = 0.532;
+    const float C2 = 2.13675;
+    const float CP = -2.13675;
 
     float w0 = 1.0 - smoothstep(0.0, m, x);
     float w2 = step(m + l0, x);
@@ -137,7 +150,6 @@ float Tonemap_Lottes(float x)
 
     return pow(x, a) / (pow(x, a * d) * b + c);
 }
-
 
 vec3 RGBtoYXY(vec3 color)
 {

@@ -36,11 +36,6 @@ void Camera::Reset()
 	m_VFX.Exposure.Strength = 1.0f;
 }
 
-void Camera::SetExposure(float exposure)
-{
-	m_VFX.Exposure.Strength = exposure;
-}
-
 glm::vec3 Camera::GetDirection(glm::vec3 direction)
 {
 	glm::mat4 rotateMat = glm::rotate(glm::mat4(1.0f), glm::radians(m_EulerAngle.y), glm::vec3(0, 1, 0)) * glm::rotate(glm::mat4(1.0f), glm::radians(m_EulerAngle.x), glm::vec3(1, 0, 0));
@@ -317,6 +312,12 @@ void Camera::SetFocalLength(float length)
 	length = length > SETTING_VFX_DOF_MAX_FLENGTH ? SETTING_VFX_DOF_MAX_FLENGTH : length;
 	length = length < SETTING_VFX_DOF_MIN_FLENGTH ? SETTING_VFX_DOF_MIN_FLENGTH : length;
 	m_VFX.Focus.FocalLength = length;
+}
+
+void Camera::SetExposure(float exposure)
+{
+	exposure = exposure > 1.0f ? exposure : 1.0f;
+	m_VFX.Exposure.Strength = exposure;
 }
 
 void Camera::DrawUI()
