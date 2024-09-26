@@ -1013,10 +1013,10 @@ void Application::DrawSettingWindow()
             core::SETTINGS.NormalColor = glm::vec3(1.0f);
             core::SETTINGS.NormalMagnitude = 1.0f;
             core::SETTINGS.PP = NO_PP;
-            m_Renderer.ChangePostProcess();
             core::SETTINGS.Gamma = 2.2f;
             core::SETTINGS.Resolution = 1.0f;
             m_Renderer.ChangeResolution();
+            m_Renderer.ChangePostProcess();
             core::SETTINGS.AA = NO_AA;
         }
         ImGui::PopStyleColor(1);
@@ -1394,7 +1394,6 @@ void Application::GamepadInput()
             // Switch post process effect
             isGamepadDpadUpPressed = false;
             core::SETTINGS.PP = (Post_Process)((core::SETTINGS.PP + 1) % POST_PROCESS_COUNT);
-            m_Renderer.ChangePostProcess();
         }
 
         static bool isGamepadDpadDownPressed;
@@ -1407,7 +1406,6 @@ void Application::GamepadInput()
             // Switch post process effect
             isGamepadDpadDownPressed = false;
             core::SETTINGS.PP = (Post_Process)((core::SETTINGS.PP - 1 < 0 ? POST_PROCESS_COUNT - 1 : core::SETTINGS.PP - 1) % POST_PROCESS_COUNT);
-            m_Renderer.ChangePostProcess();
         }
 
         static bool isGamepadDpadLeftPressed;

@@ -21,8 +21,6 @@ out vec4 v_FragColor;
 in vec2 v_TexCoord;
 
 uniform sampler2D u_ScreenTex;
-uniform float u_Gamma;
-uniform float u_Exposure;
 
 const float offset = 1.0 / 1000.0;  
 
@@ -50,14 +48,11 @@ void main()
     for(int i = 0; i < 9; i++)
     {
         sampleTex[i] = vec3(texture(u_ScreenTex, v_TexCoord.st + offsets[i]));
-        sampleTex[i] = vec3(1.0) - exp(-sampleTex[i] * 2.0);
-        sampleTex[i] = pow(sampleTex[i], vec3(1.0 / u_Gamma));
     }
     vec3 col = vec3(0.0);
     for(int i = 0; i < 9; i++)
     {
         col += sampleTex[i] * kernel[i];
     }
-
     v_FragColor = vec4(col, 1.0);
 }  

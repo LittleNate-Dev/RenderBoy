@@ -26,6 +26,7 @@ uniform float u_Gamma;
 uniform float u_Exposure;
 uniform int u_TonemapCurve;
 
+float Tonemap(float x);
 float Tonemap_Reinhard(float x);
 float Tonemap_Reinhard2(float x);
 float Tonemap_ACES(float x);
@@ -39,29 +40,35 @@ void main()
     vec3 hdrColor = texture(u_ScreenTex, v_TexCoord).rgb;
     vec3 Yxy = RGBtoYXY(hdrColor);
     float lp = Yxy.x * u_Exposure;
-
     // Tone mapping
-    switch (u_TonemapCurve)
-    {
-    case 0:
-        Yxy.x = Tonemap_Reinhard(lp);
-        break;
-    case 1:
-        Yxy.x = Tonemap_Reinhard2(lp);
-        break;
-    case 2:
-        Yxy.x = Tonemap_ACES(lp);
-        break;
-    case 3:
-        Yxy.x = Tonemap_Uchimura(lp);
-        break;
-    case 4:
-        Yxy.x = Tonemap_Lottes(lp);
-        break;
-    }
+    Yxy.x = Tonemap(lp);
     vec3 result = YXYtoRGB(Yxy);
     result = pow(result, vec3(1.0 / u_Gamma));
     v_FragColor = vec4(result, 1.0);
+}
+
+float Tonemap(float x)
+{
+    float luminance = x;
+    switch (u_TonemapCurve)
+    {
+    case 0:
+        luminance = Tonemap_Reinhard(x);
+        break;
+    case 1:
+        luminance = Tonemap_Reinhard2(x);
+        break;
+    case 2:
+        luminance = Tonemap_ACES(x);
+        break;
+    case 3:
+        luminance = Tonemap_Uchimura(x);
+        break;
+    case 4:
+        luminance = Tonemap_Lottes(x);
+        break;
+    }
+    return luminance;
 }
 
 float Tonemap_Reinhard(float x)

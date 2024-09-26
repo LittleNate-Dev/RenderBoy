@@ -25,5 +25,5 @@ uniform sampler2D u_ScreenTex;
 void main()
 {
     vec3 color = texture(u_ScreenTex, v_TexCoord).rgb;
-    v_FragColor = vec4(1.0 - color, 1.0);
-} 
+    v_FragColor = vec4(color, 1.0);
+}   
