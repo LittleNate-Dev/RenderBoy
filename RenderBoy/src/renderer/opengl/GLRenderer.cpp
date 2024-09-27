@@ -189,8 +189,8 @@ void GLRenderer::Draw(Scene& scene)
 	m_Frame.FB.Unbind();
 	Clear();
 	// Draw frame buffer's content on the screen;
-	GLCall(glViewport(0, 0, core::SETTINGS.Width, core::SETTINGS.Height));
 	GLCall(glDisable(GL_DEPTH_TEST));
+	GLCall(glViewport(0, 0, core::GetRenderRes().x, core::GetRenderRes().y));
 	m_Frame.Screen.Bind();
 	m_Shaders.Screen.Bind();
 	m_Shaders.Screen.SetUniformHandleARB("u_ScreenTex", m_Frame.FB.GetHandle());
@@ -210,6 +210,7 @@ void GLRenderer::Draw(Scene& scene)
 	GLCall(glDrawElements(GL_TRIANGLES, m_Frame.IB.GetCount(), GL_UNSIGNED_INT, nullptr));
 	m_Shaders.Screen.Unbind();
 	m_Frame.Screen.Unbind();
+	GLCall(glViewport(0, 0, core::SETTINGS.Width, core::SETTINGS.Height));
 	m_Shaders.PP.Bind();
 	m_Shaders.PP.SetUniformHandleARB("u_ScreenTex", m_Frame.Screen.GetHandle());
 	GLCall(glDrawElements(GL_TRIANGLES, m_Frame.IB.GetCount(), GL_UNSIGNED_INT, nullptr));
