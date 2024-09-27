@@ -114,6 +114,9 @@
     <ClCompile Include="src\gl\opengl\GLDataBuffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\scene\light\AreaLight.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\app\Application.h">
@@ -1656,6 +1659,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\gl\opengl\GLDataBuffer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\scene\light\AreaLight.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -99,6 +99,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\scene\light\AreaLight.cpp" />
     <ClCompile Include="data\library\glm\detail\glm.cpp" />
     <ClCompile Include="data\library\glm\glm.cppm" />
     <ClCompile Include="data\library\imgui\imgui.cpp" />
@@ -134,6 +135,7 @@
     <ClCompile Include="src\shader\opengl\GLShader.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\scene\light\AreaLight.h" />
     <ClInclude Include="data\library\assimp\aabb.h" />
     <ClInclude Include="data\library\assimp\ai_assert.h" />
     <ClInclude Include="data\library\assimp\anim.h" />
