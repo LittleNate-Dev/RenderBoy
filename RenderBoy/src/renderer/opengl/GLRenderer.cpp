@@ -15,8 +15,10 @@ void GLRenderer::Init(Scene& scene)
 	// Initialize shaders
 	m_Shaders.Screen.Init(SHADER_OPENGL_SCREEN);
 	m_Shaders.GBuffer.Init(SHADER_OPENGL_GBUFFER);
+	m_Shaders.GBufferArea.Init(SHADER_OPENGL_GBUFFER_AREA);
 	m_Shaders.Normal.Init(SHADER_OPENGL_NORMAL);
 	m_Shaders.Lightcube.Init(SHADER_OPENGL_LIGHTCUBE);
+	m_Shaders.LightcubeArea.Init(SHADER_OPENGL_LIGHTCUBE_AREA);
 	m_Shaders.Bloom[0].Init(SHADER_OPENGL_BLOOM_DOWNSAMPLE); 
 	m_Shaders.Bloom[1].Init(SHADER_OPENGL_BLOOM_UPSAMPLE);
 	m_Shaders.Bloom[2].Init(SHADER_OPENGL_BLOOM_BLEND);
@@ -190,29 +192,11 @@ void GLRenderer::Draw(Scene& scene)
 	Clear();
 	// Draw frame buffer's content on the screen;
 	GLCall(glDisable(GL_DEPTH_TEST));
-	GLCall(glViewport(0, 0, core::GetRenderRes().x, core::GetRenderRes().y));
-	m_Frame.Screen.Bind();
-	m_Shaders.Screen.Bind();
-	m_Shaders.Screen.SetUniformHandleARB("u_ScreenTex", m_Frame.FB.GetHandle());
-	m_Shaders.Screen.SetUniform1f("u_Gamma", core::SETTINGS.Gamma);
-	if (core::SETTINGS.DrawMode == DEFAULT || core::SETTINGS.DrawMode == BLANK)
-	{
-		m_Shaders.Screen.SetUniform1f("u_Exposure", scene.GetCamera().GetExposure().Strength);
-		m_Shaders.Screen.SetUniform1i("u_TonemapCurve", core::SETTINGS.TonemapCurve);
-	}
-	else
-	{
-		m_Shaders.Screen.SetUniform1f("u_Exposure", 1.0f);
-		m_Shaders.Screen.SetUniform1i("u_TonemapCurve", -1);
-	}
-	m_Frame.VA.Bind();
-	m_Frame.IB.Bind();
-	GLCall(glDrawElements(GL_TRIANGLES, m_Frame.IB.GetCount(), GL_UNSIGNED_INT, nullptr));
-	m_Shaders.Screen.Unbind();
-	m_Frame.Screen.Unbind();
 	GLCall(glViewport(0, 0, core::SETTINGS.Width, core::SETTINGS.Height));
 	m_Shaders.PP.Bind();
-	m_Shaders.PP.SetUniformHandleARB("u_ScreenTex", m_Frame.Screen.GetHandle());
+	m_Shaders.PP.SetUniformHandleARB("u_ScreenTex", m_Frame.FB.GetHandle());
+	m_Frame.VA.Bind();
+	m_Frame.IB.Bind();
 	GLCall(glDrawElements(GL_TRIANGLES, m_Frame.IB.GetCount(), GL_UNSIGNED_INT, nullptr));
 	m_Frame.VA.Unbind();
 	m_Frame.IB.Unbind();
@@ -240,8 +224,34 @@ void GLRenderer::DrawGBuffer(Scene& scene)
 		GLCall(glDrawElementsInstanced(GL_TRIANGLES, scene.GetData().GetDataGL().GetModelData()[model].IB.GetCount(), GL_UNSIGNED_INT, nullptr, scene.GetModels()[model].GetInstance()));
 		scene.GetData().GetDataGL().GetModelData()[model].VA.Unbind();
 		scene.GetData().GetDataGL().GetModelData()[model].IB.Unbind();
-	}
+	}	
 	m_Shaders.GBuffer.Unbind();
+	// Draw Area light's cube
+	std::string light;
+	m_Shaders.GBufferArea.Bind();
+	m_Shaders.GBufferArea.SetUniformMat4f("u_ProjMat", scene.GetCamera().GetProjMat());
+	m_Shaders.GBufferArea.SetUniformMat4f("u_ViewMat", scene.GetCamera().GetViewMat());
+	m_Shaders.GBufferArea.SetUniformVec2f("u_Plane", scene.GetCamera().GetPlane());
+	for (unsigned int i = 0; i < scene.GetAreaLightList().size(); i++)
+	{
+		light = scene.GetAreaLightList()[i];
+		if (scene.GetAreaLights()[light].LightSwitch() && scene.GetAreaLights()[light].ShowCube())
+		{
+			m_Shaders.GBufferArea.SetUniformMat4f("u_ModelMat", scene.GetAreaLights()[light].GetModelMat());
+			switch (scene.GetAreaLights()[light].GetLightType())
+			{
+			case RECTANGLE:
+				scene.GetData().GetDataGL().GetAreaLightData().RectangleVA.Bind();
+				scene.GetData().GetDataGL().GetAreaLightData().RectangleIB.Bind();
+				GLCall(glDrawElements(GL_TRIANGLES, scene.GetData().GetDataGL().GetAreaLightData().RectangleIB.GetCount(), GL_UNSIGNED_INT, nullptr));
+				scene.GetData().GetDataGL().GetAreaLightData().RectangleVA.Unbind();
+				scene.GetData().GetDataGL().GetAreaLightData().RectangleIB.Unbind();
+				break;
+			}
+
+		}
+	}
+	m_Shaders.GBufferArea.Unbind();
 	m_Frame.GBuffer.Unbind();
 }
 
@@ -359,6 +369,33 @@ void GLRenderer::DrawDefault(Scene& scene)
 		scene.GetData().GetDataGL().GetModelData()[model].IB.Unbind();
 		scene.GetData().GetDataGL().GetModelData()[model].Shader.Unbind();
 	}
+	// Draw Area light's cube
+	m_Shaders.LightcubeArea.Bind();
+	m_Shaders.LightcubeArea.SetUniformMat4f("u_ProjMat", scene.GetCamera().GetProjMat());
+	m_Shaders.LightcubeArea.SetUniformMat4f("u_ViewMat", scene.GetCamera().GetViewMat());
+	std::string light;
+	for (unsigned int i = 0; i < scene.GetAreaLightList().size(); i++)
+	{
+		light = scene.GetAreaLightList()[i];
+		if (scene.GetAreaLights()[light].LightSwitch() && scene.GetAreaLights()[light].ShowCube())
+		{
+			m_Shaders.LightcubeArea.SetUniformMat4f("u_ModelMat", scene.GetAreaLights()[light].GetModelMat());
+			m_Shaders.LightcubeArea.SetUniformVec3f("u_Color", scene.GetAreaLights()[light].GetColor());
+			m_Shaders.LightcubeArea.SetUniform1f("u_Intensity", scene.GetAreaLights()[light].GetIntensity());
+			switch (scene.GetAreaLights()[light].GetLightType())
+			{
+			case RECTANGLE:
+				scene.GetData().GetDataGL().GetAreaLightData().RectangleVA.Bind();
+				scene.GetData().GetDataGL().GetAreaLightData().RectangleIB.Bind();
+				GLCall(glDrawElements(GL_TRIANGLES, scene.GetData().GetDataGL().GetAreaLightData().RectangleIB.GetCount(), GL_UNSIGNED_INT, nullptr));
+				scene.GetData().GetDataGL().GetAreaLightData().RectangleVA.Unbind();
+				scene.GetData().GetDataGL().GetAreaLightData().RectangleIB.Unbind();
+				break;
+			}
+
+		}
+	}
+	m_Shaders.LightcubeArea.Unbind();
 	m_Frame.FB.Unbind();
 	// 2.Transparent pass
 	m_Frame.OIT.Bind();
@@ -419,10 +456,12 @@ void GLRenderer::DrawDefault(Scene& scene)
 		DrawFXAA(scene);
 	}
 	// Draw Bloom
-	if (scene.GetCamera().GetBloom().Switch && (core::SETTINGS.DrawMode == BLANK || core::SETTINGS.DrawMode == DEFAULT))
+	if (scene.GetCamera().GetBloom().Switch)
 	{
 		DrawBloom(scene);
 	}
+	// Tone mapping
+	DrawToneMapping(scene);
 	// Draw Depth of Field
 	if (scene.GetCamera().GetFocus().Switch)
 	{
@@ -539,6 +578,32 @@ void GLRenderer::DrawBlank(Scene& scene)
 		scene.GetData().GetDataGL().GetModelData()[model].IB.Unbind();
 	}
 	scene.GetData().GetDataGL().GetShader().Unbind();
+	// Draw Area light's cube
+	m_Shaders.LightcubeArea.Bind();
+	m_Shaders.LightcubeArea.SetUniformMat4f("u_ProjMat", scene.GetCamera().GetProjMat());
+	m_Shaders.LightcubeArea.SetUniformMat4f("u_ViewMat", scene.GetCamera().GetViewMat());
+	for (unsigned int i = 0; i < scene.GetAreaLightList().size(); i++)
+	{
+		light = scene.GetAreaLightList()[i];
+		if (scene.GetAreaLights()[light].LightSwitch() && scene.GetAreaLights()[light].ShowCube())
+		{
+			m_Shaders.LightcubeArea.SetUniformMat4f("u_ModelMat", scene.GetAreaLights()[light].GetModelMat());
+			m_Shaders.LightcubeArea.SetUniformVec3f("u_Color", scene.GetAreaLights()[light].GetColor());
+			m_Shaders.LightcubeArea.SetUniform1f("u_Intensity", scene.GetAreaLights()[light].GetIntensity());
+			switch (scene.GetAreaLights()[light].GetLightType())
+			{
+			case RECTANGLE:
+				scene.GetData().GetDataGL().GetAreaLightData().RectangleVA.Bind();
+				scene.GetData().GetDataGL().GetAreaLightData().RectangleIB.Bind();
+				GLCall(glDrawElements(GL_TRIANGLES, scene.GetData().GetDataGL().GetAreaLightData().RectangleIB.GetCount(), GL_UNSIGNED_INT, nullptr));
+				scene.GetData().GetDataGL().GetAreaLightData().RectangleVA.Unbind();
+				scene.GetData().GetDataGL().GetAreaLightData().RectangleIB.Unbind();
+				break;
+			}
+
+		}
+	}
+	m_Shaders.LightcubeArea.Unbind();
 	m_Frame.FB.Unbind();
 	// Auto Exposure
 	if (scene.GetCamera().GetExposure().Auto)
@@ -550,6 +615,20 @@ void GLRenderer::DrawBlank(Scene& scene)
 	{
 		DrawFXAA(scene);
 	}
+	// Draw Bloom
+	if (scene.GetCamera().GetBloom().Switch)
+	{
+		DrawBloom(scene);
+	}
+	// Tone mapping
+	DrawToneMapping(scene);
+	// Draw Depth of Field
+	if (scene.GetCamera().GetFocus().Switch)
+	{
+		DrawDOF(scene);
+	}
+	// Draw Light Cube
+	DrawLightCube(scene);
 }
 
 void GLRenderer::DrawWireFrame(Scene& scene)
@@ -682,6 +761,11 @@ void GLRenderer::DrawUVSet(Scene& scene)
 	{
 		DrawFXAA(scene);
 	}
+	float exposure = scene.GetCamera().GetExposure().Strength;
+	scene.GetCamera().SetExposure(1.0f);
+	// Tone mapping
+	DrawToneMapping(scene);
+	scene.GetCamera().SetExposure(exposure);
 }
 
 void GLRenderer::DrawNormal(Scene& scene)
@@ -715,16 +799,18 @@ void GLRenderer::DrawLightCube(Scene& scene)
 	m_Shaders.Lightcube.SetUniformMat4f("u_ViewMat", scene.GetCamera().GetViewMat());
 	m_Shaders.Lightcube.SetUniformMat4f("u_ViewPortMat", core::GetViewPortMatrix((unsigned int)renderRes.x, (unsigned int)renderRes.y));
 	m_Shaders.Lightcube.SetUniformVec2f("u_RenderRes", renderRes);
+
+	std::string light;
 	// Draw Point light's cube
 	scene.GetData().GetDataGL().GetPointLightData().VA.Bind();
 	scene.GetData().GetDataGL().GetPointLightData().IB.Bind();
 	for (unsigned int i = 0; i < scene.GetPointLightList().size(); i++)
 	{
-		if (scene.GetPointLights()[scene.GetPointLightList()[i]].LightSwitch() && scene.GetPointLights()[scene.GetPointLightList()[i]].ShowCube())
+		light = scene.GetPointLightList()[i];
+		if (scene.GetPointLights()[light].LightSwitch() && scene.GetPointLights()[light].ShowCube())
 		{
-			m_Shaders.Lightcube.SetUniformMat4f("u_ModelMat", scene.GetPointLights()[scene.GetPointLightList()[i]].GetModelMat());
-			m_Shaders.Lightcube.SetUniformVec3f("u_Color", scene.GetPointLights()[scene.GetPointLightList()[i]].GetColor());
-			m_Shaders.Lightcube.SetUniform1f("u_Intensity", scene.GetPointLights()[scene.GetPointLightList()[i]].GetIntensity());
+			m_Shaders.Lightcube.SetUniformMat4f("u_ModelMat", scene.GetPointLights()[light].GetModelMat());
+			m_Shaders.Lightcube.SetUniformVec3f("u_Color", scene.GetPointLights()[light].GetColor());
 			GLCall(glDrawElements(GL_TRIANGLES, scene.GetData().GetDataGL().GetPointLightData().IB.GetCount(), GL_UNSIGNED_INT, nullptr));
 		}
 	}
@@ -735,11 +821,11 @@ void GLRenderer::DrawLightCube(Scene& scene)
 	scene.GetData().GetDataGL().GetSpotLightData().IB.Bind();
 	for (unsigned int i = 0; i < scene.GetSpotLightList().size(); i++)
 	{
-		if (scene.GetSpotLights()[scene.GetSpotLightList()[i]].LightSwitch() && scene.GetSpotLights()[scene.GetSpotLightList()[i]].ShowCube())
+		light = scene.GetSpotLightList()[i];
+		if (scene.GetSpotLights()[light].LightSwitch() && scene.GetSpotLights()[light].ShowCube())
 		{
-			m_Shaders.Lightcube.SetUniformMat4f("u_ModelMat", scene.GetSpotLights()[scene.GetSpotLightList()[i]].GetModelMat());
-			m_Shaders.Lightcube.SetUniformVec3f("u_Color", scene.GetSpotLights()[scene.GetSpotLightList()[i]].GetColor());
-			m_Shaders.Lightcube.SetUniform1f("u_Intensity", scene.GetSpotLights()[scene.GetSpotLightList()[i]].GetIntensity());
+			m_Shaders.Lightcube.SetUniformMat4f("u_ModelMat", scene.GetSpotLights()[light].GetModelMat());
+			m_Shaders.Lightcube.SetUniformVec3f("u_Color", scene.GetSpotLights()[light].GetColor());
 			GLCall(glDrawElements(GL_TRIANGLES, scene.GetData().GetDataGL().GetSpotLightData().IB.GetCount(), GL_UNSIGNED_INT, nullptr));
 		}
 	}
@@ -757,7 +843,6 @@ void GLRenderer::DrawLightCube(Scene& scene)
 								* glm::scale(glm::mat4(1.0f), glm::vec3(glm::length(scene.GetCamera().GetPosition()) / 20.0f));
 			m_Shaders.Lightcube.SetUniformMat4f("u_ModelMat", modelMat);
 			m_Shaders.Lightcube.SetUniformVec3f("u_Color", scene.GetDirLights()[scene.GetDirLightList()[i]].GetColor());
-			m_Shaders.Lightcube.SetUniform1f("u_Intensity", scene.GetDirLights()[scene.GetDirLightList()[i]].GetIntensity());
 			GLCall(glDrawElements(GL_TRIANGLES, scene.GetData().GetDataGL().GetDirLightData().IB.GetCount(), GL_UNSIGNED_INT, nullptr));
 		}
 	}
@@ -1165,6 +1250,29 @@ void GLRenderer::DrawAutoExposure(Scene& scene)
 	scene.GetData().GetDataGL().GetVFXData().ExpoAvgDB.GetData(&scene.GetData().GetDataGL().GetVFXData().ExpoAvg, 0, sizeof(float));
 	float exposure = 1.0f / (9.6f * scene.GetData().GetDataGL().GetVFXData().ExpoAvg + 0.0001f);
 	scene.GetCamera().SetExposure(exposure);
+}
+
+void GLRenderer::DrawToneMapping(Scene& scene)
+{
+	GLCall(glDisable(GL_DEPTH_TEST));
+	GLCall(glViewport(0, 0, core::GetRenderRes().x, core::GetRenderRes().y));
+	m_Frame.Screen.Bind();
+	m_Shaders.Screen.Bind();
+	m_Shaders.Screen.SetUniformHandleARB("u_ScreenTex", m_Frame.FB.GetHandle());
+	m_Shaders.Screen.SetUniform1f("u_Gamma", core::SETTINGS.Gamma);
+	m_Shaders.Screen.SetUniform1f("u_Exposure", scene.GetCamera().GetExposure().Strength);
+	m_Shaders.Screen.SetUniform1i("u_TonemapCurve", core::SETTINGS.TonemapCurve);
+	m_Frame.VA.Bind();
+	m_Frame.IB.Bind();
+	GLCall(glDrawElements(GL_TRIANGLES, m_Frame.IB.GetCount(), GL_UNSIGNED_INT, nullptr));
+	m_Shaders.Screen.Unbind();
+	m_Frame.Screen.Unbind();
+	GLCall(glEnable(GL_DEPTH_TEST));
+	GLCall(glBindFramebuffer(GL_READ_FRAMEBUFFER, m_Frame.Screen.GetID()));
+	GLCall(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_Frame.FB.GetID()));
+	int width = m_Frame.Screen.GetTexWidth();
+	int height = m_Frame.Screen.GetTexHeight();
+	GLCall(glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_LINEAR));
 }
 
 bool GLRenderer::SaveScreenShot(Scene& scene)

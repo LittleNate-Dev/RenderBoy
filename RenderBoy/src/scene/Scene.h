@@ -14,6 +14,7 @@
 #include "light/PointLight.h"
 #include "light/SpotLight.h"
 #include "light/DirectionalLight.h"
+#include "light/AreaLight.h"
 
 struct Skybox
 {
@@ -47,6 +48,8 @@ private:
 	std::map<std::string, SpotLight> m_SpotLights;
 	std::vector<std::string> m_DirLightList;
 	std::map<std::string, DirectionalLight> m_DirLights;
+	std::vector<std::string> m_AreaLightList;
+	std::map<std::string, AreaLight> m_AreaLights;
 
 	// Draw windows
 	void DrawSceneWindow();
@@ -74,16 +77,19 @@ public:
 	bool AddPointLight(std::string name);
 	bool AddSpotLight(std::string name);
 	bool AddDirectionalLight(std::string name);
+	bool AddAreaLight(std::string name);
 	bool DeleteLight(std::string name, Light_Type type);
 	bool DeletePointLight(std::string name);
 	bool DeleteSpotLight(std::string name);
 	bool DeleteDirectionalLight(std::string name);
+	bool DeleteAreaLight(std::string name);
 	// Rename models and lights
 	bool RenameModel(std::string oldName, std::string newName);
 	bool RenameLight(std::string oldName, std::string newName, Light_Type type);
 	bool RenamePointLight(std::string oldName, std::string newName);
 	bool RenameSpotLight(std::string oldName, std::string newName);
 	bool RenameDirectionalLight(std::string oldName, std::string newName);
+	bool RenameAreaLight(std::string oldName, std::string newName);
 	// Set scene's name
 	void SetName(std::string name);
 	// Get Scene's members
@@ -142,6 +148,14 @@ public:
 	inline std::map<std::string, DirectionalLight>& GetDirLights()
 	{
 		return m_DirLights;
+	};
+	inline std::vector<std::string>& GetAreaLightList()
+	{
+		return m_AreaLightList;
+	};
+	inline std::map<std::string, AreaLight>& GetAreaLights()
+	{
+		return m_AreaLights;
 	};
 	// Draw UI
 	void DrawUI();

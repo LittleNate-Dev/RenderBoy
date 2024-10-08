@@ -907,6 +907,12 @@ bool Scene::AddLight(std::string name, Light_Type type)
 			return true;
 		}
 		break;
+	case AREA_LIGHT:
+		if (AddAreaLight(name))
+		{
+			return true;
+		}
+		break;
 	}
 	return false;
 }
@@ -995,6 +1001,35 @@ bool Scene::AddDirectionalLight(std::string name)
 	return true;
 }
 
+bool Scene::AddAreaLight(std::string name)
+{
+	// If name already exist, rename
+	unsigned int rename = 1;
+	std::string newName = name;
+	while (m_AreaLights.find(newName) != m_AreaLights.end())
+	{
+		newName = name + "(" + std::to_string(rename) + ")";
+		rename++;
+	}
+	if (rename != 1)
+	{
+		name = newName;
+		spdlog::warn("Light name already exist! Rename to: " + name);
+		core::ShowWarningMsg("Light name already exist! Rename to: " + name);
+	}
+
+	AreaLight light;
+	light.SetName(name);
+	light.SetPosition(m_Camera.GetPosition());
+	//light.SetEulerAngle(glm::vec3(glm::vec2(m_Camera.GetEulerAngle()), 0.0f) + glm::vec3(180.0f, 0.0f, 0.0f));
+	m_AreaLightList.push_back(name);
+	m_AreaLights.insert(std::pair<std::string, AreaLight>(name, light));
+	core::currentAreaLight = nullptr;
+	core::SCENE_STATICS.AreaLight++;
+	//m_Data.AddLight(name, SPOT_LIGHT);
+	return true;
+}
+
 bool Scene::DeleteLight(std::string name, Light_Type type)
 {
 	switch (type)
@@ -1013,6 +1048,12 @@ bool Scene::DeleteLight(std::string name, Light_Type type)
 		break;
 	case DIRECTIONAL_LIGHT:
 		if (DeleteDirectionalLight(name))
+		{
+			return true;
+		}
+		break;
+	case AREA_LIGHT:
+		if (DeleteAreaLight(name))
 		{
 			return true;
 		}
@@ -1061,6 +1102,21 @@ bool Scene::DeleteDirectionalLight(std::string name)
 		core::currentDirLight = nullptr;
 		core::SCENE_STATICS.DirectionalLight--;
 		m_Data.DeleteLight(name, DIRECTIONAL_LIGHT);
+		return true;
+	}
+	return false;
+}
+
+bool Scene::DeleteAreaLight(std::string name)
+{
+	if (std::find(m_AreaLightList.begin(), m_AreaLightList.end(), name) != m_AreaLightList.end())
+	{
+		m_AreaLightList.erase(std::remove(m_AreaLightList.begin(), m_AreaLightList.end(), name), m_AreaLightList.end());
+		m_AreaLightList.shrink_to_fit();
+		m_AreaLights.erase(name);
+		core::currentAreaLight = nullptr;
+		core::SCENE_STATICS.AreaLight--;
+		//m_Data.DeleteLight(name, DIRECTIONAL_LIGHT);
 		return true;
 	}
 	return false;
@@ -1120,6 +1176,12 @@ bool Scene::RenameLight(std::string oldName, std::string newName, Light_Type typ
 		break;
 	case DIRECTIONAL_LIGHT:
 		if (RenameDirectionalLight(oldName, newName))
+		{
+			return true;
+		}
+		break;
+	case AREA_LIGHT:
+		if (RenameAreaLight(oldName, newName))
 		{
 			return true;
 		}
@@ -1231,6 +1293,42 @@ bool Scene::RenameDirectionalLight(std::string oldName, std::string newName)
 			}
 		}
 		m_Data.RenameLight(oldName, newName, DIRECTIONAL_LIGHT);
+		return true;
+	}
+	return false;
+}
+
+bool Scene::RenameAreaLight(std::string oldName, std::string newName)
+{
+	if (std::find(m_AreaLightList.begin(), m_AreaLightList.end(), oldName) != m_AreaLightList.end())
+	{
+		// If name already exist, rename
+		unsigned int rename = 1;
+		std::string newRename = newName;
+		while (m_AreaLights.find(newRename) != m_AreaLights.end())
+		{
+			newRename = newName + "(" + std::to_string(rename) + ")";
+			rename++;
+		}
+		if (rename != 1)
+		{
+			newName = newRename;
+			spdlog::warn("Light name already exist! Rename to: " + newName);
+			core::ShowWarningMsg("Light name already exist! Rename to: " + newName);
+		}
+		AreaLight light = m_AreaLights[oldName];
+		light.SetName(newName);
+		m_AreaLights.erase(oldName);
+		m_AreaLights.insert(std::pair<std::string, AreaLight>(newName, light));
+		for (unsigned int i = 0; i < m_AreaLightList.size(); i++)
+		{
+			if (m_AreaLightList[i] == oldName)
+			{
+				m_AreaLightList[i] = newName;
+				break;
+			}
+		}
+		//m_Data.RenameLight(oldName, newName, DIRECTIONAL_LIGHT);
 		return true;
 	}
 	return false;
@@ -1367,6 +1465,8 @@ void Scene::DrawSceneWindow()
 			ImGui::Text(std::to_string(m_SpotLightList.size()).c_str());
 			ImGui::LabelHighlighted("Directional Lights:");
 			ImGui::Text(std::to_string(m_DirLightList.size()).c_str());
+			ImGui::LabelHighlighted("Area Lights:");
+			ImGui::Text(std::to_string(m_AreaLightList.size()).c_str());
 			ImGui::TreePop();
 		}
 		ImGui::End();
@@ -1456,7 +1556,8 @@ void Scene::DrawLightsWindow()
 			const char* lightTypeOps[] = {
 				"Point Light",
 				"Spot Light",
-				"Directional Light"
+				"Directional Light",
+				"Area Light"
 			};
 			static int currentLightType = -1;
 			ImGui::Combo("##Light_Type", &currentLightType, lightTypeOps, IM_ARRAYSIZE(lightTypeOps));
@@ -1614,6 +1715,53 @@ void Scene::DrawLightsWindow()
 					if (ImGui::Button("Delete"))
 					{
 						DeleteDirectionalLight(core::currentDirLight);
+					}
+					ImGui::PopStyleColor(1);
+				}
+				ImGui::TreePop();
+			}
+		}
+		// Area light
+		if (m_AreaLightList.size())
+		{
+			if (ImGui::TreeNode("Area Light"))
+			{
+				if (ImGui::BeginCombo("##AreaLight", core::currentAreaLight))
+				{
+					for (int i = 0; i < m_AreaLightList.size(); i++)
+					{
+						bool isSelected = (core::currentAreaLight == m_AreaLightList[i].c_str());
+						if (ImGui::Selectable(m_AreaLightList[i].c_str(), isSelected))
+						{
+							core::currentAreaLight = m_AreaLightList[i].c_str();
+						}
+					}
+					ImGui::EndCombo();
+				}
+				if (core::currentAreaLight)
+				{
+					ImGui::CenterAlignWidget("Name", 200.0f * core::GetWidgetWidthCoefficient());
+					ImGui::LabelHighlighted("Name");
+					ImGui::PushItemWidth(200.f * core::GetWidgetWidthCoefficient());
+					static char areaLightName[256] = "";
+					strcpy_s(areaLightName, core::currentAreaLight);
+					ImGuiInputTextFlags inputFlags = 0;
+					inputFlags |= ImGuiInputTextFlags_CharsNoBlank;
+					inputFlags |= ImGuiInputTextFlags_EnterReturnsTrue;
+					if (ImGui::InputText("##AreaLightName", areaLightName, IM_ARRAYSIZE(areaLightName), inputFlags))
+					{
+						if (areaLightName != core::currentAreaLight)
+						{
+							RenameAreaLight(core::currentAreaLight, areaLightName);
+						}
+					}
+					ImGui::PopItemWidth();
+					m_AreaLights[core::currentAreaLight].DrawUI();
+					ImGui::PushStyleColor(ImGuiCol_Text, ImGui::ColorConvertU32ToFloat4(ImGui::COLOR_WARNING_SYTLE));
+					ImGui::CenterAlignWidget("Delete");
+					if (ImGui::Button("Delete"))
+					{
+						DeleteAreaLight(core::currentAreaLight);
 					}
 					ImGui::PopStyleColor(1);
 				}

@@ -77,7 +77,6 @@ in vec3 v_EdgeDistance;
 
 uniform vec2 u_RenderRes;
 uniform vec3 u_Color;
-uniform float u_Intensity;
 
 const vec4 lineColor = vec4(0.0, 0.0, 0.0, 1.0);
 
@@ -99,5 +98,5 @@ void main()
         float x = d - (lineWidth - 1);
         mixVal = exp2(-2.0 * x * x);
     }
-    v_FragColor = mix(vec4(u_Color * u_Intensity, 1.0), lineColor, mixVal);
+    v_FragColor = mix(vec4(u_Color, 1.0), lineColor, mixVal);
 }

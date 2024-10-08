@@ -156,6 +156,25 @@ void GLData::Init()
 		layout.Push<float>(3);
 		m_DirLightData.VA.AddBuffer(m_DirLightData.VB, layout);
 	}
+	// Initialize area light's cube
+	{
+		float recPosition[] = {
+		   -0.5f,  0.5f,  0.0f, // 0
+		    0.5f,  0.5f,  0.0f, // 1
+		    0.5f, -0.5f,  0.0f, // 2
+		   -0.5f, -0.5f,  0.0f, // 3
+		};
+		unsigned int recIndices[] = {
+			0, 1, 3,
+			1, 2, 3
+		};
+		m_AreaLightData.RectangleVA.GenVertexArray();
+		m_AreaLightData.RectangleVB.GenBuffer(recPosition, sizeof(recPosition));
+		m_AreaLightData.RectangleIB.GenBuffer(recIndices, 6);
+		GLVertexBufferLayout layout;
+		layout.Push<float>(3);
+		m_AreaLightData.RectangleVA.AddBuffer(m_AreaLightData.RectangleVB, layout);
+	}
 	// Initialize data used for auto exposure
 	{
 		m_VFXData.ExpoHistogram = std::vector<unsigned int>(256, 0);

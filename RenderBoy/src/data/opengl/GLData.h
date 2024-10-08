@@ -46,6 +46,15 @@ struct GLDirLightData
 	std::map<std::string, std::vector<GLFrameBuffer>> DepthMap;
 };
 
+struct GLAreaLightData
+{
+	GLVertexArray RectangleVA;
+	GLVertexBuffer RectangleVB;
+	GLIndexBuffer RectangleIB;
+	//GLShader Shader;
+	//std::map<std::string, std::vector<GLFrameBuffer>> DepthMap;
+};
+
 struct GLSkyboxData
 {
 	GLVertexArray VA;
@@ -99,6 +108,7 @@ private:
 	GLPointLightData m_PointLightData;
 	GLSpotLightData m_SpotLightData;
 	GLDirLightData m_DirLightData;
+	GLAreaLightData m_AreaLightData;
 	std::vector<std::string> m_ModelList;
 	std::map<std::string, GLModelData> m_ModelData;
 	GLTexture m_CheckerMap;
@@ -151,6 +161,10 @@ public:
 	inline GLDirLightData& GetDirLightData()
 	{
 		return m_DirLightData;
+	};
+	inline GLAreaLightData& GetAreaLightData()
+	{
+		return m_AreaLightData;
 	};
 	inline std::map<std::string, GLModelData>& GetModelData()
 	{

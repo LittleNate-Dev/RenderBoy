@@ -19,6 +19,7 @@ namespace core
 	const char* currentPointLight = nullptr;
 	const char* currentSpotLight = nullptr;
 	const char* currentDirLight = nullptr;
+	const char* currentAreaLight = nullptr;
 	bool IS_RENDERBOY_OPENED = true;
 	bool IS_UI_OPENED = true;
 	bool IS_ABOUT_OPENED = false;

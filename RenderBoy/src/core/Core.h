@@ -65,6 +65,7 @@
 #define SHADER_OPENGL_RENDER_HASTEX_PBR_3_NH "data/shaders/opengl/render_mode/HASTEX_PBR_3_NH.glsl"
 #define SHADER_OPENGL_RENDER_HASTEX_PBR_4_NH "data/shaders/opengl/render_mode/HASTEX_PBR_4_NH.glsl"
 #define SHADER_OPENGL_GBUFFER "data/shaders/opengl/others/GBUFFER.glsl"
+#define SHADER_OPENGL_GBUFFER_AREA "data/shaders/opengl/others/GBUFFER_AREA.glsl"
 #define SHADER_OPENGL_BLANK "data/shaders/opengl/draw_mode/BLANK.glsl"
 #define SHADER_OPENGL_WIREFRAME "data/shaders/opengl/draw_mode/WIREFRAME.glsl"
 #define SHADER_OPENGL_DEPTH "data/shaders/opengl/draw_mode/DEPTH.glsl"
@@ -74,6 +75,7 @@
 #define SHADER_OPENGL_SKYBOX "data/shaders/opengl/others/SKYBOX.glsl"
 #define SHADER_OPENGL_NORMAL "data/shaders/opengl/others/NORMAL.glsl"
 #define SHADER_OPENGL_LIGHTCUBE "data/shaders/opengl/others/LIGHTCUBE.glsl"
+#define SHADER_OPENGL_LIGHTCUBE_AREA "data/shaders/opengl/others/LIGHTCUBE_AREA.glsl"
 #define SHADER_OPENGL_AA_FXAA "data/shaders/opengl/aa/FXAA.glsl"
 #define SHADER_OPENGL_BLOOM_DOWNSAMPLE "data/shaders/opengl/vfx/bloom/DOWNSAMPLE.glsl"
 #define SHADER_OPENGL_BLOOM_UPSAMPLE "data/shaders/opengl/vfx/bloom/UPSAMPLE.glsl"
@@ -145,7 +147,8 @@ enum Light_Type
 {
 	POINT_LIGHT = 0,
 	SPOT_LIGHT = 1,
-	DIRECTIONAL_LIGHT = 2
+	DIRECTIONAL_LIGHT = 2,
+	AREA_LIGHT = 3
 };
 
 enum Draw_Mode
@@ -264,6 +267,7 @@ struct SceneStatics
 	unsigned int PointLight = 0;
 	unsigned int SpotLight = 0;
 	unsigned int DirectionalLight = 0;
+	unsigned int AreaLight = 0;
 };
 
 // Statics and Consts
@@ -291,6 +295,7 @@ namespace core
 	extern const char* currentPointLight;
 	extern const char* currentSpotLight;
 	extern const char* currentDirLight;
+	extern const char* currentAreaLight;
 	// bools to display windows
 	extern bool IS_RENDERBOY_OPENED;
 	extern bool IS_UI_OPENED;

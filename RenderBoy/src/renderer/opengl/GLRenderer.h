@@ -31,8 +31,10 @@ struct Shaders
 {
 	GLShader OIT;
 	GLShader GBuffer;
+	GLShader GBufferArea;
 	GLShader Normal;
 	GLShader Lightcube;
+	GLShader LightcubeArea;
 	GLShader Screen;
 	GLShader PP;
 	GLShader Bloom[3]; // 0: DOWNSAMPLE, 1: UPSAMPLE, 2: BLEND
@@ -70,6 +72,7 @@ private:
 	void DrawSSAO(Scene& scene);
 	void DrawFXAA(Scene& scene);
 	void DrawAutoExposure(Scene& scene);
+	void DrawToneMapping(Scene& scene);
 
 public:
 	GLRenderer();
