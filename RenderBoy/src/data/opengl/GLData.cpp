@@ -156,8 +156,12 @@ void GLData::Init()
 		layout.Push<float>(3);
 		m_DirLightData.VA.AddBuffer(m_DirLightData.VB, layout);
 	}
-	// Initialize area light's cube
+	// Initialize data used for area light
 	{
+		// LTC
+		m_AreaLightData.LTC1.GenTexture(AL_LTC1);
+		m_AreaLightData.LTC2.GenTexture(AL_LTC2);
+		// Rectangle light cube
 		float recPosition[] = {
 		   -0.5f,  0.5f,  0.0f, // 0
 		    0.5f,  0.5f,  0.0f, // 1
@@ -783,6 +787,9 @@ void GLData::AddLight(std::string name, Light_Type type)
 	case DIRECTIONAL_LIGHT:
 		AddDirLight(name);
 		break;
+	case AREA_LIGHT:
+		AddAreaLight(name);
+		break;
 	}
 }
 
@@ -798,6 +805,9 @@ void GLData::DeleteLight(std::string name, Light_Type type)
 		break;
 	case DIRECTIONAL_LIGHT:
 		DeleteDirLight(name);
+		break;
+	case AREA_LIGHT:
+		DeleteAreaLight(name);
 		break;
 	}
 }
@@ -882,6 +892,11 @@ void GLData::AddDirLight(std::string name)
 	ReInitShader();
 }
 
+void GLData::AddAreaLight(std::string name)
+{
+	ReInitShader();
+}
+
 void GLData::DeletePointLight(std::string name)
 {
 	m_PointLightData.DepthMap.erase(name);
@@ -897,6 +912,11 @@ void GLData::DeleteSpotLight(std::string name)
 void GLData::DeleteDirLight(std::string name)
 {
 	m_DirLightData.DepthMap.erase(name);
+	ReInitShader();
+}
+
+void GLData::DeleteAreaLight(std::string name)
+{
 	ReInitShader();
 }
 

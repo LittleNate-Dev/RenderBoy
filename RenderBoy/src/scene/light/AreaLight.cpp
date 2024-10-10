@@ -8,6 +8,11 @@ AreaLight::AreaLight()
 	m_Color = glm::vec3(1.0f);
 	m_Intensity = 1.0f;
 	m_Type = RECTANGLE;
+	m_RectVertex[0] = glm::vec3(-0.5f, 0.5f, 0.0f);
+	m_RectVertex[1] = glm::vec3(0.5f, 0.5f, 0.0f);
+	m_RectVertex[2] = glm::vec3(0.5f, -0.5f, 0.0f);
+	m_RectVertex[3] = glm::vec3(-0.5f, -0.5f, 0.0f);
+	m_TwoSided = true;
 	m_LightSwitch = true;
 	m_ShowCube = true;
 	UpdateModelMat();
@@ -21,6 +26,10 @@ void AreaLight::UpdateModelMat()
 {
 	glm::mat4 modelMat = GetScaleMat();
 	m_ModelMat = GetTranslateMat() * GetRotateMat() * modelMat;
+	m_RectVertex[0] = glm::vec3(m_ModelMat * glm::vec4(-0.5f, 0.5f, 0.0f, 1.0f));
+	m_RectVertex[1] = glm::vec3(m_ModelMat * glm::vec4(0.5f, 0.5f, 0.0f, 1.0f));
+	m_RectVertex[2] = glm::vec3(m_ModelMat * glm::vec4(0.5f, -0.5f, 0.0f, 1.0f));
+	m_RectVertex[3] = glm::vec3(m_ModelMat * glm::vec4(-0.5f, -0.5f, 0.0f, 1.0f));
 	//m_UpdateShadow = true;
 }
 
@@ -188,6 +197,11 @@ void AreaLight::SetScale(glm::vec3 scale)
 	UpdateModelMat();
 }
 
+void AreaLight::SetType(AL_Type type)
+{
+	m_Type = type;
+}
+
 void AreaLight::SetColor(glm::vec3 color)
 {
 	color.x = color.x < 0.0f ? 0.0f : color.x;
@@ -317,6 +331,12 @@ void AreaLight::DrawUI()
 					SetIntensity(m_Intensity);
 				}
 				ImGui::PopItemWidth();
+				if (m_Type == RECTANGLE)
+				{
+					ImGui::CenterAlignWidget("Two Sided");
+					ImGui::LabelHighlighted("Two Sided"); 
+					ImGui::Checkbox("##TwoSided", &m_TwoSided);
+				}
 				ImGui::TreePop();
 			}
 			//// Shadow
@@ -552,11 +572,14 @@ void AreaLight::DrawUI()
 				{
 					SetScale(m_Scale);
 				}
-				ImGui::CenterAlignWidget("Z", 80.0f * core::GetWidgetWidthCoefficient());
-				ImGui::LabelHighlighted("Z");
-				if (ImGui::InputFloat("##Z", &m_Scale.z))
+				if (m_Type != RECTANGLE)
 				{
-					SetScale(m_Scale);
+					ImGui::CenterAlignWidget("Z", 80.0f * core::GetWidgetWidthCoefficient());
+					ImGui::LabelHighlighted("Z");
+					if (ImGui::InputFloat("##Z", &m_Scale.z))
+					{
+						SetScale(m_Scale);
+					}
 				}
 			}
 			ImGui::PopItemWidth();
@@ -576,6 +599,8 @@ void AreaLight::DrawUI()
 		//m_Range = 10.0f;
 		m_Intensity = 1.0f;
 		//m_CLQ = glm::vec3(1.0f, 0.35f, 0.44f);
+		m_Type = RECTANGLE;
+		m_TwoSided = true;
 		m_LightSwitch = true;
 		m_ShowCube = true;
 		//m_CastShadow = true;

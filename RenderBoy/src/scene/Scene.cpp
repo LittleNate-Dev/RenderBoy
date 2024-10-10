@@ -33,14 +33,18 @@ void Scene::Reset()
 	m_SpotLights.clear();
 	std::vector<std::string>().swap(m_DirLightList);
 	m_DirLights.clear();
+	std::vector<std::string>().swap(m_AreaLightList);
+	m_AreaLights.clear();
 	core::SCENE_STATICS.PointLight = 0;
 	core::SCENE_STATICS.SpotLight = 0;
 	core::SCENE_STATICS.DirectionalLight = 0;
+	core::SCENE_STATICS.AreaLight = 0;
 	m_Data.Reset();
 	core::currentModelScene = nullptr;
 	core::currentPointLight = nullptr;
 	core::currentSpotLight = nullptr;
 	core::currentDirLight = nullptr;
+	core::currentAreaLight = nullptr;
 }
 
 bool Scene::Reset(std::string filepath)
@@ -563,6 +567,54 @@ bool Scene::LoadScene(std::string filepath)
 					m_DirLights[light].SetSoftDegree((int)std::atoi(values[0].c_str()));
 				}
 			}
+			// Load area light
+			{
+				if (line.find("#AREA_LIGHT_NAME") != std::string::npos)
+				{
+					values = core::GetFileValue(line);
+					light = values[0];
+					AddLight(light, AREA_LIGHT);
+				}
+				else if (line.find("#AREA_LIGHT_" + light + "_POSITION") != std::string::npos)
+				{
+					values = core::GetFileValue(line);
+					glm::vec3 pos = glm::vec3((float)std::atof(values[0].c_str()), (float)std::atof(values[1].c_str()), (float)std::atof(values[2].c_str()));
+					m_AreaLights[light].SetPosition(pos);
+				}
+				else if (line.find("#AREA_LIGHT_" + light + "_EULERANGLE") != std::string::npos)
+				{
+					values = core::GetFileValue(line);
+					glm::vec3 euler = glm::vec3((float)std::atof(values[0].c_str()), (float)std::atof(values[1].c_str()), (float)std::atof(values[2].c_str()));
+					m_AreaLights[light].SetEulerAngle(euler);
+				}
+				else if (line.find("#AREA_LIGHT_" + light + "_SCALE") != std::string::npos)
+				{
+					values = core::GetFileValue(line);
+					glm::vec3 scale = glm::vec3((float)std::atof(values[0].c_str()), (float)std::atof(values[1].c_str()), (float)std::atof(values[2].c_str()));
+					m_AreaLights[light].SetScale(scale);
+				}
+				else if (line.find("#AREA_LIGHT_" + light + "_COLOR") != std::string::npos)
+				{
+					values = core::GetFileValue(line);
+					glm::vec3 color = glm::vec3((float)std::atof(values[0].c_str()), (float)std::atof(values[1].c_str()), (float)std::atof(values[2].c_str()));
+					m_AreaLights[light].SetColor(color);
+				}
+				else if (line.find("#AREA_LIGHT_" + light + "_INTENSITY") != std::string::npos)
+				{
+					values = core::GetFileValue(line);
+					m_AreaLights[light].SetIntensity((float)std::atof(values[0].c_str()));
+				}
+				else if (line.find("#AREA_LIGHT_" + light + "_SWITCH") != std::string::npos)
+				{
+					values = core::GetFileValue(line);
+					m_AreaLights[light].SetLightSwitch((bool)std::atoi(values[0].c_str()));
+				}
+				else if (line.find("#AREA_LIGHT_" + light + "_SHOW_CUBE") != std::string::npos)
+				{
+					values = core::GetFileValue(line);
+					m_AreaLights[light].SetShowCube((bool)std::atoi(values[0].c_str()));
+				}
+			}
 		}
 		return true;
 	}
@@ -806,6 +858,33 @@ void Scene::SaveScene()
 		line = "#DIR_LIGHT_" + light + "_SOFT_DEGREE " + std::to_string(m_DirLights[light].GetSoftDegree()) + "\n";
 		stream << line;
 	}
+	// Save Area Lights
+	for (unsigned int i = 0; i < m_AreaLightList.size(); i++)
+	{
+		std::string light = m_AreaLightList[i];
+		line = "#AREA_LIGHT_NAME " + light + "\n";
+		stream << line;
+		glm::vec3 pos = m_AreaLights[light].GetPosition();
+		line = "#AREA_LIGHT_" + light + "_POSITION " + std::to_string(pos.x) + " " + std::to_string(pos.y) + " " + std::to_string(pos.z) + "\n";
+		stream << line;
+		glm::vec3 euler = m_AreaLights[light].GetEulerAngle();
+		line = "#AREA_LIGHT_" + light + "_EULERANGLE " + std::to_string(euler.x) + " " + std::to_string(euler.y) + " " + std::to_string(euler.z) + "\n";
+		stream << line;
+		glm::vec3 scale = m_AreaLights[light].GetScale();
+		line = "#AREA_LIGHT_" + light + "_SCALE " + std::to_string(scale.x) + " " + std::to_string(scale.y) + " " + std::to_string(scale.z) + "\n";
+		stream << line;
+		glm::vec3 color = m_AreaLights[light].GetColor();
+		line = "#AREA_LIGHT_" + light + "_COLOR " + std::to_string(color.x) + " " + std::to_string(color.y) + " " + std::to_string(color.z) + "\n";
+		stream << line;
+		line = "#AREA_LIGHT_" + light + "_INTENSITY " + std::to_string(m_AreaLights[light].GetIntensity()) + "\n";
+		stream << line;
+		line = "#AREA_LIGHT_" + light + "_TWOSIDE " + std::to_string(m_AreaLights[light].TwoSided()) + "\n";
+		stream << line;
+		line = "#AREA_LIGHT_" + light + "_SWITCH " + std::to_string(m_AreaLights[light].LightSwitch()) + "\n";
+		stream << line;
+		line = "#AREA_LIGHT_" + light + "_SHOW_CUBE " + std::to_string(m_AreaLights[light].ShowCube()) + "\n";
+		stream << line;
+	}
 	stream.close();
 	core::ShowWarningMsg("Scene saved at: " + savePath);
 }
@@ -1026,7 +1105,7 @@ bool Scene::AddAreaLight(std::string name)
 	m_AreaLights.insert(std::pair<std::string, AreaLight>(name, light));
 	core::currentAreaLight = nullptr;
 	core::SCENE_STATICS.AreaLight++;
-	//m_Data.AddLight(name, SPOT_LIGHT);
+    m_Data.AddLight(name, AREA_LIGHT);
 	return true;
 }
 
@@ -1116,7 +1195,7 @@ bool Scene::DeleteAreaLight(std::string name)
 		m_AreaLights.erase(name);
 		core::currentAreaLight = nullptr;
 		core::SCENE_STATICS.AreaLight--;
-		//m_Data.DeleteLight(name, DIRECTIONAL_LIGHT);
+		m_Data.DeleteLight(name, AREA_LIGHT);
 		return true;
 	}
 	return false;

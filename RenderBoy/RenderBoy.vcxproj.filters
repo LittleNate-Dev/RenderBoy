@@ -1664,6 +1664,9 @@
     <ClInclude Include="src\scene\light\AreaLight.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\util\LTC.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="data\library\assimp\color4.inl">

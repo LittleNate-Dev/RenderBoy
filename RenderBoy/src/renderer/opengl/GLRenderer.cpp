@@ -361,6 +361,25 @@ void GLRenderer::DrawDefault(Scene& scene)
 				}
 			}
 		}
+		// Set area lights' uniforms
+		scene.GetData().GetDataGL().GetModelData()[model].Shader.SetUniformHandleARB("u_LTC1", scene.GetData().GetDataGL().GetAreaLightData().LTC1.GetHandle());
+		scene.GetData().GetDataGL().GetModelData()[model].Shader.SetUniformHandleARB("u_LTC2", scene.GetData().GetDataGL().GetAreaLightData().LTC2.GetHandle());
+		for (unsigned int j = 0; j < scene.GetAreaLightList().size(); j++)
+		{
+			light = scene.GetAreaLightList()[j];
+			std::string lightName = "u_AreaLight[" + std::to_string(j) + "].";
+			scene.GetData().GetDataGL().GetModelData()[model].Shader.SetUniform1i(lightName + "LightSwitch", scene.GetAreaLights()[light].LightSwitch());
+			if (scene.GetAreaLights()[light].LightSwitch())
+			{
+				scene.GetData().GetDataGL().GetModelData()[model].Shader.SetUniformVec3f(lightName + "RecVertex[0]", scene.GetAreaLights()[light].GetRectVertex(0));
+				scene.GetData().GetDataGL().GetModelData()[model].Shader.SetUniformVec3f(lightName + "RecVertex[1]", scene.GetAreaLights()[light].GetRectVertex(1));
+				scene.GetData().GetDataGL().GetModelData()[model].Shader.SetUniformVec3f(lightName + "RecVertex[2]", scene.GetAreaLights()[light].GetRectVertex(2));
+				scene.GetData().GetDataGL().GetModelData()[model].Shader.SetUniformVec3f(lightName + "RecVertex[3]", scene.GetAreaLights()[light].GetRectVertex(3));
+				scene.GetData().GetDataGL().GetModelData()[model].Shader.SetUniform1i(lightName + "TwoSided", scene.GetAreaLights()[light].TwoSided());
+				scene.GetData().GetDataGL().GetModelData()[model].Shader.SetUniformVec3f(lightName + "Color", scene.GetAreaLights()[light].GetColor());
+				scene.GetData().GetDataGL().GetModelData()[model].Shader.SetUniform1f(lightName + "Intensity", scene.GetAreaLights()[light].GetIntensity());
+			}
+		}
 		scene.GetData().GetDataGL().GetModelData()[model].VA.Bind();
 		scene.GetData().GetDataGL().GetModelData()[model].IB.Bind();		
 		scene.GetData().GetDataGL().GetModelData()[model].Shader.SetUniform1i("u_OITPass", 0);

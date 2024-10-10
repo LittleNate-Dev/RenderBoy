@@ -650,6 +650,7 @@
     <ClInclude Include="src\scene\model\Model.h" />
     <ClInclude Include="src\scene\Scene.h" />
     <ClInclude Include="src\shader\opengl\GLShader.h" />
+    <ClInclude Include="src\util\LTC.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="data\library\assimp\color4.inl" />

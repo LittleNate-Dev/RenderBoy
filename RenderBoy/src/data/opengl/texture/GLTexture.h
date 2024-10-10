@@ -7,11 +7,14 @@
 
 #pragma once
 
+#include "util/LTC.h"
 #include "core/Core.h"
 
 enum Tex_Type
 {
-    NOISE_SSAO = 0
+    NOISE_SSAO = 0,
+    AL_LTC1 = 1,
+    AL_LTC2 = 2
 };
 
 class GLTexture

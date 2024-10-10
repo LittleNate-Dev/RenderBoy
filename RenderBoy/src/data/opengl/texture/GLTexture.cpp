@@ -165,8 +165,36 @@ void GLTexture::GenTexture(Tex_Type type)
         GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT));
         m_Handle = glGetTextureHandleARB(m_RendererID);
         GLCall(glMakeTextureHandleResidentARB(m_Handle));
-        GLCall(glBindTexture(GL_TEXTURE_2D, 0));
     }
+    else if (type == AL_LTC1)
+    {
+        m_Width = 64;
+        m_Height = 64;
+        GLCall(glGenTextures(1, &m_RendererID));
+        GLCall(glBindTexture(GL_TEXTURE_2D, m_RendererID));
+        GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 64, 64, 0, GL_RGBA, GL_FLOAT, util::LTC1));
+        GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
+        GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
+        GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
+        GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+        m_Handle = glGetTextureHandleARB(m_RendererID);
+        GLCall(glMakeTextureHandleResidentARB(m_Handle));
+    }
+    else if (type == AL_LTC2)
+    {
+        m_Width = 64;
+        m_Height = 64;
+        GLCall(glGenTextures(1, &m_RendererID));
+        GLCall(glBindTexture(GL_TEXTURE_2D, m_RendererID));
+        GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 64, 64, 0, GL_RGBA, GL_FLOAT, util::LTC2));
+        GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
+        GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
+        GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
+        GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+        m_Handle = glGetTextureHandleARB(m_RendererID);
+        GLCall(glMakeTextureHandleResidentARB(m_Handle));
+    }
+    GLCall(glBindTexture(GL_TEXTURE_2D, 0));
 }
 
 void GLTexture::Bind(unsigned int slot) const

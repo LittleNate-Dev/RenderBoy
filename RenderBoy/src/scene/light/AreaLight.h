@@ -27,7 +27,12 @@ private:
 	glm::vec3 m_EulerAngle;
 	glm::vec3 m_Scale;
 	glm::vec3 m_Color;
+	glm::vec3 m_CLQ; // Constant, Linear and Quadratic
+	glm::vec3 m_ADS; // Ambient, Diffuse, Specular
 	AL_Type m_Type;
+	// Attributes used for rectangle area light
+	glm::vec3 m_RectVertex[4];
+	bool m_TwoSided;
 	float m_Intensity;
 	// Turn on/off light
 	bool m_LightSwitch;
@@ -50,6 +55,11 @@ public:
 	void SetEulerAngle(glm::vec3 eulerAngle);
 	void SetScale(float x, float y, float z);
 	void SetScale(glm::vec3 scale);
+	void SetType(AL_Type type);
+	inline void SetTwoSided(bool twoSide)
+	{
+		m_TwoSided = twoSide;
+	};
 	void SetColor(glm::vec3 color);
 	void SetIntensity(float intensity);
 	void SetLightSwitch(bool lightSwitch);
@@ -89,6 +99,14 @@ public:
 	inline AL_Type GetLightType() const
 	{
 		return m_Type;
+	};
+	inline glm::vec3 GetRectVertex(unsigned int i) const
+	{
+		return m_RectVertex[i];
+	};
+	inline bool TwoSided() const
+	{
+		return m_TwoSided;
 	};
 	inline bool LightSwitch() const
 	{

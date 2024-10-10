@@ -129,6 +129,11 @@ ShaderProgramSource GLShader::ParseShader(std::string filepath)
             line += " " + std::to_string(core::SCENE_STATICS.DirectionalLight);
             ss[(int)type] << line << '\n';
         }
+        else if (line.find("#define AREA_LIGHT_COUNT") != std::string::npos)
+        {
+            line += " " + std::to_string(core::SCENE_STATICS.AreaLight);
+            ss[(int)type] << line << '\n';
+        }
         else if (line.find("uniform PointLight u_PointLight[POINT_LIGHT_COUNT];") != std::string::npos)
         {
             if (core::SCENE_STATICS.PointLight == 0)
@@ -150,6 +155,14 @@ ShaderProgramSource GLShader::ParseShader(std::string filepath)
             if (core::SCENE_STATICS.DirectionalLight == 0)
             {
                 line = "uniform DirLight u_DirLight[1];";
+            }
+            ss[(int)type] << line << '\n';
+        }
+        else if (line.find("uniform AreaLight u_AreaLight[AREA_LIGHT_COUNT];") != std::string::npos)
+        {
+            if (core::SCENE_STATICS.AreaLight == 0)
+            {
+                line = "uniform AreaLight u_AreaLight[1];";
             }
             ss[(int)type] << line << '\n';
         }
@@ -265,6 +278,11 @@ ShaderProgramSource GLShader::ParseShader(std::string filepath, ModelStatics sta
             line += " " + std::to_string(core::SCENE_STATICS.DirectionalLight);
             ss[(int)type] << line << '\n';
         }
+        else if (line.find("#define AREA_LIGHT_COUNT") != std::string::npos)
+        {
+            line += " " + std::to_string(core::SCENE_STATICS.AreaLight);
+            ss[(int)type] << line << '\n';
+        }
         else if (line.find("uniform PointLight u_PointLight[POINT_LIGHT_COUNT];") != std::string::npos)
         {
             if (core::SCENE_STATICS.PointLight == 0)
@@ -286,6 +304,14 @@ ShaderProgramSource GLShader::ParseShader(std::string filepath, ModelStatics sta
             if (core::SCENE_STATICS.DirectionalLight == 0)
             {
                 line = "uniform DirLight u_DirLight[1];";
+            }
+            ss[(int)type] << line << '\n';
+        }
+        else if (line.find("uniform AreaLight u_AreaLight[AREA_LIGHT_COUNT];") != std::string::npos)
+        {
+            if (core::SCENE_STATICS.AreaLight == 0)
+            {
+                line = "uniform AreaLight u_AreaLight[1];";
             }
             ss[(int)type] << line << '\n';
         }

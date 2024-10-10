@@ -57,6 +57,6 @@ void main()
         // Map from our histogram space to actual luminance
         float currentWeightedAvgLum = exp2(((weightedLogAverage / 254.0) * Log2Range) + MinLog2);
         float lastWeightedAvgLum = weightedAvgLum;
-        weightedAvgLum = lastWeightedAvgLum + (currentWeightedAvgLum - lastWeightedAvgLum) * (1 - exp(-u_TimeDelta * 1.1));
+        weightedAvgLum = lastWeightedAvgLum + (currentWeightedAvgLum - lastWeightedAvgLum) * (1 - exp(-u_TimeDelta * 1.0));
     }
 }

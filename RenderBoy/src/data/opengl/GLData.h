@@ -48,10 +48,11 @@ struct GLDirLightData
 
 struct GLAreaLightData
 {
+	GLTexture LTC1;
+	GLTexture LTC2;
 	GLVertexArray RectangleVA;
 	GLVertexBuffer RectangleVB;
 	GLIndexBuffer RectangleIB;
-	//GLShader Shader;
 	//std::map<std::string, std::vector<GLFrameBuffer>> DepthMap;
 };
 
@@ -116,9 +117,11 @@ private:
 	void AddPointLight(std::string name);
 	void AddSpotLight(std::string name);
 	void AddDirLight(std::string name);
+	void AddAreaLight(std::string name);
 	void DeletePointLight(std::string name);
 	void DeleteSpotLight(std::string name);
 	void DeleteDirLight(std::string name);
+	void DeleteAreaLight(std::string name);
 	void RenamePointLight(std::string oldName, std::string newName);
 	void RenameSpotLight(std::string oldName, std::string newName);
 	void RenameDirLight(std::string oldName, std::string newName);
