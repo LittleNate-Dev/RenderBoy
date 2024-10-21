@@ -8,16 +8,20 @@ Renderer::~Renderer()
 {
 }
 
-void Renderer::Init(Scene& scene)
+bool Renderer::Init(Scene& scene)
 {
 	switch (core::SETTINGS.GraphicsCore)
 	{
 	case OPENGL:
-		m_RendererGL.Init(scene);
+		if (!m_RendererGL.Init(scene))
+		{
+			return false;
+		}
 		break;
 	default:
 		break;
 	}
+	return true;
 }
 
 void Renderer::Draw(Scene& scene)
@@ -74,14 +78,18 @@ void Renderer::ChangeResolution()
 	}
 }
 
-void Renderer::ChangePostProcess()
+bool Renderer::ChangePostProcess()
 {
 	switch (core::SETTINGS.GraphicsCore)
 	{
 	case OPENGL:
-		m_RendererGL.ChangePostProcess();
+		if (!m_RendererGL.ChangePostProcess())
+		{
+			return false;
+		}
 		break;
 	default:
 		break;
 	}
+	return true;
 }

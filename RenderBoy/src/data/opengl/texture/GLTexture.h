@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "util/LTC.h"
+#include "util/LUT.h"
 #include "core/Core.h"
 
 enum Tex_Type
@@ -31,8 +31,8 @@ public:
     ~GLTexture();
 
     // Tell opengl to generate a texture
-    void GenTexture(const std::string filepath);
-    void GenTexture(const std::string filepath, bool sRGB);
+    bool GenTexture(const std::string filepath);
+    bool GenTexture(const std::string filepath, bool sRGB);
     void GenTexture(Tex_Type type);
     void Bind(unsigned int slot = 0) const;
     void Unbind() const;

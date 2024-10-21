@@ -53,6 +53,15 @@ struct GLAreaLightData
 	GLVertexArray RectangleVA;
 	GLVertexBuffer RectangleVB;
 	GLIndexBuffer RectangleIB;
+	GLVertexArray SphereVA;
+	GLVertexBuffer SphereVB;
+	GLIndexBuffer SphereIB;
+	GLVertexArray CylinderVA;
+	GLVertexBuffer CylinderVB;
+	GLIndexBuffer CylinderIB;
+	GLVertexArray DiskVA;
+	GLVertexBuffer DiskVB;
+	GLIndexBuffer DiskIB;
 	//std::map<std::string, std::vector<GLFrameBuffer>> DepthMap;
 };
 
@@ -125,16 +134,18 @@ private:
 	void RenamePointLight(std::string oldName, std::string newName);
 	void RenameSpotLight(std::string oldName, std::string newName);
 	void RenameDirLight(std::string oldName, std::string newName);
-	void ReInitShader();
+	//void ReInitShader();
 
 public:
 	GLData();
 	~GLData();
 
-	void Init();
+	void ReInitShader();
+
+	bool Init();
 	void Reset();
 	// Change draw mode
-	void ChangeDrawMode();
+	bool ChangeDrawMode();
 	// Add, delete and rename model data
 	void AddModel(std::string name, Model& model);
 	bool DeleteModel(std::string name);

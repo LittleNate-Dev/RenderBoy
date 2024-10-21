@@ -8,7 +8,7 @@ Camera::Camera()
 	m_Plane = glm::vec2(0.1f, 500.0f);
 	m_Position = glm::vec3(0.0f);
 	m_EulerAngle = glm::vec3(0.0f);
-	m_MoveSpeed = 1.0f;
+	m_MoveSpeed = 50.0f;
 	m_RotateSpeed = 1.0f;
 }
 
@@ -316,7 +316,7 @@ void Camera::SetFocalLength(float length)
 
 void Camera::SetExposure(float exposure)
 {
-	exposure = exposure > 1.0f ? exposure : 1.0f;
+	//exposure = exposure > 1.0f ? exposure : 1.0f;
 	m_VFX.Exposure.Strength = exposure;
 }
 
@@ -472,6 +472,12 @@ void Camera::DrawUI()
 					SetExposure(m_VFX.Exposure.Strength);
 				}
 				ImGui::PopItemWidth();
+			}
+			else
+			{
+				ImGui::CenterAlignWidget("Exposure", 80.0f * core::GetWidgetWidthCoefficient());
+				ImGui::LabelHighlighted("Exposure");
+				ImGui::Text(std::to_string(m_VFX.Exposure.Strength).c_str());
 			}
 			ImGui::TreePop();
 		}

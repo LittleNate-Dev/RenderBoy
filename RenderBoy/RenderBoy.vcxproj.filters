@@ -1664,7 +1664,7 @@
     <ClInclude Include="src\scene\light\AreaLight.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\util\LTC.h">
+    <ClInclude Include="src\util\LUT.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

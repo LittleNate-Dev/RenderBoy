@@ -233,13 +233,18 @@ bool Application::Init()
         }
         break;
     }
-
     // Init renderer and scene
     m_Width = core::SETTINGS.Width;
     m_Height = core::SETTINGS.Height;
     core::UpdateRenderRes();
-    m_Scene.Init();
-    m_Renderer.Init(m_Scene);
+    if (!m_Scene.Init())
+    {
+        return false;
+    }
+    if (!m_Renderer.Init(m_Scene))
+    {
+        return false;
+    }
     m_Scene.GetCamera().SetWindowSize(m_Width, m_Height);
     return true;
 }
@@ -265,7 +270,8 @@ bool Application::InitOpenGL()
     // Make the window's context current
     glfwMakeContextCurrent(m_Window);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
+    glfwSwapInterval(0);
     /*if (core::SETTINGS.FullScreen)
     {
         GLFWmonitor* monitor = glfwGetWindowMonitor(m_Window);
@@ -901,7 +907,10 @@ void Application::DrawSettingWindow()
                 if (ImGui::Combo("##Post_Process", &currentPp, ppOps, IM_ARRAYSIZE(ppOps)))
                 {
                     core::SETTINGS.PP = (Post_Process)currentPp;
-                    m_Renderer.ChangePostProcess();
+                    if (!m_Renderer.ChangePostProcess())
+                    {
+                        core::ShowWarningMsg("Failed to change post-process effect!");
+                    }
                 }
                 ImGui::PopItemWidth();
             }
@@ -1126,7 +1135,7 @@ void Application::KeyboardInput()
         {
             glm::vec3 direction = m_Scene.GetCamera().GetDirection(glm::vec3(0.0f, 0.0f, -1.0f));
             direction = glm::normalize(glm::vec3(direction.x, 0.0f, direction.z));
-            move = direction * m_Scene.GetCamera().GetMoveSpeed();
+            move = direction * m_Scene.GetCamera().GetMoveSpeed() * core::TIME_DELTA;
             move += m_Scene.GetCamera().GetPosition();
             m_Scene.GetCamera().SetPosition(move);
         }
@@ -1134,7 +1143,7 @@ void Application::KeyboardInput()
         {
             glm::vec3 direction = m_Scene.GetCamera().GetDirection(glm::vec3(0.0f, 0.0f, 1.0f));
             direction = glm::normalize(glm::vec3(direction.x, 0.0f, direction.z));
-            move = direction * m_Scene.GetCamera().GetMoveSpeed();
+            move = direction * m_Scene.GetCamera().GetMoveSpeed() * core::TIME_DELTA;
             move += m_Scene.GetCamera().GetPosition();
             m_Scene.GetCamera().SetPosition(move);
         }
@@ -1142,7 +1151,7 @@ void Application::KeyboardInput()
         {
             glm::vec3 direction = m_Scene.GetCamera().GetDirection(glm::vec3(-1.0f, 0.0f, 0.0f));
             direction = glm::normalize(glm::vec3(direction.x, 0.0f, direction.z));
-            move = direction * m_Scene.GetCamera().GetMoveSpeed();
+            move = direction * m_Scene.GetCamera().GetMoveSpeed() * core::TIME_DELTA;
             move += m_Scene.GetCamera().GetPosition();
             m_Scene.GetCamera().SetPosition(move);
         }
@@ -1150,19 +1159,19 @@ void Application::KeyboardInput()
         {
             glm::vec3 direction = m_Scene.GetCamera().GetDirection(glm::vec3(1.0f, 0.0f, 0.0f));
             direction = glm::normalize(glm::vec3(direction.x, 0.0f, direction.z));
-            move = direction * m_Scene.GetCamera().GetMoveSpeed();
+            move = direction * m_Scene.GetCamera().GetMoveSpeed() * core::TIME_DELTA;
             move += m_Scene.GetCamera().GetPosition();
             m_Scene.GetCamera().SetPosition(move);
         }
         if (ImGui::IsKeyDown(ImGuiKey_Space)) // Up
         {
-            move = glm::vec3(0.0f, 1.0f, 0.0f) * m_Scene.GetCamera().GetMoveSpeed();
+            move = glm::vec3(0.0f, 1.0f, 0.0f) * m_Scene.GetCamera().GetMoveSpeed() * core::TIME_DELTA;
             move += m_Scene.GetCamera().GetPosition();
             m_Scene.GetCamera().SetPosition(move);
         }
         if (ImGui::IsKeyDown(ImGuiKey_LeftCtrl)) // Down
         {
-            move = glm::vec3(0.0f, -1.0f, 0.0f) * m_Scene.GetCamera().GetMoveSpeed();
+            move = glm::vec3(0.0f, -1.0f, 0.0f) * m_Scene.GetCamera().GetMoveSpeed() * core::TIME_DELTA;
             move += m_Scene.GetCamera().GetPosition();
             m_Scene.GetCamera().SetPosition(move);
         }

@@ -8,10 +8,6 @@ AreaLight::AreaLight()
 	m_Color = glm::vec3(1.0f);
 	m_Intensity = 1.0f;
 	m_Type = RECTANGLE;
-	m_RectVertex[0] = glm::vec3(-0.5f, 0.5f, 0.0f);
-	m_RectVertex[1] = glm::vec3(0.5f, 0.5f, 0.0f);
-	m_RectVertex[2] = glm::vec3(0.5f, -0.5f, 0.0f);
-	m_RectVertex[3] = glm::vec3(-0.5f, -0.5f, 0.0f);
 	m_TwoSided = true;
 	m_LightSwitch = true;
 	m_ShowCube = true;
@@ -26,11 +22,57 @@ void AreaLight::UpdateModelMat()
 {
 	glm::mat4 modelMat = GetScaleMat();
 	m_ModelMat = GetTranslateMat() * GetRotateMat() * modelMat;
-	m_RectVertex[0] = glm::vec3(m_ModelMat * glm::vec4(-0.5f, 0.5f, 0.0f, 1.0f));
-	m_RectVertex[1] = glm::vec3(m_ModelMat * glm::vec4(0.5f, 0.5f, 0.0f, 1.0f));
-	m_RectVertex[2] = glm::vec3(m_ModelMat * glm::vec4(0.5f, -0.5f, 0.0f, 1.0f));
-	m_RectVertex[3] = glm::vec3(m_ModelMat * glm::vec4(-0.5f, -0.5f, 0.0f, 1.0f));
+	UpdatePoints();
 	//m_UpdateShadow = true;
+}
+
+void AreaLight::UpdatePoints()
+{
+	switch (m_Type)
+	{
+	case RECTANGLE:
+		UpdatePointsRect();
+		break;
+	case SPHERE:
+		break;
+	case CYLINDER:
+		UpdatePointsCylinder();
+		break;
+	case DISK:
+		UpdatePointsDisk();
+		break;
+	}
+}
+
+void AreaLight::UpdatePointsRect()
+{
+	m_Points[0] = glm::vec3(m_ModelMat * glm::vec4(-0.5f, 0.5f, 0.0f, 1.0f));
+	m_Points[1] = glm::vec3(m_ModelMat * glm::vec4(0.5f, 0.5f, 0.0f, 1.0f));
+	m_Points[2] = glm::vec3(m_ModelMat * glm::vec4(0.5f, -0.5f, 0.0f, 1.0f));
+	m_Points[3] = glm::vec3(m_ModelMat * glm::vec4(-0.5f, -0.5f, 0.0f, 1.0f));
+}
+
+void AreaLight::UpdatePointsDisk()
+{
+	GLfloat halfX = m_Scale.x;
+	GLfloat halfY = m_Scale.y;
+	glm::vec3 dirX = glm::vec3(GetRotateMat() * glm::vec4(1.0f, 0.0f, 0.0f, 0.0f));
+	glm::vec3 dirY = glm::vec3(GetRotateMat() * glm::vec4(0.0f, 1.0f, 0.0f, 0.0f));
+	glm::vec3 ex = halfX * dirX;
+	glm::vec3 ey = halfY * dirY;
+
+	m_Points[0] = m_Position - ex - ey;
+	m_Points[1] = m_Position + ex - ey;
+	m_Points[2] = m_Position + ex + ey;
+	m_Points[3] = m_Position - ex + ey;
+	/*m_Points[0] = glm::vec3(m_ModelMat * glm::vec4(-0.5f, 0.5f, 0.0f, 1.0f));
+	m_Points[1] = glm::vec3(m_ModelMat * glm::vec4(0.5f, 0.5f, 0.0f, 1.0f));
+	m_Points[2] = glm::vec3(m_ModelMat * glm::vec4(0.5f, -0.5f, 0.0f, 1.0f));
+	m_Points[3] = glm::vec3(m_ModelMat * glm::vec4(-0.5f, -0.5f, 0.0f, 1.0f));*/
+}
+
+void AreaLight::UpdatePointsCylinder()
+{
 }
 
 void AreaLight::SetName(std::string name)
@@ -200,6 +242,7 @@ void AreaLight::SetScale(glm::vec3 scale)
 void AreaLight::SetType(AL_Type type)
 {
 	m_Type = type;
+	UpdatePoints();
 }
 
 void AreaLight::SetColor(glm::vec3 color)
@@ -261,6 +304,32 @@ void AreaLight::DrawUI()
 			//ImGui::CenterAlignWidget("Cast Shadow");
 			/*ImGui::LabelHighlighted("Cast Shadow");
 			ImGui::Checkbox("##CastShadow", &m_CastShadow);*/
+			// Light Type
+			{
+				ImGui::CenterAlignWidget("Type", 120.0f * core::GetWidgetWidthCoefficient());
+				ImGui::LabelHighlighted("Type");
+				ImGui::PushItemWidth(120.0f * core::GetWidgetWidthCoefficient());
+				const char* lightTypeOps[] = {
+					"Rectangle",
+					"Sphere",
+					"Cylinder",
+					"Disk"
+				};
+				static int currentLightType;
+				currentLightType = m_Type;
+				if (ImGui::Combo("##AreaLightType", &currentLightType, lightTypeOps, IM_ARRAYSIZE(lightTypeOps)))
+				{
+					m_Type = (AL_Type)currentLightType;
+					SetType(m_Type);
+				}
+				ImGui::PopItemWidth();
+			}
+			if (m_Type == RECTANGLE || m_Type == DISK)
+			{
+				ImGui::CenterAlignWidget("Two Sided");
+				ImGui::LabelHighlighted("Two Sided");
+				ImGui::Checkbox("##TwoSided", &m_TwoSided);
+			}
 		}
 		ImGui::TreePop();
 	}
@@ -331,12 +400,7 @@ void AreaLight::DrawUI()
 					SetIntensity(m_Intensity);
 				}
 				ImGui::PopItemWidth();
-				if (m_Type == RECTANGLE)
-				{
-					ImGui::CenterAlignWidget("Two Sided");
-					ImGui::LabelHighlighted("Two Sided"); 
-					ImGui::Checkbox("##TwoSided", &m_TwoSided);
-				}
+				
 				ImGui::TreePop();
 			}
 			//// Shadow
@@ -484,62 +548,65 @@ void AreaLight::DrawUI()
 		}
 		// Rotation
 		static bool slideRotate = true;
-		if (ImGui::TreeNode("Rotation"))
+		if (m_Type != SPHERE)
 		{
-			ImGui::Checkbox("Slider", &slideRotate);
-			if (slideRotate)
+			if (ImGui::TreeNode("Rotation"))
 			{
-				ImGui::PushItemWidth(280.0f * core::GetWidgetWidthCoefficient());
-				ImGui::CenterAlignWidget("Pitch", 280.0f * core::GetWidgetWidthCoefficient());
-				ImGui::LabelHighlighted("Pitch");
-				if (ImGui::SliderFloat("##Pitch", &m_EulerAngle.x, -360.0f, 360.0f))
+				ImGui::Checkbox("Slider", &slideRotate);
+				if (slideRotate)
 				{
-					//UpdateDirection();
-					//UpdateViewMat();
-					UpdateModelMat();
+					ImGui::PushItemWidth(280.0f * core::GetWidgetWidthCoefficient());
+					ImGui::CenterAlignWidget("Pitch", 280.0f * core::GetWidgetWidthCoefficient());
+					ImGui::LabelHighlighted("Pitch");
+					if (ImGui::SliderFloat("##Pitch", &m_EulerAngle.x, -360.0f, 360.0f))
+					{
+						//UpdateDirection();
+						//UpdateViewMat();
+						UpdateModelMat();
+					}
+					ImGui::CenterAlignWidget("Yaw", 280.0f * core::GetWidgetWidthCoefficient());
+					ImGui::LabelHighlighted("Yaw");
+					if (ImGui::SliderFloat("##Yaw", &m_EulerAngle.y, -360.0f, 360.0f))
+					{
+						//UpdateDirection();
+						//UpdateViewMat();
+						UpdateModelMat();
+					}
+					ImGui::CenterAlignWidget("Roll", 280.0f * core::GetWidgetWidthCoefficient());
+					ImGui::LabelHighlighted("Roll");
+					if (ImGui::SliderFloat("##Roll", &m_EulerAngle.z, -360.0f, 360.0f))
+					{
+						//UpdateDirection();
+						//UpdateViewMat();
+						UpdateModelMat();
+					}
+					ImGui::PopItemWidth();
 				}
-				ImGui::CenterAlignWidget("Yaw", 280.0f * core::GetWidgetWidthCoefficient());
-				ImGui::LabelHighlighted("Yaw");
-				if (ImGui::SliderFloat("##Yaw", &m_EulerAngle.y, -360.0f, 360.0f))
+				else
 				{
-					//UpdateDirection();
-					//UpdateViewMat();
-					UpdateModelMat();
+					ImGui::PushItemWidth(80.0f * core::GetWidgetWidthCoefficient());
+					ImGui::CenterAlignWidget("Pitch", 80.0f * core::GetWidgetWidthCoefficient());
+					ImGui::LabelHighlighted("Pitch");
+					if (ImGui::InputFloat("##Pitch", &m_EulerAngle.x))
+					{
+						SetPitch(m_EulerAngle.x);
+					}
+					ImGui::CenterAlignWidget("Yaw", 80.0f * core::GetWidgetWidthCoefficient());
+					ImGui::LabelHighlighted("Yaw");
+					if (ImGui::InputFloat("##Yaw", &m_EulerAngle.y))
+					{
+						SetYaw(m_EulerAngle.y);
+					}
+					ImGui::CenterAlignWidget("Roll", 80.0f * core::GetWidgetWidthCoefficient());
+					ImGui::LabelHighlighted("Roll");
+					if (ImGui::InputFloat("##Roll", &m_EulerAngle.z))
+					{
+						SetRoll(m_EulerAngle.z);
+					}
+					ImGui::PopItemWidth();
 				}
-				ImGui::CenterAlignWidget("Roll", 280.0f * core::GetWidgetWidthCoefficient());
-				ImGui::LabelHighlighted("Roll");
-				if (ImGui::SliderFloat("##Roll", &m_EulerAngle.z, -360.0f, 360.0f))
-				{
-					//UpdateDirection();
-					//UpdateViewMat();
-					UpdateModelMat();
-				}
-				ImGui::PopItemWidth();
+				ImGui::TreePop();
 			}
-			else
-			{
-				ImGui::PushItemWidth(80.0f * core::GetWidgetWidthCoefficient());
-				ImGui::CenterAlignWidget("Pitch", 80.0f * core::GetWidgetWidthCoefficient());
-				ImGui::LabelHighlighted("Pitch");
-				if (ImGui::InputFloat("##Pitch", &m_EulerAngle.x))
-				{
-					SetPitch(m_EulerAngle.x);
-				}
-				ImGui::CenterAlignWidget("Yaw", 80.0f * core::GetWidgetWidthCoefficient());
-				ImGui::LabelHighlighted("Yaw");
-				if (ImGui::InputFloat("##Yaw", &m_EulerAngle.y))
-				{
-					SetYaw(m_EulerAngle.y);
-				}
-				ImGui::CenterAlignWidget("Roll", 80.0f * core::GetWidgetWidthCoefficient());
-				ImGui::LabelHighlighted("Roll");
-				if (ImGui::InputFloat("##Roll", &m_EulerAngle.z))
-				{
-					SetRoll(m_EulerAngle.z);
-				}
-				ImGui::PopItemWidth();
-			}
-			ImGui::TreePop();
 		}
 		// Scale
 		static bool keepScale = false;
@@ -572,7 +639,7 @@ void AreaLight::DrawUI()
 				{
 					SetScale(m_Scale);
 				}
-				if (m_Type != RECTANGLE)
+				if (m_Type != RECTANGLE || m_Type != DISK)
 				{
 					ImGui::CenterAlignWidget("Z", 80.0f * core::GetWidgetWidthCoefficient());
 					ImGui::LabelHighlighted("Z");

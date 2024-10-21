@@ -8,15 +8,33 @@ GLData::~GLData()
 {
 }
 
-void GLData::Init()
+bool GLData::Init()
 {
 	// Init shaders
-	m_PointLightData.Shader.Init(SHADER_OPENGL_SHADOW_POINT);
-	m_SpotLightData.Shader.Init(SHADER_OPENGL_SHADOW_SPOT);
-	m_DirLightData.Shader.Init(SHADER_OPENGL_SHADOW_DIR);
-	m_SkyboxData.Shader.Init(SHADER_OPENGL_SKYBOX);
-	m_CheckerMap.GenTexture(UV_MAP_FILEPATH);
-	ChangeDrawMode();
+	if (!m_PointLightData.Shader.Init(SHADER_OPENGL_SHADOW_POINT))
+	{
+		return false;
+	}
+	if (!m_SpotLightData.Shader.Init(SHADER_OPENGL_SHADOW_SPOT))
+	{
+		return false;
+	}
+	if (!m_DirLightData.Shader.Init(SHADER_OPENGL_SHADOW_DIR))
+	{
+		return false;
+	}
+	if (!m_SkyboxData.Shader.Init(SHADER_OPENGL_SKYBOX))
+	{
+		return false;
+	}
+	if (!m_CheckerMap.GenTexture(UV_MAP_FILEPATH))
+	{
+		return false;
+	}
+	if (!ChangeDrawMode())
+	{
+		return false;
+	}
 	// Initialize VAO to draw skybox
 	{
 		float position[] = {
@@ -178,6 +196,78 @@ void GLData::Init()
 		GLVertexBufferLayout layout;
 		layout.Push<float>(3);
 		m_AreaLightData.RectangleVA.AddBuffer(m_AreaLightData.RectangleVB, layout);
+		// Sphere light cube
+		Model sphereLight;
+		if (!sphereLight.LoadModel("sphereLight", LIGHTCUBE_SPHERE_MODEL))
+		{
+			return false;
+		}
+		std::vector<glm::vec3> vertices;
+		std::vector<unsigned int> indices;
+		for (unsigned int i = 0; i < sphereLight.GetMeshes().size(); i++)
+		{
+			unsigned int indexOffset = (unsigned int)vertices.size();
+			for (unsigned int j = 0; j < sphereLight.GetMeshes()[i].GetIndices().size(); j++)
+			{
+				indices.push_back(sphereLight.GetMeshes()[i].GetIndices()[j] + indexOffset);
+			}
+			for (unsigned int j = 0; j < sphereLight.GetMeshes()[i].GetVertices().size(); j++)
+			{
+				vertices.push_back(sphereLight.GetMeshes()[i].GetVertices()[j].Position);
+			}
+		}
+		m_AreaLightData.SphereVA.GenVertexArray();
+		m_AreaLightData.SphereVB.GenBuffer(&vertices[0], (unsigned int)vertices.size() * sizeof(glm::vec3));
+		m_AreaLightData.SphereIB.GenBuffer(&indices[0], (unsigned int)indices.size());
+		m_AreaLightData.SphereVA.AddBuffer(m_AreaLightData.SphereVB, layout);
+		std::vector<glm::vec3>().swap(vertices);
+		std::vector<unsigned int>().swap(indices);
+		// Cylinder light cube
+		Model cylinderLight;
+		if (!cylinderLight.LoadModel("cylinderLight", LIGHTCUBE_CYLINDER_MODEL))
+		{
+			return false;
+		}
+		for (unsigned int i = 0; i < cylinderLight.GetMeshes().size(); i++)
+		{
+			unsigned int indexOffset = (unsigned int)vertices.size();
+			for (unsigned int j = 0; j < cylinderLight.GetMeshes()[i].GetIndices().size(); j++)
+			{
+				indices.push_back(cylinderLight.GetMeshes()[i].GetIndices()[j] + indexOffset);
+			}
+			for (unsigned int j = 0; j < cylinderLight.GetMeshes()[i].GetVertices().size(); j++)
+			{
+				vertices.push_back(cylinderLight.GetMeshes()[i].GetVertices()[j].Position);
+			}
+		}
+		m_AreaLightData.CylinderVA.GenVertexArray();
+		m_AreaLightData.CylinderVB.GenBuffer(&vertices[0], (unsigned int)vertices.size() * sizeof(glm::vec3));
+		m_AreaLightData.CylinderIB.GenBuffer(&indices[0], (unsigned int)indices.size());
+		m_AreaLightData.CylinderVA.AddBuffer(m_AreaLightData.CylinderVB, layout);
+		std::vector<glm::vec3>().swap(vertices);
+		std::vector<unsigned int>().swap(indices);
+		// Disk light cube
+		Model diskLight;
+		if (!diskLight.LoadModel("diskLight", LIGHTCUBE_DISK_MODEL))
+		{
+			return false;
+		}
+		for (unsigned int i = 0; i < diskLight.GetMeshes().size(); i++)
+		{
+			unsigned int indexOffset = (unsigned int)vertices.size();
+			for (unsigned int j = 0; j < diskLight.GetMeshes()[i].GetIndices().size(); j++)
+			{
+				indices.push_back(diskLight.GetMeshes()[i].GetIndices()[j] + indexOffset);
+			}
+			for (unsigned int j = 0; j < diskLight.GetMeshes()[i].GetVertices().size(); j++)
+			{
+				vertices.push_back(diskLight.GetMeshes()[i].GetVertices()[j].Position);
+			}
+		}
+		m_AreaLightData.DiskVA.GenVertexArray();
+		m_AreaLightData.DiskVB.GenBuffer(&vertices[0], (unsigned int)vertices.size() * sizeof(glm::vec3));
+		m_AreaLightData.DiskIB.GenBuffer(&indices[0], (unsigned int)indices.size());
+		m_AreaLightData.DiskVA.AddBuffer(m_AreaLightData.DiskVB, layout);
 	}
 	// Initialize data used for auto exposure
 	{
@@ -185,6 +275,7 @@ void GLData::Init()
 		m_VFXData.ExpoHistoDB.GenBuffer(&m_VFXData.ExpoHistogram[0], m_VFXData.ExpoHistogram.size() * sizeof(unsigned int), GL_DYNAMIC_COPY);
 		m_VFXData.ExpoAvgDB.GenBuffer(&m_VFXData.ExpoAvg, sizeof(int), GL_DYNAMIC_COPY);
 	}
+	return true;
 }
 
 void GLData::Reset()
@@ -198,23 +289,35 @@ void GLData::Reset()
 	m_SkyboxData.Skybox = newCubeMap;
 }
 
-void GLData::ChangeDrawMode()
+bool GLData::ChangeDrawMode()
 {
 	GLShader newShader;
 	m_Shader = newShader;
 	switch (core::SETTINGS.DrawMode)
 	{
 	case BLANK:
-		m_Shader.Init(SHADER_OPENGL_BLANK);
+		if (!m_Shader.Init(SHADER_OPENGL_BLANK))
+		{
+			return false;
+		}
 		break;
 	case WIREFRAME:
-		m_Shader.Init(SHADER_OPENGL_WIREFRAME);
+		if (!m_Shader.Init(SHADER_OPENGL_WIREFRAME))
+		{
+			return false;
+		}
 		break;
 	case POINTCLOUD:
-		m_Shader.Init(SHADER_OPENGL_POINTCLOUD);
+		if (m_Shader.Init(SHADER_OPENGL_POINTCLOUD))
+		{
+			return false;
+		}
 		break;
 	case UVSET:
-		m_Shader.Init(SHADER_OPENGL_UVSET);
+		if (!m_Shader.Init(SHADER_OPENGL_UVSET))
+		{
+			return false;
+		}
 		m_Shader.Bind();
 		m_Shader.SetUniformHandleARB("u_CheckerMap", m_CheckerMap.GetHandle());
 		m_Shader.Unbind();
@@ -226,6 +329,7 @@ void GLData::ChangeDrawMode()
 		m_Shader.Init(SHADER_OPENGL_NORMAL_DM);
 		break;
 	}
+	return true;
 }
 
 void GLData::AddModel(std::string name, Model& model)

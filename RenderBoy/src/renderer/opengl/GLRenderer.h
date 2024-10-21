@@ -63,6 +63,7 @@ private:
 	void DrawUVSet(Scene& scene);
 	void DrawNormal(Scene& scene);
 	void DrawLightCube(Scene& scene);
+	void DrawAreaLightCube(Scene& scene, AL_Type type);
 	void DrawSkybox(Scene& scene);
 	void DrawPointLightShadow(Scene& scene, bool update);
 	void DrawSpotLightShadow(Scene& scene, bool update);
@@ -78,10 +79,10 @@ public:
 	GLRenderer();
 	~GLRenderer();
 
-	void Init(Scene& scene);
+	bool Init(Scene& scene);
 	void Draw(Scene& scene);
 	
 	bool SaveScreenShot(Scene& scene);
 	void ChangeResolution();
-	void ChangePostProcess();
+	bool ChangePostProcess();
 };

@@ -8,16 +8,20 @@ Data::~Data()
 {
 }
 
-void Data::Init()
+bool Data::Init()
 {
 	switch (core::SETTINGS.GraphicsCore)
 	{
 	case OPENGL:
-		m_DataGL.Init();
+		if (!m_DataGL.Init())
+		{
+			return false;
+		}
 		break;
 	default:
 		break;
 	}
+	return true;
 }
 
 void Data::Reset()

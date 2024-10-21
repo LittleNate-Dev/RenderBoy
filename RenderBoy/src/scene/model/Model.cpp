@@ -14,7 +14,8 @@ Model::Model()
     m_InstanceScale.push_back(glm::vec3(1.0f));
     m_InstanceEulerAngle.push_back(glm::vec3(0.0f));
     m_ModelMats.push_back(glm::mat4(1.0f));
-    m_UpdateShadow = false;
+    m_UpdateShadow = true;
+    //m_Wireframe = false;
 }
 
 Model::~Model()
@@ -25,6 +26,8 @@ void Model::UpdateStatics()
 {
     // Mesh statics
     m_Statics.MeshCount = (unsigned int)m_Meshes.size();
+    m_Statics.VertexCount = 0;
+    m_Statics.TriangleCount = 0;
     for (unsigned int i = 0; i < m_Meshes.size(); i++)
     {
         // Vertex statics
@@ -95,6 +98,7 @@ bool Model::LoadModel(std::string name, std::string filepath)
 {
     m_Name = name;
     m_UpdateShadow = true;
+    std::vector<Mesh>().swap(m_Meshes);
     if (core::CheckFileFormatAssimp(core::GetFileFormat(filepath)))
     {
         if (LoadModelAssimp(filepath))
@@ -724,6 +728,9 @@ glm::mat4 Model::GetRotateMat(unsigned int current)
 
 void Model::DrawUI()
 {
+    /*ImGui::CenterAlignWidget("Wireframe");
+    ImGui::LabelHighlighted("Wireframe");
+    ImGui::Checkbox("##Wireframe", &m_Wireframe);*/
     ImGui::CenterAlignWidget("Set All Instance");
     ImGui::LabelHighlighted("Set All Instance");
     if (ImGui::Checkbox("##SetAllInstance", &m_SetInstance))

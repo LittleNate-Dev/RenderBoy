@@ -19,11 +19,11 @@ public:
 	Renderer();
 	~Renderer();
 
-	void Init(Scene& scene);
+	bool Init(Scene& scene);
 	void Draw(Scene& scene);
 	void Clear();
 
 	bool SaveScreenShot(Scene& scene);
 	void ChangeResolution();
-	void ChangePostProcess();
+	bool ChangePostProcess();
 };

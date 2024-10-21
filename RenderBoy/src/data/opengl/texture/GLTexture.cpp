@@ -19,7 +19,7 @@ GLTexture::~GLTexture()
     glDeleteTextures(1, &m_RendererID);
 }
 
-void GLTexture::GenTexture(const std::string filepath)
+bool GLTexture::GenTexture(const std::string filepath)
 {
     m_LocalBuffer = FreeImage_Load(FreeImage_GetFileType(filepath.c_str(), 0), filepath.c_str());
     FreeImage_FlipVertical(m_LocalBuffer);
@@ -29,7 +29,7 @@ void GLTexture::GenTexture(const std::string filepath)
     if (!m_LocalBuffer)
     {
         spdlog::warn("Failed to load texture from: " + filepath);
-        return;
+        return false;
     }
     m_FilePath = filepath;
     // Generate texture id and handle
@@ -67,9 +67,10 @@ void GLTexture::GenTexture(const std::string filepath)
     {
         FreeImage_Unload(m_LocalBuffer);
     }
+    return true;
 }
 
-void GLTexture::GenTexture(const std::string filepath, bool sRGB)
+bool GLTexture::GenTexture(const std::string filepath, bool sRGB)
 {
     m_LocalBuffer = FreeImage_Load(FreeImage_GetFileType(filepath.c_str(), 0), filepath.c_str());
     FreeImage_FlipVertical(m_LocalBuffer);
@@ -79,7 +80,7 @@ void GLTexture::GenTexture(const std::string filepath, bool sRGB)
     if (!m_LocalBuffer)
     {
         spdlog::warn("Failed to load texture from: " + filepath);
-        return;
+        return false;
     }
     m_FilePath = filepath;
     // Generate texture id and handle
@@ -131,6 +132,7 @@ void GLTexture::GenTexture(const std::string filepath, bool sRGB)
     {
         FreeImage_Unload(m_LocalBuffer);
     }
+    return true;
 }
 
 void GLTexture::GenTexture(Tex_Type type)
@@ -172,7 +174,7 @@ void GLTexture::GenTexture(Tex_Type type)
         m_Height = 64;
         GLCall(glGenTextures(1, &m_RendererID));
         GLCall(glBindTexture(GL_TEXTURE_2D, m_RendererID));
-        GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 64, 64, 0, GL_RGBA, GL_FLOAT, util::LTC1));
+        GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, 64, 64, 0, GL_RGBA, GL_FLOAT, util::LTC1));
         GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
         GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
         GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
@@ -186,7 +188,7 @@ void GLTexture::GenTexture(Tex_Type type)
         m_Height = 64;
         GLCall(glGenTextures(1, &m_RendererID));
         GLCall(glBindTexture(GL_TEXTURE_2D, m_RendererID));
-        GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 64, 64, 0, GL_RGBA, GL_FLOAT, util::LTC2));
+        GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, 64, 64, 0, GL_RGBA, GL_FLOAT, util::LTC2));
         GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
         GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
         GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST));

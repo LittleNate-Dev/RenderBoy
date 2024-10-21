@@ -14,7 +14,7 @@ enum AL_Type
 {
 	RECTANGLE = 0,
 	SPHERE = 1,
-	TUBE = 2,
+	CYLINDER = 2,
 	DISK = 3
 };
 
@@ -30,14 +30,18 @@ private:
 	glm::vec3 m_CLQ; // Constant, Linear and Quadratic
 	glm::vec3 m_ADS; // Ambient, Diffuse, Specular
 	AL_Type m_Type;
-	// Attributes used for rectangle area light
-	glm::vec3 m_RectVertex[4];
+	glm::vec3 m_Points[4];
 	bool m_TwoSided;
 	float m_Intensity;
 	// Turn on/off light
 	bool m_LightSwitch;
 	// Show light cube
 	bool m_ShowCube;
+
+	void UpdatePoints();
+	void UpdatePointsRect();
+	void UpdatePointsDisk();
+	void UpdatePointsCylinder();
 
 public:
 	AreaLight();
@@ -100,9 +104,9 @@ public:
 	{
 		return m_Type;
 	};
-	inline glm::vec3 GetRectVertex(unsigned int i) const
+	inline glm::vec3 GetPoints(unsigned int i) const
 	{
-		return m_RectVertex[i];
+		return m_Points[i];
 	};
 	inline bool TwoSided() const
 	{

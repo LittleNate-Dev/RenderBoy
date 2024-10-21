@@ -96,9 +96,6 @@ void main()
 #define DIR_LIGHT_COUNT
 #define AREA_LIGHT_COUNT
 #define PI 3.14159265359
-#define LUT_SIZE 64.0
-#define LUT_SCALE (LUT_SIZE - 1.0)/LUT_SIZE;
-#define LUT_BIAS 0.5/LUT_SIZE;
 
 struct FragPosDir
 {
@@ -158,8 +155,9 @@ struct DirLight
 
 struct AreaLight
 {
+    int Type;
     vec3 Position;
-    vec3 RecVertex[4];
+    vec3 Points[4];
     float Intensity;
     vec3 Color;
     bool TwoSided;
@@ -168,6 +166,10 @@ struct AreaLight
 
 layout(location = 0) out vec4 v_Accum;
 layout(location = 1) out float v_Reveal;
+
+const float LUT_SIZE  = 64.0; // ltc_texture size 
+const float LUT_SCALE = (LUT_SIZE - 1.0)/LUT_SIZE;
+const float LUT_BIAS  = 0.5/LUT_SIZE;
 
 in vec3 v_FragPos;
 in vec3 v_Normal;
@@ -227,13 +229,18 @@ float c_Alpha = 1.0;
 vec3 CalcPointLight(int i);
 vec3 CalcSpotLight(int i);
 vec3 CalcDirLight(int i);
+vec3 CalcAreaLight(int i);
+vec3 CalcAreaLightRect(int i);
+vec3 CalcAreaLightDisk(int i);
 float DistributionGGX(vec3 N, vec3 H, float roughness);
 float GeometrySchlickGGX(float NdotV, float roughness);
 float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness);
 vec3 FresnelSchlick(float cosTheta, vec3 F0);
-vec3 EvaluateLTC(vec3 N, vec3 V, vec3 P, mat3 Minv, vec3 vertex[4], bool twoSided);
+vec3 EvaluateLTCRect(vec3 N, vec3 V, vec3 P, mat3 Minv, vec3 vertex[4], bool twoSided);
+vec3 EvaluateLTCDisk(vec3 N, vec3 V, vec3 P, mat3 Minv, vec3 vertex[4], bool twoSided);
 vec3 IntegrateEdgeVec(vec3 v1, vec3 v2);
 float IntegrateEdge(vec3 v1, vec3 v2);
+vec3 SolveCubic(vec4 Coefficient);
 
 void main()
 {
@@ -628,7 +635,22 @@ vec3 CalcDirLight(int i)
 vec3 CalcAreaLight(int i)
 {
     vec3 lighting = vec3(0.0);
-    float dotNV = clamp(dot(c_Normal, c_ViewDir), 0.0f, 1.0f);
+    switch (u_AreaLight[i].Type)
+    {
+    case 0:
+        lighting = CalcAreaLightRect(i);
+        break;
+    case 3:
+        lighting = CalcAreaLightDisk(i);
+        break;
+    }    
+    return lighting;
+}
+
+vec3 CalcAreaLightRect(int i)
+{
+    vec3 lighting = vec3(0.0);
+    float dotNV = clamp(dot(c_Normal, c_ViewDir), 0.0, 1.0);
     // use roughness and sqrt(1-cos_theta) to sample M_texture
     vec2 uv = vec2(c_Roughness, sqrt(1.0 - dotNV));
     uv = uv * LUT_SCALE + LUT_BIAS;
@@ -642,14 +664,42 @@ vec3 CalcAreaLight(int i)
         vec3(t1.z, 0.0, t1.w)
     );
     // Evaluate LTC shading
-    vec3 diffuse = EvaluateLTC(c_Normal, c_ViewDir, v_FragPos, mat3(1.0), u_AreaLight[i].RecVertex, u_AreaLight[i].TwoSided);
-    vec3 specular = EvaluateLTC(c_Normal, c_ViewDir, v_FragPos, Minv, u_AreaLight[i].RecVertex, u_AreaLight[i].TwoSided);
+    vec3 diffuse, specular;
+    diffuse = EvaluateLTCRect(c_Normal, c_ViewDir, v_FragPos, mat3(1.0), u_AreaLight[i].Points, u_AreaLight[i].TwoSided);
+    specular = EvaluateLTCRect(c_Normal, c_ViewDir, v_FragPos, Minv, u_AreaLight[i].Points, u_AreaLight[i].TwoSided);
     // GGX BRDF shadowing and Fresnel
     // t2.x: shadowedF90 (F90 normally it should be 1.0)
     // t2.y: Smith function for Geometric Attenuation Term, it is dot(V or L, H).
     specular *= vec3(c_Metallic) * t2.x + (1.0 - vec3(c_Metallic)) * t2.y;
     lighting = u_AreaLight[i].Color * u_AreaLight[i].Intensity * (specular + c_Albedo * diffuse);
+
     return lighting;
+}
+
+vec3 CalcAreaLightDisk(int i)
+{
+    vec3 lighting = vec3(0.0);
+    float dotNV = clamp(dot(c_Normal, c_ViewDir), 0.0, 1.0);
+    // use roughness and sqrt(1-cos_theta) to sample M_texture
+    vec2 uv = vec2(c_Roughness, sqrt(1.0 - dotNV));
+    uv = uv * LUT_SCALE + LUT_BIAS;
+    // get 4 parameters for inverse_M
+    vec4 t1 = texture(u_LTC1, uv);
+    // Get 2 parameters for Fresnel calculation
+    vec4 t2 = texture(u_LTC2, uv);
+    mat3 Minv = mat3(
+        vec3(t1.x, 0.0, t1.y),
+        vec3(0.0,  1.0,  0.0),
+        vec3(t1.z, 0.0, t1.w)
+    );
+    // Evaluate LTC shading
+    vec3 diffuse, specular;
+    diffuse = EvaluateLTCDisk(c_Normal, c_ViewDir, v_FragPos, mat3(1.0), u_AreaLight[i].Points, u_AreaLight[i].TwoSided);
+    specular = EvaluateLTCDisk(c_Normal, c_ViewDir, v_FragPos, Minv, u_AreaLight[i].Points, u_AreaLight[i].TwoSided);
+    specular *= vec3(c_Metallic) * t2.x + (1.0 - vec3(c_Metallic)) * t2.y;
+    lighting = u_AreaLight[i].Color * u_AreaLight[i].Intensity * (specular + c_Albedo * diffuse);
+    
+    return lighting; 
 }
 
 float DistributionGGX(vec3 N, vec3 H, float roughness)
@@ -693,7 +743,7 @@ vec3 FresnelSchlick(float cosTheta, vec3 F0)
 }
 
 // P is fragPos in world space (LTC distribution)
-vec3 EvaluateLTC(vec3 N, vec3 V, vec3 P, mat3 Minv, vec3 vertex[4], bool twoSided)
+vec3 EvaluateLTCRect(vec3 N, vec3 V, vec3 P, mat3 Minv, vec3 vertex[4], bool twoSided)
 {
     // construct orthonormal basis around N
     vec3 T1, T2;
@@ -745,6 +795,126 @@ vec3 EvaluateLTC(vec3 N, vec3 V, vec3 P, mat3 Minv, vec3 vertex[4], bool twoSide
     return Lo_i;
 }
 
+vec3 EvaluateLTCDisk(vec3 N, vec3 V, vec3 P, mat3 Minv, vec3 vertex[4], bool twoSided)
+{
+    // construct orthonormal basis around N
+    vec3 T1, T2;
+    T1 = normalize(V - N * dot(V, N));
+    T2 = cross(N, T1);
+    // rotate area light in (T1, T2, N) basis
+    mat3 R = transpose(mat3(T1, T2, N));
+
+    // polygon (allocate 5 vertices for clipping)
+    vec3 L_[3];
+    L_[0] = R * (vertex[0] - P);
+    L_[1] = R * (vertex[1] - P);
+    L_[2] = R * (vertex[2] - P);
+
+    // init ellipse
+    vec3 C  = 0.5 * (L_[0] + L_[2]);
+    vec3 V1 = 0.5 * (L_[1] - L_[2]);
+    vec3 V2 = 0.5 * (L_[1] - L_[0]);
+
+    C  = Minv * C;
+    V1 = Minv * V1;
+    V2 = Minv * V2;
+
+    if(!twoSided && dot(cross(V1, V2), C) >= 0.0)
+    {
+        return vec3(0.0);
+    }
+
+    // compute eigenvectors of ellipse
+    float a, b;
+    float d11 = dot(V1, V1);
+    float d22 = dot(V2, V2);
+    float d12 = dot(V1, V2);
+
+    if (abs(d12) / sqrt(d11 * d22) > 0.0001)
+    //if (true)
+    {
+        float tr = d11 + d22;
+        float det = -d12 * d12 + d11 * d22;
+
+        // use sqrt matrix to solve for eigenvalues
+        det = sqrt(det);
+        float u = 0.5 * sqrt(tr - 2.0 * det);
+        float v = 0.5 * sqrt(tr + 2.0 * det);
+        float e_max = (u + v) * (u + v);
+        float e_min = (u - v) * (u - v);
+
+        vec3 V1_, V2_;
+
+        if (d11 > d22)
+        {
+            V1_ = d12 * V1 + (e_max - d11) * V2;
+            V2_ = d12 * V1 + (e_min - d11) * V2;
+        }
+        else
+        {
+            V1_ = d12 * V2 + (e_max - d22) * V1;
+            V2_ = d12 * V2 + (e_min - d22) * V1;
+        }
+
+        a = 1.0 / e_max;
+        b = 1.0 / e_min;
+        V1 = normalize(V1_);
+        V2 = normalize(V2_);
+    }
+    else
+    {
+        a = 1.0 / dot(V1, V1);
+        b = 1.0 / dot(V2, V2);
+        V1 *= sqrt(a);
+        V2 *= sqrt(b);
+    }
+
+    vec3 V3 = cross(V1, V2);
+    if (dot(C, V3) < 0.0)
+    {
+        V3 *= -1.0;
+    }
+
+    float L  = dot(V3, C);
+    float x0 = dot(V1, C) / L;
+    float y0 = dot(V2, C) / L;
+
+    float E1 = inversesqrt(a);
+    float E2 = inversesqrt(b);
+
+    a *= L * L;
+    b *= L * L;
+
+    float c0 = a * b;
+    float c1 = a * b * (1.0 + x0 * x0 + y0 * y0) - a - b;
+    float c2 = 1.0 - a * (1.0 + x0 * x0) - b * (1.0 + y0 * y0);
+    float c3 = 1.0;
+
+    vec3 roots = SolveCubic(vec4(c0, c1, c2, c3));
+    float e1 = roots.x;
+    float e2 = roots.y;
+    float e3 = roots.z;
+
+    vec3 avgDir = vec3(a * x0 / (a - e2), b * y0 / (b - e2), 1.0);
+    mat3 rotate = mat3(V1, V2, V3);
+
+    avgDir = rotate * avgDir;
+    avgDir = normalize(avgDir);
+
+    float L1 = sqrt(-e2 / e3);
+    float L2 = sqrt(-e2 / e1);
+
+    float formFactor = L1 * L2 * inversesqrt((1.0 + L1 * L1) * (1.0 + L2 * L2));
+
+    // use tabulated horizon-clipped sphere
+    vec2 uv = vec2(avgDir.z * 0.5 + 0.5, formFactor);
+    uv = uv * LUT_SCALE + LUT_BIAS;
+    float scale = texture(u_LTC2, uv).w;
+
+    float spec = formFactor * scale;
+    return vec3(spec);
+}
+
 // Vector form without project to the plane (dot with the normal)
 // Use for proxy sphere clipping
 vec3 IntegrateEdgeVec(vec3 v1, vec3 v2)
@@ -766,4 +936,102 @@ vec3 IntegrateEdgeVec(vec3 v1, vec3 v2)
 float IntegrateEdge(vec3 v1, vec3 v2)
 {
     return IntegrateEdgeVec(v1, v2).z;
+}
+
+// An extended version of the implementation from
+// "How to solve a cubic equation, revisited"
+// http://momentsingraphics.de/?p=105
+vec3 SolveCubic(vec4 Coefficient)
+{
+    // Normalize the polynomial
+    Coefficient.xyz /= Coefficient.w;
+    // Divide middle coefficients by three
+    Coefficient.yz /= 3.0;
+
+    float A = Coefficient.w;
+    float B = Coefficient.z;
+    float C = Coefficient.y;
+    float D = Coefficient.x;
+
+    // Compute the Hessian and the discriminant
+    vec3 Delta = vec3(
+        -Coefficient.z * Coefficient.z + Coefficient.y,
+        -Coefficient.y * Coefficient.z + Coefficient.x,
+        dot(vec2(Coefficient.z, -Coefficient.y), Coefficient.xy)
+    );
+
+    float Discriminant = dot(vec2(4.0 * Delta.x, -Delta.y), Delta.zy);
+
+    vec3 RootsA, RootsD;
+
+    vec2 xlc, xsc;
+
+    // Algorithm A
+    {
+        float A_a = 1.0;
+        float C_a = Delta.x;
+        float D_a = -2.0 * B * Delta.x + Delta.y;
+
+        // Take the cubic root of a normalized complex number
+        float Theta = atan(sqrt(Discriminant), -D_a) / 3.0;
+
+        float x_1a = 2.0 * sqrt(-C_a) * cos(Theta);
+        float x_3a = 2.0 * sqrt(-C_a) * cos(Theta + (2.0 / 3.0) * PI);
+
+        float xl;
+        if ((x_1a + x_3a) > 2.0 * B)
+        {
+            xl = x_1a;
+        }
+        else
+        {
+            xl = x_3a;   
+        }
+
+        xlc = vec2(xl - B, A);
+    }
+
+    // Algorithm D
+    {
+        float A_d = D;
+        float C_d = Delta.z;
+        float D_d = -D * Delta.y + 2.0 * C * Delta.z;
+
+        // Take the cubic root of a normalized complex number
+        float Theta = atan(D * sqrt(Discriminant), -D_d) / 3.0;
+
+        float x_1d = 2.0 * sqrt(-C_d) * cos(Theta);
+        float x_3d = 2.0 * sqrt(-C_d) * cos(Theta + (2.0 / 3.0) * PI);
+
+        float xs;
+        if (x_1d + x_3d < 2.0 * C)
+        {
+            xs = x_1d;
+        }
+        else
+        {
+            xs = x_3d;
+        }
+
+        xsc = vec2(-D, xs + C);
+    }
+
+    float E =  xlc.y * xsc.y;
+    float F = -xlc.x * xsc.y - xlc.y * xsc.x;
+    float G =  xlc.x * xsc.x;
+
+    vec2 xmc = vec2(C * F - B * G, -B * F + C * E);
+
+    vec3 Root = vec3(xsc.x / xsc.y, xmc.x / xmc.y, xlc.x / xlc.y);
+
+    if (Root.x < Root.y && Root.x < Root.z)
+    {
+        Root.xyz = Root.yxz;
+    }
+    else if (Root.z < Root.x && Root.z < Root.y)
+    {
+        Root.xyz = Root.xzy;
+    }
+
+    return Root;
 }

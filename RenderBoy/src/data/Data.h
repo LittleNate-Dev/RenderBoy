@@ -18,7 +18,7 @@ public:
 	Data();
 	~Data();
 
-	void Init();
+	bool Init();
 	void Reset();
 	// Change draw mode
 	void ChangeDrawMode();

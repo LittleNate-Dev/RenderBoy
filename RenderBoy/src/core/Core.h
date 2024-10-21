@@ -27,6 +27,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/quaternion.hpp>
 
+#include <Eigen/Dense>
+
 #include <imgui/imgui.h>
 #include <imgui/imgui_impl_opengl3.h>
 #include <imgui/imgui_impl_glfw.h>
@@ -46,8 +48,12 @@
 #define SETTING_FILEPATH "data/config/settings.config"
 #define LOGGER_FILEPATH "res/logger/RenderBoy_Logger.txt"
 #define FONTS_FILEPATH "res/fonts/"
+#define MODELS_FILEPATH "res/models/"
 #define SCREENSHOT_FILEPATH "saves/screenshot/"
 #define UV_MAP_FILEPATH "res/checkermap/CheckerMap.png"
+#define LIGHTCUBE_SPHERE_MODEL "res/models/AreaLight_Sphere.obj"
+#define LIGHTCUBE_CYLINDER_MODEL "res/models/AreaLight_Cylinder.obj"
+#define LIGHTCUBE_DISK_MODEL "res/models/AreaLight_Disk.obj"
 #define SHADER_OPENGL "data/shaders/opengl/"
 #define SHADER_OPENGL_SCREEN "data/shaders/opengl/others/SCREEN.glsl"
 #define SHADER_OPENGL_PP_NONE "data/shaders/opengl/post_process/NONE.glsl"

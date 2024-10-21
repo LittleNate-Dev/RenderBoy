@@ -10,10 +10,14 @@ Scene::~Scene()
 {
 }
 
-void Scene::Init()
+bool Scene::Init()
 {
-	m_Data.Init();
+	if (!m_Data.Init())
+	{
+		return false;
+	}
 	core::SCENE_DATA = &m_Data;
+	return true;
 }
 
 void Scene::Reset()
@@ -575,6 +579,12 @@ bool Scene::LoadScene(std::string filepath)
 					light = values[0];
 					AddLight(light, AREA_LIGHT);
 				}
+				if (line.find("#AREA_LIGHT_" + light + "_TYPE") != std::string::npos)
+				{
+					values = core::GetFileValue(line);
+					int type = std::atoi(values[0].c_str());
+					m_AreaLights[light].SetType((AL_Type)type);
+				}
 				else if (line.find("#AREA_LIGHT_" + light + "_POSITION") != std::string::npos)
 				{
 					values = core::GetFileValue(line);
@@ -864,6 +874,8 @@ void Scene::SaveScene()
 		std::string light = m_AreaLightList[i];
 		line = "#AREA_LIGHT_NAME " + light + "\n";
 		stream << line;
+		line = "#AREA_LIGHT_" + light + "_TYPE " + std::to_string(m_AreaLights[light].GetLightType()) + "\n";
+		stream << line;
 		glm::vec3 pos = m_AreaLights[light].GetPosition();
 		line = "#AREA_LIGHT_" + light + "_POSITION " + std::to_string(pos.x) + " " + std::to_string(pos.y) + " " + std::to_string(pos.z) + "\n";
 		stream << line;
@@ -1100,6 +1112,7 @@ bool Scene::AddAreaLight(std::string name)
 	AreaLight light;
 	light.SetName(name);
 	light.SetPosition(m_Camera.GetPosition());
+	light.SetEulerAngle(m_Camera.GetEulerAngle());
 	//light.SetEulerAngle(glm::vec3(glm::vec2(m_Camera.GetEulerAngle()), 0.0f) + glm::vec3(180.0f, 0.0f, 0.0f));
 	m_AreaLightList.push_back(name);
 	m_AreaLights.insert(std::pair<std::string, AreaLight>(name, light));
@@ -1548,6 +1561,12 @@ void Scene::DrawSceneWindow()
 			ImGui::Text(std::to_string(m_AreaLightList.size()).c_str());
 			ImGui::TreePop();
 		}
+
+		////Debug func
+		//if (ImGui::Button("Reload Shader"))
+		//{
+		//	m_Data.GetDataGL().ReInitShader();
+		//}
 		ImGui::End();
 	}
 }
@@ -1624,14 +1643,13 @@ void Scene::DrawLightsWindow()
 		// Add light
 		if (ImGui::TreeNode("Add Light"))
 		{
+			ImGui::PushItemWidth(200.0f * core::GetWidgetWidthCoefficient());
 			ImGui::CenterAlignWidget("Name", 200.0f * core::GetWidgetWidthCoefficient());
 			ImGui::LabelHighlighted("Name");
-			ImGui::PushItemWidth(200.0f);
 			static char lightName[256] = "";
 			ImGui::InputText("##LightName", lightName, IM_ARRAYSIZE(lightName));
 			ImGui::CenterAlignWidget("Type", 200.0f * core::GetWidgetWidthCoefficient());
 			ImGui::LabelHighlighted("Type");
-			ImGui::PushItemWidth(200.0f);
 			const char* lightTypeOps[] = {
 				"Point Light",
 				"Spot Light",
@@ -1641,22 +1659,16 @@ void Scene::DrawLightsWindow()
 			static int currentLightType = -1;
 			ImGui::Combo("##Light_Type", &currentLightType, lightTypeOps, IM_ARRAYSIZE(lightTypeOps));
 			ImGui::PopItemWidth();
-			ImGui::CenterAlignWidget("Add");
-			if (ImGui::Button("Add"))
+			if (lightName[0] != '\0' && currentLightType >= 0)
 			{
-				if (lightName[0] != '\0' && currentLightType >= 0)
+				ImGui::CenterAlignWidget("Add"); 
+				if (ImGui::Button("Add"))
 				{
 					AddLight(lightName, (Light_Type)currentLightType);
+					memset(lightName, '\0', sizeof(lightName));
+					currentLightType = -1;
 				}
-				else
-				{
-					core::ShowWarningMsg("Incomplete light info!");
-				}
-				memset(lightName, '\0', sizeof(lightName));
-				currentLightType = -1;
-
 			}
-			ImGui::PopItemWidth();
 			ImGui::TreePop();
 		}
 		// Point light

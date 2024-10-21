@@ -8,33 +8,93 @@ GLRenderer::~GLRenderer()
 {
 }
 
-void GLRenderer::Init(Scene& scene)
+bool GLRenderer::Init(Scene& scene)
 {
 	GLCall(glLineWidth(0.4f));
 	GLCall(glPointSize(1.5f));
 	// Initialize shaders
-	m_Shaders.Screen.Init(SHADER_OPENGL_SCREEN);
-	m_Shaders.GBuffer.Init(SHADER_OPENGL_GBUFFER);
-	m_Shaders.GBufferArea.Init(SHADER_OPENGL_GBUFFER_AREA);
-	m_Shaders.Normal.Init(SHADER_OPENGL_NORMAL);
-	m_Shaders.Lightcube.Init(SHADER_OPENGL_LIGHTCUBE);
-	m_Shaders.LightcubeArea.Init(SHADER_OPENGL_LIGHTCUBE_AREA);
-	m_Shaders.Bloom[0].Init(SHADER_OPENGL_BLOOM_DOWNSAMPLE); 
-	m_Shaders.Bloom[1].Init(SHADER_OPENGL_BLOOM_UPSAMPLE);
-	m_Shaders.Bloom[2].Init(SHADER_OPENGL_BLOOM_BLEND);
-	m_Shaders.OIT.Init(SHADER_OPENGL_OIT);
-	m_Shaders.DOF[0].Init(SHADER_OPENGL_DOF_COC);
-	m_Shaders.DOF[1].Init(SHADER_OPENGL_DOF_BOKEH);
-	m_Shaders.DOF[2].Init(SHADER_OPENGL_DOF_DOWNSAMPLE);
-	m_Shaders.DOF[3].Init(SHADER_OPENGL_DOF_BLEND);
-	m_Shaders.GaussianBlur.Init(SHADER_OPENGL_UTIL_GAUSSIAN_BLUR);
-	m_Shaders.FXAA.Init(SHADER_OPENGL_AA_FXAA);
-	m_Shaders.Exposure[0].Init(SHADER_OPENGL_EXPOSURE_HISTOGRAM);
-	m_Shaders.Exposure[1].Init(SHADER_OPENGL_EXPOSURE_AVERAGE);
-	ChangePostProcess();
+	if (!m_Shaders.Screen.Init(SHADER_OPENGL_SCREEN))
+	{
+		return false;
+	}
+	if (!m_Shaders.GBuffer.Init(SHADER_OPENGL_GBUFFER))
+	{
+		return false;
+	}
+	if (!m_Shaders.GBufferArea.Init(SHADER_OPENGL_GBUFFER_AREA))
+	{
+		return false;
+	}
+	if (!m_Shaders.Normal.Init(SHADER_OPENGL_NORMAL))
+	{
+		return false;
+	}
+	if (!m_Shaders.Lightcube.Init(SHADER_OPENGL_LIGHTCUBE))
+	{
+		return false;
+	}
+	if (!m_Shaders.LightcubeArea.Init(SHADER_OPENGL_LIGHTCUBE_AREA))
+	{
+		return false;
+	}
+	if (!m_Shaders.Bloom[0].Init(SHADER_OPENGL_BLOOM_DOWNSAMPLE))
+	{
+		return false;
+	}
+	if (!m_Shaders.Bloom[1].Init(SHADER_OPENGL_BLOOM_UPSAMPLE))
+	{
+		return false;
+	}
+	if (!m_Shaders.Bloom[2].Init(SHADER_OPENGL_BLOOM_BLEND))
+	{
+		return false;
+	}
+	if (!m_Shaders.OIT.Init(SHADER_OPENGL_OIT))
+	{
+		return false;
+	}
+	if (!m_Shaders.DOF[0].Init(SHADER_OPENGL_DOF_COC))
+	{
+		return false;
+	}
+	if (!m_Shaders.DOF[1].Init(SHADER_OPENGL_DOF_BOKEH))
+	{
+		return false;
+	}
+	if (!m_Shaders.DOF[2].Init(SHADER_OPENGL_DOF_DOWNSAMPLE))
+	{
+		return false;
+	}
+	if (!m_Shaders.DOF[3].Init(SHADER_OPENGL_DOF_BLEND))
+	{
+		return false;
+	}
+	if (!m_Shaders.GaussianBlur.Init(SHADER_OPENGL_UTIL_GAUSSIAN_BLUR))
+	{
+		return false;
+	}
+	if (!m_Shaders.FXAA.Init(SHADER_OPENGL_AA_FXAA))
+	{
+		return false;
+	}
+	if (!m_Shaders.Exposure[0].Init(SHADER_OPENGL_EXPOSURE_HISTOGRAM))
+	{
+		return false;
+	}
+	if (!m_Shaders.Exposure[1].Init(SHADER_OPENGL_EXPOSURE_AVERAGE))
+	{
+		return false;
+	}
+	if (!ChangePostProcess())
+	{
+		return false;
+	}
 	// Shaders used for SSAO
 	{
-		m_Shaders.SSAO[0].Init(SHADER_OPENGL_SSAO_GEN);
+		if (!m_Shaders.SSAO[0].Init(SHADER_OPENGL_SSAO_GEN))
+		{
+			return false;
+		}
 		m_Shaders.SSAO[0].Bind();
 		for (unsigned int i = 0; i < 64; i++)
 		{
@@ -42,7 +102,10 @@ void GLRenderer::Init(Scene& scene)
 		}
 		m_Shaders.SSAO[0].SetUniformHandleARB("u_NoiseTex", scene.GetData().GetDataGL().GetVFXData().SSAONoiseTex.GetHandle());
 		m_Shaders.SSAO[0].Unbind();
-		m_Shaders.SSAO[1].Init(SHADER_OPENGL_SSAO_BLUR);
+		if (!m_Shaders.SSAO[1].Init(SHADER_OPENGL_SSAO_BLUR))
+		{
+			return false;
+		}
 	}
 	// Initialize frame buffers
 	m_Frame.FB.Init(FBType::FRAME);
@@ -102,7 +165,9 @@ void GLRenderer::Init(Scene& scene)
 	else
 	{
 		core::ShowWarningMsg("Failed to initialize OpenGL renderer!");
+		return false;
 	}	
+	return true;
 }
 
 void GLRenderer::UpdateModelMat(Scene& scene)
@@ -238,17 +303,7 @@ void GLRenderer::DrawGBuffer(Scene& scene)
 		if (scene.GetAreaLights()[light].LightSwitch() && scene.GetAreaLights()[light].ShowCube())
 		{
 			m_Shaders.GBufferArea.SetUniformMat4f("u_ModelMat", scene.GetAreaLights()[light].GetModelMat());
-			switch (scene.GetAreaLights()[light].GetLightType())
-			{
-			case RECTANGLE:
-				scene.GetData().GetDataGL().GetAreaLightData().RectangleVA.Bind();
-				scene.GetData().GetDataGL().GetAreaLightData().RectangleIB.Bind();
-				GLCall(glDrawElements(GL_TRIANGLES, scene.GetData().GetDataGL().GetAreaLightData().RectangleIB.GetCount(), GL_UNSIGNED_INT, nullptr));
-				scene.GetData().GetDataGL().GetAreaLightData().RectangleVA.Unbind();
-				scene.GetData().GetDataGL().GetAreaLightData().RectangleIB.Unbind();
-				break;
-			}
-
+			DrawAreaLightCube(scene, scene.GetAreaLights()[light].GetLightType());
 		}
 	}
 	m_Shaders.GBufferArea.Unbind();
@@ -268,7 +323,7 @@ void GLRenderer::DrawDefault(Scene& scene)
 	GLCall(glDisable(GL_BLEND));
 	for (unsigned int i = 0; i < scene.GetModelList().size(); i++)
 	{
-		model = scene.GetModelList()[i];;
+		model = scene.GetModelList()[i];
 		scene.GetData().GetDataGL().GetModelData()[model].Shader.Bind();
 		scene.GetData().GetDataGL().GetModelData()[model].Shader.SetUniformMat4f("u_ProjMat", scene.GetCamera().GetProjMat());
 		scene.GetData().GetDataGL().GetModelData()[model].Shader.SetUniformMat4f("u_ViewMat", scene.GetCamera().GetViewMat());
@@ -371,13 +426,15 @@ void GLRenderer::DrawDefault(Scene& scene)
 			scene.GetData().GetDataGL().GetModelData()[model].Shader.SetUniform1i(lightName + "LightSwitch", scene.GetAreaLights()[light].LightSwitch());
 			if (scene.GetAreaLights()[light].LightSwitch())
 			{
-				scene.GetData().GetDataGL().GetModelData()[model].Shader.SetUniformVec3f(lightName + "RecVertex[0]", scene.GetAreaLights()[light].GetRectVertex(0));
-				scene.GetData().GetDataGL().GetModelData()[model].Shader.SetUniformVec3f(lightName + "RecVertex[1]", scene.GetAreaLights()[light].GetRectVertex(1));
-				scene.GetData().GetDataGL().GetModelData()[model].Shader.SetUniformVec3f(lightName + "RecVertex[2]", scene.GetAreaLights()[light].GetRectVertex(2));
-				scene.GetData().GetDataGL().GetModelData()[model].Shader.SetUniformVec3f(lightName + "RecVertex[3]", scene.GetAreaLights()[light].GetRectVertex(3));
-				scene.GetData().GetDataGL().GetModelData()[model].Shader.SetUniform1i(lightName + "TwoSided", scene.GetAreaLights()[light].TwoSided());
-				scene.GetData().GetDataGL().GetModelData()[model].Shader.SetUniformVec3f(lightName + "Color", scene.GetAreaLights()[light].GetColor());
+				scene.GetData().GetDataGL().GetModelData()[model].Shader.SetUniform1i(lightName + "Type", scene.GetAreaLights()[light].GetLightType()); 
+				scene.GetData().GetDataGL().GetModelData()[model].Shader.SetUniformVec3f(lightName + "Position", scene.GetAreaLights()[light].GetPosition());
+				scene.GetData().GetDataGL().GetModelData()[model].Shader.SetUniformVec3f(lightName + "Points[0]", scene.GetAreaLights()[light].GetPoints(0));
+				scene.GetData().GetDataGL().GetModelData()[model].Shader.SetUniformVec3f(lightName + "Points[1]", scene.GetAreaLights()[light].GetPoints(1));
+				scene.GetData().GetDataGL().GetModelData()[model].Shader.SetUniformVec3f(lightName + "Points[2]", scene.GetAreaLights()[light].GetPoints(2));
+				scene.GetData().GetDataGL().GetModelData()[model].Shader.SetUniformVec3f(lightName + "Points[3]", scene.GetAreaLights()[light].GetPoints(3));
 				scene.GetData().GetDataGL().GetModelData()[model].Shader.SetUniform1f(lightName + "Intensity", scene.GetAreaLights()[light].GetIntensity());
+				scene.GetData().GetDataGL().GetModelData()[model].Shader.SetUniformVec3f(lightName + "Color", scene.GetAreaLights()[light].GetColor());
+				scene.GetData().GetDataGL().GetModelData()[model].Shader.SetUniform1i(lightName + "TwoSided", scene.GetAreaLights()[light].TwoSided());
 			}
 		}
 		scene.GetData().GetDataGL().GetModelData()[model].VA.Bind();
@@ -401,17 +458,7 @@ void GLRenderer::DrawDefault(Scene& scene)
 			m_Shaders.LightcubeArea.SetUniformMat4f("u_ModelMat", scene.GetAreaLights()[light].GetModelMat());
 			m_Shaders.LightcubeArea.SetUniformVec3f("u_Color", scene.GetAreaLights()[light].GetColor());
 			m_Shaders.LightcubeArea.SetUniform1f("u_Intensity", scene.GetAreaLights()[light].GetIntensity());
-			switch (scene.GetAreaLights()[light].GetLightType())
-			{
-			case RECTANGLE:
-				scene.GetData().GetDataGL().GetAreaLightData().RectangleVA.Bind();
-				scene.GetData().GetDataGL().GetAreaLightData().RectangleIB.Bind();
-				GLCall(glDrawElements(GL_TRIANGLES, scene.GetData().GetDataGL().GetAreaLightData().RectangleIB.GetCount(), GL_UNSIGNED_INT, nullptr));
-				scene.GetData().GetDataGL().GetAreaLightData().RectangleVA.Unbind();
-				scene.GetData().GetDataGL().GetAreaLightData().RectangleIB.Unbind();
-				break;
-			}
-
+			DrawAreaLightCube(scene, scene.GetAreaLights()[light].GetLightType());
 		}
 	}
 	m_Shaders.LightcubeArea.Unbind();
@@ -609,17 +656,7 @@ void GLRenderer::DrawBlank(Scene& scene)
 			m_Shaders.LightcubeArea.SetUniformMat4f("u_ModelMat", scene.GetAreaLights()[light].GetModelMat());
 			m_Shaders.LightcubeArea.SetUniformVec3f("u_Color", scene.GetAreaLights()[light].GetColor());
 			m_Shaders.LightcubeArea.SetUniform1f("u_Intensity", scene.GetAreaLights()[light].GetIntensity());
-			switch (scene.GetAreaLights()[light].GetLightType())
-			{
-			case RECTANGLE:
-				scene.GetData().GetDataGL().GetAreaLightData().RectangleVA.Bind();
-				scene.GetData().GetDataGL().GetAreaLightData().RectangleIB.Bind();
-				GLCall(glDrawElements(GL_TRIANGLES, scene.GetData().GetDataGL().GetAreaLightData().RectangleIB.GetCount(), GL_UNSIGNED_INT, nullptr));
-				scene.GetData().GetDataGL().GetAreaLightData().RectangleVA.Unbind();
-				scene.GetData().GetDataGL().GetAreaLightData().RectangleIB.Unbind();
-				break;
-			}
-
+			DrawAreaLightCube(scene, scene.GetAreaLights()[light].GetLightType());
 		}
 	}
 	m_Shaders.LightcubeArea.Unbind();
@@ -870,6 +907,41 @@ void GLRenderer::DrawLightCube(Scene& scene)
 	scene.GetData().GetDataGL().GetDirLightData().IB.Unbind();
 	m_Shaders.Lightcube.Unbind();
 	m_Frame.FB.Unbind();
+}
+
+void GLRenderer::DrawAreaLightCube(Scene& scene, AL_Type type)
+{
+	switch (type)
+	{
+	case RECTANGLE:
+		scene.GetData().GetDataGL().GetAreaLightData().RectangleVA.Bind();
+		scene.GetData().GetDataGL().GetAreaLightData().RectangleIB.Bind();
+		GLCall(glDrawElements(GL_TRIANGLES, scene.GetData().GetDataGL().GetAreaLightData().RectangleIB.GetCount(), GL_UNSIGNED_INT, nullptr));
+		scene.GetData().GetDataGL().GetAreaLightData().RectangleVA.Unbind();
+		scene.GetData().GetDataGL().GetAreaLightData().RectangleIB.Unbind();
+		break;
+	case SPHERE:
+		scene.GetData().GetDataGL().GetAreaLightData().SphereVA.Bind();
+		scene.GetData().GetDataGL().GetAreaLightData().SphereIB.Bind();
+		GLCall(glDrawElements(GL_TRIANGLES, scene.GetData().GetDataGL().GetAreaLightData().SphereIB.GetCount(), GL_UNSIGNED_INT, nullptr));
+		scene.GetData().GetDataGL().GetAreaLightData().SphereVA.Unbind();
+		scene.GetData().GetDataGL().GetAreaLightData().SphereIB.Unbind();
+		break;
+	case CYLINDER:
+		scene.GetData().GetDataGL().GetAreaLightData().CylinderVA.Bind();
+		scene.GetData().GetDataGL().GetAreaLightData().CylinderIB.Bind();
+		GLCall(glDrawElements(GL_TRIANGLES, scene.GetData().GetDataGL().GetAreaLightData().CylinderIB.GetCount(), GL_UNSIGNED_INT, nullptr));
+		scene.GetData().GetDataGL().GetAreaLightData().CylinderVA.Unbind();
+		scene.GetData().GetDataGL().GetAreaLightData().CylinderIB.Unbind();
+		break;
+	case DISK:
+		scene.GetData().GetDataGL().GetAreaLightData().DiskVA.Bind();
+		scene.GetData().GetDataGL().GetAreaLightData().DiskIB.Bind();
+		GLCall(glDrawElements(GL_TRIANGLES, scene.GetData().GetDataGL().GetAreaLightData().DiskIB.GetCount(), GL_UNSIGNED_INT, nullptr));
+		scene.GetData().GetDataGL().GetAreaLightData().DiskVA.Unbind();
+		scene.GetData().GetDataGL().GetAreaLightData().DiskIB.Unbind();
+		break;
+	}
 }
 
 void GLRenderer::DrawSkybox(Scene& scene)
@@ -1364,24 +1436,40 @@ void GLRenderer::ChangeResolution()
 	}
 }
 
-void GLRenderer::ChangePostProcess()
+bool GLRenderer::ChangePostProcess()
 {
 	switch (core::SETTINGS.PP)
 	{
 	case 0:
-		m_Shaders.PP.Init(SHADER_OPENGL_PP_NONE);
+		if (!m_Shaders.PP.Init(SHADER_OPENGL_PP_NONE))
+		{
+			return false;
+		}
 		break;
 	case 1:
-		m_Shaders.PP.Init(SHADER_OPENGL_PP_INVERSE);
+		if (!m_Shaders.PP.Init(SHADER_OPENGL_PP_INVERSE))
+		{
+			return false;
+		}
 		break;
 	case 2:
-		m_Shaders.PP.Init(SHADER_OPENGL_PP_BLUR);
+		if (!m_Shaders.PP.Init(SHADER_OPENGL_PP_BLUR))
+		{
+			return false;
+		}
 		break;
 	case 3:
-		m_Shaders.PP.Init(SHADER_OPENGL_PP_GRAYSCALE);
+		if (!m_Shaders.PP.Init(SHADER_OPENGL_PP_GRAYSCALE))
+		{
+			return false;
+		}
 		break;
 	case 4:
-		m_Shaders.PP.Init(SHADER_OPENGL_PP_EDGE);
+		if (!m_Shaders.PP.Init(SHADER_OPENGL_PP_EDGE))
+		{
+			return false;
+		}
 		break;
 	}
+	return true;
 }

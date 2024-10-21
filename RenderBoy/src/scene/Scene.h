@@ -61,7 +61,7 @@ public:
 	Scene();
 	~Scene();
 
-	void Init();
+	bool Init();
 	// Reset the current scene
 	void Reset();
 	bool Reset(std::string filepath);
