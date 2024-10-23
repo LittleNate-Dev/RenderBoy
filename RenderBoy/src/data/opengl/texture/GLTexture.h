@@ -32,7 +32,7 @@ public:
 
     // Tell opengl to generate a texture
     bool GenTexture(const std::string filepath);
-    bool GenTexture(const std::string filepath, bool sRGB);
+    bool GenTexture(const std::string filepath, bool sRGB, bool compress);
     void GenTexture(Tex_Type type);
     void Bind(unsigned int slot = 0) const;
     void Unbind() const;

@@ -1293,11 +1293,11 @@ void Application::GamepadInput()
                 direction = glm::normalize(direction);
                 if (state.axes[GLFW_GAMEPAD_AXIS_LEFT_X] > 0.0f)
                 {
-                    move = direction * m_Scene.GetCamera().GetMoveSpeed() * (state.axes[GLFW_GAMEPAD_AXIS_LEFT_X] - core::SETTINGS.DeadZone.x);
+                    move = direction * m_Scene.GetCamera().GetMoveSpeed() * core::TIME_DELTA * (state.axes[GLFW_GAMEPAD_AXIS_LEFT_X] - core::SETTINGS.DeadZone.x);
                 }
                 else
                 {
-                    move = direction * m_Scene.GetCamera().GetMoveSpeed() * (state.axes[GLFW_GAMEPAD_AXIS_LEFT_X] + core::SETTINGS.DeadZone.x);
+                    move = direction * m_Scene.GetCamera().GetMoveSpeed() * core::TIME_DELTA * (state.axes[GLFW_GAMEPAD_AXIS_LEFT_X] + core::SETTINGS.DeadZone.x);
                 }
                 move -= m_Scene.GetCamera().GetPosition();
                 m_Scene.GetCamera().SetPosition(move);
@@ -1305,24 +1305,24 @@ void Application::GamepadInput()
                 direction = glm::normalize(direction);
                 if (state.axes[GLFW_GAMEPAD_AXIS_LEFT_Y] > 0.0f)
                 {
-                    move = direction * m_Scene.GetCamera().GetMoveSpeed() * -(state.axes[GLFW_GAMEPAD_AXIS_LEFT_Y] - core::SETTINGS.DeadZone.x);
+                    move = direction * m_Scene.GetCamera().GetMoveSpeed() * core::TIME_DELTA * -(state.axes[GLFW_GAMEPAD_AXIS_LEFT_Y] - core::SETTINGS.DeadZone.x);
                 }
                 else
                 {
-                    move = direction * m_Scene.GetCamera().GetMoveSpeed() * -(state.axes[GLFW_GAMEPAD_AXIS_LEFT_Y] + core::SETTINGS.DeadZone.x);
+                    move = direction * m_Scene.GetCamera().GetMoveSpeed() * core::TIME_DELTA * -(state.axes[GLFW_GAMEPAD_AXIS_LEFT_Y] + core::SETTINGS.DeadZone.x);
                 }
                 move -= m_Scene.GetCamera().GetPosition();
                 m_Scene.GetCamera().SetPosition(move);
             }
             if (state.buttons[GLFW_GAMEPAD_BUTTON_LEFT_THUMB])
             {
-                move = glm::vec3(0.0f, 1.0f, 0.0f) * m_Scene.GetCamera().GetMoveSpeed();
+                move = glm::vec3(0.0f, 1.0f, 0.0f) * m_Scene.GetCamera().GetMoveSpeed() * core::TIME_DELTA;
                 move += m_Scene.GetCamera().GetPosition();
                 m_Scene.GetCamera().SetPosition(move);
             }
             if (state.buttons[GLFW_GAMEPAD_BUTTON_RIGHT_THUMB])
             {
-                move = glm::vec3(0.0f, -1.0f, 0.0f) * m_Scene.GetCamera().GetMoveSpeed();
+                move = glm::vec3(0.0f, -1.0f, 0.0f) * m_Scene.GetCamera().GetMoveSpeed() * core::TIME_DELTA;
                 move += m_Scene.GetCamera().GetPosition();
                 m_Scene.GetCamera().SetPosition(move);
             }
