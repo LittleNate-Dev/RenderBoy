@@ -62,6 +62,9 @@ void AreaLight::UpdatePointsDisk()
 
 void AreaLight::UpdatePointsCylinder()
 {
+	glm::vec3 tangent = glm::vec3(GetRotateMat() * glm::vec4(1.0f, 0.0f, 0.0f, 0.0f));
+	m_Points[0] = m_Position - 0.5f * m_Scale.x * tangent;
+	m_Points[1] = m_Position + 0.5f * m_Scale.x * tangent;
 }
 
 void AreaLight::SetName(std::string name)
@@ -318,6 +321,12 @@ void AreaLight::DrawUI()
 				ImGui::CenterAlignWidget("Two Sided");
 				ImGui::LabelHighlighted("Two Sided");
 				ImGui::Checkbox("##TwoSided", &m_TwoSided);
+			}
+			else if (m_Type == CYLINDER)
+			{
+				ImGui::CenterAlignWidget("End Caps");
+				ImGui::LabelHighlighted("End Caps");
+				ImGui::Checkbox("##EndCaps", &m_TwoSided);
 			}
 		}
 		ImGui::TreePop();
@@ -614,6 +623,22 @@ void AreaLight::DrawUI()
 					SetScale(glm::vec3(m_Scale.x));
 				}
 			}
+			else if (m_Type == CYLINDER)
+			{
+				ImGui::CenterAlignWidget("Length", 80.0f * core::GetWidgetWidthCoefficient());
+				ImGui::LabelHighlighted("Length");
+				if (ImGui::InputFloat("##Length", &m_Scale.x))
+				{
+					SetScale(m_Scale);
+				}
+				ImGui::CenterAlignWidget("Radius", 80.0f * core::GetWidgetWidthCoefficient());
+				ImGui::LabelHighlighted("Radius");
+				if (ImGui::InputFloat("##Radius", &m_Scale.z))
+				{
+					m_Scale.y = m_Scale.z;
+					SetScale(m_Scale);
+				}
+			}
 			else
 			{
 				ImGui::CenterAlignWidget("X", 80.0f * core::GetWidgetWidthCoefficient());
@@ -628,7 +653,7 @@ void AreaLight::DrawUI()
 				{
 					SetScale(m_Scale);
 				}
-				if (m_Type != RECTANGLE || m_Type != DISK)
+				if (m_Type != RECTANGLE && m_Type != DISK)
 				{
 					ImGui::CenterAlignWidget("Z", 80.0f * core::GetWidgetWidthCoefficient());
 					ImGui::LabelHighlighted("Z");

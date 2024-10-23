@@ -429,6 +429,7 @@ void GLRenderer::DrawDefault(Scene& scene)
 			{
 				scene.GetData().GetDataGL().GetModelData()[model].Shader.SetUniform1i(lightName + "Type", scene.GetAreaLights()[light].GetLightType()); 
 				scene.GetData().GetDataGL().GetModelData()[model].Shader.SetUniformVec3f(lightName + "Position", scene.GetAreaLights()[light].GetPosition());
+				scene.GetData().GetDataGL().GetModelData()[model].Shader.SetUniformVec3f(lightName + "Scale", scene.GetAreaLights()[light].GetScale());
 				scene.GetData().GetDataGL().GetModelData()[model].Shader.SetUniformVec3f(lightName + "Points[0]", scene.GetAreaLights()[light].GetPoints(0));
 				scene.GetData().GetDataGL().GetModelData()[model].Shader.SetUniformVec3f(lightName + "Points[1]", scene.GetAreaLights()[light].GetPoints(1));
 				scene.GetData().GetDataGL().GetModelData()[model].Shader.SetUniformVec3f(lightName + "Points[2]", scene.GetAreaLights()[light].GetPoints(2));

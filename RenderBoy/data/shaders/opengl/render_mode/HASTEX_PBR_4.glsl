@@ -145,6 +145,7 @@ struct AreaLight
 {
     int Type;
     vec3 Position;
+    vec3 Scale;
     vec3 Points[4];
     float Intensity;
     vec3 Color;
@@ -213,15 +214,21 @@ vec3 CalcDirLight(int i);
 vec3 CalcAreaLight(int i);
 vec3 CalcAreaLightRect(int i);
 vec3 CalcAreaLightDisk(int i);
+vec3 CalcAreaLightCylinder(int i);
+// Helper functions
 float DistributionGGX(vec3 N, vec3 H, float roughness);
 float GeometrySchlickGGX(float NdotV, float roughness);
 float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness);
 vec3 FresnelSchlick(float cosTheta, vec3 F0);
 vec3 EvaluateLTCRect(vec3 N, vec3 V, vec3 P, mat3 Minv, vec3 vertex[4], bool twoSided);
 vec3 EvaluateLTCDisk(vec3 N, vec3 V, vec3 P, mat3 Minv, vec3 vertex[4], bool twoSided);
+vec3 EvaluateLTCCylinder(vec3 N, vec3 V, vec3 P, mat3 Minv, vec3 vertex[4], float radius, bool endCaps);
 vec3 IntegrateEdgeVec(vec3 v1, vec3 v2);
 float IntegrateEdge(vec3 v1, vec3 v2);
 vec3 SolveCubic(vec4 Coefficient);
+float Fpo(float d, float l);
+float Fwt(float d, float l);
+float D(vec3 w, mat3 Minv);
 
 void main()
 {
@@ -579,6 +586,9 @@ vec3 CalcAreaLight(int i)
     case 0:
         lighting = CalcAreaLightRect(i);
         break;
+    case 2:
+        lighting = CalcAreaLightCylinder(i);
+        break;
     case 3:
         lighting = CalcAreaLightDisk(i);
         break;
@@ -643,6 +653,33 @@ vec3 CalcAreaLightDisk(int i)
     lighting.z = max(0.0, lighting.z);
 
     return lighting; 
+}
+
+vec3 CalcAreaLightCylinder(int i)
+{
+    vec3 lighting = vec3(0.0);
+    float dotNV = clamp(dot(c_Normal, c_ViewDir), 0.0, 1.0);
+    // use roughness and sqrt(1-cos_theta) to sample M_texture
+    vec2 uv = vec2(c_Roughness, sqrt(1.0 - dotNV));
+    uv = uv * LUT_SCALE + LUT_BIAS;
+    // get 4 parameters for inverse_M
+    vec4 t1 = texture(u_LTC1, uv);
+    // Get 2 parameters for Fresnel calculation
+    vec4 t2 = texture(u_LTC2, uv);
+    mat3 Minv = mat3(
+        vec3(t1.x, 0.0, t1.y),
+        vec3(0.0,  1.0,  0.0),
+        vec3(t1.z, 0.0, t1.w)
+    );
+
+    // Evaluate LTC shading
+    vec3 diffuse, specular;
+    diffuse = EvaluateLTCCylinder(c_Normal, c_ViewDir, v_FragPos, mat3(1.0), u_AreaLight[i].Points, u_AreaLight[i].Scale.z, u_AreaLight[i].TwoSided);
+    specular = EvaluateLTCCylinder(c_Normal, c_ViewDir, v_FragPos, Minv, u_AreaLight[i].Points, u_AreaLight[i].Scale.z, u_AreaLight[i].TwoSided);
+    specular *= vec3(c_Metallic) * t2.x + (1.0 - vec3(c_Metallic)) * t2.y;
+    lighting = u_AreaLight[i].Color * u_AreaLight[i].Intensity * (specular + c_Albedo * diffuse);
+
+    return lighting;
 }
 
 float DistributionGGX(vec3 N, vec3 H, float roughness)
@@ -858,6 +895,70 @@ vec3 EvaluateLTCDisk(vec3 N, vec3 V, vec3 P, mat3 Minv, vec3 vertex[4], bool two
     return vec3(spec);
 }
 
+vec3 EvaluateLTCCylinder(vec3 N, vec3 V, vec3 P, mat3 Minv, vec3 vertex[4], float radius, bool endCaps)
+{
+    // construct orthonormal basis around N
+    vec3 T1, T2;
+    T1 = normalize(V - N * dot(V, N));
+    T2 = cross(N, T1);
+    mat3 B = transpose(mat3(T1, T2, N));
+    vec3 p1 = B * (vertex[0] - P);
+    vec3 p2 = B * (vertex[1] - P);
+    // transform to diffuse configuration
+    vec3 p1o = Minv * p1;
+    vec3 p2o = Minv * p2;
+
+    float I_diffuse = 0.0;
+    // tangent
+    vec3 wt = normalize(p2o - p1o);
+    // clamping
+    if (p1o.z <= 0.0 && p2o.z <= 0.0)
+    {
+       I_diffuse = 0.0; 
+    }
+    else
+    {
+        if (p1o.z < 0.0)
+        {
+            p1o = (+p1o * p2o.z - p2o * p1o.z) / (+p2o.z - p1o.z);
+        }
+
+        if (p2o.z < 0.0)
+        {
+            p2o = (-p1o * p2o.z + p2o * p1o.z) / (-p2o.z + p1o.z);
+        }
+        // parameterization Eq.(1.12, 1.13)
+        float l1 = dot(p1o, wt);
+        float l2 = dot(p2o, wt);
+        // shading point orthonormal projection on the line Eq.(1.14)
+        vec3 po = p1o - l1*wt;
+        // distance to line Eq.(1.15)
+        float d = length(po);
+        // integral Eq.(1.21)
+        float I = (Fpo(d, l2) - Fpo(d, l1)) * po.z + (Fwt(d, l2) - Fwt(d, l1)) * wt.z;
+        I_diffuse = I / PI;
+    }
+    // width factor
+    vec3 ortho = normalize(cross(p1, p2));
+    float w =  1.0 / length(inverse(transpose(Minv)) * ortho);
+    float Iline = radius * w * I_diffuse;
+
+    float Idisks = 0.0;
+    if (endCaps)
+    {
+        float A = PI * radius * radius;
+        vec3 wt  = normalize(p2 - p1);
+        vec3 wp1 = normalize(p1);
+        vec3 wp2 = normalize(p2);
+        Idisks = A * (
+        D(wp1, Minv) * max(0.0, dot(+wt, wp1)) / dot(p1, p1) +
+        D(wp2, Minv) * max(0.0, dot(-wt, wp2)) / dot(p2, p2));
+    }
+    
+    // there are some bugs when roughness is quite small
+    return vec3(min(1.0, Iline + Idisks));
+}
+
 // Vector form without project to the plane (dot with the normal)
 // Use for proxy sphere clipping
 vec3 IntegrateEdgeVec(vec3 v1, vec3 v2)
@@ -977,4 +1078,24 @@ vec3 SolveCubic(vec4 Coefficient)
     }
 
     return Root;
+}
+
+float Fpo(float d, float l)
+{
+    return l/(d*(d*d + l*l)) + atan(l/d)/(d*d);
+}
+
+float Fwt(float d, float l)
+{
+    return l*l/(d*(d*d + l*l));
+}
+
+float D(vec3 w, mat3 Minv)
+{
+    // Using Minv to get back to origin distribution
+    vec3 wo = Minv * w;
+    float lo = length(wo);
+    // BRDF * cos
+    float res = 1.0/PI * max(0.0, wo.z/lo) * abs(determinant(Minv)) / (lo*lo*lo);
+    return res;
 }
