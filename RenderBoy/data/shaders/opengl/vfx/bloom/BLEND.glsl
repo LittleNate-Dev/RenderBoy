@@ -29,8 +29,6 @@ void main()
 {
     vec3 hdrColor = texture(u_ScreenTex, v_TexCoord).rgb;
     vec3 bloomColor = texture(u_BloomTex, v_TexCoord).rgb;
-    //vec3 result = hdrColor + bloomStrength * bloomColor;
     vec3 result = mix(hdrColor, bloomColor, u_BloomStrength);
-    //vec3 result = hdrColor;
     v_FragColor = vec4(result, 1.0);
 }

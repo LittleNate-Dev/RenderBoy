@@ -54,21 +54,10 @@ void AreaLight::UpdatePointsRect()
 
 void AreaLight::UpdatePointsDisk()
 {
-	GLfloat halfX = m_Scale.x;
-	GLfloat halfY = m_Scale.y;
-	glm::vec3 dirX = glm::vec3(GetRotateMat() * glm::vec4(1.0f, 0.0f, 0.0f, 0.0f));
-	glm::vec3 dirY = glm::vec3(GetRotateMat() * glm::vec4(0.0f, 1.0f, 0.0f, 0.0f));
-	glm::vec3 ex = halfX * dirX;
-	glm::vec3 ey = halfY * dirY;
-
-	m_Points[0] = m_Position - ex - ey;
-	m_Points[1] = m_Position + ex - ey;
-	m_Points[2] = m_Position + ex + ey;
-	m_Points[3] = m_Position - ex + ey;
-	/*m_Points[0] = glm::vec3(m_ModelMat * glm::vec4(-0.5f, 0.5f, 0.0f, 1.0f));
+	m_Points[0] = glm::vec3(m_ModelMat * glm::vec4(-0.5f, 0.5f, 0.0f, 1.0f));
 	m_Points[1] = glm::vec3(m_ModelMat * glm::vec4(0.5f, 0.5f, 0.0f, 1.0f));
 	m_Points[2] = glm::vec3(m_ModelMat * glm::vec4(0.5f, -0.5f, 0.0f, 1.0f));
-	m_Points[3] = glm::vec3(m_ModelMat * glm::vec4(-0.5f, -0.5f, 0.0f, 1.0f));*/
+	m_Points[3] = glm::vec3(m_ModelMat * glm::vec4(-0.5f, -0.5f, 0.0f, 1.0f));
 }
 
 void AreaLight::UpdatePointsCylinder()

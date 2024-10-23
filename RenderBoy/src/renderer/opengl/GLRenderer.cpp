@@ -260,6 +260,7 @@ void GLRenderer::Draw(Scene& scene)
 	GLCall(glViewport(0, 0, core::SETTINGS.Width, core::SETTINGS.Height));
 	m_Shaders.PP.Bind();
 	m_Shaders.PP.SetUniformHandleARB("u_ScreenTex", m_Frame.FB.GetHandle());
+	//m_Shaders.PP.SetUniformHandleARB("u_ScreenTex", m_Frame.Bloom[0].GetHandle());
 	m_Frame.VA.Bind();
 	m_Frame.IB.Bind();
 	GLCall(glDrawElements(GL_TRIANGLES, m_Frame.IB.GetCount(), GL_UNSIGNED_INT, nullptr));

@@ -699,6 +699,10 @@ vec3 CalcAreaLightDisk(int i)
     specular *= vec3(c_Metallic) * t2.x + (1.0 - vec3(c_Metallic)) * t2.y;
     lighting = u_AreaLight[i].Color * u_AreaLight[i].Intensity * (specular + c_Albedo * diffuse);
     
+    lighting.x = max(0.0, lighting.x);
+    lighting.y = max(0.0, lighting.y);
+    lighting.z = max(0.0, lighting.z);
+
     return lighting; 
 }
 
