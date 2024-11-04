@@ -13,9 +13,9 @@
 enum AL_Type
 {
 	RECTANGLE = 0,
-	SPHERE = 1,
-	CYLINDER = 2,
-	DISK = 3
+	CYLINDER = 1,
+	DISK = 2,
+	SPHERE = 3
 };
 
 class AreaLight
@@ -42,6 +42,7 @@ private:
 	void UpdatePointsRect();
 	void UpdatePointsDisk();
 	void UpdatePointsCylinder();
+	void UpdatePointsSphere();
 
 public:
 	AreaLight();

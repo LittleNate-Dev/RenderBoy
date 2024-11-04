@@ -211,7 +211,6 @@ vec3 CalcSpotLight(int i);
 vec3 CalcDirLight(int i);
 vec3 CalcAreaLight(int i);
 vec3 CalcAreaLightRect(int i);
-vec3 CalcAreaLightSphere(int i);
 vec3 CalcAreaLightDisk(int i);
 vec3 CalcAreaLightCylinder(int i);
 // Helper functions
@@ -585,12 +584,9 @@ vec3 CalcAreaLight(int i)
         lighting = CalcAreaLightRect(i);
         break;
     case 1:
-        lighting = CalcAreaLightSphere(i);
-        break;
-    case 2:
         lighting = CalcAreaLightCylinder(i);
         break;
-    case 3:
+    case 2:
         lighting = CalcAreaLightDisk(i);
         break;
     }    
@@ -625,11 +621,6 @@ vec3 CalcAreaLightRect(int i)
     lighting = u_AreaLight[i].Color * u_AreaLight[i].Intensity * (specular + c_Albedo * diffuse);
 
     return lighting;
-}
-
-vec3 CalcAreaLightSphere(int i)
-{
-    return vec3(1.0);
 }
 
 vec3 CalcAreaLightDisk(int i)

@@ -67,6 +67,14 @@ void AreaLight::UpdatePointsCylinder()
 	m_Points[1] = m_Position + 0.5f * m_Scale.x * tangent;
 }
 
+void AreaLight::UpdatePointsSphere()
+{
+	m_Points[0] = glm::vec3(-m_Scale.x * 0.5f, 0.0f, -m_Scale.z * 0.5f);
+	m_Points[1] = glm::vec3(m_Scale.x * 0.5f, 0.0f, -m_Scale.z * 0.5f);
+	m_Points[2] = glm::vec3(m_Scale.x * 0.5f, 0.0f, m_Scale.z * 0.5f);
+	m_Points[3] = glm::vec3(-m_Scale.x * 0.5f, 0.0f, m_Scale.z * 0.5f);
+}
+
 void AreaLight::SetName(std::string name)
 {
 	m_Name = name;
@@ -303,9 +311,9 @@ void AreaLight::DrawUI()
 				ImGui::PushItemWidth(120.0f * core::GetWidgetWidthCoefficient());
 				const char* lightTypeOps[] = {
 					"Rectangle",
-					"Sphere",
 					"Cylinder",
 					"Disk"
+					//"Sphere",
 				};
 				static int currentLightType;
 				currentLightType = m_Type;

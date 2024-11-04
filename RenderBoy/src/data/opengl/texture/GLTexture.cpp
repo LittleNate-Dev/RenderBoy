@@ -101,56 +101,60 @@ bool GLTexture::GenTexture(const std::string filepath, bool sRGB, bool compress)
         m_LocalBuffer = FreeImage_ConvertTo24Bits(m_LocalBuffer);
     }
     FIBITMAP* alphaChannel = FreeImage_GetChannel(m_LocalBuffer, FICC_ALPHA);
+    GLenum internalFormat, format;
     if (alphaChannel == nullptr)
     {
+        format = GL_BGR;
         if (sRGB)
         {
             if (compress)
             {
-                GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_COMPRESSED_SRGB8_ETC2, m_Width, m_Height, 0, GL_BGR, GL_UNSIGNED_BYTE, (void*)FreeImage_GetBits(m_LocalBuffer)));
+                internalFormat = GL_COMPRESSED_SRGB;
             }
             else
             {
-                GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_SRGB, m_Width, m_Height, 0, GL_BGR, GL_UNSIGNED_BYTE, (void*)FreeImage_GetBits(m_LocalBuffer)));
+                internalFormat = GL_SRGB;
             }
         }
         else
         {
             if (compress)
             {
-                GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_COMPRESSED_RGB8_ETC2, m_Width, m_Height, 0, GL_BGR, GL_UNSIGNED_BYTE, (void*)FreeImage_GetBits(m_LocalBuffer)));
+                internalFormat = GL_COMPRESSED_RGB;
             }
             else
             {
-                GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_Width, m_Height, 0, GL_BGR, GL_UNSIGNED_BYTE, (void*)FreeImage_GetBits(m_LocalBuffer)));
+                internalFormat = GL_RGB;
             }
         }
     }
     else
     {
+        format = GL_BGRA;
         if (sRGB)
         {
             if (compress)
             {
-                GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT1_NV, m_Width, m_Height, 0, GL_BGRA, GL_UNSIGNED_BYTE, (void*)FreeImage_GetBits(m_LocalBuffer)));
+                internalFormat = GL_COMPRESSED_SRGB_ALPHA;
             }
             else
             {
-                GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_SRGB_ALPHA, m_Width, m_Height, 0, GL_BGRA, GL_UNSIGNED_BYTE, (void*)FreeImage_GetBits(m_LocalBuffer)));
+                internalFormat = GL_SRGB_ALPHA;
             }
         }
         else
         {
             if (compress)
             {
-                GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_COMPRESSED_RGBA_S3TC_DXT1_NV, m_Width, m_Height, 0, GL_BGRA, GL_UNSIGNED_BYTE, (void*)FreeImage_GetBits(m_LocalBuffer)));
+                internalFormat = GL_COMPRESSED_RGBA;
             }
             else
             {
-                GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_Width, m_Height, 0, GL_BGRA, GL_UNSIGNED_BYTE, (void*)FreeImage_GetBits(m_LocalBuffer)));
+                internalFormat = GL_RGBA;
             }
         }
     }
+    GLCall(glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, m_Width, m_Height, 0, format, GL_UNSIGNED_BYTE, (void*)FreeImage_GetBits(m_LocalBuffer)));
     GLCall(glGenerateMipmap(GL_TEXTURE_2D));
     // Generate texture handle
     m_Handle = glGetTextureHandleARB(m_RendererID);

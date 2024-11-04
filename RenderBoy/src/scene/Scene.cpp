@@ -624,6 +624,11 @@ bool Scene::LoadScene(std::string filepath)
 					values = core::GetFileValue(line);
 					m_AreaLights[light].SetShowCube((bool)std::atoi(values[0].c_str()));
 				}
+				else if (line.find("#AREA_LIGHT_" + light + "_TWOSIDE") != std::string::npos)
+				{
+					values = core::GetFileValue(line);
+					m_AreaLights[light].SetTwoSided((bool)std::atoi(values[0].c_str()));
+				}
 			}
 		}
 		return true;

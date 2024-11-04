@@ -647,10 +647,10 @@ vec3 CalcAreaLight(int i)
     case 0:
         lighting = CalcAreaLightRect(i);
         break;
-    case 2:
+    case 1:
         lighting = CalcAreaLightCylinder(i);
         break;
-    case 3:
+    case 2:
         lighting = CalcAreaLightDisk(i);
         break;
     }    
