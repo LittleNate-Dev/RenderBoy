@@ -555,45 +555,59 @@ vec3 CalcDirLight(int i)
                 break;
             }
         }
+        // Inside light's frustum
+        float currentDepth = ndc.z * 0.5 + 0.5;
         vec2 shadowTex = ndc.xy;
         shadowTex = shadowTex * 0.5 + 0.5;
-        float closestDepth = texture(u_DirLight[i].ShadowMap[level], shadowTex).r;
-        float currentDepth = ndc.z * 0.5 + 0.5;
-        if (closestDepth == 1.0)
+        float shadow = 0.0;
+        float bias = u_DirLight[i].Bias[level];
+        if (u_DirLight[i].SoftShadow)
         {
-            lighting = ambient + diffuse + specular;
+            // PCF
+            vec2 texelSize = 1.0 / textureSize(u_DirLight[i].ShadowMap[level], 0);
+            ivec3 offsetCoord;
+            vec2 f = mod(gl_FragCoord.xy, vec2(16)); // window filter size
+            offsetCoord.yz = ivec2(f);
+            float sum = 0.0;
+            int samplesDiv2 = 32; //(filterSize * filterSize / 2)
+            for (int index = 0; index < 4; index++)
+            {
+                offsetCoord.x = index;
+                vec4 offsets = texelFetch(u_ShadowOffset, offsetCoord, 0) * u_DirLight[i].SoftDegree;
+                float pcfDepth = texture(u_DirLight[i].ShadowMap[level], shadowTex.xy + offsets.rg * texelSize).r;
+                sum += currentDepth - bias > pcfDepth ? 0.0 : 1.0;  
+                pcfDepth = texture(u_DirLight[i].ShadowMap[level], shadowTex.xy + offsets.ba * texelSize).r;
+                sum += currentDepth - bias > pcfDepth ? 0.0 : 1.0;  
+            }
+            shadow = sum / 8.0;
+                
+            if (shadow != 0.0 && shadow != 1.0) 
+            {
+                for (int i = 4 ; i < samplesDiv2 ; i++) 
+                {
+                    offsetCoord.x = i;
+                    vec4 offsets = texelFetch(u_ShadowOffset, offsetCoord, 0) * u_DirLight[i].SoftDegree;
+                    float pcfDepth = texture(u_DirLight[i].ShadowMap[level], shadowTex.xy + offsets.rg * texelSize).r;
+                    sum += currentDepth - bias > pcfDepth  ? 0.0 : 1.0;  
+
+                    pcfDepth = texture(u_DirLight[i].ShadowMap[level], shadowTex.xy + offsets.ba * texelSize).r;
+                    sum += currentDepth - bias > pcfDepth  ? 0.0 : 1.0;  
+                }
+                shadow = sum / float(samplesDiv2 * 2.0);
+                shadow *= (u_DirLight[i].SoftDegree / 2.5);
+                shadow = shadow > 1.0 ? 1.0 : shadow;
+            }
+            if (shadow == 0.0)
+            {
+                shadow += 1 - pow(1.005, -u_SpotLight[i].SoftDegree);
+            }
         }
         else
         {
-            if (currentDepth - u_DirLight[i].Bias[level] > closestDepth)
-            {
-                if (u_DirLight[i].SoftShadow)
-                {
-                    // PCF
-                    float shadow = 0.0;
-                    vec2 texelSize = 1.0 / textureSize(u_DirLight[i].ShadowMap[level], 0);
-                    float offset = u_DirLight[i].SoftDegree;
-                    for(float x = -offset; x <= offset; ++x)
-                    {
-                        for(float y = -offset; y <= offset; ++y)
-                        {
-                            float pcfDepth = texture(u_DirLight[i].ShadowMap[level], shadowTex.xy + vec2(x, y) * texelSize).r; 
-                            shadow += currentDepth - u_DirLight[i].Bias[level] > pcfDepth  ? 1.0 : 0.0;        
-                        }    
-                    }
-                    shadow /= pow(offset * 2.0 + 1.0, 2.0);
-                    lighting = ambient + (1.0 - shadow) * (diffuse + specular);
-                }
-                else
-                {
-                    lighting = ambient;
-                }
-            }
-            else
-            {
-                lighting = ambient + diffuse + specular;
-            }
+            float closestDepth = texture(u_DirLight[i].ShadowMap[level], shadowTex).r;
+            shadow = currentDepth - bias > closestDepth ? 0.0 : 1.0;
         }
+        lighting = ambient + shadow * (diffuse + specular);
     }
     else
     {

@@ -372,7 +372,7 @@ void DirectionalLight::SetBias(glm::vec3 bias)
 
 void DirectionalLight::SetSoftDegree(unsigned int degree)
 {
-	m_SoftDegree = degree;
+	m_SoftDegree = degree > 0 ? degree : 1;
 }
 
 void DirectionalLight::SetSoftShadow(bool softShadow)
