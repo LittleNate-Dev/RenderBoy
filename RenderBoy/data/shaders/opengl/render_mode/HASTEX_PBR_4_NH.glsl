@@ -195,6 +195,8 @@ uniform sampler2D u_SSAOTex;
 // LTC used for area light
 uniform sampler2D u_LTC1;
 uniform sampler2D u_LTC2;
+// Texture used for pcf offset
+uniform sampler3D u_ShadowOffset;
 
 // Material
 uniform vec3 u_Diffuse[];

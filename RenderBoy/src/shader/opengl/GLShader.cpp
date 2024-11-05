@@ -77,6 +77,24 @@ bool GLShader::Init(ModelStatics statics)
     }
 }
 
+bool GLShader::Init(std::string filepath, ModelStatics statics)
+{
+    m_UniformLocationCache.clear();
+    GLCall(glDeleteProgram(m_RendererID));
+    m_RendererID = 0;
+    m_FilePath = filepath;
+    ShaderProgramSource source = ParseShader(filepath, statics);
+    m_RendererID = CreateShader(source);
+    if (m_RendererID)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
 ShaderProgramSource GLShader::ParseShader(std::string filepath)
 {
     std::ifstream stream(filepath);

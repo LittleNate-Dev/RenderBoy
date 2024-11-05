@@ -93,6 +93,7 @@ struct GLModelData
 	GLVertexBuffer InstanceVB;
 	GLIndexBuffer IB;
 	GLShader Shader;
+	GLShader GBuffer;
 	std::vector<GLTexture> AlbedoTex;
 	std::vector<GLTexture> SpecularTex;
 	std::vector<GLTexture> MetallicTex;
@@ -148,7 +149,7 @@ public:
 	// Change draw mode
 	bool ChangeDrawMode();
 	// Add, delete and rename model data
-	void AddModel(std::string name, Model& model);
+	bool AddModel(std::string name, Model& model);
 	bool DeleteModel(std::string name);
 	bool RenameModel(std::string oldName, std::string newName);
 	void AddLight(std::string name, Light_Type type);

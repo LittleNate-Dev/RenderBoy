@@ -17,10 +17,6 @@ bool GLRenderer::Init(Scene& scene)
 	{
 		return false;
 	}
-	if (!m_Shaders.GBuffer.Init(SHADER_OPENGL_GBUFFER))
-	{
-		return false;
-	}
 	if (!m_Shaders.GBufferArea.Init(SHADER_OPENGL_GBUFFER_AREA))
 	{
 		return false;
@@ -276,22 +272,23 @@ void GLRenderer::DrawGBuffer(Scene& scene)
 	Clear();
 	glm::vec2 texSize = m_Frame.GBuffer.GetTexSize();
 	GLCall(glViewport(0, 0, texSize.x, texSize.y));
-	m_Shaders.GBuffer.Bind();
-	m_Shaders.GBuffer.SetUniformMat4f("u_ProjMat", scene.GetCamera().GetProjMat());
-	m_Shaders.GBuffer.SetUniformMat4f("u_ViewMat", scene.GetCamera().GetViewMat());
-	m_Shaders.GBuffer.SetUniformVec2f("u_Plane", scene.GetCamera().GetPlane());
+	
 	std::string model;
 	for (unsigned int i = 0; i < scene.GetModelList().size(); i++)
 	{
 		model = scene.GetModelList()[i];
+		scene.GetData().GetDataGL().GetModelData()[model].GBuffer.Bind();
+		scene.GetData().GetDataGL().GetModelData()[model].GBuffer.SetUniformMat4f("u_ProjMat", scene.GetCamera().GetProjMat());
+		scene.GetData().GetDataGL().GetModelData()[model].GBuffer.SetUniformMat4f("u_ViewMat", scene.GetCamera().GetViewMat());
+		scene.GetData().GetDataGL().GetModelData()[model].GBuffer.SetUniformVec2f("u_Plane", scene.GetCamera().GetPlane());
 		scene.GetData().GetDataGL().GetModelData()[model].VA.Bind();
 		scene.GetData().GetDataGL().GetModelData()[model].IB.Bind();
 		// Draw Model
 		GLCall(glDrawElementsInstanced(GL_TRIANGLES, scene.GetData().GetDataGL().GetModelData()[model].IB.GetCount(), GL_UNSIGNED_INT, nullptr, scene.GetModels()[model].GetInstance()));
 		scene.GetData().GetDataGL().GetModelData()[model].VA.Unbind();
 		scene.GetData().GetDataGL().GetModelData()[model].IB.Unbind();
+		scene.GetData().GetDataGL().GetModelData()[model].GBuffer.Unbind();
 	}	
-	m_Shaders.GBuffer.Unbind();
 	// Draw Area light's cube
 	std::string light;
 	m_Shaders.GBufferArea.Bind();

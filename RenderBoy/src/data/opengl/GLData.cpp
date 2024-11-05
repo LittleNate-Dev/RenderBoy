@@ -333,7 +333,7 @@ bool GLData::ChangeDrawMode()
 	return true;
 }
 
-void GLData::AddModel(std::string name, Model& model)
+bool GLData::AddModel(std::string name, Model& model)
 {
 	m_ModelList.push_back(name);
 	GLModelData modelData;
@@ -749,7 +749,15 @@ void GLData::AddModel(std::string name, Model& model)
 	instanceLayout.Push<float>(4);
 	m_ModelData[name].VA.AddBuffer(m_ModelData[name].InstanceVB, instanceLayout, 1);
 	// Init shader
-	m_ModelData[name].Shader.Init(m_ModelData[name].Statics);
+	if (!m_ModelData[name].Shader.Init(m_ModelData[name].Statics))
+	{
+		return false;
+	}
+	if (!m_ModelData[name].GBuffer.Init(SHADER_OPENGL_GBUFFER, m_ModelData[name].Statics))
+	{
+		return false;
+	}
+	// Set uniforms in shader
 	m_ModelData[name].Shader.Bind();
 	std::string uniformName;
 	for (unsigned int i = 0; i < m_ModelData[name].DiffuseValue.size(); i++)
@@ -845,6 +853,21 @@ void GLData::AddModel(std::string name, Model& model)
 		m_ModelData[name].Shader.SetUniformHandleARB(uniformName, m_ModelData[name].HeightTex[i].GetHandle());
 	}
 	m_ModelData[name].Shader.Unbind();
+	// Set uniforms in Gbuffer
+	m_ModelData[name].GBuffer.Bind();
+	for (unsigned int i = 0; i < m_ModelData[name].TransparentValue.size(); i++)
+	{
+		uniformName = "u_Transparent[" + std::to_string(i) + "]";
+		m_ModelData[name].GBuffer.SetUniform1f(uniformName, m_ModelData[name].TransparentValue[i]);
+	}
+	for (unsigned int i = 0; i < m_ModelData[name].AlbedoTex.size(); i++)
+	{
+		uniformName = "u_AlbedoTex[" + std::to_string(i) + "]";
+		m_ModelData[name].AlbedoTex[i].GenTexture(albedoTex[i], true, true);
+		m_ModelData[name].GBuffer.SetUniformHandleARB(uniformName, m_ModelData[name].AlbedoTex[i].GetHandle());
+	}
+	m_ModelData[name].GBuffer.Unbind();
+	return true;
 }
 
 bool GLData::DeleteModel(std::string name)

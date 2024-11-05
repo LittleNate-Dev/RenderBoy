@@ -41,6 +41,7 @@ public:
 
     bool Init(std::string filepath);
     bool Init(ModelStatics statics);
+    bool Init(std::string filepath, ModelStatics statics);
     void Bind() const;
     void Unbind() const;
     inline unsigned int GetID() const

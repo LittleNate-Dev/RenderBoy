@@ -30,7 +30,6 @@ struct Frame
 struct Shaders
 {
 	GLShader OIT;
-	GLShader GBuffer;
 	GLShader GBufferArea;
 	GLShader Normal;
 	GLShader Lightcube;
