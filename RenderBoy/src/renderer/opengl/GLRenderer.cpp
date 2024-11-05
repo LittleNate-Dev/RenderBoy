@@ -331,6 +331,7 @@ void GLRenderer::DrawDefault(Scene& scene)
 		scene.GetData().GetDataGL().GetModelData()[model].Shader.SetUniformVec3f("u_ViewPos", scene.GetCamera().GetPosition());
 		scene.GetData().GetDataGL().GetModelData()[model].Shader.SetUniform1i("u_SSAO", scene.GetVFX().SSAO);
 		scene.GetData().GetDataGL().GetModelData()[model].Shader.SetUniformHandleARB("u_SSAOTex", m_Frame.SSAO[1].GetHandle());
+		scene.GetData().GetDataGL().GetModelData()[model].Shader.SetUniformHandleARB("u_ShadowOffset", scene.GetData().GetDataGL().GetSpotLightData().ShadowOffset.GetHandle());
 		std::string light;
 		// Set point lights' uniforms
 		for (unsigned int j = 0; j < scene.GetPointLightList().size(); j++)

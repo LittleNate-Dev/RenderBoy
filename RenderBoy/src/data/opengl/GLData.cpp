@@ -140,6 +140,7 @@ bool GLData::Init()
 		GLVertexBufferLayout layout;
 		layout.Push<float>(3);
 		m_SpotLightData.VA.AddBuffer(m_SpotLightData.VB, layout);
+		m_SpotLightData.ShadowOffset.GenTexture(PCF_RANDOM);
 	}
 	// Initialize directional light's cube
 	{

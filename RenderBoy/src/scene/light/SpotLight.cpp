@@ -395,7 +395,7 @@ void SpotLight::SetSoftShadow(bool softShadow)
 
 void SpotLight::SetSoftDegree(unsigned int degree)
 {
-	m_SoftDegree = degree;
+	m_SoftDegree = degree > 0 ? degree : 1;
 }
 
 void SpotLight::DrawUI()

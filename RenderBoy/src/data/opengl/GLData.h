@@ -34,6 +34,7 @@ struct GLSpotLightData
 	GLVertexBuffer VB;
 	GLIndexBuffer IB;
 	GLShader Shader;
+	GLTexture ShadowOffset;
 	std::map<std::string, GLFrameBuffer> DepthMap;
 };
 

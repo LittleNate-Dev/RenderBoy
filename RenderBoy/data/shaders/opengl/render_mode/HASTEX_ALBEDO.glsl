@@ -158,6 +158,8 @@ uniform SpotLight u_SpotLight[SPOT_LIGHT_COUNT];
 uniform DirLight u_DirLight[DIR_LIGHT_COUNT];
 uniform bool u_SSAO;
 uniform sampler2D u_SSAOTex;
+// Texture used for pcf offset
+uniform sampler3D u_ShadowOffset;
 
 // Material
 uniform vec3 u_Diffuse[];
@@ -308,12 +310,14 @@ vec3 CalcPointLight(int i)
             if (u_PointLight[i].SoftShadow)
             {
                 float samples = 4.0;
+                float halfSample = 2.0;
+                float tripleSample = 64.0;
                 float offset  = u_PointLight[i].SoftDegree;
-                for(float x = -offset; x < offset; x += offset / (samples * 0.5))
+                for(float x = -offset; x < offset; x += offset / halfSample)
                 {
-                    for(float y = -offset; y < offset; y += offset / (samples * 0.5))
+                    for(float y = -offset; y < offset; y += offset / halfSample)
                     {
-                        for(float z = -offset; z < offset; z += offset / (samples * 0.5))
+                        for(float z = -offset; z < offset; z += offset / halfSample)
                         {
                             float closestDepth = texture(u_PointLight[i].ShadowMap, fragToLight + vec3(x, y, z)).r; 
                             closestDepth *= u_PointLight[i].FarPlane;
@@ -324,7 +328,7 @@ vec3 CalcPointLight(int i)
                         }
                     }
                 }
-                shadow /= (samples * samples * samples);
+                shadow /= tripleSample;
             }
             else
             {
@@ -393,54 +397,68 @@ vec3 CalcSpotLight(int i)
     vec3 lighting = vec3(1.0);
     if (u_SpotLight[i].CastShadow)
     {
-        float bias = max(u_SpotLight[i].Bias.x * (1.0 - dot(c_Normal, lightDir)), u_SpotLight[i].Bias.y);
+        float bias = max(u_SpotLight[i].Bias.x * (1.0 - dot(normalize(v_Normal), normalize(u_SpotLight[i].Position - v_FragPos))), u_SpotLight[i].Bias.y);
         vec3 ndc = v_FragPosSpot[i].xyz / v_FragPosSpot[i].w;
-        if (ndc.x < 1.0 && ndc.x > -1.0 && ndc.y < 1.0 && ndc.y > -1.0 && ndc.z > -1.0)
+        if (ndc.x < 1.0 && ndc.x > -1.0 && ndc.y < 1.0 && ndc.y > -1.0 && ndc.z > -1.0 && ndc.z < 1.0)
         {
             // Inside light's frustum
-            lighting = vec3(1.0);
+            float currentDepth = ndc.z * 0.5 + 0.5;
+            currentDepth *= u_SpotLight[i].FarPlane;
             vec2 shadowTex = ndc.xy;
             shadowTex = shadowTex * 0.5 + 0.5;
-            float closestDepth = texture(u_SpotLight[i].ShadowMap, shadowTex).r;
-            float currentDepth = ndc.z * 0.5 + 0.5;
-            if (closestDepth == 1.0)
+            float shadow = 0.0;
+            if (u_SpotLight[i].SoftShadow)
             {
-                lighting = ambient + diffuse + specular;
+                // PCF
+                vec2 texelSize = 1.0 / textureSize(u_SpotLight[i].ShadowMap, 0);
+                ivec3 offsetCoord;
+                vec2 f = mod(gl_FragCoord.xy, vec2(16)); // window filter size
+                offsetCoord.yz = ivec2(f);
+                float sum = 0.0;
+                int samplesDiv2 = 32; //(filterSize * filterSize / 2)
+                for (int index = 0; index < 4; index++)
+                {
+                    offsetCoord.x = index;
+                    vec4 offsets = texelFetch(u_ShadowOffset, offsetCoord, 0) * u_SpotLight[i].SoftDegree;
+                    float pcfDepth = texture(u_SpotLight[i].ShadowMap, shadowTex.xy + offsets.rg * texelSize).r;
+                    pcfDepth *= u_SpotLight[i].FarPlane;
+                    sum += currentDepth - bias > pcfDepth ? 0.0 : 1.0;  
+                    pcfDepth = texture(u_SpotLight[i].ShadowMap, shadowTex.xy + offsets.ba * texelSize).r;
+                    pcfDepth *= u_SpotLight[i].FarPlane;
+                    sum += currentDepth - bias > pcfDepth ? 0.0 : 1.0;  
+                }
+                shadow = sum / 8.0;
+                
+                if (shadow != 0.0 && shadow != 1.0) 
+                {
+                    for (int i = 4 ; i < samplesDiv2 ; i++) 
+                    {
+                        offsetCoord.x = i;
+                        vec4 offsets = texelFetch(u_ShadowOffset, offsetCoord, 0) * u_SpotLight[i].SoftDegree;
+                        float pcfDepth = texture(u_SpotLight[i].ShadowMap, shadowTex.xy + offsets.rg * texelSize).r;
+                        pcfDepth *= u_SpotLight[i].FarPlane;
+                        sum += currentDepth - bias > pcfDepth  ? 0.0 : 1.0;  
+
+                        pcfDepth = texture(u_SpotLight[i].ShadowMap, shadowTex.xy + offsets.ba * texelSize).r;
+                        pcfDepth *= u_SpotLight[i].FarPlane;
+                        sum += currentDepth - bias > pcfDepth  ? 0.0 : 1.0;  
+                    }
+                    shadow = sum / float(samplesDiv2 * 2.0);
+                    shadow *= (u_SpotLight[i].SoftDegree / 5.0);
+                    shadow = shadow > 1.0 ? 1.0 : shadow;
+                }
+                if (shadow == 0.0)
+                {
+                    shadow += 1 - pow(1.005, -u_SpotLight[i].SoftDegree);
+                }
             }
             else
             {
+                float closestDepth = texture(u_SpotLight[i].ShadowMap, shadowTex).r;
                 closestDepth *= u_SpotLight[i].FarPlane;
-                currentDepth *= u_SpotLight[i].FarPlane;
-                if (currentDepth - bias > closestDepth)
-                {
-                    if (u_SpotLight[i].SoftShadow)
-                    {
-                        // PCF
-                        float shadow = 0.0;
-                        vec2 texelSize = 1.0 / textureSize(u_SpotLight[i].ShadowMap, 0);
-                        float offset = u_SpotLight[i].SoftDegree;
-                        for(float x = -offset; x <= offset; ++x)
-                        {
-                            for(float y = -offset; y <= offset; ++y)
-                            {
-                                float pcfDepth = texture(u_SpotLight[i].ShadowMap, shadowTex.xy + vec2(x, y) * texelSize).r; 
-                                pcfDepth *= u_SpotLight[i].FarPlane;
-                                shadow += currentDepth - bias > pcfDepth  ? 1.0 : 0.0;        
-                            }    
-                        }
-                        shadow /= pow(offset * 2.0 + 1.0, 2.0);
-                        lighting = ambient + (1.0 - shadow) * (diffuse + specular);
-                    }
-                    else
-                    {
-                        lighting = ambient;
-                    }
-                }
-                else
-                {
-                    lighting = ambient + diffuse + specular;
-                }
+                shadow = currentDepth - bias > closestDepth ? 0.0 : 1.0;
             }
+            lighting = ambient + shadow * (diffuse + specular);
         }
         else
         {

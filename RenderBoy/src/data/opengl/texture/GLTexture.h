@@ -12,9 +12,11 @@
 
 enum Tex_Type
 {
-    NOISE_SSAO = 0,
-    AL_LTC1 = 1,
-    AL_LTC2 = 2
+    NORMAL = 0,
+    NOISE_SSAO = 1,
+    AL_LTC1 = 2,
+    AL_LTC2 = 3,
+    PCF_RANDOM = 4
 };
 
 class GLTexture
@@ -25,6 +27,7 @@ private:
     std::string m_FilePath;
     FIBITMAP* m_LocalBuffer;
     int m_Width, m_Height;
+    Tex_Type m_Type;
 
 public:
     GLTexture();
