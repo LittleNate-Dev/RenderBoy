@@ -548,7 +548,7 @@ vec3 CalcSpotLight(int i)
                 }
                 if (shadow == 0.0)
                 {
-                    shadow += 1 - pow(1.005, -u_SpotLight[i].SoftDegree);
+                    shadow += 1 - pow(1.001, -u_SpotLight[i].SoftDegree);
                 }
             }
             else

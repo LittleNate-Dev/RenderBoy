@@ -370,9 +370,9 @@ void DirectionalLight::SetBias(glm::vec3 bias)
 	m_Bias = bias;
 }
 
-void DirectionalLight::SetSoftDegree(unsigned int degree)
+void DirectionalLight::SetSoftDegree(float degree)
 {
-	m_SoftDegree = degree > 0 ? degree : 1;
+	m_SoftDegree = degree > 0.0f ? degree : 1.0f;
 }
 
 void DirectionalLight::SetSoftShadow(bool softShadow)
@@ -475,7 +475,7 @@ void DirectionalLight::DrawUI()
 					ImGui::PushItemWidth(90.0f * core::GetWidgetWidthCoefficient());
 					ImGui::CenterAlignWidget("Degree", 90.0f * core::GetWidgetWidthCoefficient());
 					ImGui::LabelHighlighted("Degree");
-					if (ImGui::InputInt("##Degree", &m_SoftDegree))
+					if (ImGui::InputFloat("##Degree", &m_SoftDegree))
 					{
 						SetSoftDegree(m_SoftDegree);
 					}

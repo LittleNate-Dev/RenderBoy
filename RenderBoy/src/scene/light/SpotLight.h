@@ -40,7 +40,7 @@ private:
 	unsigned int m_ShadowRes;
 	bool m_SoftShadow;
 	glm::vec2 m_Bias;
-	int m_SoftDegree;
+	float m_SoftDegree;
 	bool m_UpdateShadow;
 
 public:
@@ -90,7 +90,7 @@ public:
 	void SetCastShadow(bool castShadow);
 	void SetShadowRes(unsigned int res);
 	void SetSoftShadow(bool softShadow);
-	void SetSoftDegree(unsigned int degree);
+	void SetSoftDegree(float degree);
 	// Get spot light's members
 	inline std::string GetName() const
 	{
@@ -180,7 +180,7 @@ public:
 	{
 		return m_SoftShadow;
 	};
-	inline unsigned int GetSoftDegree() const
+	inline float GetSoftDegree() const
 	{
 		return m_SoftDegree;
 	};

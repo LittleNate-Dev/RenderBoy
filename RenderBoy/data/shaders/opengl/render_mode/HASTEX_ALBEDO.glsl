@@ -169,7 +169,8 @@ uniform sampler2D u_AlbedoTex[];
 
 uniform bool u_OITPass;
 
-const float c_Shininess = 32.0f;
+//const float c_Shininess = 32.0f;
+const float c_Shininess = 16.0f;
 
 vec3 c_ViewDir = vec3(1.0);
 vec3 c_Normal = vec3(0.0);
@@ -199,6 +200,7 @@ void main()
     {
         c_Alpha = texture(u_AlbedoTex[c_AlbedoTexIndex], v_TexCoord).a;
     }
+
     if (!u_OITPass && c_Alpha < 1.0)
     {
         discard;

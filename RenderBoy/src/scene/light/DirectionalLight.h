@@ -33,7 +33,7 @@ private:
 	float m_ShadowEnlarge;
 	glm::vec3 m_Bias;
 	bool m_SoftShadow;
-	int m_SoftDegree;
+	float m_SoftDegree;
 
 public:
 	DirectionalLight();
@@ -67,7 +67,7 @@ public:
 	void SetCSMRatio(glm::vec2 ratio);
 	void SetShadowEnlarge(float enlarge);
 	void SetBias(glm::vec3 bias);
-	void SetSoftDegree(unsigned int degree);
+	void SetSoftDegree(float degree);
 	void SetSoftShadow(bool softShadow);
 	// Get spot light's members
 	inline std::string GetName() const
@@ -134,7 +134,7 @@ public:
 	{
 		return m_SoftShadow;
 	};
-	inline int GetSoftDegree() const
+	inline float GetSoftDegree() const
 	{
 		return m_SoftDegree;
 	};

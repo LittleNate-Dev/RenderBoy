@@ -393,9 +393,9 @@ void SpotLight::SetSoftShadow(bool softShadow)
 	m_SoftShadow = softShadow;
 }
 
-void SpotLight::SetSoftDegree(unsigned int degree)
+void SpotLight::SetSoftDegree(float degree)
 {
-	m_SoftDegree = degree > 0 ? degree : 1;
+	m_SoftDegree = degree > 0.0f ? degree : 1.0f;
 }
 
 void SpotLight::DrawUI()
@@ -554,7 +554,7 @@ void SpotLight::DrawUI()
 					ImGui::PushItemWidth(90.0f * core::GetWidgetWidthCoefficient());
 					ImGui::CenterAlignWidget("Degree", 90.0f * core::GetWidgetWidthCoefficient());
 					ImGui::LabelHighlighted("Degree");
-					if (ImGui::InputInt("##Degree", &m_SoftDegree))
+					if (ImGui::InputFloat("##Degree", &m_SoftDegree))
 					{
 						SetSoftDegree(m_SoftDegree);
 					}

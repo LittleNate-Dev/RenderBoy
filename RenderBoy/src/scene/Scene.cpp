@@ -1567,11 +1567,11 @@ void Scene::DrawSceneWindow()
 			ImGui::TreePop();
 		}
 
-		////Debug func
-		//if (ImGui::Button("Reload Shader"))
-		//{
-		//	m_Data.GetDataGL().ReInitShader();
-		//}
+		//Debug func
+		if (ImGui::Button("Reload Shader"))
+		{
+			m_Data.GetDataGL().ReInitShader();
+		}
 		ImGui::End();
 	}
 }
