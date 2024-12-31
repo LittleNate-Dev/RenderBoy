@@ -546,6 +546,7 @@ void GLRenderer::DrawBlank(Scene& scene)
 	scene.GetData().GetDataGL().GetShader().SetUniformVec3f("u_ViewPos", scene.GetCamera().GetPosition());
 	scene.GetData().GetDataGL().GetShader().SetUniform1i("u_SSAO", scene.GetVFX().SSAO);
 	scene.GetData().GetDataGL().GetShader().SetUniformHandleARB("u_SSAOTex", m_Frame.SSAO[1].GetHandle());
+	scene.GetData().GetDataGL().GetShader().SetUniformHandleARB("u_ShadowOffset", scene.GetData().GetDataGL().GetSpotLightData().ShadowOffset.GetHandle());
 	std::string light;
 	// Set point lights' uniforms
 	for (unsigned int i = 0; i < scene.GetPointLightList().size(); i++)
@@ -632,6 +633,29 @@ void GLRenderer::DrawBlank(Scene& scene)
 			}
 		}
 	}
+	// Set area lights' uniforms
+	scene.GetData().GetDataGL().GetShader().SetUniformHandleARB("u_LTC1", scene.GetData().GetDataGL().GetAreaLightData().LTC1.GetHandle());
+	scene.GetData().GetDataGL().GetShader().SetUniformHandleARB("u_LTC2", scene.GetData().GetDataGL().GetAreaLightData().LTC2.GetHandle());
+	for (unsigned int j = 0; j < scene.GetAreaLightList().size(); j++)
+	{
+		light = scene.GetAreaLightList()[j];
+		std::string lightName = "u_AreaLight[" + std::to_string(j) + "].";
+		scene.GetData().GetDataGL().GetShader().SetUniform1i(lightName + "LightSwitch", scene.GetAreaLights()[light].LightSwitch());
+		if (scene.GetAreaLights()[light].LightSwitch())
+		{
+			scene.GetData().GetDataGL().GetShader().SetUniform1i(lightName + "Type", scene.GetAreaLights()[light].GetLightType());
+			scene.GetData().GetDataGL().GetShader().SetUniformVec3f(lightName + "Position", scene.GetAreaLights()[light].GetPosition());
+			scene.GetData().GetDataGL().GetShader().SetUniformVec3f(lightName + "Scale", scene.GetAreaLights()[light].GetScale());
+			scene.GetData().GetDataGL().GetShader().SetUniformVec3f(lightName + "Points[0]", scene.GetAreaLights()[light].GetPoints(0));
+			scene.GetData().GetDataGL().GetShader().SetUniformVec3f(lightName + "Points[1]", scene.GetAreaLights()[light].GetPoints(1));
+			scene.GetData().GetDataGL().GetShader().SetUniformVec3f(lightName + "Points[2]", scene.GetAreaLights()[light].GetPoints(2));
+			scene.GetData().GetDataGL().GetShader().SetUniformVec3f(lightName + "Points[3]", scene.GetAreaLights()[light].GetPoints(3));
+			scene.GetData().GetDataGL().GetShader().SetUniform1f(lightName + "Intensity", scene.GetAreaLights()[light].GetIntensity());
+			scene.GetData().GetDataGL().GetShader().SetUniformVec3f(lightName + "Color", scene.GetAreaLights()[light].GetColor());
+			scene.GetData().GetDataGL().GetShader().SetUniform1i(lightName + "TwoSided", scene.GetAreaLights()[light].TwoSided());
+		}
+	}
+	// Set models' uniforms
 	std::string model;
 	for (unsigned int i = 0; i < scene.GetModelList().size(); i++)
 	{
@@ -743,6 +767,9 @@ void GLRenderer::DrawPointCloud(Scene& scene)
 
 void GLRenderer::DrawDepth(Scene& scene)
 {
+	//// Draw Skybox
+	DrawSkybox(scene);
+
 	m_Frame.FB.Bind();
 	std::string model;
 	scene.GetData().GetDataGL().GetShader().Bind();

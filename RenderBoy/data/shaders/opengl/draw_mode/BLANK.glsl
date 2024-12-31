@@ -26,13 +26,10 @@ struct FragPosDir
 layout (location = 0) in vec4 a_Position;
 layout (location = 1) in vec2 a_TexCoord;
 layout (location = 2) in vec3 a_Normal;
-layout (location = 3) in vec3 a_Tangent;
-layout (location = 4) in vec3 a_BiTangent;
 layout (location = 9) in mat4 a_ModelMat;
 
 out vec3 v_FragPos;
 out vec3 v_Normal;
-out mat3 v_TBN;
 out vec4 v_FragPosSpot[SPOT_LIGHT_COUNT];
 out FragPosDir v_FragPosDir[DIR_LIGHT_COUNT];
 
@@ -53,10 +50,6 @@ void main()
     {
         mat3 normalMat = transpose(inverse(mat3(a_ModelMat)));
         v_Normal = normalMat * a_Normal;
-        vec3 T = normalize(normalMat * a_Tangent);
-        vec3 B = normalize(normalMat * a_BiTangent);
-        vec3 N = normalize(v_Normal);
-        v_TBN = mat3(T, B, N);
     }
     
     for (int i = 0; i < SPOT_LIGHT_COUNT; i++)
@@ -159,7 +152,6 @@ const float LUT_BIAS  = 0.5/LUT_SIZE;
 
 in vec3 v_FragPos;
 in vec3 v_Normal;
-in mat3 v_TBN;
 in vec4 v_FragPosSpot[SPOT_LIGHT_COUNT];
 in FragPosDir v_FragPosDir[DIR_LIGHT_COUNT];
 
@@ -181,9 +173,9 @@ uniform sampler3D u_ShadowOffset;
 vec3 c_ViewDir = vec3(0.0);
 vec3 c_Normal = vec3(0.0);
 float c_SSAO = 1.0;
-vec3 c_Albedo = vec3(0.78);
-float c_Metallic = 0.5;
-float c_Roughness = 0.8;
+vec3 c_Albedo = vec3(0.9);
+float c_Metallic = 0.7;
+float c_Roughness = 0.5;
 float c_AO = 1.0;
 vec3 c_F0 = vec3(0.04); 
 float c_Alpha = 1.0;
@@ -213,6 +205,8 @@ void main()
 {
     // Varibles used for lighting
     c_ViewDir = normalize(u_ViewPos - v_FragPos);
+    // normal
+    c_Normal = normalize(v_Normal);
     // SSAO
     if (u_SSAO)
     {

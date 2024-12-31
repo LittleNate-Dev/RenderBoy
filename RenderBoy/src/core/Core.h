@@ -100,7 +100,7 @@
 #define SHADER_OPENGL_EXPOSURE_AVERAGE "data/shaders/opengl/vfx/exposure/AVERAGE.glsl"
 #define DRAW_MODE_COUNT 7
 #define POST_PROCESS_COUNT 5
-#define SETTING_MAX_FOV 120
+#define SETTING_MAX_FOV 200
 #define SETTING_MIN_FOV 40
 #define SETTING_RES_MIN 20
 #define SETTING_RES_MAX 200
