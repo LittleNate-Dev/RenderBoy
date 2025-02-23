@@ -15,7 +15,6 @@ Model::Model()
     m_InstanceEulerAngle.push_back(glm::vec3(0.0f));
     m_ModelMats.push_back(glm::mat4(1.0f));
     m_UpdateShadow = true;
-    //m_Wireframe = false;
 }
 
 Model::~Model()
@@ -113,7 +112,7 @@ bool Model::LoadModel(std::string name, std::string filepath)
 bool Model::LoadModelAssimp(std::string filepath)
 {
     Assimp::Importer import;
-    const aiScene* scene = import.ReadFile(filepath, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
+    const aiScene* scene = import.ReadFile(filepath, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenSmoothNormals | aiProcess_CalcTangentSpace);
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
     {
         core::ShowWarningMsg("Failed to load file! Check log for details.");
@@ -724,6 +723,15 @@ glm::mat4 Model::GetRotateMat(unsigned int current)
         rotateMat = core::GetRodrigue(glm::normalize(axis), m_EulerAngle.z + m_InstanceEulerAngle[current - 1].z) * rotateMat;
     }
     return rotateMat;
+}
+
+void Model::Free()
+{
+    for (unsigned int i = 0; i < m_Meshes.size(); i++)
+    {
+        std::vector<Vertex>().swap(m_Meshes[i].GetVertices());
+        std::vector<unsigned int>().swap(m_Meshes[i].GetIndices());
+    }
 }
 
 void Model::DrawUI()

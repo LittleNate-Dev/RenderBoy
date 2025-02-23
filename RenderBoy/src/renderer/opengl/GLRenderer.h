@@ -70,7 +70,9 @@ private:
 	void DrawDOF(Scene& scene); // Depth of Field
 	void DrawBloom(Scene& scene);
 	void DrawSSAO(Scene& scene);
+	void DrawAA(Scene& scene); // Use this function to apply all post-processing aa
 	void DrawFXAA(Scene& scene);
+	void DrawSMAA(Scene& scene);
 	void DrawAutoExposure(Scene& scene);
 	void DrawToneMapping(Scene& scene);
 

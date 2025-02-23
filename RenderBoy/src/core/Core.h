@@ -183,7 +183,8 @@ enum Render_Mode
 enum Anti_Alising
 {
 	NO_AA = 0,
-	FXAA = 1
+	FXAA = 1,
+	SMAA_1X = 2
 };
 
 enum Post_Process

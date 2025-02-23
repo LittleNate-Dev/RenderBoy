@@ -932,6 +932,7 @@ bool Scene::AddModel(std::string filepath)
 		m_Data.AddModel(name, m_Models[name]);
 		m_Models[name].SetPosition(m_Camera.GetPosition(), 0);
 		core::currentModelScene = nullptr;
+		//m_Models[name].Free();
 		return true;
 	}
 	return false;
@@ -962,6 +963,7 @@ bool Scene::AddModel(std::string name, std::string filepath)
 		m_Data.AddModel(name, m_Models[name]);
 		m_Models[name].SetPosition(m_Camera.GetPosition(), 0);
 		core::currentModelScene = nullptr;
+		//m_Models[name].Free();
 		return true;
 	}
 	return false;

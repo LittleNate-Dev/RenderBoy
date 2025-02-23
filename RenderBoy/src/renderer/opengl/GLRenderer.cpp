@@ -516,11 +516,8 @@ void GLRenderer::DrawDefault(Scene& scene)
 	{
 		DrawAutoExposure(scene);
 	}
-	// Apply FXAA
-	if (core::SETTINGS.AA == FXAA)
-	{
-		DrawFXAA(scene);
-	}
+	// Apply Post-Process AA
+	DrawAA(scene);
 	// Draw Bloom
 	if (scene.GetCamera().GetBloom().Switch)
 	{
@@ -690,11 +687,8 @@ void GLRenderer::DrawBlank(Scene& scene)
 	{
 		DrawAutoExposure(scene);
 	}
-	// Apply FXAA
-	if (core::SETTINGS.AA == FXAA)
-	{
-		DrawFXAA(scene);
-	}
+	// Apply Post-Process AA
+	DrawAA(scene);
 	// Draw Bloom
 	if (scene.GetCamera().GetBloom().Switch)
 	{
@@ -733,11 +727,8 @@ void GLRenderer::DrawWireFrame(Scene& scene)
 	}
 	scene.GetData().GetDataGL().GetShader().Unbind();
 	m_Frame.FB.Unbind();
-	// Apply FXAA
-	if (core::SETTINGS.AA == FXAA)
-	{
-		DrawFXAA(scene);
-	}
+	// Apply Post-Process AA
+	DrawAA(scene);
 }
 
 void GLRenderer::DrawPointCloud(Scene& scene)
@@ -758,11 +749,8 @@ void GLRenderer::DrawPointCloud(Scene& scene)
 	}
 	scene.GetData().GetDataGL().GetShader().Unbind();
 	m_Frame.FB.Unbind();
-	// Apply FXAA
-	if (core::SETTINGS.AA == FXAA)
-	{
-		DrawFXAA(scene);
-	}
+	// Apply Post-Process AA
+	DrawAA(scene);
 }
 
 void GLRenderer::DrawDepth(Scene& scene)
@@ -788,11 +776,8 @@ void GLRenderer::DrawDepth(Scene& scene)
 	}
 	scene.GetData().GetDataGL().GetShader().Unbind();
 	m_Frame.FB.Unbind();
-	// Apply FXAA
-	if (core::SETTINGS.AA == FXAA)
-	{
-		DrawFXAA(scene);
-	}
+	// Apply Post-Process AA
+	DrawAA(scene);
 }
 
 void GLRenderer::DrawNormalDM(Scene& scene)
@@ -813,11 +798,8 @@ void GLRenderer::DrawNormalDM(Scene& scene)
 	}
 	scene.GetData().GetDataGL().GetShader().Unbind();
 	m_Frame.FB.Unbind();
-	// Apply FXAA
-	if (core::SETTINGS.AA == FXAA)
-	{
-		DrawFXAA(scene);
-	}
+	// Apply Post-Process AA
+	DrawAA(scene);
 }
 
 void GLRenderer::DrawUVSet(Scene& scene)
@@ -839,11 +821,8 @@ void GLRenderer::DrawUVSet(Scene& scene)
 	}
 	scene.GetData().GetDataGL().GetShader().Unbind();
 	m_Frame.FB.Unbind();
-	// Apply FXAA
-	if (core::SETTINGS.AA == FXAA)
-	{
-		DrawFXAA(scene);
-	}
+	// Apply Post-Process AA
+	DrawAA(scene);
 	float exposure = scene.GetCamera().GetExposure().Strength;
 	scene.GetCamera().SetExposure(1.0f);
 	// Tone mapping
@@ -1318,6 +1297,21 @@ void GLRenderer::DrawSSAO(Scene& scene)
 	GLCall(glEnable(GL_BLEND));
 }
 
+void GLRenderer::DrawAA(Scene& scene)
+{
+	switch (core::SETTINGS.AA)
+	{
+	case FXAA:
+		DrawFXAA(scene);
+		break;
+	case SMAA_1X:
+		DrawSMAA(scene);
+		break;
+	default:
+		break;
+	}
+}
+
 void GLRenderer::DrawFXAA(Scene& scene)
 {
 	GLCall(glDisable(GL_DEPTH_TEST));
@@ -1340,6 +1334,11 @@ void GLRenderer::DrawFXAA(Scene& scene)
 	GLCall(glBindFramebuffer(GL_READ_FRAMEBUFFER, m_Frame.FXAA.GetID()));
 	GLCall(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_Frame.FB.GetID()));
 	GLCall(glBlitFramebuffer(0, 0, m_Frame.FXAA.GetTexWidth(), m_Frame.FXAA.GetTexHeight(), 0, 0, m_Frame.FB.GetTexWidth(), m_Frame.FB.GetTexHeight(), GL_COLOR_BUFFER_BIT, GL_LINEAR));
+}
+
+void GLRenderer::DrawSMAA(Scene& scene)
+{
+	//TODO: Apply SMAA
 }
 
 void GLRenderer::DrawAutoExposure(Scene& scene)

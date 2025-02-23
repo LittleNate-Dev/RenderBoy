@@ -977,7 +977,8 @@ void Application::DrawSettingWindow()
                 ImGui::PushItemWidth(100.0f * core::GetWidgetWidthCoefficient());
                 const char* aaOps[] = {
                     "Off",
-                    "FXAA"
+                    "FXAA",
+                    "SMAA 1X"
                 };
                 static int currentAA;
                 currentAA = core::SETTINGS.AA;

@@ -24,7 +24,6 @@ private:
 	unsigned int m_Instance;
 	unsigned int m_Current;
 	bool m_SetInstance;
-	//bool m_Wireframe;
 	std::vector<glm::vec3> m_InstancePosition;
 	std::vector<glm::vec3> m_InstanceScale;
 	std::vector<glm::vec3> m_InstanceEulerAngle;
@@ -107,10 +106,8 @@ public:
 	glm::mat4 GetTranslateMat(unsigned int current = 0);
 	glm::mat4 GetScaleMat(unsigned int current = 0);
 	glm::mat4 GetRotateMat(unsigned int current = 0);
-	/*inline bool DrawWireFrame()
-	{
-		return m_Wireframe;
-	};*/
+	// Free model's data from memory
+	void Free();
 	// Draw Model's UI
 	void DrawUI();
 };
