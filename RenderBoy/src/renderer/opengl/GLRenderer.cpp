@@ -69,10 +69,7 @@ bool GLRenderer::Init(Scene& scene)
 	{
 		return false;
 	}
-	if (!m_Shaders.FXAA.Init(SHADER_OPENGL_AA_FXAA))
-	{
-		return false;
-	}
+	ChangeAA();
 	if (!m_Shaders.Exposure[0].Init(SHADER_OPENGL_EXPOSURE_HISTOGRAM))
 	{
 		return false;
@@ -108,8 +105,11 @@ bool GLRenderer::Init(Scene& scene)
 	m_Frame.Screen.Init(FBType::FRAME);
 	m_Frame.GBuffer.Init(FBType::G_BUFFER);
 	m_Frame.OIT.Init(FBType::OIT);
-	// Initialize framebuffer used for FXAA
-	m_Frame.FXAA.Init(FBType::FRAME);
+	// Initialize framebuffer used for PPAA
+	for (unsigned int i = 0; i < 2; i++)
+	{
+		m_Frame.PPAA[i].Init(FBType::FRAME);
+	}
 	// Initialize framebuffers used for SSAO
 	m_Frame.SSAO[0].Init(FBType::SSAO); 
 	m_Frame.SSAO[1].Init(FBType::SSAO);
@@ -256,7 +256,7 @@ void GLRenderer::Draw(Scene& scene)
 	GLCall(glViewport(0, 0, core::SETTINGS.Width, core::SETTINGS.Height));
 	m_Shaders.PP.Bind();
 	m_Shaders.PP.SetUniformHandleARB("u_ScreenTex", m_Frame.FB.GetHandle());
-	//m_Shaders.PP.SetUniformHandleARB("u_ScreenTex", m_Frame.Bloom[0].GetHandle());
+	//m_Shaders.PP.SetUniformHandleARB("u_ScreenTex", m_Frame.PPAA[0].GetHandle());
 	m_Frame.VA.Bind();
 	m_Frame.IB.Bind();
 	GLCall(glDrawElements(GL_TRIANGLES, m_Frame.IB.GetCount(), GL_UNSIGNED_INT, nullptr));
@@ -272,7 +272,6 @@ void GLRenderer::DrawGBuffer(Scene& scene)
 	Clear();
 	glm::vec2 texSize = m_Frame.GBuffer.GetTexSize();
 	GLCall(glViewport(0, 0, texSize.x, texSize.y));
-	
 	std::string model;
 	for (unsigned int i = 0; i < scene.GetModelList().size(); i++)
 	{
@@ -511,13 +510,6 @@ void GLRenderer::DrawDefault(Scene& scene)
 	m_Frame.FB.Unbind();
 	GLCall(glDepthMask(GL_TRUE));
 	GLCall(glDepthFunc(GL_LESS));
-	// Auto Exposure
-	if (scene.GetCamera().GetExposure().Auto)
-	{
-		DrawAutoExposure(scene);
-	}
-	// Apply Post-Process AA
-	DrawAA(scene);
 	// Draw Bloom
 	if (scene.GetCamera().GetBloom().Switch)
 	{
@@ -525,6 +517,13 @@ void GLRenderer::DrawDefault(Scene& scene)
 	}
 	// Tone mapping
 	DrawToneMapping(scene);
+	// Apply Post-Process AA
+	DrawAA(scene);
+	// Auto Exposure
+	if (scene.GetCamera().GetExposure().Auto)
+	{
+		DrawAutoExposure(scene);
+	}
 	// Draw Depth of Field
 	if (scene.GetCamera().GetFocus().Switch)
 	{
@@ -687,8 +686,6 @@ void GLRenderer::DrawBlank(Scene& scene)
 	{
 		DrawAutoExposure(scene);
 	}
-	// Apply Post-Process AA
-	DrawAA(scene);
 	// Draw Bloom
 	if (scene.GetCamera().GetBloom().Switch)
 	{
@@ -696,6 +693,8 @@ void GLRenderer::DrawBlank(Scene& scene)
 	}
 	// Tone mapping
 	DrawToneMapping(scene);
+	// Apply Post-Process AA
+	DrawAA(scene);
 	// Draw Depth of Field
 	if (scene.GetCamera().GetFocus().Switch)
 	{
@@ -821,13 +820,13 @@ void GLRenderer::DrawUVSet(Scene& scene)
 	}
 	scene.GetData().GetDataGL().GetShader().Unbind();
 	m_Frame.FB.Unbind();
-	// Apply Post-Process AA
-	DrawAA(scene);
 	float exposure = scene.GetCamera().GetExposure().Strength;
 	scene.GetCamera().SetExposure(1.0f);
 	// Tone mapping
 	DrawToneMapping(scene);
 	scene.GetCamera().SetExposure(exposure);
+	// Apply Post-Process AA
+	DrawAA(scene);
 }
 
 void GLRenderer::DrawNormal(Scene& scene)
@@ -1317,28 +1316,70 @@ void GLRenderer::DrawFXAA(Scene& scene)
 	GLCall(glDisable(GL_DEPTH_TEST));
 	GLCall(glDepthMask(GL_FALSE));
 	GLCall(glDisable(GL_BLEND));
-	m_Frame.FXAA.Bind();
-	m_Shaders.FXAA.Bind();
-	m_Shaders.FXAA.SetUniformHandleARB("u_Source", m_Frame.FB.GetHandle()); 
-	m_Shaders.FXAA.SetUniformVec2f("u_InverseScreenSize", 1.0f / core::GetRenderRes());
+	m_Frame.PPAA[0].Bind();
+	m_Shaders.PPAA[0].Bind();
+	m_Shaders.PPAA[0].SetUniformHandleARB("u_Source", m_Frame.FB.GetHandle());
+	m_Shaders.PPAA[0].SetUniformVec2f("u_InverseScreenSize", 1.0f / core::GetRenderRes());
 	m_Frame.VA.Bind();
 	m_Frame.IB.Bind();
 	GLCall(glDrawElements(GL_TRIANGLES, m_Frame.IB.GetCount(), GL_UNSIGNED_INT, nullptr));
 	m_Frame.VA.Unbind();
 	m_Frame.IB.Unbind();
-	m_Shaders.FXAA.Unbind();
-	m_Frame.FXAA.Unbind();
+	m_Shaders.PPAA[0].Unbind();
+	m_Frame.PPAA[0].Unbind();
 	GLCall(glEnable(GL_BLEND));
 	GLCall(glDepthMask(GL_TRUE));
 	GLCall(glEnable(GL_DEPTH_TEST));
-	GLCall(glBindFramebuffer(GL_READ_FRAMEBUFFER, m_Frame.FXAA.GetID()));
+	GLCall(glBindFramebuffer(GL_READ_FRAMEBUFFER, m_Frame.PPAA[0].GetID()));
 	GLCall(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_Frame.FB.GetID()));
-	GLCall(glBlitFramebuffer(0, 0, m_Frame.FXAA.GetTexWidth(), m_Frame.FXAA.GetTexHeight(), 0, 0, m_Frame.FB.GetTexWidth(), m_Frame.FB.GetTexHeight(), GL_COLOR_BUFFER_BIT, GL_LINEAR));
+	GLCall(glBlitFramebuffer(0, 0, m_Frame.PPAA[0].GetTexWidth(), m_Frame.PPAA[0].GetTexHeight(), 0, 0, m_Frame.FB.GetTexWidth(), m_Frame.FB.GetTexHeight(), GL_COLOR_BUFFER_BIT, GL_LINEAR));
 }
 
 void GLRenderer::DrawSMAA(Scene& scene)
 {
-	//TODO: Apply SMAA
+	GLCall(glDisable(GL_DEPTH_TEST));
+	GLCall(glDepthMask(GL_FALSE));
+	GLCall(glDisable(GL_BLEND));
+	// 1.Edge Detection
+	m_Frame.PPAA[0].Bind();
+	m_Shaders.PPAA[0].Bind();
+	m_Shaders.PPAA[0].SetUniformHandleARB("u_ColorTex", m_Frame.FB.GetHandle());
+	glm::vec2 res = core::GetRenderRes();
+	glm::vec4 metrics = glm::vec4(1.0 / res.x, 1.0 / res.y, res.x, res.y);
+	m_Shaders.PPAA[0].SetUniformVec4f("u_Metrics", metrics);
+	m_Frame.VA.Bind();
+	m_Frame.IB.Bind();
+	GLCall(glDrawElements(GL_TRIANGLES, m_Frame.IB.GetCount(), GL_UNSIGNED_INT, nullptr));
+	m_Shaders.PPAA[0].Unbind();
+	m_Frame.PPAA[0].Unbind();
+	// 2.Blending Weight Calculation
+	m_Frame.PPAA[1].Bind();
+	m_Shaders.PPAA[1].Bind();
+	m_Shaders.PPAA[1].SetUniformVec4f("u_Metrics", metrics);
+	m_Shaders.PPAA[1].SetUniformHandleARB("u_EdgeTex", m_Frame.PPAA[0].GetHandle());
+	m_Shaders.PPAA[1].SetUniformHandleARB("u_AreaTex", scene.GetData().GetDataGL().GetTexData().SMAAArea.GetHandle());
+	m_Shaders.PPAA[1].SetUniformHandleARB("u_SearchTex", scene.GetData().GetDataGL().GetTexData().SMAASearch.GetHandle());
+	GLCall(glDrawElements(GL_TRIANGLES, m_Frame.IB.GetCount(), GL_UNSIGNED_INT, nullptr));
+	m_Shaders.PPAA[1].Unbind();
+	m_Frame.PPAA[1].Unbind();
+	// 3.Blend original img
+	m_Frame.PPAA[0].Bind();
+	m_Shaders.PPAA[2].Bind();
+	m_Shaders.PPAA[2].SetUniformVec4f("u_Metrics", metrics);
+	m_Shaders.PPAA[2].SetUniformHandleARB("u_ColorTex", m_Frame.FB.GetHandle());
+	m_Shaders.PPAA[2].SetUniformHandleARB("u_BlendTex", m_Frame.PPAA[1].GetHandle());
+	GLCall(glDrawElements(GL_TRIANGLES, m_Frame.IB.GetCount(), GL_UNSIGNED_INT, nullptr));
+	m_Shaders.PPAA[2].Unbind();
+	m_Frame.PPAA[0].Unbind();
+
+	m_Frame.VA.Unbind();
+	m_Frame.IB.Unbind();
+	GLCall(glBindFramebuffer(GL_READ_FRAMEBUFFER, m_Frame.PPAA[0].GetID()));
+	GLCall(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_Frame.FB.GetID()));
+	GLCall(glBlitFramebuffer(0, 0, m_Frame.PPAA[0].GetTexWidth(), m_Frame.PPAA[0].GetTexHeight(), 0, 0, m_Frame.FB.GetTexWidth(), m_Frame.FB.GetTexHeight(), GL_COLOR_BUFFER_BIT, GL_LINEAR));
+	GLCall(glEnable(GL_BLEND));
+	GLCall(glDepthMask(GL_TRUE));
+	GLCall(glEnable(GL_DEPTH_TEST));
 }
 
 void GLRenderer::DrawAutoExposure(Scene& scene)
@@ -1429,7 +1470,10 @@ void GLRenderer::ChangeResolution()
 
 	m_Frame.FB.Init(FBType::FRAME, width, height);
 	m_Frame.Screen.Init(FBType::FRAME, width, height);
-	m_Frame.FXAA.Init(FBType::FRAME);
+	for (unsigned int i = 0; i < 2; i++)
+	{
+		m_Frame.PPAA[i].Init(FBType::FRAME);
+	}
 	m_Frame.GBuffer.Init(FBType::G_BUFFER, width, height);
 	m_Frame.SSAO[0].Init(FBType::SSAO, width, height);
 	m_Frame.SSAO[1].Init(FBType::SSAO, width, height);
@@ -1495,6 +1539,35 @@ bool GLRenderer::ChangePostProcess()
 		{
 			return false;
 		}
+		break;
+	}
+	return true;
+}
+
+bool GLRenderer::ChangeAA()
+{
+	switch (core::SETTINGS.AA)
+	{
+	case FXAA:
+		if (!m_Shaders.PPAA[0].Init(SHADER_OPENGL_AA_FXAA))
+		{
+			return false;
+		}
+		break;
+	case SMAA_1X:
+		if (!m_Shaders.PPAA[0].Init(SHADER_OPENGL_AA_SMAA_1X_EDGE))
+		{
+			return false;
+		}
+		if (!m_Shaders.PPAA[1].Init(SHADER_OPENGL_AA_SMAA_1X_WEIGHT))
+		{
+			return false;
+		}
+		if (!m_Shaders.PPAA[2].Init(SHADER_OPENGL_AA_SMAA_1X_BLEND))
+		{
+			return false;
+		}
+	default:
 		break;
 	}
 	return true;

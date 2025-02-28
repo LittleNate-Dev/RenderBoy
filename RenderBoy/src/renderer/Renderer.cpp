@@ -93,3 +93,19 @@ bool Renderer::ChangePostProcess()
 	}
 	return true;
 }
+
+bool Renderer::ChangeAA()
+{
+	switch (core::SETTINGS.GraphicsCore)
+	{
+	case OPENGL:
+		if (!m_RendererGL.ChangeAA())
+		{
+			return false;
+		}
+		break;
+	default:
+		break;
+	}
+	return true;
+}

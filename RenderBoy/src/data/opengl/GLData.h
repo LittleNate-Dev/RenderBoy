@@ -111,6 +111,13 @@ struct GLModelData
 	std::vector<glm::vec3> TransmissionValue;
 };
 
+struct GLTexData
+{
+	GLTexture CheckerMap;
+	GLTexture SMAASearch;
+	GLTexture SMAAArea;
+};
+
 class GLData
 {
 private:
@@ -123,7 +130,7 @@ private:
 	GLAreaLightData m_AreaLightData;
 	std::vector<std::string> m_ModelList;
 	std::map<std::string, GLModelData> m_ModelData;
-	GLTexture m_CheckerMap;
+	GLTexData m_TexData;
 
 	void AddPointLight(std::string name);
 	void AddSpotLight(std::string name);
@@ -189,5 +196,9 @@ public:
 	inline GLVFXData& GetVFXData()
 	{
 		return m_VFXData;
+	};
+	inline GLTexData& GetTexData()
+	{
+		return m_TexData;
 	};
 };

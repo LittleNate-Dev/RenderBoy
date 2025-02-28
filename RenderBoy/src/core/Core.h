@@ -42,7 +42,7 @@
 
 #include <freeimage/FreeImage.h>
 
-#define APP_VERSION "ver 0.8.5"
+#define APP_VERSION "ver 0.8.6"
 #define GIT_REPO "https://github.com/LittleNate-Dev/RenderBoy"
 #define SCENE_FILEPATH "saves/scene/"
 #define SETTING_FILEPATH "data/config/settings.config"
@@ -51,6 +51,8 @@
 #define MODELS_FILEPATH "res/models/"
 #define SCREENSHOT_FILEPATH "saves/screenshot/"
 #define UV_MAP_FILEPATH "res/checkermap/CheckerMap.png"
+#define SMAA_AREA_FILEPATH "data/shaders/tex/SMAA_Area.png"
+#define SMAA_SEARCH_FILEPATH "data/shaders/tex/SMAA_Search.png"
 #define LIGHTCUBE_SPHERE_MODEL "res/models/AreaLight_Sphere.obj"
 #define LIGHTCUBE_CYLINDER_MODEL "res/models/AreaLight_Cylinder.obj"
 #define LIGHTCUBE_DISK_MODEL "res/models/AreaLight_Disk.obj"
@@ -83,6 +85,9 @@
 #define SHADER_OPENGL_LIGHTCUBE "data/shaders/opengl/others/LIGHTCUBE.glsl"
 #define SHADER_OPENGL_LIGHTCUBE_AREA "data/shaders/opengl/others/LIGHTCUBE_AREA.glsl"
 #define SHADER_OPENGL_AA_FXAA "data/shaders/opengl/aa/FXAA.glsl"
+#define SHADER_OPENGL_AA_SMAA_1X_EDGE "data/shaders/opengl/aa/smaa/EDGE.glsl"
+#define SHADER_OPENGL_AA_SMAA_1X_WEIGHT "data/shaders/opengl/aa/smaa/WEIGHT.glsl"
+#define SHADER_OPENGL_AA_SMAA_1X_BLEND "data/shaders/opengl/aa/smaa/BLEND.glsl"
 #define SHADER_OPENGL_BLOOM_DOWNSAMPLE "data/shaders/opengl/vfx/bloom/DOWNSAMPLE.glsl"
 #define SHADER_OPENGL_BLOOM_UPSAMPLE "data/shaders/opengl/vfx/bloom/UPSAMPLE.glsl"
 #define SHADER_OPENGL_BLOOM_BLEND "data/shaders/opengl/vfx/bloom/BLEND.glsl"

@@ -24,7 +24,7 @@ struct Frame
 	GLFrameBuffer Bloom[7];
 	GLFrameBuffer SSAO[2];
 	GLFrameBuffer DOF[4];
-	GLFrameBuffer FXAA;
+	GLFrameBuffer PPAA[2]; // PPAA: Post-Process Anti-Aliasing
 };
 
 struct Shaders
@@ -40,7 +40,7 @@ struct Shaders
 	GLShader SSAO[2]; // 0: GEN, 1: BLUR
 	GLShader DOF[4]; // 0: COC, 1: BOKEH, 2: DOWNSAMPLE, 3: BLEND
 	GLShader GaussianBlur;
-	GLShader FXAA;
+	GLShader PPAA[3]; // PPAA: Post-Process Anti-Aliasing
 	GLShader Exposure[2]; // 0£º HISTOGRAM, 1: AVERAGE
 };
 
@@ -86,4 +86,5 @@ public:
 	bool SaveScreenShot(Scene& scene);
 	void ChangeResolution();
 	bool ChangePostProcess();
+	bool ChangeAA();
 };

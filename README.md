@@ -3,7 +3,7 @@
 
 RenderBoy is still under development, and I haven't got time to write a proper README (Once I finished the development of v1.0, I'll write one).
 
-If you have any issue, please send me emails, thank you :)
+If you have any issue, please send me emails, and if you like this repo, please give me a star, thank you :)
 ![IMG](https://github.com/LittleNate-Dev/RenderBoy/blob/master/Images/Screenshot_1.png)
 ![IMG](https://github.com/LittleNate-Dev/RenderBoy/blob/master/Images/Screenshot_2.png)
 ![IMG](https://github.com/LittleNate-Dev/RenderBoy/blob/master/Images/Screenshot_3.png)

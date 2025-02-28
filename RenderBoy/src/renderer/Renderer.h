@@ -26,4 +26,5 @@ public:
 	bool SaveScreenShot(Scene& scene);
 	void ChangeResolution();
 	bool ChangePostProcess();
+	bool ChangeAA();
 };

@@ -985,6 +985,10 @@ void Application::DrawSettingWindow()
                 if (ImGui::Combo("##AntiAlising", &currentAA, aaOps, IM_ARRAYSIZE(aaOps)))
                 {
                     core::SETTINGS.AA = (Anti_Alising)currentAA;
+                    if (!m_Renderer.ChangeAA())
+                    {
+                        core::ShowWarningMsg("Failed to change AA Setting! Shader files might be missing!");
+                    }
                 }
                 ImGui::PopItemWidth();
             }

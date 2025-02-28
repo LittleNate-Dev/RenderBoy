@@ -27,7 +27,16 @@ bool GLData::Init()
 	{
 		return false;
 	}
-	if (!m_CheckerMap.GenTexture(UV_MAP_FILEPATH))
+	// Init textures
+	if (!m_TexData.CheckerMap.GenTexture(UV_MAP_FILEPATH))
+	{
+		return false;
+	}
+	if (!m_TexData.SMAAArea.GenTexture(SMAA_AREA_FILEPATH, false, false))
+	{
+		return false;
+	}
+	if (!m_TexData.SMAASearch.GenTexture(SMAA_SEARCH_FILEPATH, false, false))
 	{
 		return false;
 	}
@@ -320,7 +329,7 @@ bool GLData::ChangeDrawMode()
 			return false;
 		}
 		m_Shader.Bind();
-		m_Shader.SetUniformHandleARB("u_CheckerMap", m_CheckerMap.GetHandle());
+		m_Shader.SetUniformHandleARB("u_CheckerMap", m_TexData.CheckerMap.GetHandle());
 		m_Shader.Unbind();
 		break;
 	case DEPTH:
