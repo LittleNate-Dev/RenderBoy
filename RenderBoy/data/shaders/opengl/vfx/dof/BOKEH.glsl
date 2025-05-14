@@ -19,9 +19,9 @@ void main()
 
 layout (location = 0) out vec4 v_FragColor;
 
-in vec2 v_TexCoord;
-
 #define PI 3.14159265359
+
+in vec2 v_TexCoord;
 
 uniform sampler2D u_Source;
 uniform vec2 u_TexelSize;

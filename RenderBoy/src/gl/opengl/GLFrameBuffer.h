@@ -70,7 +70,14 @@ public:
 	};
 	inline GLuint64 GetHandle(unsigned int slot = 0) const
 	{
-		return m_Handles[slot];
+		if (slot > m_Handles.size() - 1)
+		{
+			return m_Handles[0];
+		}
+		else
+		{
+			return m_Handles[slot];
+		}
 	};
 	inline std::vector<GLuint64> GetHandles() const
 	{

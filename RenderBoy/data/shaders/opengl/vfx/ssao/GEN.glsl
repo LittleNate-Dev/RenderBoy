@@ -18,7 +18,7 @@ void main()
 #version 460 core
 #extension GL_ARB_bindless_texture : require
 
-out float v_FragColor;
+layout (location = 0) out float v_FragColor;
 
 in vec2 v_TexCoord;
 
@@ -26,15 +26,12 @@ uniform sampler2D u_Position;
 uniform sampler2D u_Normal;
 uniform sampler2D u_NoiseTex;
 uniform vec3 u_Samples[64];
-
 // parameters (you'd probably want to use them as uniforms to more easily tweak the effect)
 uniform int u_KernelSize;
 uniform float u_Radius;
 uniform float u_Bias;
-
 // tile noise texture over screen based on screen dimensions divided by noise size
 uniform vec2 u_NoiseScale; 
-
 uniform mat4 u_ProjMat;
 
 void main()

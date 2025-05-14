@@ -121,7 +121,7 @@ void GLFrameBuffer::Init(FBType type)
 		m_TexIDs.push_back(0);
 		GLCall(glGenTextures(1, &m_TexIDs[0]));
 		GLCall(glBindTexture(GL_TEXTURE_2D, m_TexIDs[0]));
-		GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, width, height, 0, GL_RGBA, GL_FLOAT, NULL));
+		GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, width, height, 0, GL_RGB, GL_FLOAT, NULL));
 		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
 		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
 		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
@@ -135,7 +135,7 @@ void GLFrameBuffer::Init(FBType type)
 		m_TexIDs.push_back(0);
 		GLCall(glGenTextures(1, &m_TexIDs[1]));
 		GLCall(glBindTexture(GL_TEXTURE_2D, m_TexIDs[1]));
-		GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, width, height, 0, GL_RGBA, GL_FLOAT, NULL));
+		GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, width, height, 0, GL_RGB, GL_FLOAT, NULL));
 		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
 		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
 		m_Handles.push_back(0);
@@ -147,7 +147,7 @@ void GLFrameBuffer::Init(FBType type)
 		m_TexIDs.push_back(0);
 		GLCall(glGenTextures(1, &m_TexIDs[2]));
 		GLCall(glBindTexture(GL_TEXTURE_2D, m_TexIDs[2]));
-		GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, width, height, 0, GL_RGB, GL_FLOAT, NULL));
+		GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, width, height, 0, GL_RGB, GL_FLOAT, NULL));
 		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
 		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
 		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
@@ -157,9 +157,23 @@ void GLFrameBuffer::Init(FBType type)
 		GLCall(glMakeTextureHandleResidentARB(m_Handles[2]));
 		GLCall(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, m_TexIDs[2], 0));
 		GLCall(glBindTexture(GL_TEXTURE_2D, 0));
+		// Albedo buffer
+		m_TexIDs.push_back(0);
+		GLCall(glGenTextures(1, &m_TexIDs[3]));
+		GLCall(glBindTexture(GL_TEXTURE_2D, m_TexIDs[3]));
+		GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, width, height, 0, GL_RGB, GL_FLOAT, NULL));
+		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
+		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
+		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
+		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
+		m_Handles.push_back(0);
+		m_Handles[3] = glGetTextureHandleARB(m_TexIDs[3]);
+		GLCall(glMakeTextureHandleResidentARB(m_Handles[3]));
+		GLCall(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D, m_TexIDs[3], 0));
+		GLCall(glBindTexture(GL_TEXTURE_2D, 0));
 
-		unsigned int attachments[3] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
-		GLCall(glDrawBuffers(3, attachments));
+		unsigned int attachments[4] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3 };
+		GLCall(glDrawBuffers(4, attachments));
 	}
 	else if (m_Type == SSAO)
 	{
@@ -222,7 +236,7 @@ void GLFrameBuffer::Init(FBType type, unsigned int width, unsigned int height)
 		m_TexIDs.push_back(0);
 		GLCall(glGenTextures(1, &m_TexIDs[0]));
 		GLCall(glBindTexture(GL_TEXTURE_2D, m_TexIDs[0]));
-		GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, width, height, 0, GL_RGBA, GL_FLOAT, NULL));
+		GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, width, height, 0, GL_RGB, GL_FLOAT, NULL));
 		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
 		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
 		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
@@ -236,7 +250,7 @@ void GLFrameBuffer::Init(FBType type, unsigned int width, unsigned int height)
 		m_TexIDs.push_back(0);
 		GLCall(glGenTextures(1, &m_TexIDs[1]));
 		GLCall(glBindTexture(GL_TEXTURE_2D, m_TexIDs[1]));
-		GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, width, height, 0, GL_RGBA, GL_FLOAT, NULL));
+		GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, width, height, 0, GL_RGB, GL_FLOAT, NULL));
 		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
 		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
 		m_Handles.push_back(0);
@@ -248,7 +262,7 @@ void GLFrameBuffer::Init(FBType type, unsigned int width, unsigned int height)
 		m_TexIDs.push_back(0);
 		GLCall(glGenTextures(1, &m_TexIDs[2]));
 		GLCall(glBindTexture(GL_TEXTURE_2D, m_TexIDs[2]));
-		GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, width, height, 0, GL_RGB, GL_FLOAT, NULL));
+		GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, width, height, 0, GL_RGB, GL_FLOAT, NULL));
 		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
 		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
 		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
@@ -258,9 +272,23 @@ void GLFrameBuffer::Init(FBType type, unsigned int width, unsigned int height)
 		GLCall(glMakeTextureHandleResidentARB(m_Handles[2]));
 		GLCall(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, m_TexIDs[2], 0));
 		GLCall(glBindTexture(GL_TEXTURE_2D, 0));
+		// Albedo buffer
+		m_TexIDs.push_back(0);
+		GLCall(glGenTextures(1, &m_TexIDs[3]));
+		GLCall(glBindTexture(GL_TEXTURE_2D, m_TexIDs[3]));
+		GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, width, height, 0, GL_RGB, GL_FLOAT, NULL));
+		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
+		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
+		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
+		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
+		m_Handles.push_back(0);
+		m_Handles[3] = glGetTextureHandleARB(m_TexIDs[3]);
+		GLCall(glMakeTextureHandleResidentARB(m_Handles[3]));
+		GLCall(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D, m_TexIDs[3], 0));
+		GLCall(glBindTexture(GL_TEXTURE_2D, 0));
 
-		unsigned int attachments[3] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
-		GLCall(glDrawBuffers(3, attachments));
+		unsigned int attachments[4] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3 };
+		GLCall(glDrawBuffers(4, attachments));
 	}
 	else if (m_Type == OIT)
 	{

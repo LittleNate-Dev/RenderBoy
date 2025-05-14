@@ -1,6 +1,12 @@
 #SHADER VERTEX
 #version 460 core
 
+layout (location = 0) in vec4 a_Position;
+layout (location = 2) in vec3 a_Normal;
+layout (location = 6) in vec3 a_ColorIndex;
+layout (location = 6) in vec4 a_AttributeIndex;
+layout (location = 9) in mat4 a_ModelMat;
+
 #define POINT_LIGHT_COUNT
 #define SPOT_LIGHT_COUNT
 #define DIR_LIGHT_COUNT
@@ -21,12 +27,6 @@ struct FragPosDir
 {
     vec4 FragPos[3];
 };
-
-layout (location = 0) in vec4 a_Position;
-layout (location = 2) in vec3 a_Normal;
-layout (location = 6) in vec3 a_ColorIndex;
-layout (location = 6) in vec4 a_AttributeIndex;
-layout (location = 9) in mat4 a_ModelMat;
 
 out vec3 v_FragPos;
 out vec3 v_Normal;
@@ -71,6 +71,8 @@ void main()
 
 #SHADER FRAGMENT
 #version 460 core
+
+layout(location = 0) out vec4 v_FragColor;
 
 #define POINT_LIGHT_COUNT
 #define SPOT_LIGHT_COUNT
@@ -132,14 +134,14 @@ struct DirLight
     float SoftDegree;
 };
 
-layout(location = 0) out vec4 v_FragColor;
-
 in vec3 v_FragPos;
 in vec3 v_Normal;
 in vec3 v_ColorIndex;
 in vec4 v_AttributeIndex;
 in vec4 v_FragPosSpot[SPOT_LIGHT_COUNT];
 in FragPosDir v_FragPosDir[DIR_LIGHT_COUNT];
+
+const float c_Shininess = 32.0f;
 
 uniform mat4 u_ProjMat;
 uniform mat4 u_ViewMat;
@@ -149,12 +151,9 @@ uniform SpotLight u_SpotLight[SPOT_LIGHT_COUNT];
 uniform DirLight u_DirLight[DIR_LIGHT_COUNT];
 uniform bool u_SSAO;
 uniform sampler2D u_SSAOTex;
-
 // Material
 uniform vec3 u_Diffuse[];
 uniform vec3 u_Specular[];
-
-const float c_Shininess = 32.0f;
 
 vec3 c_ViewDir = vec3(1.0);
 vec3 c_Normal = vec3(0.0);

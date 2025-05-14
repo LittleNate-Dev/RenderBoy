@@ -28,37 +28,19 @@ void main()
 
 layout (location = 0) out vec4 v_FragColor;
 
+precision highp float;
+
+#define mad(a, b, c) (a * b + c)
+
 in vec2 v_TexCoord;
 in vec4 v_Offset;
-
-precision highp float;
 
 uniform sampler2D u_ColorTex;
 uniform sampler2D u_BlendTex;
 uniform vec4 u_Metrics;
 
-#define mad(a, b, c) (a * b + c)
-
-/**
- * Conditional move:
- */
-void Movc(bvec2 cond, inout vec2 variable, vec2 value) 
-{
-    if (cond.x)
-    {
-        variable.x = value.x;
-    }
-    if (cond.y)
-    {
-        variable.y = value.y;
-    }
-}
-
-void Movc(bvec4 cond, inout vec4 variable, vec4 value) 
-{
-    Movc(cond.xy, variable.xy, value.xy);
-    Movc(cond.zw, variable.zw, value.zw);
-}
+void Movc(bvec2 cond, inout vec2 variable, vec2 value);
+void Movc(bvec4 cond, inout vec4 variable, vec4 value);
 
 void main() 
 {
@@ -91,4 +73,25 @@ void main()
         color += blendingWeight.y * texture2D(u_ColorTex, blendingCoord.zw); // LinearSampler
     }    
     v_FragColor = color;
+}
+
+/**
+ * Conditional move:
+ */
+void Movc(bvec2 cond, inout vec2 variable, vec2 value) 
+{
+    if (cond.x)
+    {
+        variable.x = value.x;
+    }
+    if (cond.y)
+    {
+        variable.y = value.y;
+    }
+}
+
+void Movc(bvec4 cond, inout vec4 variable, vec4 value) 
+{
+    Movc(cond.xy, variable.xy, value.xy);
+    Movc(cond.zw, variable.zw, value.zw);
 }

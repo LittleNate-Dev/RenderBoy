@@ -1,6 +1,14 @@
 #SHADER VERTEX
 #version 460 core
 
+layout (location = 0) in vec4 a_Position;
+layout (location = 1) in vec2 a_TexCoord;
+layout (location = 2) in vec3 a_Normal;
+layout (location = 5) in vec4 a_TexIndex;
+layout (location = 6) in vec3 a_ColorIndex;
+layout (location = 7) in vec4 a_AttributeIndex;
+layout (location = 9) in mat4 a_ModelMat;
+
 #define POINT_LIGHT_COUNT
 #define SPOT_LIGHT_COUNT
 #define DIR_LIGHT_COUNT
@@ -22,14 +30,6 @@ struct FragPosDir
 {
     vec4 FragPos[3];
 };
-
-layout (location = 0) in vec4 a_Position;
-layout (location = 1) in vec2 a_TexCoord;
-layout (location = 2) in vec3 a_Normal;
-layout (location = 5) in vec4 a_TexIndex;
-layout (location = 6) in vec3 a_ColorIndex;
-layout (location = 7) in vec4 a_AttributeIndex;
-layout (location = 9) in mat4 a_ModelMat;
 
 out vec3 v_FragPos;
 out vec3 v_Normal;
@@ -78,6 +78,9 @@ void main()
 
 #SHADER FRAGMENT
 #version 460 core
+
+layout(location = 0) out vec4 v_Accum;
+layout(location = 1) out float v_Reveal;
 
 #define POINT_LIGHT_COUNT
 #define SPOT_LIGHT_COUNT
@@ -153,13 +156,6 @@ struct AreaLight
     bool LightSwitch;
 };
 
-layout(location = 0) out vec4 v_Accum;
-layout(location = 1) out float v_Reveal;
-
-const float LUT_SIZE  = 64.0; // ltc_texture size 
-const float LUT_SCALE = (LUT_SIZE - 1.0)/LUT_SIZE;
-const float LUT_BIAS  = 0.5/LUT_SIZE;
-
 in vec3 v_FragPos;
 in vec3 v_Normal;
 in vec2 v_TexCoord;
@@ -168,6 +164,10 @@ in vec3 v_ColorIndex;
 in vec4 v_AttributeIndex;
 in vec4 v_FragPosSpot[SPOT_LIGHT_COUNT];
 in FragPosDir v_FragPosDir[DIR_LIGHT_COUNT];
+
+const float LUT_SIZE  = 64.0; // ltc_texture size 
+const float LUT_SCALE = (LUT_SIZE - 1.0)/LUT_SIZE;
+const float LUT_BIAS  = 0.5/LUT_SIZE;
 
 uniform mat4 u_ProjMat;
 uniform mat4 u_ViewMat;
@@ -183,14 +183,12 @@ uniform sampler2D u_LTC1;
 uniform sampler2D u_LTC2;
 // Texture used for pcf offset
 uniform sampler3D u_ShadowOffset;
-
 // Material
 uniform vec3 u_Diffuse[];
 uniform float u_Transparent[];
 uniform sampler2D u_AlbedoTex[];
 uniform sampler2D u_MetallicTex[];
 uniform sampler2D u_AoTex[];
-
 uniform bool u_OITPass;
 
 vec3 c_ViewDir = vec3(1.0);

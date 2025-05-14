@@ -19,12 +19,12 @@ void main()
 
 layout (location = 0) out vec4 v_FragColor;
 
-in vec2 v_TexCoord;
-
 #define EDGE_THRESHOLD_MIN 0.0312
 #define EDGE_THRESHOLD_MAX 0.125
 #define SUBPIXEL_QUALITY 0.75
 #define ITERATIONS 12
+
+in vec2 v_TexCoord;
 
 uniform sampler2D u_Source;
 uniform vec2 u_InverseScreenSize;

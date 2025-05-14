@@ -17,15 +17,42 @@ void main()
 #SHADER FRAGMENT
 #version 460 core
 
-out vec4 v_FragColor;
+layout (location = 0) out vec4 v_FragColor;
 
 in vec2 v_TexCoord;
+
+// epsilon number
+const float EPSILON = 0.00001f;
 
 uniform sampler2D u_Accum;
 uniform sampler2D u_Reveal;
 
-// epsilon number
-const float EPSILON = 0.00001f;
+bool IsApproximatelyEqual(float a, float b);
+float Max3(vec3 v);
+
+void main()
+{
+    // fragment revealage
+    float revealage = texture(u_Reveal, v_TexCoord).r;
+
+    // save the blending and color texture fetch cost if there is not a transparent fragment
+    if (IsApproximatelyEqual(revealage, 1.0f))
+    {
+        discard;
+    }
+
+    // fragment color
+    vec4 accumulation = texture(u_Accum, v_TexCoord);
+    // suppress overflow
+    if (isinf(Max3(abs(accumulation.rgb))))
+    {
+        accumulation.rgb = vec3(accumulation.a);
+    }
+    // prevent floating point precision bug
+    vec3 average_color = accumulation.rgb / max(accumulation.a, EPSILON);
+    // blend pixels
+    v_FragColor = vec4(average_color, 1.0 - revealage);
+}
 
 // calculate floating point numbers equality accurately
 bool IsApproximatelyEqual(float a, float b)
@@ -37,31 +64,4 @@ bool IsApproximatelyEqual(float a, float b)
 float Max3(vec3 v)
 {
     return max(max(v.x, v.y), v.z);
-}
-
-void main()
-{
-    // fragment revealage
-    float revealage = texture(u_Reveal, v_TexCoord).r;
-
-    // save the blending and color texture fetch cost if there is not a transparent fragment
-    if (IsApproximatelyEqual(revealage, 1.0f))
-    {
-        //discard;
-    }
-
-    // fragment color
-    vec4 accumulation = texture(u_Accum, v_TexCoord);
-
-    // suppress overflow
-    if (isinf(Max3(abs(accumulation.rgb))))
-    {
-        accumulation.rgb = vec3(accumulation.a);
-    }
-
-    // prevent floating point precision bug
-    vec3 average_color = accumulation.rgb / max(accumulation.a, EPSILON);
-
-    // blend pixels
-    v_FragColor = vec4(average_color, 1.0 - revealage);
 }

@@ -2,28 +2,24 @@
 #version 460 core
 
 layout (local_size_x = 256, local_size_y = 1) in;
+layout(std430, binding = 0) buffer Histogram
+{
+    uint histogram[256];
+};
+layout(std430, binding = 1) buffer HistoAvg
+{
+    float weightedAvgLum;
+};
 
 #define EPSILON 0.005
 #define RGB_TO_LUM vec3(0.2125, 0.7154, 0.0721)
 #define MinLog2 -10.0
 #define Log2Range 12.0
 
-layout(std430, binding = 0) buffer Histogram
-{
-    uint histogram[256];
-};
-
-layout(std430, binding = 1) buffer HistoAvg
-{
-    float weightedAvgLum;
-};
-
 shared uint histogramShared[256];
 
 uniform int u_PixelNum;
 uniform float u_TimeDelta;
-
-uint colorToBin(vec3 hdrColor, float minLogLum, float inverseLogLumRange);
 
 void main() 
 {

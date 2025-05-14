@@ -16,13 +16,15 @@ void main()
 #SHADER FRAGMENT
 #version 460 core
 
-out vec4 v_FragColor;
+layout (location = 0) out vec4 v_FragColor;
 
 in vec2 v_TexCoord;
 
+const float offset = 1.0 / 1000.0; 
+
 uniform sampler2D u_ScreenTex;
 
-const float offset = 1.0 / 1000.0;  
+ 
 
 void main()
 {

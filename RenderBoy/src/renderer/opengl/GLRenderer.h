@@ -25,6 +25,7 @@ struct Frame
 	GLFrameBuffer SSAO[2];
 	GLFrameBuffer DOF[4];
 	GLFrameBuffer PPAA[2]; // PPAA: Post-Process Anti-Aliasing
+	GLFrameBuffer SSR;
 };
 
 struct Shaders
@@ -38,6 +39,7 @@ struct Shaders
 	GLShader PP;
 	GLShader Bloom[3]; // 0: DOWNSAMPLE, 1: UPSAMPLE, 2: BLEND
 	GLShader SSAO[2]; // 0: GEN, 1: BLUR
+	GLShader SSR; //0: UV
 	GLShader DOF[4]; // 0: COC, 1: BOKEH, 2: DOWNSAMPLE, 3: BLEND
 	GLShader GaussianBlur;
 	GLShader PPAA[3]; // PPAA: Post-Process Anti-Aliasing
@@ -70,6 +72,7 @@ private:
 	void DrawDOF(Scene& scene); // Depth of Field
 	void DrawBloom(Scene& scene);
 	void DrawSSAO(Scene& scene);
+	void DrawSSR(Scene& scene);
 	void DrawAA(Scene& scene); // Use this function to apply all post-processing aa
 	void DrawFXAA(Scene& scene);
 	void DrawSMAA(Scene& scene);

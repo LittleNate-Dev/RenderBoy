@@ -12,10 +12,7 @@ out vec4 v_Offset[3];
 
 uniform vec4 u_Metrics;
 
-vec4 mad(vec4 a, vec4 b, vec4 c)
-{
-    return a * b + c;
-}
+vec4 mad(vec4 a, vec4 b, vec4 c);
 
 void main()
 {
@@ -34,16 +31,19 @@ void main()
     gl_Position = vec4(a_Position.x, a_Position.y, 0.0, 1.0);   
 } 
 
+vec4 mad(vec4 a, vec4 b, vec4 c)
+{
+    return a * b + c;
+}
+
+
+
 
 
 #SHADER FRAGMENT
 #version 460 core
 
 layout (location = 0) out vec4 v_FragColor;
-
-in vec2 v_TexCoord;
-in vec2 v_PixCoord;
-in vec4 v_Offset[3];
 
 precision highp float;
 precision highp int;
@@ -65,15 +65,125 @@ precision highp int;
 #define AREATEX_SELECT(sample) sample.rg
 #define SEARCHTEX_SELECT(sample) sample.r
 
+#define mad(a, b, c) (a * b + c)
+#define saturate(a) clamp(a, 0.0, 1.0)
+#define round(v) floor(v + 0.5)
+#define SampleLevelZeroOffset(tex, coord, offset) texture2D(tex, coord + offset * u_Metrics.xy)
+
+in vec2 v_TexCoord;
+in vec2 v_PixCoord;
+in vec4 v_Offset[3];
+
 uniform sampler2D u_EdgeTex;
 uniform sampler2D u_AreaTex;
 uniform sampler2D u_SearchTex;
 uniform vec4 u_Metrics;
 
-#define mad(a, b, c) (a * b + c)
-#define saturate(a) clamp(a, 0.0, 1.0)
-#define round(v) floor(v + 0.5)
-#define SampleLevelZeroOffset(tex, coord, offset) texture2D(tex, coord + offset * u_Metrics.xy)
+void Movc(bvec2 cond, inout vec2 variable, vec2 value);
+void Movc(bvec4 cond, inout vec4 variable, vec4 value);
+vec2 DecodeDiagBilinearAccess(vec2 e);
+vec4 DecodeDiagBilinearAccess(vec4 e);
+vec2 SearchDiag1(sampler2D edgesTex, vec2 texcoord, vec2 dir, out vec2 e);
+vec2 SearchDiag2(sampler2D edgesTex, vec2 texcoord, vec2 dir, out vec2 e);
+vec2 AreaDiag(sampler2D areaTex, vec2 dist, vec2 e, float offset);
+vec2 CalculateDiagWeights(sampler2D edgesTex, sampler2D areaTex, vec2 texcoord, vec2 e, vec4 subsampleIndices);
+float SearchLength(sampler2D searchTex, vec2 e, float offset);
+float SearchXLeft(sampler2D edgesTex, sampler2D searchTex, vec2 texcoord, float end);
+float SearchXRight(sampler2D edgesTex, sampler2D searchTex, vec2 texcoord, float end);
+float SearchYUp(sampler2D edgesTex, sampler2D searchTex, vec2 texcoord, float end);
+float SearchYDown(sampler2D edgesTex, sampler2D searchTex, vec2 texcoord, float end);
+vec2 Area(sampler2D areaTex, vec2 dist, float e1, float e2, float offset);
+void DetectHorizontalCornerPattern(sampler2D edgesTex, inout vec2 weights, vec4 texcoord, vec2 d);
+void DetectVerticalCornerPattern(sampler2D edgesTex, inout vec2 weights, vec4 texcoord, vec2 d);
+
+void main() 
+{
+    vec4 subsampleIndices = vec4(0.0); // Just pass zero for SMAA 1x, see @SUBSAMPLE_INDICES.
+    // subsampleIndices = vec4(1.0, 1.0, 1.0, 0.0);
+    vec4 weights = vec4(0.0);
+    vec2 e = texture2D(u_EdgeTex, v_TexCoord).rg;
+    if (e.g > 0.0) // Edge at north
+    { 
+        // #if !defined(SMAA_DISABLE_DIAG_DETECTION)
+        // Diagonals have both north and west edges, so searching for them in
+        // one of the boundaries is enough.
+        weights.rg = CalculateDiagWeights(u_EdgeTex, u_AreaTex, v_TexCoord, e, subsampleIndices);
+        // We give priority to diagonals, so if we find a diagonal we skip
+        // horizontal/vertical processing.
+        if (weights.r == -weights.g) // weights.r + weights.g == 0.0
+        { 
+        // #endif
+        vec2 d;
+        // Find the distance to the left:
+        vec3 coords;
+        coords.x = SearchXLeft(u_EdgeTex, u_SearchTex, v_Offset[0].xy, v_Offset[2].x);
+        coords.y = v_Offset[1].y; // vOffset[1].y = vTexCoord0.y - 0.25 * SMAA_RT_METRICS.y (@CROSSING_OFFSET)
+        d.x = coords.x;
+        // Now fetch the left crossing edges, two at a time using bilinear
+        // filtering. Sampling at -0.25 (see @CROSSING_OFFSET) enables to
+        // discern what value each edge has:
+        float e1 = texture2D(u_EdgeTex, coords.xy).r; // LinearSampler
+        // Find the distance to the right:
+        coords.z = SearchXRight(u_EdgeTex, u_SearchTex, v_Offset[0].zw, v_Offset[2].y);
+        d.y = coords.z;
+        // We want the distances to be in pixel units (doing this here allow to
+        // better interleave arithmetic and memory accesses):
+        d = abs(round(mad(u_Metrics.zz, d, -v_PixCoord.xx)));
+        // SMAAArea below needs a sqrt, as the areas texture is compressed
+        // quadratically:
+        vec2 sqrt_d = sqrt(d);
+        // Fetch the right crossing edges:
+        float e2 = SampleLevelZeroOffset(u_EdgeTex, coords.zy, vec2(1, 0)).r;
+        // Ok, we know how this pattern looks like, now it is time for getting
+        // the actual area:
+        weights.rg = Area(u_AreaTex, sqrt_d, e1, e2, subsampleIndices.y);
+        // Fix corners:
+        coords.y = v_TexCoord.y;
+        DetectHorizontalCornerPattern(u_EdgeTex, weights.rg, coords.xyzy, d);
+        // #if !defined(SMAA_DISABLE_DIAG_DETECTION)
+        } 
+        else
+        {
+            e.r = 0.0; // Skip vertical processing.
+        }
+        // #endif
+    }
+
+    if (e.r > 0.0) // Edge at west
+    {
+        vec2 d;
+        // Find the distance to the top:
+        vec3 coords;
+        coords.y = SearchYUp(u_EdgeTex, u_SearchTex, v_Offset[1].xy, v_Offset[2].z);
+        coords.x = v_Offset[0].x; // vOffset[1].x = vTexCoord0.x - 0.25 * SMAA_RT_METRICS.x;
+        d.x = coords.y;
+
+        // Fetch the top crossing edges:
+        float e1 = texture2D(u_EdgeTex, coords.xy).g; // LinearSampler
+
+        // Find the distance to the bottom:
+        coords.z = SearchYDown(u_EdgeTex, u_SearchTex, v_Offset[1].zw, v_Offset[2].w);
+        d.y = coords.z;
+
+        // We want the distances to be in pixel units:
+        d = abs(round(mad(u_Metrics.ww, d, -v_PixCoord.yy)));
+
+        // SMAAArea below needs a sqrt, as the areas texture is compressed
+        // quadratically:
+        vec2 sqrt_d = sqrt(d);
+
+        // Fetch the bottom crossing edges:
+        float e2 = SampleLevelZeroOffset(u_EdgeTex, coords.xz, vec2(0, 1)).g;
+
+        // Get the area for this direction:
+        weights.ba = Area(u_AreaTex, sqrt_d, e1, e2, subsampleIndices.x);
+
+        // Fix corners:
+        coords.x = v_TexCoord.x;
+        DetectVerticalCornerPattern(u_EdgeTex, weights.ba, coords.xyxz, d);
+    }
+    v_FragColor = weights;
+}
 
 /**
  * Conditional move:
@@ -407,7 +517,6 @@ void DetectHorizontalCornerPattern(sampler2D edgesTex, inout vec2 weights, vec4 
 
 void DetectVerticalCornerPattern(sampler2D edgesTex, inout vec2 weights, vec4 texcoord, vec2 d) 
 {
-    // #if !defined(SMAA_DISABLE_CORNER_DETECTION)
     vec2 leftRight = step(d.xy, d.yx);
     vec2 rounding = (1.0 - CORNER_ROUNDING_NORM) * leftRight;
 
@@ -420,94 +529,4 @@ void DetectVerticalCornerPattern(sampler2D edgesTex, inout vec2 weights, vec4 te
     factor.y -= rounding.y * SampleLevelZeroOffset(edgesTex, texcoord.zw, vec2(-2, 1)).g;
 
     weights *= saturate(factor);
-    // #endif
-}
-
-void main() 
-{
-    vec4 subsampleIndices = vec4(0.0); // Just pass zero for SMAA 1x, see @SUBSAMPLE_INDICES.
-    // subsampleIndices = vec4(1.0, 1.0, 1.0, 0.0);
-    vec4 weights = vec4(0.0);
-    vec2 e = texture2D(u_EdgeTex, v_TexCoord).rg;
-    if (e.g > 0.0) // Edge at north
-    { 
-        // #if !defined(SMAA_DISABLE_DIAG_DETECTION)
-        // Diagonals have both north and west edges, so searching for them in
-        // one of the boundaries is enough.
-        weights.rg = CalculateDiagWeights(u_EdgeTex, u_AreaTex, v_TexCoord, e, subsampleIndices);
-        // We give priority to diagonals, so if we find a diagonal we skip
-        // horizontal/vertical processing.
-        if (weights.r == -weights.g) // weights.r + weights.g == 0.0
-        { 
-        // #endif
-        vec2 d;
-        // Find the distance to the left:
-        vec3 coords;
-        coords.x = SearchXLeft(u_EdgeTex, u_SearchTex, v_Offset[0].xy, v_Offset[2].x);
-        coords.y = v_Offset[1].y; // vOffset[1].y = vTexCoord0.y - 0.25 * SMAA_RT_METRICS.y (@CROSSING_OFFSET)
-        d.x = coords.x;
-        // Now fetch the left crossing edges, two at a time using bilinear
-        // filtering. Sampling at -0.25 (see @CROSSING_OFFSET) enables to
-        // discern what value each edge has:
-        float e1 = texture2D(u_EdgeTex, coords.xy).r; // LinearSampler
-        // Find the distance to the right:
-        coords.z = SearchXRight(u_EdgeTex, u_SearchTex, v_Offset[0].zw, v_Offset[2].y);
-        d.y = coords.z;
-        // We want the distances to be in pixel units (doing this here allow to
-        // better interleave arithmetic and memory accesses):
-        d = abs(round(mad(u_Metrics.zz, d, -v_PixCoord.xx)));
-        // SMAAArea below needs a sqrt, as the areas texture is compressed
-        // quadratically:
-        vec2 sqrt_d = sqrt(d);
-        // Fetch the right crossing edges:
-        float e2 = SampleLevelZeroOffset(u_EdgeTex, coords.zy, vec2(1, 0)).r;
-        // Ok, we know how this pattern looks like, now it is time for getting
-        // the actual area:
-        weights.rg = Area(u_AreaTex, sqrt_d, e1, e2, subsampleIndices.y);
-        // Fix corners:
-        coords.y = v_TexCoord.y;
-        DetectHorizontalCornerPattern(u_EdgeTex, weights.rg, coords.xyzy, d);
-        // #if !defined(SMAA_DISABLE_DIAG_DETECTION)
-        } 
-        else
-        {
-            e.r = 0.0; // Skip vertical processing.
-        }
-        // #endif
-    }
-
-    if (e.r > 0.0) // Edge at west
-    {
-        vec2 d;
-        // Find the distance to the top:
-        vec3 coords;
-        coords.y = SearchYUp(u_EdgeTex, u_SearchTex, v_Offset[1].xy, v_Offset[2].z);
-        coords.x = v_Offset[0].x; // vOffset[1].x = vTexCoord0.x - 0.25 * SMAA_RT_METRICS.x;
-        d.x = coords.y;
-
-        // Fetch the top crossing edges:
-        float e1 = texture2D(u_EdgeTex, coords.xy).g; // LinearSampler
-
-        // Find the distance to the bottom:
-        coords.z = SearchYDown(u_EdgeTex, u_SearchTex, v_Offset[1].zw, v_Offset[2].w);
-        d.y = coords.z;
-
-        // We want the distances to be in pixel units:
-        d = abs(round(mad(u_Metrics.ww, d, -v_PixCoord.yy)));
-
-        // SMAAArea below needs a sqrt, as the areas texture is compressed
-        // quadratically:
-        vec2 sqrt_d = sqrt(d);
-
-        // Fetch the bottom crossing edges:
-        float e2 = SampleLevelZeroOffset(u_EdgeTex, coords.xz, vec2(0, 1)).g;
-
-        // Get the area for this direction:
-        weights.ba = Area(u_AreaTex, sqrt_d, e1, e2, subsampleIndices.x);
-
-        // Fix corners:
-        coords.x = v_TexCoord.x;
-        DetectVerticalCornerPattern(u_EdgeTex, weights.ba, coords.xyxz, d);
-    }
-    v_FragColor = weights;
 }

@@ -32,5 +32,5 @@ in vec3 v_Normal;
 
 void main()
 {    
-    g_Normal = vec4(normalize(v_Normal), 1.0);
+    g_Normal = vec4((normalize(v_Normal) + 1.0) * 0.5, 1.0);
 }

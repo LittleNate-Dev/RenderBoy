@@ -75,10 +75,10 @@ layout(location = 0) out vec4 v_FragColor;
 
 in vec3 v_EdgeDistance;
 
-uniform vec2 u_RenderRes;
-
 const vec4 faceColor = vec4(0.78, 0.78, 0.78, 1.0);
 const vec4 lineColor = vec4(0.282, 0.537, 0.254, 1.0);
+
+uniform vec2 u_RenderRes;
 
 void main()
 {

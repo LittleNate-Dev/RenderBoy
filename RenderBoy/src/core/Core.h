@@ -42,7 +42,7 @@
 
 #include <freeimage/FreeImage.h>
 
-#define APP_VERSION "ver 0.8.6"
+#define APP_VERSION "ver 0.8.7"
 #define GIT_REPO "https://github.com/LittleNate-Dev/RenderBoy"
 #define SCENE_FILEPATH "saves/scene/"
 #define SETTING_FILEPATH "data/config/settings.config"
@@ -97,6 +97,7 @@
 #define SHADER_OPENGL_DOF_BLEND "data/shaders/opengl/vfx/dof/BLEND.glsl"
 #define SHADER_OPENGL_SSAO_GEN "data/shaders/opengl/vfx/ssao/GEN.glsl"
 #define SHADER_OPENGL_SSAO_BLUR "data/shaders/opengl/vfx/ssao/BLUR.glsl"
+#define SHADER_OPENGL_SSR_UV "data/shaders/opengl/vfx/ssr/UV.glsl"
 #define SHADER_OPENGL_SHADOW_POINT "data/shaders/opengl/shadow/POINTLIGHT.glsl"
 #define SHADER_OPENGL_SHADOW_SPOT "data/shaders/opengl/shadow/SPOTLIGHT.glsl"
 #define SHADER_OPENGL_SHADOW_DIR "data/shaders/opengl/shadow/DIRLIGHT.glsl"

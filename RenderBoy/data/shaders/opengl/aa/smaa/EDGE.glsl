@@ -28,17 +28,15 @@ void main()
 #SHADER FRAGMENT
 #version 460 core
 
-precision highp float;
-
 layout (location = 0) out vec4 v_FragColor;
-
-in vec2 v_TexCoord;
-in vec4 v_Offset[3];
 
 precision highp float;
 
 #define THRESHOLD 0.1
 #define LOCAL_CONTRAST_ADAPTATION_FACTOR 2.0
+
+in vec2 v_TexCoord;
+in vec4 v_Offset[3];
 
 uniform sampler2D u_ColorTex;
 
@@ -49,7 +47,6 @@ void main()
     // Calculate lumas:
     vec3 weights = vec3(0.2126, 0.7152, 0.0722);
     float L = dot(texture2D(u_ColorTex, v_TexCoord).rgb, weights);
-
     float Lleft = dot(texture2D(u_ColorTex, v_Offset[0].xy).rgb, weights);
     float Ltop  = dot(texture2D(u_ColorTex, v_Offset[0].zw).rgb, weights);
 

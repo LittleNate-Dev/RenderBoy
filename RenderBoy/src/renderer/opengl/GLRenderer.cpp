@@ -33,35 +33,7 @@ bool GLRenderer::Init(Scene& scene)
 	{
 		return false;
 	}
-	if (!m_Shaders.Bloom[0].Init(SHADER_OPENGL_BLOOM_DOWNSAMPLE))
-	{
-		return false;
-	}
-	if (!m_Shaders.Bloom[1].Init(SHADER_OPENGL_BLOOM_UPSAMPLE))
-	{
-		return false;
-	}
-	if (!m_Shaders.Bloom[2].Init(SHADER_OPENGL_BLOOM_BLEND))
-	{
-		return false;
-	}
 	if (!m_Shaders.OIT.Init(SHADER_OPENGL_OIT))
-	{
-		return false;
-	}
-	if (!m_Shaders.DOF[0].Init(SHADER_OPENGL_DOF_COC))
-	{
-		return false;
-	}
-	if (!m_Shaders.DOF[1].Init(SHADER_OPENGL_DOF_BOKEH))
-	{
-		return false;
-	}
-	if (!m_Shaders.DOF[2].Init(SHADER_OPENGL_DOF_DOWNSAMPLE))
-	{
-		return false;
-	}
-	if (!m_Shaders.DOF[3].Init(SHADER_OPENGL_DOF_BLEND))
 	{
 		return false;
 	}
@@ -69,18 +41,28 @@ bool GLRenderer::Init(Scene& scene)
 	{
 		return false;
 	}
-	ChangeAA();
-	if (!m_Shaders.Exposure[0].Init(SHADER_OPENGL_EXPOSURE_HISTOGRAM))
-	{
-		return false;
-	}
-	if (!m_Shaders.Exposure[1].Init(SHADER_OPENGL_EXPOSURE_AVERAGE))
-	{
-		return false;
-	}
 	if (!ChangePostProcess())
 	{
 		return false;
+	}
+	if (!ChangeAA())
+	{
+		return false;
+	}
+	// Shaders used for bloom
+	{
+		if (!m_Shaders.Bloom[0].Init(SHADER_OPENGL_BLOOM_DOWNSAMPLE))
+		{
+			return false;
+		}
+		if (!m_Shaders.Bloom[1].Init(SHADER_OPENGL_BLOOM_UPSAMPLE))
+		{
+			return false;
+		}
+		if (!m_Shaders.Bloom[2].Init(SHADER_OPENGL_BLOOM_BLEND))
+		{
+			return false;
+		}
 	}
 	// Shaders used for SSAO
 	{
@@ -100,6 +82,43 @@ bool GLRenderer::Init(Scene& scene)
 			return false;
 		}
 	}
+	// Shaders used for depth of field
+	{
+		if (!m_Shaders.DOF[0].Init(SHADER_OPENGL_DOF_COC))
+		{
+			return false;
+		}
+		if (!m_Shaders.DOF[1].Init(SHADER_OPENGL_DOF_BOKEH))
+		{
+			return false;
+		}
+		if (!m_Shaders.DOF[2].Init(SHADER_OPENGL_DOF_DOWNSAMPLE))
+		{
+			return false;
+		}
+		if (!m_Shaders.DOF[3].Init(SHADER_OPENGL_DOF_BLEND))
+		{
+			return false;
+		}
+	}
+	// Shaders used for auto exposure
+	{
+		if (!m_Shaders.Exposure[0].Init(SHADER_OPENGL_EXPOSURE_HISTOGRAM))
+		{
+			return false;
+		}
+		if (!m_Shaders.Exposure[1].Init(SHADER_OPENGL_EXPOSURE_AVERAGE))
+		{
+			return false;
+		}
+	}
+	// Shaders used for SSR
+	{
+		if (!m_Shaders.SSR.Init(SHADER_OPENGL_SSR_UV))
+		{
+			return false;
+		}
+	}
 	// Initialize frame buffers
 	m_Frame.FB.Init(FBType::FRAME);
 	m_Frame.Screen.Init(FBType::FRAME);
@@ -111,29 +130,39 @@ bool GLRenderer::Init(Scene& scene)
 		m_Frame.PPAA[i].Init(FBType::FRAME);
 	}
 	// Initialize framebuffers used for SSAO
-	m_Frame.SSAO[0].Init(FBType::SSAO); 
-	m_Frame.SSAO[1].Init(FBType::SSAO);
-	// Initialize framebuffers used for depth of field
-	m_Frame.DOF[0].Init(FBType::FRAME);
-	m_Frame.DOF[1].Init(FBType::FRAME);
-	glm::vec2 renderRes = core::GetRenderRes() * 0.5f;
-	m_Frame.DOF[2].Init(FBType::FRAME, (int)renderRes.x, (int)renderRes.y);
-	m_Frame.DOF[3].Init(FBType::FRAME, (int)renderRes.x, (int)renderRes.y);
-	// Initialize framebuffers used for bloom effect
-	int bloomWidth = (int)(core::SETTINGS.Width * core::SETTINGS.Resolution);
-	int bloomHeight = (int)(core::SETTINGS.Height * core::SETTINGS.Resolution);
-	m_Frame.Bloom[6].Init(FBType::FRAME, bloomWidth, bloomHeight);
-	for (unsigned int i = 0; i < 6; i++)
 	{
-		if (bloomWidth > 6 && bloomHeight > 6)
+		m_Frame.SSAO[0].Init(FBType::SSAO);
+		m_Frame.SSAO[1].Init(FBType::SSAO);
+	}
+	// Initialize framebuffers used for SSR
+	{
+		m_Frame.SSR.Init(FBType::FRAME);
+	}
+	// Initialize framebuffers used for depth of field
+	{
+		m_Frame.DOF[0].Init(FBType::FRAME);
+		m_Frame.DOF[1].Init(FBType::FRAME);
+		glm::vec2 renderRes = core::GetRenderRes() * 0.5f;
+		m_Frame.DOF[2].Init(FBType::FRAME, (int)renderRes.x, (int)renderRes.y);
+		m_Frame.DOF[3].Init(FBType::FRAME, (int)renderRes.x, (int)renderRes.y);
+	}
+	// Initialize framebuffers used for bloom effect
+	{
+		int bloomWidth = (int)(core::SETTINGS.Width * core::SETTINGS.Resolution);
+		int bloomHeight = (int)(core::SETTINGS.Height * core::SETTINGS.Resolution);
+		m_Frame.Bloom[6].Init(FBType::FRAME, bloomWidth, bloomHeight);
+		for (unsigned int i = 0; i < 6; i++)
 		{
-			m_Frame.Bloom[i].Init(FBType::FRAME, bloomWidth, bloomHeight);
-			bloomWidth /= 2;
-			bloomHeight /= 2;
-		}
-		else
-		{
-			break;
+			if (bloomWidth > 6 && bloomHeight > 6)
+			{
+				m_Frame.Bloom[i].Init(FBType::FRAME, bloomWidth, bloomHeight);
+				bloomWidth /= 2;
+				bloomHeight /= 2;
+			}
+			else
+			{
+				break;
+			}
 		}
 	}
 	if (m_Frame.FB.IsInitialized())
@@ -189,7 +218,7 @@ void GLRenderer::Draw(Scene& scene)
 {
 	UpdateModelMat(scene);
 	DrawGBuffer(scene);
-	if (scene.GetVFX().SSAO)
+	if (scene.GetVFX().SSAO.Status)
 	{
 		DrawSSAO(scene);
 	}
@@ -256,7 +285,7 @@ void GLRenderer::Draw(Scene& scene)
 	GLCall(glViewport(0, 0, core::SETTINGS.Width, core::SETTINGS.Height));
 	m_Shaders.PP.Bind();
 	m_Shaders.PP.SetUniformHandleARB("u_ScreenTex", m_Frame.FB.GetHandle());
-	//m_Shaders.PP.SetUniformHandleARB("u_ScreenTex", m_Frame.PPAA[0].GetHandle());
+	//m_Shaders.PP.SetUniformHandleARB("u_ScreenTex", m_Frame.SSR.GetHandle());
 	m_Frame.VA.Bind();
 	m_Frame.IB.Bind();
 	GLCall(glDrawElements(GL_TRIANGLES, m_Frame.IB.GetCount(), GL_UNSIGNED_INT, nullptr));
@@ -325,7 +354,7 @@ void GLRenderer::DrawDefault(Scene& scene)
 		scene.GetData().GetDataGL().GetModelData()[model].Shader.SetUniformMat4f("u_ProjMat", scene.GetCamera().GetProjMat());
 		scene.GetData().GetDataGL().GetModelData()[model].Shader.SetUniformMat4f("u_ViewMat", scene.GetCamera().GetViewMat());
 		scene.GetData().GetDataGL().GetModelData()[model].Shader.SetUniformVec3f("u_ViewPos", scene.GetCamera().GetPosition());
-		scene.GetData().GetDataGL().GetModelData()[model].Shader.SetUniform1i("u_SSAO", scene.GetVFX().SSAO);
+		scene.GetData().GetDataGL().GetModelData()[model].Shader.SetUniform1i("u_SSAO", scene.GetVFX().SSAO.Status);
 		scene.GetData().GetDataGL().GetModelData()[model].Shader.SetUniformHandleARB("u_SSAOTex", m_Frame.SSAO[1].GetHandle());
 		scene.GetData().GetDataGL().GetModelData()[model].Shader.SetUniformHandleARB("u_ShadowOffset", scene.GetData().GetDataGL().GetSpotLightData().ShadowOffset.GetHandle());
 		std::string light;
@@ -510,6 +539,8 @@ void GLRenderer::DrawDefault(Scene& scene)
 	m_Frame.FB.Unbind();
 	GLCall(glDepthMask(GL_TRUE));
 	GLCall(glDepthFunc(GL_LESS));
+	// Draw SSR
+	DrawSSR(scene);
 	// Draw Bloom
 	if (scene.GetCamera().GetBloom().Switch)
 	{
@@ -540,7 +571,7 @@ void GLRenderer::DrawBlank(Scene& scene)
 	scene.GetData().GetDataGL().GetShader().SetUniformMat4f("u_ProjMat", scene.GetCamera().GetProjMat());
 	scene.GetData().GetDataGL().GetShader().SetUniformMat4f("u_ViewMat", scene.GetCamera().GetViewMat());
 	scene.GetData().GetDataGL().GetShader().SetUniformVec3f("u_ViewPos", scene.GetCamera().GetPosition());
-	scene.GetData().GetDataGL().GetShader().SetUniform1i("u_SSAO", scene.GetVFX().SSAO);
+	scene.GetData().GetDataGL().GetShader().SetUniform1i("u_SSAO", scene.GetVFX().SSAO.Status);
 	scene.GetData().GetDataGL().GetShader().SetUniformHandleARB("u_SSAOTex", m_Frame.SSAO[1].GetHandle());
 	scene.GetData().GetDataGL().GetShader().SetUniformHandleARB("u_ShadowOffset", scene.GetData().GetDataGL().GetSpotLightData().ShadowOffset.GetHandle());
 	std::string light;
@@ -1276,9 +1307,9 @@ void GLRenderer::DrawSSAO(Scene& scene)
 									scene.GetData().GetDataGL().GetVFXData().SSAONoiseTex.GetHeight());
 	glm::vec2 noiseScale = glm::vec2(m_Frame.SSAO[0].GetTexWidth() / noiseSize.x, m_Frame.SSAO[0].GetTexHeight() / noiseSize.y);
 	m_Shaders.SSAO[0].SetUniformVec2f("u_NoiseScale", noiseScale);
-	m_Shaders.SSAO[0].SetUniform1i("u_KernelSize", scene.GetVFX().SSAOKernelSize);
-	m_Shaders.SSAO[0].SetUniform1f("u_Radius", scene.GetVFX().SSAORadius);
-	m_Shaders.SSAO[0].SetUniform1f("u_Bias", scene.GetVFX().SSAOBias);
+	m_Shaders.SSAO[0].SetUniform1i("u_KernelSize", scene.GetVFX().SSAO.KernelSize);
+	m_Shaders.SSAO[0].SetUniform1f("u_Radius", scene.GetVFX().SSAO.Radius);
+	m_Shaders.SSAO[0].SetUniform1f("u_Bias", scene.GetVFX().SSAO.Bias);
 	GLCall(glDrawElements(GL_TRIANGLES, m_Frame.IB.GetCount(), GL_UNSIGNED_INT, nullptr));
 	m_Shaders.SSAO[0].Unbind();
 	m_Frame.SSAO[0].Unbind();
@@ -1294,6 +1325,37 @@ void GLRenderer::DrawSSAO(Scene& scene)
 	m_Frame.IB.Unbind();
 	GLCall(glEnable(GL_DEPTH_TEST));
 	GLCall(glEnable(GL_BLEND));
+}
+
+void GLRenderer::DrawSSR(Scene& scene)
+{
+	GLCall(glDisable(GL_DEPTH_TEST));
+	GLCall(glDepthMask(GL_FALSE));
+	GLCall(glDisable(GL_BLEND));
+	m_Frame.SSR.Bind();
+	Clear();
+	m_Shaders.SSR.Bind();
+	m_Shaders.SSR.SetUniformMat4f("u_ProjMat", scene.GetCamera().GetProjMat());
+	m_Shaders.SSR.SetUniformHandleARB("u_PosTex", m_Frame.GBuffer.GetHandle());
+	m_Shaders.SSR.SetUniformHandleARB("u_NormalTex", m_Frame.GBuffer.GetHandle(1));
+	m_Shaders.SSR.SetUniformHandleARB("u_ColorTex", m_Frame.GBuffer.GetHandle(3));
+	m_Shaders.SSR.SetUniformVec2f("u_TexSize", m_Frame.GBuffer.GetTexSize());
+	m_Shaders.SSR.SetUniform1f("u_MaxDistance", scene.GetVFX().SSR.MaxDistance);
+	m_Shaders.SSR.SetUniform1f("u_Resolution", scene.GetVFX().SSR.Resolution);
+	m_Shaders.SSR.SetUniform1i("u_Step", scene.GetVFX().SSR.Step);
+	m_Shaders.SSR.SetUniform1f("u_Thickness", scene.GetVFX().SSR.Thickness);
+	m_Shaders.SSR.SetUniform1i("u_MaxLoop", scene.GetVFX().SSR.MaxLoop);
+	m_Frame.VA.Bind();
+	m_Frame.IB.Bind();
+	GLCall(glDrawElements(GL_TRIANGLES, m_Frame.IB.GetCount(), GL_UNSIGNED_INT, nullptr));
+	m_Shaders.SSR.Unbind();
+	m_Frame.SSR.Unbind();
+
+	m_Frame.VA.Unbind();
+	m_Frame.IB.Unbind();
+	GLCall(glEnable(GL_BLEND));
+	GLCall(glDepthMask(GL_TRUE));
+	GLCall(glEnable(GL_DEPTH_TEST));
 }
 
 void GLRenderer::DrawAA(Scene& scene)
@@ -1465,43 +1527,43 @@ bool GLRenderer::SaveScreenShot(Scene& scene)
 
 void GLRenderer::ChangeResolution()
 {
-	int width = (int)(core::SETTINGS.Width * core::SETTINGS.Resolution);
-	int height = (int)(core::SETTINGS.Height * core::SETTINGS.Resolution);
-
-	m_Frame.FB.Init(FBType::FRAME, width, height);
-	m_Frame.Screen.Init(FBType::FRAME, width, height);
+	m_Frame.FB.Init(FBType::FRAME);
+	m_Frame.Screen.Init(FBType::FRAME);
 	for (unsigned int i = 0; i < 2; i++)
 	{
 		m_Frame.PPAA[i].Init(FBType::FRAME);
 	}
-	m_Frame.GBuffer.Init(FBType::G_BUFFER, width, height);
-	m_Frame.SSAO[0].Init(FBType::SSAO, width, height);
-	m_Frame.SSAO[1].Init(FBType::SSAO, width, height);
-	m_Frame.OIT.Init(FBType::OIT, width, height);
-	m_Frame.DOF[0].Init(FBType::FRAME, width, height);
-	m_Frame.DOF[1].Init(FBType::FRAME, width, height);
+	m_Frame.GBuffer.Init(FBType::G_BUFFER);
+	m_Frame.SSAO[0].Init(FBType::SSAO);
+	m_Frame.SSAO[1].Init(FBType::SSAO);
+	m_Frame.OIT.Init(FBType::OIT);
+	m_Frame.DOF[0].Init(FBType::FRAME);
+	m_Frame.DOF[1].Init(FBType::FRAME);
 	glm::vec2 renderRes = core::GetRenderRes() * 0.5f;
 	m_Frame.DOF[2].Init(FBType::FRAME, (int)renderRes.x, (int)renderRes.y);
 	m_Frame.DOF[3].Init(FBType::FRAME, (int)renderRes.x, (int)renderRes.y);
+	m_Frame.SSR.Init(FBType::FRAME);
 	// Initialize framebuffers used for bloom effect
-	for (unsigned int i = 0; i < 7; i++)
 	{
-		m_Frame.Bloom[i].~GLFrameBuffer();
-	}
-	int bloomWidth = (int)(core::SETTINGS.Width * core::SETTINGS.Resolution);
-	int bloomHeight = (int)(core::SETTINGS.Height * core::SETTINGS.Resolution);
-	m_Frame.Bloom[6].Init(FBType::FRAME, bloomWidth, bloomHeight);
-	for (unsigned int i = 0; i < 6; i++)
-	{
-		if (bloomWidth > 6 && bloomHeight > 6)
+		for (unsigned int i = 0; i < 7; i++)
 		{
-			m_Frame.Bloom[i].Init(FRAME, bloomWidth, bloomHeight);
-			bloomWidth /= 2;
-			bloomHeight /= 2;
+			m_Frame.Bloom[i].~GLFrameBuffer();
 		}
-		else
+		int bloomWidth = (int)(core::SETTINGS.Width * core::SETTINGS.Resolution);
+		int bloomHeight = (int)(core::SETTINGS.Height * core::SETTINGS.Resolution);
+		m_Frame.Bloom[6].Init(FBType::FRAME, bloomWidth, bloomHeight);
+		for (unsigned int i = 0; i < 6; i++)
 		{
-			break;
+			if (bloomWidth > 6 && bloomHeight > 6)
+			{
+				m_Frame.Bloom[i].Init(FRAME, bloomWidth, bloomHeight);
+				bloomWidth /= 2;
+				bloomHeight /= 2;
+			}
+			else
+			{
+				break;
+			}
 		}
 	}
 }

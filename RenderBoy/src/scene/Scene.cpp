@@ -72,6 +72,288 @@ bool Scene::Reset(std::string filepath)
 	return false;
 }
 
+void Scene::SaveScene()
+{
+	std::string savePath;
+	if (m_FilePath != "")
+	{
+		savePath = m_FilePath;
+	}
+	else
+	{
+		savePath = SCENE_FILEPATH + m_Name + ".scene";
+	}
+	std::ofstream stream(savePath);
+	std::string line;
+	line = "#SCENE_NAME " + m_Name + "\n";
+	stream << line;
+	// Save Camera
+	{
+		line = "#CAMERA_TYPE " + std::to_string(m_Camera.GetCameraType()) + "\n";
+		stream << line;
+		line = "#CAMERA_FOV " + std::to_string(m_Camera.GetFOV()) + "\n";
+		stream << line;
+		line = "#CAMERA_NEAR_PLANE " + std::to_string(m_Camera.GetNearPlane()) + "\n";
+		stream << line;
+		line = "#CAMERA_FAR_PLANE " + std::to_string(m_Camera.GetFarPlane()) + "\n";
+		stream << line;
+		line = "#CAMERA_MOVE_SPEED " + std::to_string(m_Camera.GetMoveSpeed()) + "\n";
+		stream << line;
+		line = "#CAMERA_ROTATE_SPEED " + std::to_string(m_Camera.GetRotateSpeed()) + "\n";
+		stream << line;
+		glm::vec3 pos = m_Camera.GetPosition();
+		line = "#CAMERA_POSITION " + std::to_string(pos.x) + " " + std::to_string(pos.y) + " " + std::to_string(pos.z) + "\n";
+		stream << line;
+		glm::vec3 euler = m_Camera.GetEulerAngle();
+		line = "#CAMERA_EULERANGLE " + std::to_string(euler.x) + " " + std::to_string(euler.y) + " " + std::to_string(euler.z) + "\n";
+		stream << line;
+		line = "#CAMERA_VFX_EXPOSURE_AUTO " + std::to_string(m_Camera.GetExposure().Auto) + "\n";
+		stream << line;
+		line = "#CAMERA_VFX_EXPOSURE_STRENGTH " + std::to_string(m_Camera.GetExposure().Strength) + "\n";
+		stream << line;
+		line = "#CAMERA_VFX_BLOOM_SWITCH " + std::to_string(m_Camera.GetBloom().Switch) + "\n";
+		stream << line;
+		line = "#CAMERA_VFX_BLOOM_STRENGTH " + std::to_string(m_Camera.GetBloom().Strength) + "\n";
+		stream << line;
+		line = "#CAMERA_VFX_BLOOM_FILTER_RADIUS " + std::to_string(m_Camera.GetBloom().FilterRadius) + "\n";
+		stream << line;
+		line = "#CAMERA_VFX_DOF_SWITCH " + std::to_string(m_Camera.GetFocus().Switch) + "\n";
+		stream << line;
+		line = "#CAMERA_VFX_DOF_DISTANCE " + std::to_string(m_Camera.GetFocus().Distance) + "\n";
+		stream << line;
+		line = "#CAMERA_VFX_DOF_RANGE " + std::to_string(m_Camera.GetFocus().Range) + "\n";
+		stream << line;
+		line = "#CAMERA_VFX_DOF_FOCAL_LENGTH " + std::to_string(m_Camera.GetFocus().FocalLength) + "\n";
+		stream << line;
+	}
+	// Save Skybox
+	{
+		line = "#SKYBOX_TYPE " + std::to_string(m_Skybox.Type) + "\n";
+		stream << line;
+		if (m_Skybox.Type == PURE_COLOR)
+		{
+			line = "#SKYBOX_COLOR " + std::to_string(m_Skybox.Color.x) + " " + std::to_string(m_Skybox.Color.y) + " " + std::to_string(m_Skybox.Color.z) + "\n";
+			stream << line;
+		}
+		else if (m_Skybox.Type == PICTURE && m_Skybox.Filepath.size())
+		{
+			line = "#SKYBOX_FILEPATH " + m_Skybox.Filepath[0] + "\n";
+			stream << line;
+		}
+	}
+	// SaveVFX
+	{
+		line = "#SSAO_SWITCH " + std::to_string(m_VFX.SSAO.Status) + "\n";
+		stream << line;
+		line = "#SSAO_KERNEL_SIZE " + std::to_string(m_VFX.SSAO.KernelSize) + "\n";
+		stream << line;
+		line = "#SSAO_RADIUS " + std::to_string(m_VFX.SSAO.Radius) + "\n";
+		stream << line;
+		line = "#SSAO_BIAS " + std::to_string(m_VFX.SSAO.Bias) + "\n";
+		stream << line;
+		line = "#SSR_SWITCH " + std::to_string(m_VFX.SSR.Status) + "\n";
+		stream << line;
+		line = "#SSR_MAX_DISTANCE " + std::to_string(m_VFX.SSR.MaxDistance) + "\n";
+		stream << line;
+		line = "#SSR_RESOLUTION " + std::to_string(m_VFX.SSR.Resolution) + "\n";
+		stream << line;
+		line = "#SSR_STEP " + std::to_string(m_VFX.SSR.Step) + "\n";
+		stream << line;
+		line = "#SSR_THICKNESS " + std::to_string(m_VFX.SSR.Thickness) + "\n";
+		stream << line;
+		line = "#SSR_MAX_LOOP " + std::to_string(m_VFX.SSR.MaxLoop) + "\n";
+		stream << line;
+	}
+	// Save models
+	for (unsigned int i = 0; i < m_ModelList.size(); i++)
+	{
+		std::string model = m_ModelList[i];
+		line = "#MODEL_NAME " + model + "\n";
+		stream << line;
+		line = "#" + model + "_FILEPATH " + m_Models[model].GetFilePath() + "\n";
+		stream << line;
+		glm::vec3 pos = m_Models[model].GetPosition();
+		line = "#" + model + "_POSITION " + std::to_string(pos.x) + " " + std::to_string(pos.y) + " " + std::to_string(pos.z) + "\n";
+		stream << line;
+		glm::vec3 scale = m_Models[model].GetScale();
+		line = "#" + model + "_SCALE " + std::to_string(scale.x) + " " + std::to_string(scale.y) + " " + std::to_string(scale.z) + "\n";
+		stream << line;
+		glm::vec3 euler = m_Models[model].GetEulerAngle();
+		line = "#" + model + "_EULERANGLE " + std::to_string(euler.x) + " " + std::to_string(euler.y) + " " + std::to_string(euler.z) + "\n";
+		stream << line;
+		line = "#" + model + "_INSTANCE_NUM " + std::to_string(m_Models[model].GetInstance()) + "\n";
+		stream << line;
+		line = "#" + model + "_CURRENT " + std::to_string(m_Models[model].GetCurrent()) + "\n";
+		stream << line;
+		for (unsigned int j = 0; j < m_Models[model].GetInstance(); j++)
+		{
+			pos = m_Models[model].GetPosition(j + 1);
+			line = "#" + model + "_INSTANCE_POSITION " + std::to_string(j + 1) + " " + std::to_string(pos.x) + " " + std::to_string(pos.y) + " " + std::to_string(pos.z) + "\n";
+			stream << line;
+			scale = m_Models[model].GetScale(j + 1);
+			line = "#" + model + "_INSTANCE_SCALE " + std::to_string(j + 1) + " " + std::to_string(scale.x) + " " + std::to_string(scale.y) + " " + std::to_string(scale.z) + "\n";
+			stream << line;
+			euler = m_Models[model].GetEulerAngle(j + 1);
+			line = "#" + model + "_INSTANCE_EULERANGLE " + std::to_string(j + 1) + " " + std::to_string(euler.x) + " " + std::to_string(euler.y) + " " + std::to_string(euler.z) + "\n";
+			stream << line;
+		}
+	}
+	// Save Point Lights
+	for (unsigned int i = 0; i < m_PointLightList.size(); i++)
+	{
+		std::string light = m_PointLightList[i];
+		line = "#POINT_LIGHT_NAME " + light + "\n";
+		stream << line;
+		glm::vec3 pos = m_PointLights[light].GetPosition();
+		line = "#POINT_LIGHT_" + light + "_POSITION " + std::to_string(pos.x) + " " + std::to_string(pos.y) + " " + std::to_string(pos.z) + "\n";
+		stream << line;
+		glm::vec3 color = m_PointLights[light].GetColor();
+		line = "#POINT_LIGHT_" + light + "_COLOR " + std::to_string(color.x) + " " + std::to_string(color.y) + " " + std::to_string(color.z) + "\n";
+		stream << line;
+		line = "#POINT_LIGHT_" + light + "_RANGE " + std::to_string(m_PointLights[light].GetRange()) + "\n";
+		stream << line;
+		line = "#POINT_LIGHT_" + light + "_INTENSITY " + std::to_string(m_PointLights[light].GetIntensity()) + "\n";
+		stream << line;
+		line = "#POINT_LIGHT_" + light + "_BIAS " + std::to_string(m_PointLights[light].GetBias()) + "\n";
+		stream << line;
+		glm::vec3 ads = m_PointLights[light].GetADS();
+		line = "#POINT_LIGHT_" + light + "_ADS " + std::to_string(ads.x) + " " + std::to_string(ads.y) + " " + std::to_string(ads.z) + "\n";
+		stream << line;
+		glm::vec3 clq = m_PointLights[light].GetCLQ();
+		line = "#POINT_LIGHT_" + light + "_CLQ " + std::to_string(clq.x) + " " + std::to_string(clq.y) + " " + std::to_string(clq.z) + "\n";
+		stream << line;
+		line = "#POINT_LIGHT_" + light + "_SWITCH " + std::to_string(m_PointLights[light].LightSwitch()) + "\n";
+		stream << line;
+		line = "#POINT_LIGHT_" + light + "_SHOW_CUBE " + std::to_string(m_PointLights[light].ShowCube()) + "\n";
+		stream << line;
+		line = "#POINT_LIGHT_" + light + "_CAST_SHADOW " + std::to_string(m_PointLights[light].CastShadow()) + "\n";
+		stream << line;
+		line = "#POINT_LIGHT_" + light + "_SHADOW_RES " + std::to_string(m_PointLights[light].GetShadowRes()) + "\n";
+		stream << line;
+		line = "#POINT_LIGHT_" + light + "_SOFT_SHADOW " + std::to_string(m_PointLights[light].SoftShadow()) + "\n";
+		stream << line;
+		line = "#POINT_LIGHT_" + light + "_SOFT_DEGREE " + std::to_string(m_PointLights[light].GetSoftDegree()) + "\n";
+		stream << line;
+	}
+	// Save Spot Lights
+	for (unsigned int i = 0; i < m_SpotLightList.size(); i++)
+	{
+		std::string light = m_SpotLightList[i];
+		line = "#SPOT_LIGHT_NAME " + light + "\n";
+		stream << line;
+		glm::vec3 pos = m_SpotLights[light].GetPosition();
+		line = "#SPOT_LIGHT_" + light + "_POSITION " + std::to_string(pos.x) + " " + std::to_string(pos.y) + " " + std::to_string(pos.z) + "\n";
+		stream << line;
+		glm::vec3 euler = m_SpotLights[light].GetEulerAngle();
+		line = "#SPOT_LIGHT_" + light + "_EULERANGLE " + std::to_string(euler.x) + " " + std::to_string(euler.y) + " " + std::to_string(euler.z) + "\n";
+		stream << line;
+		glm::vec3 color = m_SpotLights[light].GetColor();
+		line = "#SPOT_LIGHT_" + light + "_COLOR " + std::to_string(color.x) + " " + std::to_string(color.y) + " " + std::to_string(color.z) + "\n";
+		stream << line;
+		line = "#SPOT_LIGHT_" + light + "_RANGE " + std::to_string(m_SpotLights[light].GetRange()) + "\n";
+		stream << line;
+		line = "#SPOT_LIGHT_" + light + "_INTENSITY " + std::to_string(m_SpotLights[light].GetIntensity()) + "\n";
+		stream << line;
+		line = "#SPOT_LIGHT_" + light + "_ANGLE " + std::to_string(m_SpotLights[light].GetAngle()) + "\n";
+		stream << line;
+		line = "#SPOT_LIGHT_" + light + "_DIMANGLE " + std::to_string(m_SpotLights[light].GetDimAngle()) + "\n";
+		stream << line;
+		glm::vec2 bias = m_SpotLights[light].GetBias();
+		line = "#SPOT_LIGHT_" + light + "_BIAS " + std::to_string(bias.x) + " " + std::to_string(bias.y) + "\n";
+		stream << line;
+		glm::vec3 ads = m_SpotLights[light].GetADS();
+		line = "#SPOT_LIGHT_" + light + "_ADS " + std::to_string(ads.x) + " " + std::to_string(ads.y) + " " + std::to_string(ads.z) + "\n";
+		stream << line;
+		glm::vec3 clq = m_SpotLights[light].GetCLQ();
+		line = "#SPOT_LIGHT_" + light + "_CLQ " + std::to_string(clq.x) + " " + std::to_string(clq.y) + " " + std::to_string(clq.z) + "\n";
+		stream << line;
+		line = "#SPOT_LIGHT_" + light + "_SWITCH " + std::to_string(m_SpotLights[light].LightSwitch()) + "\n";
+		stream << line;
+		line = "#SPOT_LIGHT_" + light + "_SHOW_CUBE " + std::to_string(m_SpotLights[light].ShowCube()) + "\n";
+		stream << line;
+		line = "#SPOT_LIGHT_" + light + "_CAST_SHADOW " + std::to_string(m_SpotLights[light].CastShadow()) + "\n";
+		stream << line;
+		line = "#SPOT_LIGHT_" + light + "_SHADOW_RES " + std::to_string(m_SpotLights[light].GetShadowRes()) + "\n";
+		stream << line;
+		line = "#SPOT_LIGHT_" + light + "_SOFT_SHADOW " + std::to_string(m_SpotLights[light].SoftShadow()) + "\n";
+		stream << line;
+		line = "#SPOT_LIGHT_" + light + "_SOFT_DEGREE " + std::to_string(m_SpotLights[light].GetSoftDegree()) + "\n";
+		stream << line;
+	}
+	// Save Directional Lights
+	for (unsigned int i = 0; i < m_DirLightList.size(); i++)
+	{
+		std::string light = m_DirLightList[i];
+		line = "#DIR_LIGHT_NAME " + light + "\n";
+		stream << line;
+		glm::vec3 euler = m_DirLights[light].GetEulerAngle();
+		line = "#DIR_LIGHT_" + light + "_EULERANGLE " + std::to_string(euler.x) + " " + std::to_string(euler.y) + " " + std::to_string(euler.z) + "\n";
+		stream << line;
+		glm::vec3 color = m_DirLights[light].GetColor();
+		line = "#DIR_LIGHT_" + light + "_COLOR " + std::to_string(color.x) + " " + std::to_string(color.y) + " " + std::to_string(color.z) + "\n";
+		stream << line;
+		line = "#DIR_LIGHT_" + light + "_INTENSITY " + std::to_string(m_DirLights[light].GetIntensity()) + "\n";
+		stream << line;
+		glm::vec3 ads = m_DirLights[light].GetADS();
+		line = "#DIR_LIGHT_" + light + "_ADS " + std::to_string(ads.x) + " " + std::to_string(ads.y) + " " + std::to_string(ads.z) + "\n";
+		stream << line;
+		line = "#DIR_LIGHT_" + light + "_SWITCH " + std::to_string(m_DirLights[light].LightSwitch()) + "\n";
+		stream << line;
+		line = "#DIR_LIGHT_" + light + "_SHOW_CUBE " + std::to_string(m_DirLights[light].ShowCube()) + "\n";
+		stream << line;
+		line = "#DIR_LIGHT_" + light + "_CAST_SHADOW " + std::to_string(m_DirLights[light].CastShadow()) + "\n";
+		stream << line;
+		line = "#DIR_LIGHT_" + light + "_SHADOW_RES " + std::to_string(m_DirLights[light].GetShadowRes()) + "\n";
+		stream << line;
+		glm::vec2 ratio = m_DirLights[light].GetCSMRatio();
+		line = "#DIR_LIGHT_" + light + "_CSM_RATIO " + std::to_string(ratio.x) + " " + std::to_string(ratio.y) + "\n";
+		stream << line;
+		glm::vec3 bias = m_DirLights[light].GetBias();
+		line = "#DIR_LIGHT_" + light + "_SHADOW_BIAS " 
+			+ std::to_string(bias.x) + " " 
+			+ std::to_string(bias.y) + " "
+			+ std::to_string(bias.z) + "\n";
+		stream << line;
+		line = "#DIR_LIGHT_" + light + "_SHADOW_ENLARGE " + std::to_string(m_DirLights[light].GetShadowEnlarge()) + "\n";
+		stream << line;
+		line = "#DIR_LIGHT_" + light + "_SOFT_SHADOW " + std::to_string(m_DirLights[light].SoftShadow()) + "\n";
+		stream << line;
+		line = "#DIR_LIGHT_" + light + "_SOFT_DEGREE " + std::to_string(m_DirLights[light].GetSoftDegree()) + "\n";
+		stream << line;
+	}
+	// Save Area Lights
+	for (unsigned int i = 0; i < m_AreaLightList.size(); i++)
+	{
+		std::string light = m_AreaLightList[i];
+		line = "#AREA_LIGHT_NAME " + light + "\n";
+		stream << line;
+		line = "#AREA_LIGHT_" + light + "_TYPE " + std::to_string(m_AreaLights[light].GetLightType()) + "\n";
+		stream << line;
+		glm::vec3 pos = m_AreaLights[light].GetPosition();
+		line = "#AREA_LIGHT_" + light + "_POSITION " + std::to_string(pos.x) + " " + std::to_string(pos.y) + " " + std::to_string(pos.z) + "\n";
+		stream << line;
+		glm::vec3 euler = m_AreaLights[light].GetEulerAngle();
+		line = "#AREA_LIGHT_" + light + "_EULERANGLE " + std::to_string(euler.x) + " " + std::to_string(euler.y) + " " + std::to_string(euler.z) + "\n";
+		stream << line;
+		glm::vec3 scale = m_AreaLights[light].GetScale();
+		line = "#AREA_LIGHT_" + light + "_SCALE " + std::to_string(scale.x) + " " + std::to_string(scale.y) + " " + std::to_string(scale.z) + "\n";
+		stream << line;
+		glm::vec3 color = m_AreaLights[light].GetColor();
+		line = "#AREA_LIGHT_" + light + "_COLOR " + std::to_string(color.x) + " " + std::to_string(color.y) + " " + std::to_string(color.z) + "\n";
+		stream << line;
+		line = "#AREA_LIGHT_" + light + "_INTENSITY " + std::to_string(m_AreaLights[light].GetIntensity()) + "\n";
+		stream << line;
+		line = "#AREA_LIGHT_" + light + "_TWOSIDE " + std::to_string(m_AreaLights[light].TwoSided()) + "\n";
+		stream << line;
+		line = "#AREA_LIGHT_" + light + "_SWITCH " + std::to_string(m_AreaLights[light].LightSwitch()) + "\n";
+		stream << line;
+		line = "#AREA_LIGHT_" + light + "_SHOW_CUBE " + std::to_string(m_AreaLights[light].ShowCube()) + "\n";
+		stream << line;
+	}
+	stream.close();
+	core::ShowWarningMsg("Scene saved at: " + savePath);
+}
+
 bool Scene::LoadScene(std::string filepath)
 {
 	Reset();
@@ -225,22 +507,52 @@ bool Scene::LoadScene(std::string filepath)
 				if (line.find("#SSAO_SWITCH") != std::string::npos)
 				{
 					values = core::GetFileValue(line);
-					m_VFX.SSAO = (bool)std::atoi(values[0].c_str());
+					m_VFX.SSAO.Status = (bool)std::atoi(values[0].c_str());
 				}
 				else if (line.find("#SSAO_KERNEL_SIZE") != std::string::npos)
 				{
 					values = core::GetFileValue(line);
-					m_VFX.SSAOKernelSize = (int)std::atoi(values[0].c_str());
+					m_VFX.SSAO.KernelSize = (int)std::atoi(values[0].c_str());
 				}
 				else if (line.find("#SSAO_RADIUS") != std::string::npos)
 				{
 					values = core::GetFileValue(line);
-					m_VFX.SSAORadius = (float)std::atof(values[0].c_str());
+					m_VFX.SSAO.Radius = (float)std::atof(values[0].c_str());
 				}
 				else if (line.find("#SSAO_BIAS") != std::string::npos)
 				{
 					values = core::GetFileValue(line);
-					m_VFX.SSAOBias = (float)std::atof(values[0].c_str());
+					m_VFX.SSAO.Bias = (float)std::atof(values[0].c_str());
+				}
+				else if (line.find("#SSR_SWITCH") != std::string::npos)
+				{
+					values = core::GetFileValue(line);
+					m_VFX.SSR.Status = (bool)std::atoi(values[0].c_str());
+				}
+				else if (line.find("#SSR_MAX_DISTANCE") != std::string::npos)
+				{
+					values = core::GetFileValue(line);
+					m_VFX.SSR.MaxDistance = (float)std::atof(values[0].c_str());
+				}
+				else if (line.find("#SSR_RESOLUTION") != std::string::npos)
+				{
+					values = core::GetFileValue(line);
+					m_VFX.SSR.Resolution = (float)std::atof(values[0].c_str());
+				}
+				else if (line.find("#SSR_STEP") != std::string::npos)
+				{
+					values = core::GetFileValue(line);
+					m_VFX.SSR.Step = (int)std::atoi(values[0].c_str());
+				}
+				else if (line.find("#SSR_THICKNESS") != std::string::npos)
+				{
+					values = core::GetFileValue(line);
+					m_VFX.SSR.Thickness = (float)std::atof(values[0].c_str());
+				}
+				else if (line.find("#SSR_MAX_LOOP") != std::string::npos)
+				{
+					values = core::GetFileValue(line);
+					m_VFX.SSR.MaxLoop = (int)std::atoi(values[0].c_str());
 				}
 			}
 			// Load models
@@ -634,276 +946,6 @@ bool Scene::LoadScene(std::string filepath)
 		return true;
 	}
 	return false;
-}
-
-void Scene::SaveScene()
-{
-	std::string savePath;
-	if (m_FilePath != "")
-	{
-		savePath = m_FilePath;
-	}
-	else
-	{
-		savePath = SCENE_FILEPATH + m_Name + ".scene";
-	}
-	std::ofstream stream(savePath);
-	std::string line;
-	line = "#SCENE_NAME " + m_Name + "\n";
-	stream << line;
-	// Save Camera
-	{
-		line = "#CAMERA_TYPE " + std::to_string(m_Camera.GetCameraType()) + "\n";
-		stream << line;
-		line = "#CAMERA_FOV " + std::to_string(m_Camera.GetFOV()) + "\n";
-		stream << line;
-		line = "#CAMERA_NEAR_PLANE " + std::to_string(m_Camera.GetNearPlane()) + "\n";
-		stream << line;
-		line = "#CAMERA_FAR_PLANE " + std::to_string(m_Camera.GetFarPlane()) + "\n";
-		stream << line;
-		line = "#CAMERA_MOVE_SPEED " + std::to_string(m_Camera.GetMoveSpeed()) + "\n";
-		stream << line;
-		line = "#CAMERA_ROTATE_SPEED " + std::to_string(m_Camera.GetRotateSpeed()) + "\n";
-		stream << line;
-		glm::vec3 pos = m_Camera.GetPosition();
-		line = "#CAMERA_POSITION " + std::to_string(pos.x) + " " + std::to_string(pos.y) + " " + std::to_string(pos.z) + "\n";
-		stream << line;
-		glm::vec3 euler = m_Camera.GetEulerAngle();
-		line = "#CAMERA_EULERANGLE " + std::to_string(euler.x) + " " + std::to_string(euler.y) + " " + std::to_string(euler.z) + "\n";
-		stream << line;
-		line = "#CAMERA_VFX_EXPOSURE_AUTO " + std::to_string(m_Camera.GetExposure().Auto) + "\n";
-		stream << line;
-		line = "#CAMERA_VFX_EXPOSURE_STRENGTH " + std::to_string(m_Camera.GetExposure().Strength) + "\n";
-		stream << line;
-		line = "#CAMERA_VFX_BLOOM_SWITCH " + std::to_string(m_Camera.GetBloom().Switch) + "\n";
-		stream << line;
-		line = "#CAMERA_VFX_BLOOM_STRENGTH " + std::to_string(m_Camera.GetBloom().Strength) + "\n";
-		stream << line;
-		line = "#CAMERA_VFX_BLOOM_FILTER_RADIUS " + std::to_string(m_Camera.GetBloom().FilterRadius) + "\n";
-		stream << line;
-		line = "#CAMERA_VFX_DOF_SWITCH " + std::to_string(m_Camera.GetFocus().Switch) + "\n";
-		stream << line;
-		line = "#CAMERA_VFX_DOF_DISTANCE " + std::to_string(m_Camera.GetFocus().Distance) + "\n";
-		stream << line;
-		line = "#CAMERA_VFX_DOF_RANGE " + std::to_string(m_Camera.GetFocus().Range) + "\n";
-		stream << line;
-		line = "#CAMERA_VFX_DOF_FOCAL_LENGTH " + std::to_string(m_Camera.GetFocus().FocalLength) + "\n";
-		stream << line;
-	}
-	// Save Skybox
-	{
-		line = "#SKYBOX_TYPE " + std::to_string(m_Skybox.Type) + "\n";
-		stream << line;
-		if (m_Skybox.Type == PURE_COLOR)
-		{
-			line = "#SKYBOX_COLOR " + std::to_string(m_Skybox.Color.x) + " " + std::to_string(m_Skybox.Color.y) + " " + std::to_string(m_Skybox.Color.z) + "\n";
-			stream << line;
-		}
-		else if (m_Skybox.Type == PICTURE && m_Skybox.Filepath.size())
-		{
-			line = "#SKYBOX_FILEPATH " + m_Skybox.Filepath[0] + "\n";
-			stream << line;
-		}
-	}
-	// SaveVFX
-	{
-		line = "#SSAO_SWITCH " + std::to_string(m_VFX.SSAO) + "\n";
-		stream << line;
-		line = "#SSAO_KERNEL_SIZE " + std::to_string(m_VFX.SSAOKernelSize) + "\n";
-		stream << line;
-		line = "#SSAO_RADIUS " + std::to_string(m_VFX.SSAORadius) + "\n";
-		stream << line;
-		line = "#SSAO_BIAS " + std::to_string(m_VFX.SSAOBias) + "\n";
-		stream << line;
-	}
-	// Save models
-	for (unsigned int i = 0; i < m_ModelList.size(); i++)
-	{
-		std::string model = m_ModelList[i];
-		line = "#MODEL_NAME " + model + "\n";
-		stream << line;
-		line = "#" + model + "_FILEPATH " + m_Models[model].GetFilePath() + "\n";
-		stream << line;
-		glm::vec3 pos = m_Models[model].GetPosition();
-		line = "#" + model + "_POSITION " + std::to_string(pos.x) + " " + std::to_string(pos.y) + " " + std::to_string(pos.z) + "\n";
-		stream << line;
-		glm::vec3 scale = m_Models[model].GetScale();
-		line = "#" + model + "_SCALE " + std::to_string(scale.x) + " " + std::to_string(scale.y) + " " + std::to_string(scale.z) + "\n";
-		stream << line;
-		glm::vec3 euler = m_Models[model].GetEulerAngle();
-		line = "#" + model + "_EULERANGLE " + std::to_string(euler.x) + " " + std::to_string(euler.y) + " " + std::to_string(euler.z) + "\n";
-		stream << line;
-		line = "#" + model + "_INSTANCE_NUM " + std::to_string(m_Models[model].GetInstance()) + "\n";
-		stream << line;
-		line = "#" + model + "_CURRENT " + std::to_string(m_Models[model].GetCurrent()) + "\n";
-		stream << line;
-		for (unsigned int j = 0; j < m_Models[model].GetInstance(); j++)
-		{
-			pos = m_Models[model].GetPosition(j + 1);
-			line = "#" + model + "_INSTANCE_POSITION " + std::to_string(j + 1) + " " + std::to_string(pos.x) + " " + std::to_string(pos.y) + " " + std::to_string(pos.z) + "\n";
-			stream << line;
-			scale = m_Models[model].GetScale(j + 1);
-			line = "#" + model + "_INSTANCE_SCALE " + std::to_string(j + 1) + " " + std::to_string(scale.x) + " " + std::to_string(scale.y) + " " + std::to_string(scale.z) + "\n";
-			stream << line;
-			euler = m_Models[model].GetEulerAngle(j + 1);
-			line = "#" + model + "_INSTANCE_EULERANGLE " + std::to_string(j + 1) + " " + std::to_string(euler.x) + " " + std::to_string(euler.y) + " " + std::to_string(euler.z) + "\n";
-			stream << line;
-		}
-	}
-	// Save Point Lights
-	for (unsigned int i = 0; i < m_PointLightList.size(); i++)
-	{
-		std::string light = m_PointLightList[i];
-		line = "#POINT_LIGHT_NAME " + light + "\n";
-		stream << line;
-		glm::vec3 pos = m_PointLights[light].GetPosition();
-		line = "#POINT_LIGHT_" + light + "_POSITION " + std::to_string(pos.x) + " " + std::to_string(pos.y) + " " + std::to_string(pos.z) + "\n";
-		stream << line;
-		glm::vec3 color = m_PointLights[light].GetColor();
-		line = "#POINT_LIGHT_" + light + "_COLOR " + std::to_string(color.x) + " " + std::to_string(color.y) + " " + std::to_string(color.z) + "\n";
-		stream << line;
-		line = "#POINT_LIGHT_" + light + "_RANGE " + std::to_string(m_PointLights[light].GetRange()) + "\n";
-		stream << line;
-		line = "#POINT_LIGHT_" + light + "_INTENSITY " + std::to_string(m_PointLights[light].GetIntensity()) + "\n";
-		stream << line;
-		line = "#POINT_LIGHT_" + light + "_BIAS " + std::to_string(m_PointLights[light].GetBias()) + "\n";
-		stream << line;
-		glm::vec3 ads = m_PointLights[light].GetADS();
-		line = "#POINT_LIGHT_" + light + "_ADS " + std::to_string(ads.x) + " " + std::to_string(ads.y) + " " + std::to_string(ads.z) + "\n";
-		stream << line;
-		glm::vec3 clq = m_PointLights[light].GetCLQ();
-		line = "#POINT_LIGHT_" + light + "_CLQ " + std::to_string(clq.x) + " " + std::to_string(clq.y) + " " + std::to_string(clq.z) + "\n";
-		stream << line;
-		line = "#POINT_LIGHT_" + light + "_SWITCH " + std::to_string(m_PointLights[light].LightSwitch()) + "\n";
-		stream << line;
-		line = "#POINT_LIGHT_" + light + "_SHOW_CUBE " + std::to_string(m_PointLights[light].ShowCube()) + "\n";
-		stream << line;
-		line = "#POINT_LIGHT_" + light + "_CAST_SHADOW " + std::to_string(m_PointLights[light].CastShadow()) + "\n";
-		stream << line;
-		line = "#POINT_LIGHT_" + light + "_SHADOW_RES " + std::to_string(m_PointLights[light].GetShadowRes()) + "\n";
-		stream << line;
-		line = "#POINT_LIGHT_" + light + "_SOFT_SHADOW " + std::to_string(m_PointLights[light].SoftShadow()) + "\n";
-		stream << line;
-		line = "#POINT_LIGHT_" + light + "_SOFT_DEGREE " + std::to_string(m_PointLights[light].GetSoftDegree()) + "\n";
-		stream << line;
-	}
-	// Save Spot Lights
-	for (unsigned int i = 0; i < m_SpotLightList.size(); i++)
-	{
-		std::string light = m_SpotLightList[i];
-		line = "#SPOT_LIGHT_NAME " + light + "\n";
-		stream << line;
-		glm::vec3 pos = m_SpotLights[light].GetPosition();
-		line = "#SPOT_LIGHT_" + light + "_POSITION " + std::to_string(pos.x) + " " + std::to_string(pos.y) + " " + std::to_string(pos.z) + "\n";
-		stream << line;
-		glm::vec3 euler = m_SpotLights[light].GetEulerAngle();
-		line = "#SPOT_LIGHT_" + light + "_EULERANGLE " + std::to_string(euler.x) + " " + std::to_string(euler.y) + " " + std::to_string(euler.z) + "\n";
-		stream << line;
-		glm::vec3 color = m_SpotLights[light].GetColor();
-		line = "#SPOT_LIGHT_" + light + "_COLOR " + std::to_string(color.x) + " " + std::to_string(color.y) + " " + std::to_string(color.z) + "\n";
-		stream << line;
-		line = "#SPOT_LIGHT_" + light + "_RANGE " + std::to_string(m_SpotLights[light].GetRange()) + "\n";
-		stream << line;
-		line = "#SPOT_LIGHT_" + light + "_INTENSITY " + std::to_string(m_SpotLights[light].GetIntensity()) + "\n";
-		stream << line;
-		line = "#SPOT_LIGHT_" + light + "_ANGLE " + std::to_string(m_SpotLights[light].GetAngle()) + "\n";
-		stream << line;
-		line = "#SPOT_LIGHT_" + light + "_DIMANGLE " + std::to_string(m_SpotLights[light].GetDimAngle()) + "\n";
-		stream << line;
-		glm::vec2 bias = m_SpotLights[light].GetBias();
-		line = "#SPOT_LIGHT_" + light + "_BIAS " + std::to_string(bias.x) + " " + std::to_string(bias.y) + "\n";
-		stream << line;
-		glm::vec3 ads = m_SpotLights[light].GetADS();
-		line = "#SPOT_LIGHT_" + light + "_ADS " + std::to_string(ads.x) + " " + std::to_string(ads.y) + " " + std::to_string(ads.z) + "\n";
-		stream << line;
-		glm::vec3 clq = m_SpotLights[light].GetCLQ();
-		line = "#SPOT_LIGHT_" + light + "_CLQ " + std::to_string(clq.x) + " " + std::to_string(clq.y) + " " + std::to_string(clq.z) + "\n";
-		stream << line;
-		line = "#SPOT_LIGHT_" + light + "_SWITCH " + std::to_string(m_SpotLights[light].LightSwitch()) + "\n";
-		stream << line;
-		line = "#SPOT_LIGHT_" + light + "_SHOW_CUBE " + std::to_string(m_SpotLights[light].ShowCube()) + "\n";
-		stream << line;
-		line = "#SPOT_LIGHT_" + light + "_CAST_SHADOW " + std::to_string(m_SpotLights[light].CastShadow()) + "\n";
-		stream << line;
-		line = "#SPOT_LIGHT_" + light + "_SHADOW_RES " + std::to_string(m_SpotLights[light].GetShadowRes()) + "\n";
-		stream << line;
-		line = "#SPOT_LIGHT_" + light + "_SOFT_SHADOW " + std::to_string(m_SpotLights[light].SoftShadow()) + "\n";
-		stream << line;
-		line = "#SPOT_LIGHT_" + light + "_SOFT_DEGREE " + std::to_string(m_SpotLights[light].GetSoftDegree()) + "\n";
-		stream << line;
-	}
-	// Save Directional Lights
-	for (unsigned int i = 0; i < m_DirLightList.size(); i++)
-	{
-		std::string light = m_DirLightList[i];
-		line = "#DIR_LIGHT_NAME " + light + "\n";
-		stream << line;
-		glm::vec3 euler = m_DirLights[light].GetEulerAngle();
-		line = "#DIR_LIGHT_" + light + "_EULERANGLE " + std::to_string(euler.x) + " " + std::to_string(euler.y) + " " + std::to_string(euler.z) + "\n";
-		stream << line;
-		glm::vec3 color = m_DirLights[light].GetColor();
-		line = "#DIR_LIGHT_" + light + "_COLOR " + std::to_string(color.x) + " " + std::to_string(color.y) + " " + std::to_string(color.z) + "\n";
-		stream << line;
-		line = "#DIR_LIGHT_" + light + "_INTENSITY " + std::to_string(m_DirLights[light].GetIntensity()) + "\n";
-		stream << line;
-		glm::vec3 ads = m_DirLights[light].GetADS();
-		line = "#DIR_LIGHT_" + light + "_ADS " + std::to_string(ads.x) + " " + std::to_string(ads.y) + " " + std::to_string(ads.z) + "\n";
-		stream << line;
-		line = "#DIR_LIGHT_" + light + "_SWITCH " + std::to_string(m_DirLights[light].LightSwitch()) + "\n";
-		stream << line;
-		line = "#DIR_LIGHT_" + light + "_SHOW_CUBE " + std::to_string(m_DirLights[light].ShowCube()) + "\n";
-		stream << line;
-		line = "#DIR_LIGHT_" + light + "_CAST_SHADOW " + std::to_string(m_DirLights[light].CastShadow()) + "\n";
-		stream << line;
-		line = "#DIR_LIGHT_" + light + "_SHADOW_RES " + std::to_string(m_DirLights[light].GetShadowRes()) + "\n";
-		stream << line;
-		glm::vec2 ratio = m_DirLights[light].GetCSMRatio();
-		line = "#DIR_LIGHT_" + light + "_CSM_RATIO " + std::to_string(ratio.x) + " " + std::to_string(ratio.y) + "\n";
-		stream << line;
-		glm::vec3 bias = m_DirLights[light].GetBias();
-		line = "#DIR_LIGHT_" + light + "_SHADOW_BIAS " 
-			+ std::to_string(bias.x) + " " 
-			+ std::to_string(bias.y) + " "
-			+ std::to_string(bias.z) + "\n";
-		stream << line;
-		line = "#DIR_LIGHT_" + light + "_SHADOW_ENLARGE " + std::to_string(m_DirLights[light].GetShadowEnlarge()) + "\n";
-		stream << line;
-		line = "#DIR_LIGHT_" + light + "_SOFT_SHADOW " + std::to_string(m_DirLights[light].SoftShadow()) + "\n";
-		stream << line;
-		line = "#DIR_LIGHT_" + light + "_SOFT_DEGREE " + std::to_string(m_DirLights[light].GetSoftDegree()) + "\n";
-		stream << line;
-	}
-	// Save Area Lights
-	for (unsigned int i = 0; i < m_AreaLightList.size(); i++)
-	{
-		std::string light = m_AreaLightList[i];
-		line = "#AREA_LIGHT_NAME " + light + "\n";
-		stream << line;
-		line = "#AREA_LIGHT_" + light + "_TYPE " + std::to_string(m_AreaLights[light].GetLightType()) + "\n";
-		stream << line;
-		glm::vec3 pos = m_AreaLights[light].GetPosition();
-		line = "#AREA_LIGHT_" + light + "_POSITION " + std::to_string(pos.x) + " " + std::to_string(pos.y) + " " + std::to_string(pos.z) + "\n";
-		stream << line;
-		glm::vec3 euler = m_AreaLights[light].GetEulerAngle();
-		line = "#AREA_LIGHT_" + light + "_EULERANGLE " + std::to_string(euler.x) + " " + std::to_string(euler.y) + " " + std::to_string(euler.z) + "\n";
-		stream << line;
-		glm::vec3 scale = m_AreaLights[light].GetScale();
-		line = "#AREA_LIGHT_" + light + "_SCALE " + std::to_string(scale.x) + " " + std::to_string(scale.y) + " " + std::to_string(scale.z) + "\n";
-		stream << line;
-		glm::vec3 color = m_AreaLights[light].GetColor();
-		line = "#AREA_LIGHT_" + light + "_COLOR " + std::to_string(color.x) + " " + std::to_string(color.y) + " " + std::to_string(color.z) + "\n";
-		stream << line;
-		line = "#AREA_LIGHT_" + light + "_INTENSITY " + std::to_string(m_AreaLights[light].GetIntensity()) + "\n";
-		stream << line;
-		line = "#AREA_LIGHT_" + light + "_TWOSIDE " + std::to_string(m_AreaLights[light].TwoSided()) + "\n";
-		stream << line;
-		line = "#AREA_LIGHT_" + light + "_SWITCH " + std::to_string(m_AreaLights[light].LightSwitch()) + "\n";
-		stream << line;
-		line = "#AREA_LIGHT_" + light + "_SHOW_CUBE " + std::to_string(m_AreaLights[light].ShowCube()) + "\n";
-		stream << line;
-	}
-	stream.close();
-	core::ShowWarningMsg("Scene saved at: " + savePath);
 }
 
 bool Scene::AddModel(std::string filepath)
@@ -1513,27 +1555,79 @@ void Scene::DrawSceneWindow()
 			{
 				ImGui::CenterAlignWidget("SSAO");
 				ImGui::LabelHighlighted("SSAO");
-				ImGui::Checkbox("##SSAO", &m_VFX.SSAO);
-				if (m_VFX.SSAO)
+				ImGui::Checkbox("##SSAO", &m_VFX.SSAO.Status);
+				if (m_VFX.SSAO.Status)
 				{
 					// SSAO kernal size
 					ImGui::PushItemWidth(120.0f * core::GetWidgetWidthCoefficient());
 					ImGui::CenterAlignWidget("Kernel Size", 120.0f * core::GetWidgetWidthCoefficient());
 					ImGui::LabelHighlighted("Kernel Size");
-					ImGui::SliderInt("##SSAOKernalSize", &m_VFX.SSAOKernelSize, 1, 64);
+					ImGui::SliderInt("##SSAOKernalSize", &m_VFX.SSAO.KernelSize, 1, 64);
 					// SSAO Radius
 					ImGui::PushItemWidth(80.0f * core::GetWidgetWidthCoefficient());
 					ImGui::CenterAlignWidget("Radius", 80.0f * core::GetWidgetWidthCoefficient());
 					ImGui::LabelHighlighted("Radius");
-					if (ImGui::InputFloat("##SSAORadius", &m_VFX.SSAORadius, 0.0f, 0.0f, "%.6f"))
+					if (ImGui::InputFloat("##SSAORadius", &m_VFX.SSAO.Radius, 0.0f, 0.0f, "%.6f"))
 					{
-						m_VFX.SSAORadius = m_VFX.SSAORadius > 0.0f ? m_VFX.SSAORadius : 0.005f;
+						m_VFX.SSAO.Radius = m_VFX.SSAO.Radius > 0.0f ? m_VFX.SSAO.Radius : 0.005f;
 					}
 					// SSAO Bias
 					ImGui::PushItemWidth(80.0f * core::GetWidgetWidthCoefficient());
 					ImGui::CenterAlignWidget("Bias", 80.0f * core::GetWidgetWidthCoefficient());
 					ImGui::LabelHighlighted("Bias");
-					ImGui::InputFloat("##SSAOBias", &m_VFX.SSAOBias, 0.0f, 0.0f, "%.6f");
+					ImGui::InputFloat("##SSAOBias", &m_VFX.SSAO.Bias, 0.0f, 0.0f, "%.6f");
+				}
+				ImGui::TreePop();
+			}
+			// SSR
+			if (ImGui::TreeNode("SSR"))
+			{
+				ImGui::CenterAlignWidget("SSR");
+				ImGui::LabelHighlighted("SSR");
+				ImGui::Checkbox("##SSR", &m_VFX.SSR.Status);
+				if (m_VFX.SSR.Status)
+				{
+					// SSR Max Distance
+					ImGui::PushItemWidth(120.0f * core::GetWidgetWidthCoefficient());
+					ImGui::CenterAlignWidget("Max Distance", 120.0f * core::GetWidgetWidthCoefficient());
+					ImGui::LabelHighlighted("Max Distance");
+					if (ImGui::InputFloat("##SSRMaxDistance", &m_VFX.SSR.MaxDistance, 0.0f, 0.0f, "%.2f"))
+					{
+						m_VFX.SSR.MaxDistance = m_VFX.SSR.MaxDistance > 0.0f ? m_VFX.SSR.MaxDistance : 1.0f;
+					}
+					// SSR Resolution
+					ImGui::PushItemWidth(80.0f * core::GetWidgetWidthCoefficient());
+					ImGui::CenterAlignWidget("Resolution", 80.0f * core::GetWidgetWidthCoefficient());
+					ImGui::LabelHighlighted("Resolution");
+					if (ImGui::InputFloat("##SSRResolution", &m_VFX.SSR.Resolution, 0.0f, 0.0f, "%.3f"))
+					{
+						m_VFX.SSR.Resolution = m_VFX.SSR.Resolution > 0.0f ? m_VFX.SSR.Resolution : 0.1f;
+						m_VFX.SSR.Resolution = m_VFX.SSR.Resolution <= 1.0f ? m_VFX.SSR.Resolution : 1.0f;
+					}
+					// SSR Step
+					ImGui::PushItemWidth(120.0f * core::GetWidgetWidthCoefficient());
+					ImGui::CenterAlignWidget("Step", 120.0f * core::GetWidgetWidthCoefficient());
+					ImGui::LabelHighlighted("Step");
+					if (ImGui::InputInt("##SSRStep", &m_VFX.SSR.Step))
+					{
+						m_VFX.SSR.Step = m_VFX.SSR.Step > 1 ? m_VFX.SSR.Step : 1;
+					}
+					// SSR Thickness
+					ImGui::PushItemWidth(80.0f * core::GetWidgetWidthCoefficient());
+					ImGui::CenterAlignWidget("Thickness", 80.0f * core::GetWidgetWidthCoefficient());
+					ImGui::LabelHighlighted("Thickness");
+					if (ImGui::InputFloat("##SSRThickness", &m_VFX.SSR.Thickness, 0.0f, 0.0f, "%.3f"))
+					{
+						m_VFX.SSR.Thickness = m_VFX.SSR.Thickness > 0.0f ? m_VFX.SSR.Thickness : 0.1f;
+					}
+					// SSR Max Loop
+					ImGui::PushItemWidth(120.0f * core::GetWidgetWidthCoefficient());
+					ImGui::CenterAlignWidget("Max Loop", 120.0f * core::GetWidgetWidthCoefficient());
+					ImGui::LabelHighlighted("Max Loop");
+					if (ImGui::InputInt("##SSRMaxLoop", &m_VFX.SSR.MaxLoop))
+					{
+						m_VFX.SSR.MaxLoop = m_VFX.SSR.MaxLoop > 1 ? m_VFX.SSR.MaxLoop : 1;
+					}
 				}
 				ImGui::TreePop();
 			}

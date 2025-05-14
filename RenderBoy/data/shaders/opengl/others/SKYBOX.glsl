@@ -20,7 +20,7 @@ void main()
 #SHADER FRAGMENT
 #version 460 core
 
-out vec4 v_FragColor;
+layout (location = 0) out vec4 v_FragColor;
 
 in vec3 v_TexCoord;
 
@@ -33,7 +33,6 @@ void main()
     if (u_UseTex)
     {
         v_FragColor = texture(u_Skybox, v_TexCoord);
-        //v_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
     }
     else
     {

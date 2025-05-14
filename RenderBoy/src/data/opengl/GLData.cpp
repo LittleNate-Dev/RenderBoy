@@ -708,6 +708,7 @@ bool GLData::AddModel(std::string name, Model& model)
 				break;
 			}
 		}
+		// Set indices
 		for (unsigned int j = 0; j < model.GetMeshes()[i].GetVertices().size(); j++)
 		{
 			model.GetMeshes()[i].GetVertices()[j].TexIndex = texIndex;
@@ -869,11 +870,20 @@ bool GLData::AddModel(std::string name, Model& model)
 		uniformName = "u_Transparent[" + std::to_string(i) + "]";
 		m_ModelData[name].GBuffer.SetUniform1f(uniformName, m_ModelData[name].TransparentValue[i]);
 	}
+	for (unsigned int i = 0; i < m_ModelData[name].DiffuseValue.size(); i++)
+	{
+		uniformName = "u_Diffuse[" + std::to_string(i) + "]";
+		m_ModelData[name].GBuffer.SetUniformVec3f(uniformName, m_ModelData[name].DiffuseValue[i]);
+	}
 	for (unsigned int i = 0; i < m_ModelData[name].AlbedoTex.size(); i++)
 	{
 		uniformName = "u_AlbedoTex[" + std::to_string(i) + "]";
-		m_ModelData[name].AlbedoTex[i].GenTexture(albedoTex[i], true, true);
 		m_ModelData[name].GBuffer.SetUniformHandleARB(uniformName, m_ModelData[name].AlbedoTex[i].GetHandle());
+	}
+	for (unsigned int i = 0; i < m_ModelData[name].NormalTex.size(); i++)
+	{
+		uniformName = "u_NormalTex[" + std::to_string(i) + "]";
+		m_ModelData[name].GBuffer.SetUniformHandleARB(uniformName, m_ModelData[name].NormalTex[i].GetHandle());
 	}
 	m_ModelData[name].GBuffer.Unbind();
 	return true;

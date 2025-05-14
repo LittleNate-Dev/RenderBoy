@@ -18,7 +18,7 @@ void main()
 #version 460 core
 #extension GL_ARB_bindless_texture : require
 
-out float v_FragColor;
+layout (location = 0) out float v_FragColor;
 
 in vec2 v_TexCoord;
 

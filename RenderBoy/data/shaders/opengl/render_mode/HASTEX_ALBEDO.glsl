@@ -1,6 +1,14 @@
 #SHADER VERTEX
 #version 460 core
 
+layout (location = 0) in vec4 a_Position;
+layout (location = 1) in vec2 a_TexCoord;
+layout (location = 2) in vec3 a_Normal;
+layout (location = 5) in vec4 a_TexIndex;
+layout (location = 6) in vec3 a_ColorIndex;
+layout (location = 7) in vec4 a_AttributeIndex;
+layout (location = 9) in mat4 a_ModelMat;
+
 #define POINT_LIGHT_COUNT
 #define SPOT_LIGHT_COUNT
 #define DIR_LIGHT_COUNT
@@ -21,14 +29,6 @@ struct FragPosDir
 {
     vec4 FragPos[3];
 };
-
-layout (location = 0) in vec4 a_Position;
-layout (location = 1) in vec2 a_TexCoord;
-layout (location = 2) in vec3 a_Normal;
-layout (location = 5) in vec4 a_TexIndex;
-layout (location = 6) in vec3 a_ColorIndex;
-layout (location = 7) in vec4 a_AttributeIndex;
-layout (location = 9) in mat4 a_ModelMat;
 
 out vec3 v_FragPos;
 out vec3 v_Normal;
@@ -77,6 +77,9 @@ void main()
 
 #SHADER FRAGMENT
 #version 460 core
+
+layout(location = 0) out vec4 v_Accum;
+layout(location = 1) out float v_Reveal;
 
 #define POINT_LIGHT_COUNT
 #define SPOT_LIGHT_COUNT
@@ -138,9 +141,6 @@ struct DirLight
     float SoftDegree;
 };
 
-layout(location = 0) out vec4 v_Accum;
-layout(location = 1) out float v_Reveal;
-
 in vec3 v_FragPos;
 in vec3 v_Normal;
 in vec2 v_TexCoord;
@@ -149,6 +149,8 @@ in vec3 v_ColorIndex;
 in vec4 v_AttributeIndex;
 in vec4 v_FragPosSpot[SPOT_LIGHT_COUNT];
 in FragPosDir v_FragPosDir[DIR_LIGHT_COUNT];
+
+const float c_Shininess = 16.0f;
 
 uniform mat4 u_ProjMat;
 uniform mat4 u_ViewMat;
@@ -160,17 +162,12 @@ uniform bool u_SSAO;
 uniform sampler2D u_SSAOTex;
 // Texture used for pcf offset
 uniform sampler3D u_ShadowOffset;
-
 // Material
 uniform vec3 u_Diffuse[];
 uniform vec3 u_Specular[];
 uniform float u_Transparent[];
 uniform sampler2D u_AlbedoTex[];
-
 uniform bool u_OITPass;
-
-//const float c_Shininess = 32.0f;
-const float c_Shininess = 16.0f;
 
 vec3 c_ViewDir = vec3(1.0);
 vec3 c_Normal = vec3(0.0);

@@ -1,6 +1,17 @@
 #SHADER VERTEX
 #version 460 core
 
+layout (location = 0) in vec4 a_Position;
+layout (location = 1) in vec2 a_TexCoord;
+layout (location = 2) in vec3 a_Normal;
+layout (location = 3) in vec3 a_Tangent;
+layout (location = 4) in vec3 a_BiTangent;
+layout (location = 5) in vec4 a_TexIndex;
+layout (location = 6) in vec3 a_ColorIndex;
+layout (location = 7) in vec4 a_AttributeIndex;
+layout (location = 8) in vec2 a_NHIndex;
+layout (location = 9) in mat4 a_ModelMat;
+
 #define POINT_LIGHT_COUNT
 #define SPOT_LIGHT_COUNT
 #define DIR_LIGHT_COUNT
@@ -22,17 +33,6 @@ struct FragPosDir
 {
     vec4 FragPos[3];
 };
-
-layout (location = 0) in vec4 a_Position;
-layout (location = 1) in vec2 a_TexCoord;
-layout (location = 2) in vec3 a_Normal;
-layout (location = 3) in vec3 a_Tangent;
-layout (location = 4) in vec3 a_BiTangent;
-layout (location = 5) in vec4 a_TexIndex;
-layout (location = 6) in vec3 a_ColorIndex;
-layout (location = 7) in vec4 a_AttributeIndex;
-layout (location = 8) in vec2 a_NHIndex;
-layout (location = 9) in mat4 a_ModelMat;
 
 out vec3 v_FragPos;
 out vec3 v_Normal;
@@ -90,6 +90,9 @@ void main()
 
 #SHADER FRAGMENT
 #version 460 core
+
+layout(location = 0) out vec4 v_Accum;
+layout(location = 1) out float v_Reveal;
 
 #define POINT_LIGHT_COUNT
 #define SPOT_LIGHT_COUNT
@@ -165,13 +168,6 @@ struct AreaLight
     bool LightSwitch;
 };
 
-layout(location = 0) out vec4 v_Accum;
-layout(location = 1) out float v_Reveal;
-
-const float LUT_SIZE  = 64.0; // ltc_texture size 
-const float LUT_SCALE = (LUT_SIZE - 1.0)/LUT_SIZE;
-const float LUT_BIAS  = 0.5/LUT_SIZE;
-
 in vec3 v_FragPos;
 in vec3 v_Normal;
 in mat3 v_TBN;
@@ -182,6 +178,10 @@ in vec4 v_AttributeIndex;
 in vec2 v_NHIndex;
 in vec4 v_FragPosSpot[SPOT_LIGHT_COUNT];
 in FragPosDir v_FragPosDir[DIR_LIGHT_COUNT];
+
+const float LUT_SIZE  = 64.0; // ltc_texture size 
+const float LUT_SCALE = (LUT_SIZE - 1.0)/LUT_SIZE;
+const float LUT_BIAS  = 0.5/LUT_SIZE;
 
 uniform mat4 u_ProjMat;
 uniform mat4 u_ViewMat;
@@ -197,7 +197,6 @@ uniform sampler2D u_LTC1;
 uniform sampler2D u_LTC2;
 // Texture used for pcf offset
 uniform sampler3D u_ShadowOffset;
-
 // Material
 uniform vec3 u_Diffuse[];
 uniform float u_Transparent[];
@@ -206,8 +205,8 @@ uniform sampler2D u_MetallicTex[];
 uniform sampler2D u_AoTex[];
 uniform sampler2D u_NormalTex[];
 uniform sampler2D u_HeightTex[];
-
 uniform bool u_OITPass;
+uniform samplerCube u_Skybox;
 
 vec2 c_TexCoord = vec2(0.0);
 vec3 c_ViewDir = vec3(0.0);
@@ -326,6 +325,7 @@ void main()
         aoCoord = aoCoord * 0.5 + 0.5;
         c_SSAO = texture(u_SSAOTex, aoCoord).r;
     }
+    // Albedo
     if (v_TexIndex.x < 0)
     {
         c_Albedo = u_Diffuse[int(c_ColorIndex.y)];
@@ -336,6 +336,7 @@ void main()
         c_Metallic = texture(u_MetallicTex[c_MetallicTexIndex], c_TexCoord).b;
         c_Roughness = texture(u_MetallicTex[c_MetallicTexIndex], c_TexCoord).g;
     }
+
     if (v_TexIndex.w >= 0)
     {
         c_AO = texture(u_AoTex[c_AoTexIndex], c_TexCoord).r;

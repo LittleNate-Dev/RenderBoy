@@ -23,12 +23,28 @@ struct Skybox
 	std::vector<std::string> Filepath;
 };
 
+struct VFX_SSAO
+{
+	bool Status = false;
+	int KernelSize = 64;
+	float Radius = 0.5f;
+	float Bias = 0.025f;
+};
+
+struct VFX_SSR
+{
+	bool Status = false;
+	float MaxDistance = 500.0f;
+	float Resolution = 0.5f;
+	int Step = 10;
+	float Thickness = 0.5f;
+	int MaxLoop = 500;
+};
+
 struct VisualEffects
 {
-	bool SSAO = false;
-	int SSAOKernelSize = 64;
-	float SSAORadius = 0.5f;
-	float SSAOBias = 0.025f;
+	VFX_SSAO SSAO;
+	VFX_SSR SSR;
 };
 
 class Scene

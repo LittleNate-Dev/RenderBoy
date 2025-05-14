@@ -16,7 +16,7 @@ void main()
 #SHADER FRAGMENT
 #version 460 core
 
-out vec4 v_FragColor;
+layout (location = 0) out vec4 v_FragColor;
 
 in vec2 v_TexCoord;
 
