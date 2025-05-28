@@ -198,40 +198,7 @@ void DirectionalLight::SetRoll(float roll)
 
 void DirectionalLight::SetEulerAngle(float pitch, float yaw, float roll)
 {
-	if (abs(pitch) > 360.0f)
-	{
-		if (pitch > 0.0f)
-		{
-			pitch = pitch - (float)((int)pitch / 360) * 360.0f;
-		}
-		else
-		{
-			pitch = pitch - (float)((int)abs(pitch) / 360) * -360.0f;
-		}
-	}
-	if (abs(yaw) > 360.0f)
-	{
-		if (yaw > 0.0f)
-		{
-			yaw = yaw - (float)((int)yaw / 360) * 360.0f;
-		}
-		else
-		{
-			yaw = yaw - (float)((int)abs(yaw) / 360) * -360.0f;
-		}
-	}
-	if (abs(roll) > 360.0f)
-	{
-		if (roll > 0.0f)
-		{
-			roll = roll - (float)((int)roll / 360) * 360.0f;
-		}
-		else
-		{
-			roll = roll - (float)((int)abs(roll) / 360) * -360.0f;
-		}
-	}
-	m_EulerAngle = glm::vec3(pitch, yaw, roll);
+	SetEulerAngle(glm::vec3(pitch, yaw, roll));
 }
 
 void DirectionalLight::SetEulerAngle(glm::vec3 eulerAngle)
@@ -300,10 +267,7 @@ void DirectionalLight::SetSpecular(float specular)
 
 void DirectionalLight::SetADS(float ambient, float diffuse, float specular)
 {
-	ambient = ambient < 0.0f ? 0.0f : ambient;
-	diffuse = diffuse < 0.0f ? 0.0f : diffuse;
-	specular = specular < 0.0f ? 0.0f : specular;
-	m_ADS = glm::vec3(ambient, diffuse, specular);
+	SetADS(glm::vec3(ambient, diffuse, specular));
 }
 
 void DirectionalLight::SetADS(glm::vec3 ads)

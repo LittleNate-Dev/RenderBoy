@@ -145,41 +145,7 @@ void AreaLight::SetRoll(float roll)
 
 void AreaLight::SetEulerAngle(float pitch, float yaw, float roll)
 {
-	if (abs(pitch) > 360.0f)
-	{
-		if (pitch > 0.0f)
-		{
-			pitch = pitch - (float)((int)pitch / 360) * 360.0f;
-		}
-		else
-		{
-			pitch = pitch - (float)((int)abs(pitch) / 360) * -360.0f;
-		}
-	}
-	if (abs(yaw) > 360.0f)
-	{
-		if (yaw > 0.0f)
-		{
-			yaw = yaw - (float)((int)yaw / 360) * 360.0f;
-		}
-		else
-		{
-			yaw = yaw - (float)((int)abs(yaw) / 360) * -360.0f;
-		}
-	}
-	if (abs(roll) > 360.0f)
-	{
-		if (roll > 0.0f)
-		{
-			roll = roll - (float)((int)roll / 360) * 360.0f;
-		}
-		else
-		{
-			roll = roll - (float)((int)abs(roll) / 360) * -360.0f;
-		}
-	}
-	m_EulerAngle = glm::vec3(pitch, yaw, roll);
-	UpdateModelMat();
+	SetEulerAngle(glm::vec3(pitch, yaw, roll));
 }
 
 void AreaLight::SetEulerAngle(glm::vec3 eulerAngle)
@@ -223,11 +189,7 @@ void AreaLight::SetEulerAngle(glm::vec3 eulerAngle)
 
 void AreaLight::SetScale(float x, float y, float z)
 {
-	x = x < 0.0f ? 0.0f : x;
-	y = y < 0.0f ? 0.0f : y;
-	z = z < 0.0f ? 0.0f : z;
-	m_Scale = glm::vec3(x, y, z);
-	UpdateModelMat();
+	SetScale(glm::vec3(x, y, z));
 }
 
 void AreaLight::SetScale(glm::vec3 scale)

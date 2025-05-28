@@ -124,9 +124,7 @@ void Camera::SetFarPlane(float farPlane)
 
 void Camera::SetPlane(float nearPlane, float farPlane)
 {
-	nearPlane = nearPlane <= 0.0f ? 0.1f : nearPlane;
-	nearPlane = nearPlane >= farPlane ? farPlane * 0.9f : nearPlane;
-	m_Plane = glm::vec2(nearPlane, farPlane);
+	SetPlane(glm::vec2(nearPlane, farPlane));
 }
 
 void Camera::SetPlane(glm::vec2 plane)
@@ -196,40 +194,7 @@ void Camera::SetRoll(float roll)
 
 void Camera::SetEulerAngle(float pitch, float yaw, float roll)
 {
-	if (abs(pitch) > 360.0f)
-	{
-		if (pitch > 0.0f)
-		{
-			pitch = pitch - (float)((int)pitch / 360) * 360.0f;
-		}
-		else
-		{
-			pitch = pitch - (float)((int)abs(pitch) / 360) * -360.0f;
-		}
-	}
-	if (abs(yaw) > 360.0f)
-	{
-		if (yaw > 0.0f)
-		{
-			yaw = yaw - (float)((int)yaw / 360) * 360.0f;
-		}
-		else
-		{
-			yaw = yaw - (float)((int)abs(yaw) / 360) * -360.0f;
-		}
-	}
-	if (abs(roll) > 360.0f)
-	{
-		if (roll > 0.0f)
-		{
-			roll = roll - (float)((int)roll / 360) * 360.0f;
-		}
-		else
-		{
-			roll = roll - (float)((int)abs(roll) / 360) * -360.0f;
-		}
-	}
-	m_EulerAngle = glm::vec3(pitch, yaw, roll);
+	SetEulerAngle(glm::vec3(pitch, yaw, roll));
 }
 
 void Camera::SetEulerAngle(glm::vec3 eulerAngle)

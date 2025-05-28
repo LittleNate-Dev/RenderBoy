@@ -145,10 +145,7 @@ void PointLight::SetSpecular(float specular)
 
 void PointLight::SetADS(float ambient, float diffuse, float specular)
 {
-	ambient = ambient < 0.0f ? 0.0f : ambient;
-	diffuse = diffuse < 0.0f ? 0.0f : diffuse;
-	specular = specular < 0.0f ? 0.0f : specular;
-	m_ADS = glm::vec3(ambient, diffuse, specular);
+	SetADS(glm::vec3(ambient, diffuse, specular));
 }
 
 void PointLight::SetADS(glm::vec3 ads)

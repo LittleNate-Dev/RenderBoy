@@ -420,19 +420,7 @@ void Model::SetPosition(glm::vec3 position, unsigned int current)
 
 void Model::SetScale(float scaleX, float scaleY, float scaleZ, unsigned int current)
 {
-    current = current > m_Instance ? m_Instance : current;
-    scaleX = scaleX < 0.0f ? 0.0f : scaleX;
-    scaleY = scaleY < 0.0f ? 0.0f : scaleY;
-    scaleZ = scaleZ < 0.0f ? 0.0f : scaleZ;
-    if (!current)
-    {
-        m_Scale = glm::vec3(scaleX, scaleY, scaleZ);
-    }
-    else
-    {
-        m_InstanceScale[current - 1] = glm::vec3(scaleX, scaleY, scaleZ);
-    }
-    UpdateModelMat(current);
+    SetScale(glm::vec3(scaleX, scaleY, scaleZ), current);
 }
 
 void Model::SetScale(glm::vec3 scale, unsigned int current)
@@ -529,49 +517,7 @@ void Model::SetRoll(float roll, unsigned int current)
 
 void Model::SetEulerAngle(float pitch, float yaw, float roll, unsigned int current)
 {
-    current = current > m_Instance ? m_Instance : current;
-    if (abs(pitch) > 360.0f)
-    {
-        if (pitch > 0.0f)
-        {
-            pitch = pitch - (float)((int)pitch / 360) * 360.0f;
-        }
-        else
-        {
-            pitch = pitch - (float)((int)abs(pitch) / 360) * -360.0f;
-        }
-    }
-    if (abs(yaw) > 360.0f)
-    {
-        if (yaw > 0.0f)
-        {
-            yaw = yaw - (float)((int)yaw / 360) * 360.0f;
-        }
-        else
-        {
-            yaw = yaw - (float)((int)abs(yaw) / 360) * -360.0f;
-        }
-    }
-    if (abs(roll) > 360.0f)
-    {
-        if (roll > 0.0f)
-        {
-            roll = roll - (float)((int)roll / 360) * 360.0f;
-        }
-        else
-        {
-            roll = roll - (float)((int)abs(roll) / 360) * -360.0f;
-        }
-    }
-    if (!current)
-    {
-        m_EulerAngle = glm::vec3(pitch, yaw, roll);
-    }
-    else
-    {
-        m_InstanceEulerAngle[current - 1] = glm::vec3(pitch, yaw, roll);
-    }
-    UpdateModelMat(current);
+    SetEulerAngle(glm::vec3(pitch, yaw, roll), current);
 }
 
 void Model::SetEulerAngle(glm::vec3 eulerAngle, unsigned int current)
